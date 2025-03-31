@@ -1,0 +1,23 @@
+{
+  "name": "neurodesarrollo/donativos",
+  "description": "Sistema de donativos para Neurodesarrollo",
+  "config": {
+    "platform": {
+      "php": "5.4.4"
+    }
+  },
+  "require": {
+    "phroute/phroute": "v2.2.0",
+    "vlucas/phpdotenv": "v2.0.0",
+    "setasign/fpdf": "^1.8",
+    "firebase/php-jwt": "v6.0"
+  },
+  "autoload": {
+      "psr-4": {
+          "App\\": "app/"
+      }
+  }
+}
+
+
+

@@ -1,0 +1,39 @@
+services:
+  php5.4-apache:
+    container_name: php5.4-apache
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "80:80"
+    networks:
+      - trabajo-social
+
+  mysql5.1:
+    container_name: mysql5.1
+    image: vsamov/mysql-5.1.73
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    networks:
+      - trabajo-social
+
+volumes:
+  db_data:
+    name: trabajo-social-db-data
+
+networks:
+  trabajo-social:
+    name: trabajo-social
+    driver: bridge
+
