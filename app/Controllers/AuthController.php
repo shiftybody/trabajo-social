@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Controllers\Api;
+namespace App\Controllers;
 
 use App\Models\userModel;
 
 /**
- * Controlador para autenticación API con JWT y autenticación web con sesiones
+ * Controlador para autenticación API con sesiones
  */
-class ApiAuthController
+class AuthController
 {
   private $userModel;
 
@@ -17,12 +17,12 @@ class ApiAuthController
   }
 
   /**
-   * Endpoint para autenticar un usuario y obtener un token JWT
+   * Endpoint para autenticar un usuario usando sesiones
    * Acepta tanto JSON como datos de formulario
    */
   public function login()
   {
-    // Verificar método HTTP
+    // Si no es una solicitud POST, devolver error 405
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
       http_response_code(405);
       echo json_encode(['status' => 'error', 'message' => 'Método no permitido']);
@@ -61,7 +61,7 @@ class ApiAuthController
       $remember = isset($_POST['recordar']) ? true : false;
     }
 
-    // Autenticar usuario
+    // Autenticar usuario usando el modelo
     $usuario = $this->userModel->autenticarUsuario($username, $password);
 
     if (!$usuario) {
@@ -73,52 +73,40 @@ class ApiAuthController
     // Registrar último acceso
     $this->userModel->actualizarUltimoAcceso($usuario->usuario_id);
 
-    // Generar token JWT
-    $token = $this->generateToken($usuario);
+    // Iniciar sesión si no está iniciada
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+      session_start();
+    }
 
-    // Para solicitudes de formulario, crear sesión
-    if (!$isApiRequest) {
-      // Iniciar sesión si no está iniciada
-      if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
-      }
+    // Crear sesión
+    $_SESSION[APP_SESSION_NAME] = [
+      'id' => $usuario->usuario_id,
+      'username' => $usuario->usuario_usuario,
+      'nombre' => $usuario->usuario_nombre,
+      'apellido_paterno' => $usuario->usuario_apellido_paterno,
+      'apellido_materno' => $usuario->usuario_apellido_materno,
+      'email' => $usuario->usuario_email,
+      'foto' => $usuario->usuario_foto,
+      'rol' => $usuario->usuario_rol,
+      'rol_descripcion' => $usuario->rol_descripcion
+    ];
 
-      // Crear sesión
-      $_SESSION[APP_SESSION_NAME] = [
+    // Configurar cookie si se solicitó "recordar sesión"
+    if ($remember) {
+      $cookieData = [
         'id' => $usuario->usuario_id,
         'username' => $usuario->usuario_usuario,
-        'nombre' => $usuario->usuario_nombre,
-        'apellido_paterno' => $usuario->usuario_apellido_paterno,
-        'apellido_materno' => $usuario->usuario_apellido_materno,
-        'email' => $usuario->usuario_email,
-        'foto' => $usuario->usuario_foto,
-        'rol' => $usuario->usuario_rol,
-        'rol_descripcion' => $usuario->rol_descripcion,
-        'token' => $token
+        'token' => hash('sha256', $usuario->usuario_password_hash . TOKEN_SECRET_KEY)
       ];
+      $cookieValue = base64_encode(json_encode($cookieData));
+      setcookie(APP_SESSION_NAME . "_remember", $cookieValue, time() + (30 * 24 * 60 * 60), "/");
+    }
 
-      // Configurar cookie si se solicitó "recordar sesión"
-      if ($remember) {
-        $cookieData = [
-          'id' => $usuario->usuario_id,
-          'username' => $usuario->usuario_usuario,
-          'token' => hash('sha256', $usuario->usuario_password_hash . TOKEN_SECRET_KEY)
-        ];
-        $cookieValue = base64_encode(json_encode($cookieData));
-        setcookie(APP_SESSION_NAME . "_remember", $cookieValue, time() + (30 * 24 * 60 * 60), "/");
-      }
-
-      // Devolver respuesta para formulario
+    // Enviar respuesta según tipo de solicitud
+    if ($isApiRequest) {
+      // Devolver respuesta para API (ahora también basada en sesiones)
       echo json_encode([
         'status' => 'success',
-        'redirect' => APP_URL . 'dashboard'
-      ]);
-      exit; // Aseguramos que termina la ejecución aquí
-    } else {
-      // Devolver token y datos básicos del usuario para API
-      echo json_encode([
-        'status' => 'success',
-        'token' => $token,
         'usuario' => [
           'id' => $usuario->usuario_id,
           'username' => $usuario->usuario_usuario,
@@ -126,65 +114,16 @@ class ApiAuthController
           'apellido_paterno' => $usuario->usuario_apellido_paterno,
           'rol' => $usuario->usuario_rol,
           'rol_descripcion' => $usuario->rol_descripcion
-        ]
+        ],
+        'redirect' => APP_URL . 'dashboard'
       ]);
-      exit; // Aseguramos que termina la ejecución aquí
+    } else {
+      // Devolver respuesta para formulario
+      echo json_encode([
+        'status' => 'success',
+        'redirect' => APP_URL . 'dashboard'
+      ]);
     }
-  }
-
-  /**
-   * Endpoint para refrescar un token JWT
-   */
-  public function refresh()
-  {
-    require_once APP_ROOT . '/app/Utils/JwtHandler.php';
-    $jwtHandler = new \App\Utils\JwtHandler();
-
-    // Obtener headers Authorization
-    $headers = getallheaders();
-    $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : '';
-
-    if (empty($authHeader) || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-      http_response_code(401);
-      echo json_encode(['status' => 'error', 'message' => 'Token no proporcionado']);
-      exit;
-    }
-
-    $token = $matches[1];
-    $payload = $jwtHandler->decode($token);
-
-    if (!$payload) {
-      http_response_code(401);
-      echo json_encode(['status' => 'error', 'message' => 'Token inválido']);
-      exit;
-    }
-
-    // Verificar si el token está a punto de expirar (menos de 15 minutos)
-    $exp = isset($payload->exp) ? $payload->exp : 0;
-    $now = time();
-
-    if ($exp - $now > 15 * 60) {
-      http_response_code(400);
-      echo json_encode(['status' => 'error', 'message' => 'El token aún no necesita ser refrescado']);
-      exit;
-    }
-
-    // Obtener usuario por ID
-    $usuario = $this->userModel->obtenerUsuarioPorId($payload->id);
-
-    if (!$usuario) {
-      http_response_code(401);
-      echo json_encode(['status' => 'error', 'message' => 'Usuario no encontrado']);
-      exit;
-    }
-
-    // Generar nuevo token
-    $newToken = $this->generateToken($usuario);
-
-    echo json_encode([
-      'status' => 'success',
-      'token' => $newToken
-    ]);
     exit;
   }
 
@@ -219,9 +158,6 @@ class ApiAuthController
       // Regenerar sesión
       $this->userModel->actualizarUltimoAcceso($usuario->usuario_id);
 
-      // Generar token JWT
-      $token = $this->generateToken($usuario);
-
       $_SESSION[APP_SESSION_NAME] = [
         'id' => $usuario->usuario_id,
         'username' => $usuario->usuario_usuario,
@@ -231,8 +167,7 @@ class ApiAuthController
         'email' => $usuario->usuario_email,
         'foto' => $usuario->usuario_foto,
         'rol' => $usuario->usuario_rol,
-        'rol_descripcion' => $usuario->rol_descripcion,
-        'token' => $token
+        'rol_descripcion' => $usuario->rol_descripcion
       ];
 
       return true;
@@ -273,25 +208,5 @@ class ApiAuthController
       header("Location: " . APP_URL . "login");
       exit;
     }
-  }
-
-  /**
-   * Genera un token JWT para el usuario
-   */
-  private function generateToken($usuario)
-  {
-    require_once APP_ROOT . '/app/Utils/JwtHandler.php';
-    $jwtHandler = new \App\Utils\JwtHandler();
-
-    $payload = [
-      'id' => $usuario->usuario_id,
-      'username' => $usuario->usuario_usuario,
-      'email' => $usuario->usuario_email,
-      'rol' => $usuario->usuario_rol,
-      'iat' => time(),
-      'exp' => time() + (60 * 60) // 1 hora de expiración
-    ];
-
-    return $jwtHandler->encode($payload);
   }
 }

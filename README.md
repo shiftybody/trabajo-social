@@ -11,20 +11,22 @@ trabajo-social
 ├─ .htaccess
 ├─ app
 │  ├─ Controllers
-│  │  ├─ Api
-│  │  └─ Web
+│  │  └─ AuthController.php
 │  ├─ Helpers
 │  ├─ Middlewares
+│  │  └─ SessionMiddleware.php
 │  ├─ Models
 │  │  ├─ mainModel.php
 │  │  └─ userModel.php
 │  ├─ Routes
-│  │  ├─ api.php
-│  │  └─ web.php
+│  │  ├─ authRoutes.php
+│  │  ├─ index.php
+│  │  └─ userRoutes.php
 │  ├─ Services
 │  ├─ Utils
+│  │  └─ FormValidator.php
 │  └─ Views
-│     ├─ dashboard.php
+│     ├─ dashboardView.php
 │     └─ loginView.php
 ├─ compose.yml
 ├─ composer.json
@@ -65,10 +67,12 @@ trabajo-social
 │  ├─ inc
 │  │  ├─ head.php
 │  │  ├─ navbar.php
+│  │  ├─ passgen.php
 │  │  ├─ script.php
 │  │  └─ session_start.php
 │  ├─ index.php
 │  ├─ js
+│  │  ├─ auth.js
 │  │  └─ datatables.min.js
 │  └─ photos
 ├─ README.md
@@ -77,4 +81,5 @@ trabajo-social
 │  └─ fonts
 │     └─ Inter.ttf
 └─ vite.config.ts
+
 ```

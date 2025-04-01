@@ -24,5 +24,3 @@ if (!file_exists(APP_ROOT . 'storage/tmp')) {
 if (!file_exists(APP_ROOT . 'storage/logs')) {
   mkdir(APP_URL . '/storage/logs', 0777, true);
 }
-
-$logger = new App\Utils\Logger(APP_URL . '/storage/logs', 'log-' . date('Y-m-d') . '.log');

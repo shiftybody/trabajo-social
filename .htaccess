@@ -8,15 +8,11 @@
     
     # Redirigir todo a public/index.php
     RewriteRule ^(.*)$ public/index.php [L,QSA]
+    
 </IfModule>
 
 php_value upload_max_filesize 10M
 php_value post_max_size 10M
 php_value max_execution_time 30
 php_value upload_tmp_dir storage/tmp
-
-php_value error_reporting E_ALL
-php_flag log_errors on
 php_value error_log /storage/logs/php_errors.log
-php_flag display_errors off
-php_flag display_startup_errors off
