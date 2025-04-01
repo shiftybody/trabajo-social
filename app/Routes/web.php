@@ -1,129 +1,90 @@
 <?php
 
-use Phroute\Phroute\RouteCollector;
-
 /**
- * Definición de rutas web compatible con PHP 5.4 y Phroute 2.2
- * 
- * @return RouteCollector
+ * Archivo de rutas web para la aplicación
  */
 
-// Iniciar el router
+use Phroute\Phroute\RouteCollector;
+use App\Middlewares\SessionMiddleware;
+use App\Helpers\RolHelper;
+
 $router = new RouteCollector();
 
-// ====================================================================
-// MIDDLEWARE FILTERS
-// ====================================================================
-
-// Middleware para usuarios no autenticados (guest)
-$router->filter('guest', function () {
-    $session = new \App\Services\SessionService();
-    if ($session->isAuthenticated()) {
-        header('Location: /dashboard');
-        exit;
-    }
-    return null;
-});
-
-// Middleware para usuarios autenticados
+// Middleware para rutas que requieren autenticación
 $router->filter('auth', function () {
-    $session = new \App\Services\SessionService();
-    if (!$session->isAuthenticated()) {
-        $session->setFlash('error', 'Debe iniciar sesión para acceder a esta página');
-        header('Location: /login');
-        exit;
-    }
-
-    // Verificar si la sesión ha expirado por inactividad
-    if (!$session->checkSession()) {
-        $session->setFlash('error', 'Su sesión ha expirado por inactividad, por favor inicie sesión nuevamente');
-        header('Location: /login');
-        exit;
-    }
-
-    return null;
+  return SessionMiddleware::verificarSesion();
 });
 
-// Middleware para verificar rol de administrador
-$router->filter('admin', function () {
-    $session = new \App\Services\SessionService();
-    if (!$session->isAuthenticated()) {
-        $session->setFlash('error', 'Debe iniciar sesión para acceder a esta página');
-        header('Location: /login');
-        exit;
-    }
-
-    // Verificar si el usuario es administrador (asumiendo que rol_id 1 es admin)
-    if (!$session->hasRole(1)) {
-        $session->setFlash('error', 'No tiene permisos suficientes para acceder a esta página');
-        header('Location: /dashboard');
-        exit;
-    }
-
-    return null;
+// Middleware para rutas que requieren roles específicos
+$router->filter('role', function ($role) {
+  $roles = explode(',', $role);
+  $roles = array_map('intval', $roles);
+  return SessionMiddleware::verificarPermiso($roles);
 });
 
-// ====================================================================
-// RUTAS PÚBLICAS (no requieren autenticación)
-// ====================================================================
-
-// Página principal - redirige según autenticación
+// Rutas públicas
 $router->get('/', function () {
-    $session = new \App\Services\SessionService();
-    if ($session->isAuthenticated()) {
-        header('Location: /dashboard');
-    } else {
-        header('Location: /login');
-    }
-    exit;
+  header('Location: ' . APP_URL . 'login');
+  exit();
 });
 
-// Rutas de autenticación (para usuarios no autenticados)
-$router->group(['before' => 'guest'], function ($router) {
-    $router->get('/login', ['App\Controllers\Web\AuthController', 'showLoginForm']);
-    $router->post('/login', ['App\Controllers\Web\AuthController', 'login']);
+// Utilizamos ApiAuthController para el login, pero en la ruta web tradicional
+$router->get('/login', function () {
+  // Verificar si ya hay una sesión activa
+  if (isset($_SESSION[APP_SESSION_NAME])) {
+    header("Location: " . APP_URL . "dashboard");
+    exit();
+  }
+
+  // Incluir la vista de login
+  require_once APP_ROOT . '/app/Views/loginView.php';
 });
 
-// ====================================================================
-// RUTAS PROTEGIDAS (requieren autenticación)
-// ====================================================================
+$router->post('/login', ['App\Controllers\Api\ApiAuthController', 'login']);
+$router->get('/logout', ['App\Controllers\Api\ApiAuthController', 'logout']);
 
-// Grupo para rutas que requieren autenticación
+// Rutas protegidas - Requieren autenticación
 $router->group(['before' => 'auth'], function ($router) {
 
-    // Dashboard
-    $router->get('/dashboard', ['App\Controllers\Web\DashboardController', 'index']);
+  // Dashboard - Accesible para todos los roles autenticados
+  $router->get('/dashboard', function () {
+    require_once APP_ROOT . '/app/Views/dashboard.php';
+  });
 
-    // Cerrar sesión
-    $router->get('/logout', ['App\Controllers\Web\AuthController', 'logout']);
-});
+  // Rutas protegidas por rol
 
-// ====================================================================
-// RUTAS DE ADMINISTRACIÓN (requieren rol de administrador)
-// ====================================================================
+  // Rutas para administradores
+  $router->group(['before' => 'role:1'], function ($router) {
+    // Rutas de administración de usuarios
+    $router->get('/usuarios', function () {
+      // Vista de listado de usuarios
+      echo "Listado de usuarios - Solo administradores";
+    });
+  });
 
-// Grupo para rutas que requieren rol de administrador
-$router->group(['before' => 'admin'], function ($router) {
+  // Rutas para administradores y supervisores
+  $router->group(['before' => 'role:1,2'], function ($router) {
+    // Rutas de reportes
+    $router->get('/reportes', function () {
+      // Vista de reportes
+      echo "Reportes - Administradores y supervisores";
+    });
+  });
 
-    // Gestión de usuarios
-    $router->get('/users', ['App\Controllers\Web\UserController', 'index']);
-    $router->get('/users/create', ['App\Controllers\Web\UserController', 'create']);
-    $router->post('/users', ['App\Controllers\Web\UserController', 'store']);
-    $router->get('/users/{id}', ['App\Controllers\Web\UserController', 'show']);
-    $router->get('/users/{id}/edit', ['App\Controllers\Web\UserController', 'edit']);
-    $router->post('/users/{id}', ['App\Controllers\Web\UserController', 'update']);
-    $router->post('/users/{id}/delete', ['App\Controllers\Web\UserController', 'destroy']);
-});
+  // Rutas para administradores, supervisores y operadores
+  $router->group(['before' => 'role:1,2,3'], function ($router) {
+    // Rutas de donaciones
+    $router->get('/donaciones', function () {
+      // Vista de donaciones
+      echo "Donaciones - Admins, supervisores y operadores";
+    });
 
-// ====================================================================
-// RUTAS DE ERROR
-// ====================================================================
-
-// Ruta para errores 404
-$router->get('/404', function () {
-    header('HTTP/1.0 404 Not Found');
-    echo 'Página no encontrada';
-    exit;
+    // Rutas de donadores
+    $router->get('/donadores', function () {
+      // Vista de donadores
+      echo "Donadores - Admins, supervisores y operadores";
+    });
+  });
 });
 
 return $router;

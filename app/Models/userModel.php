@@ -209,7 +209,7 @@ class userModel extends mainModel
     {
         try {
             $query = "SELECT u.*, r.rol_descripcion 
-                     FROM usuario u 
+                     FROM usuario u
                      JOIN rol r ON u.usuario_rol = r.rol_id 
                      WHERE u.usuario_usuario = :username";
 
@@ -276,14 +276,19 @@ class userModel extends mainModel
 
             // Determinar si es email o nombre de usuario
             $usuario = null;
+            $tipo_usuario = null;
             if (filter_var($identificador, FILTER_VALIDATE_EMAIL)) {
+                $tipo_usuario = "email";
                 $usuario = $this->obtenerUsuarioPorEmail($identificador);
             } else {
+                $tipo_usuario = "username";
                 $usuario = $this->obtenerUsuarioPorUsername($identificador);
             }
 
             // Si no encontramos el usuario o está inactivo
             if (!$usuario || $usuario->usuario_estado != 1) {
+                // loggear el intento de acceso fallido en la carpeta storage/logs
+                error_log("\nIntento de acceso fallido para el tipo de usuario: " . $tipo_usuario, 3, APP_ROOT . "storage/logs/access.log");
                 return false;
             }
 

@@ -12,38 +12,20 @@ trabajo-social
 ├─ app
 │  ├─ Controllers
 │  │  ├─ Api
-│  │  │  ├─ AuthController.php
-│  │  │  └─ UserController.php
 │  │  └─ Web
-│  │     ├─ AuthController.php
-│  │     ├─ DashboardController.php
-│  │     └─ UserController.php
 │  ├─ Helpers
-│  │  └─ validationHelper.php
 │  ├─ Middlewares
-│  │  ├─ ApiAuthMiddleware.php
-│  │  ├─ ApiRoleMiddleware.php
-│  │  ├─ AuthMiddleware.php
-│  │  ├─ GuestMiddleware.php
-│  │  └─ RolMiddleware.php
 │  ├─ Models
 │  │  ├─ mainModel.php
-│  │  ├─ rolModel.php
 │  │  └─ userModel.php
 │  ├─ Routes
 │  │  ├─ api.php
 │  │  └─ web.php
 │  ├─ Services
-│  │  ├─ FileService.php
-│  │  ├─ SessionService.php
-│  │  └─ TokenService.php
 │  ├─ Utils
-│  │  └─ Logger.php
 │  └─ Views
-│     ├─ auth
-│     │  └─ login.php
-│     └─ dashboard
-│        └─ index.php
+│     ├─ dashboard.php
+│     └─ loginView.php
 ├─ compose.yml
 ├─ composer.json
 ├─ composer.lock
@@ -77,6 +59,9 @@ trabajo-social
 │  │  ├─ v-line.svg
 │  │  └─ x.svg
 │  ├─ images
+│  │  ├─ imagotipo-neurodesarrollo.png
+│  │  ├─ logo-unam.svg
+│  │  └─ logotipo-neurodesarrollo.png
 │  ├─ inc
 │  │  ├─ head.php
 │  │  ├─ navbar.php
@@ -84,8 +69,7 @@ trabajo-social
 │  │  └─ session_start.php
 │  ├─ index.php
 │  ├─ js
-│  │  ├─ datatables.min.js
-│  │  └─ session-timeout.js
+│  │  └─ datatables.min.js
 │  └─ photos
 ├─ README.md
 ├─ resources

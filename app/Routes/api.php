@@ -1,104 +1,113 @@
 <?php
 
-use Phroute\Phroute\RouteCollector;
-
 /**
- * Definición de rutas API compatible con PHP 5.4 y Phroute 2.2
- * 
- * @return RouteCollector
+ * Archivo de rutas de API para la aplicación
  */
 
-// Iniciar el router
+use Phroute\Phroute\RouteCollector;
+use App\Middlewares\JwtMiddleware;
+use App\Helpers\RolHelper;
+
 $router = new RouteCollector();
 
-// ====================================================================
-// MIDDLEWARE FILTERS
-// ====================================================================
+// Middleware para rutas que requieren autenticación JWT
+$router->filter('jwt', function() {
+    return JwtMiddleware::verificarToken() !== false;
+});
 
-// Middleware para configurar headers de API y CORS
-$router->filter('api', function () {
-    // Establecer las cabeceras CORS
+// Middleware para rutas que requieren roles específicos
+$router->filter('jwt-role', function($role) {
+    $roles = explode(',', $role);
+    $roles = array_map('intval', $roles);
+    return JwtMiddleware::verificarRol($roles) !== false;
+});
+
+// Configurar los encabezados para API solo si no es una solicitud de formulario
+$contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
+$isFormRequest = strpos($contentType, 'application/x-www-form-urlencoded') !== false || 
+                strpos($contentType, 'multipart/form-data') !== false;
+
+if (!$isFormRequest) {
+    header('Content-Type: application/json');
     header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Headers: X-Requested-With, Content-Type, Accept, Origin, Authorization');
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-
-    // Si es una solicitud OPTIONS, terminar aquí (preflight request)
-    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+    
+    // Manejar el método OPTIONS para CORS
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
         exit(0);
     }
+}
 
-    return null;
-});
+// Rutas públicas de la API
+$router->post('/auth/login', ['App\Controllers\Api\ApiAuthController', 'login']);
+$router->post('/auth/refresh', ['App\Controllers\Api\ApiAuthController', 'refresh']);
+$router->get('/auth/logout', ['App\Controllers\Api\ApiAuthController', 'logout']);
 
-// Middleware para autenticación de API
-$router->filter('api-auth', function () {
-    $middleware = new \App\Middlewares\ApiAuthMiddleware();
-    return $middleware->handle();
-});
-
-// Filtro para rol de administrador (rol_id 1)
-$router->filter('api-admin', function () {
-    $middleware = new \App\Middlewares\ApiRoleMiddleware([1]);
-    return $middleware->handle();
-});
-
-// ====================================================================
-// RUTAS API
-// ====================================================================
-
-// Aplicar middleware api a todas las rutas
-$router->group(['before' => 'api'], function ($router) {
-
-    // Prefijo para todas las rutas API
-    $router->group(['prefix' => '/api'], function ($router) {
-
-        // ====================================================================
-        // RUTAS PÚBLICAS API
-        // ====================================================================
-
-        // Autenticación
-        $router->post('/auth/login', ['App\Controllers\Api\AuthController', 'login']);
-
-        // Rutas de verificación de sesión (no requieren token)
-        $router->get('/auth/ping', ['App\Controllers\Api\AuthController', 'ping']);
-        $router->get('/auth/check-session', ['App\Controllers\Api\AuthController', 'checkSession']);
-
-        // ====================================================================
-        // RUTAS PROTEGIDAS API (requieren autenticación)
-        // ====================================================================
-
-        $router->group(['before' => 'api-auth'], function ($router) {
-
-            // Verificación y logout
-            $router->get('/auth/check', ['App\Controllers\Api\AuthController', 'check']);
-            $router->post('/auth/logout', ['App\Controllers\Api\AuthController', 'logout']);
-
-            // ====================================================================
-            // RUTAS ADMIN API (requieren rol de administrador)
-            // ====================================================================
-
-            $router->group(['before' => 'api-admin'], function ($router) {
-
-                // Gestión de usuarios
-                $router->get('/users', ['App\Controllers\Api\UserController', 'index']);
-                $router->post('/users', ['App\Controllers\Api\UserController', 'store']);
-                $router->get('/users/{id}', ['App\Controllers\Api\UserController', 'show']);
-                $router->put('/users/{id}', ['App\Controllers\Api\UserController', 'update']);
-                $router->delete('/users/{id}', ['App\Controllers\Api\UserController', 'destroy']);
-            });
-        });
-    });
-
-    // Ruta para manejar solicitudes a endpoints no existentes
-    $router->any('/api/{any}', function () {
-        header('Content-Type: application/json');
-        header('HTTP/1.0 404 Not Found');
+// Rutas protegidas - Requieren JWT
+$router->group(['before' => 'jwt'], function($router) {
+    
+    // Rutas para todos los usuarios autenticados
+    $router->get('/me', function() {
+        $payload = JwtMiddleware::verificarToken();
         echo json_encode([
-            'success' => false,
-            'message' => 'Endpoint no encontrado',
-            'code' => 404
+            'status' => 'success',
+            'data' => [
+                'id' => $payload->id,
+                'username' => $payload->username,
+                'email' => $payload->email,
+                'rol' => $payload->rol
+            ]
         ]);
         exit;
+    });
+    
+    // Rutas para administradores
+    $router->group(['before' => 'jwt-role:1'], function($router) {
+        // API de usuarios - Solo administradores
+        $router->get('/usuarios', function() {
+            $userModel = new App\Models\userModel();
+            $usuarios = $userModel->obtenerTodosUsuarios();
+            
+            echo json_encode([
+                'status' => 'success',
+                'data' => $usuarios
+            ]);
+            exit;
+        });
+    });
+    
+    // Rutas para administradores y supervisores
+    $router->group(['before' => 'jwt-role:1,2'], function($router) {
+        // API de reportes - Administradores y supervisores
+        $router->get('/reportes', function() {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'API de reportes - Acceso permitido'
+            ]);
+            exit;
+        });
+    });
+    
+    // Rutas para administradores, supervisores y operadores
+    $router->group(['before' => 'jwt-role:1,2,3'], function($router) {
+        // API de donaciones
+        $router->get('/donaciones', function() {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'API de donaciones - Acceso permitido'
+            ]);
+            exit;
+        });
+        
+        // API de donadores
+        $router->get('/donadores', function() {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'API de donadores - Acceso permitido'
+            ]);
+            exit;
+        });
     });
 });
 
