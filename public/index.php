@@ -6,11 +6,13 @@
  * Este archivo maneja todas las solicitudes entrantes y las dirige al enrutador apropiado
  */
 
-// Iniciar sesión
-session_start();
-
+// Cargar configuraciones
 require_once '../vendor/autoload.php';
 require_once '../config/env.php'; // Cargar variables de entorno
+require_once '../config/session.php'; // Cargar configuración de sesiones
+
+// Iniciar sesión
+session_start();
 
 // Crear instancia de Request
 $request = new App\Core\Request();
@@ -20,7 +22,14 @@ $uri = $request->getUri();
 $segments = explode('/', trim($uri, '/'));
 
 $authController = new App\Controllers\AuthController();
-$sessionRestored = $authController->checkRememberCookie();
+
+// Verificar tiempo de inactividad (antes de cualquier otra operación)
+$sessionExpired = $authController->checkSessionTimeout();
+
+// Solo si la sesión no ha expirado, intentar restaurarla desde la cookie
+if (!$sessionExpired && !isset($_SESSION[APP_SESSION_NAME])) {
+  $sessionRestored = $authController->checkRememberCookie();
+}
 
 // Comprobar si estamos en la raíz (URL base)
 if ($uri === '/') {

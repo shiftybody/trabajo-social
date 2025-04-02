@@ -3,7 +3,7 @@
 /**
  * Middleware de Autenticación
  * 
- * Verifica si el usuario está autenticado
+ * Verifica si el usuario está autenticado y gestiona el tiempo de inactividad
  */
 
 namespace App\Middlewares;
@@ -28,10 +28,25 @@ class AuthMiddleware
       session_start();
     }
 
+    // Verificar si la sesión ha expirado por inactividad
+    $authController = new AuthController();
+    $sessionExpired = $authController->checkSessionTimeout();
+
+    // Si la sesión expiró, redirigir a login con mensaje
+    if ($sessionExpired) {
+      if ($request->expectsJson()) {
+        return Response::json(array(
+          'status' => 'error',
+          'message' => 'Sesión expirada por inactividad'
+        ), 401);
+      }
+      
+      return Response::redirect(APP_URL . 'login?expired=1');
+    }
+
     // Verificar si hay sesión activa
     if (!isset($_SESSION[APP_SESSION_NAME]) || empty($_SESSION[APP_SESSION_NAME]['id'])) {
       // Verificar si hay cookie de recordar sesión
-      $authController = new AuthController();
       if (!$authController->checkRememberCookie()) {
         if ($request->expectsJson()) {
           return Response::json(array(
@@ -44,7 +59,10 @@ class AuthMiddleware
       }
     }
 
-    // Usuario autenticado, continuar
+    // Usuario autenticado, actualizar tiempo de último acceso
+    $_SESSION[APP_SESSION_NAME]['last_activity'] = time();
+    
+    // Continuar con la petición
     return $next($request);
   }
 }

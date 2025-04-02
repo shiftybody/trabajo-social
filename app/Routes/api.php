@@ -5,6 +5,9 @@
  */
 
 use App\Core\Router;
+use App\Middlewares\AuthMiddleware;
+use App\Middlewares\PermissionMiddleware;
+use App\Middlewares\RoleMiddleware;
 
 // Crear instancia del router
 $router = new Router();
@@ -12,9 +15,15 @@ $router = new Router();
 // Rutas API públicas
 $router->post('/auth/login', 'AuthController@login');
 
+// Ruta para mantener la sesión activa
+$router->post('/session/ping', 'SessionController@ping');
+
 // Rutas API protegidas (requieren autenticación)
 $router->group(array('middleware' => 'Auth'), function ($router) {
   $router->post('/auth/logout', 'AuthController@logout');
+  
+  // Verificar estado de sesión
+  $router->get('/session/status', 'SessionController@status');
 
   // Usuarios
   $router->group(array('middleware' => 'Permission:users.view'), function ($router) {

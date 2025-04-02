@@ -5,6 +5,22 @@
     background-color: #F7F7F7;
   }
 
+  h1 {
+    padding-bottom: 0.5rem;
+  }
+
+  p {
+    justify-content: center;
+    color: var(--gray-500, #677283);
+    color: var(--gray-500, color(display-p3 0.4196 0.4471 0.502));
+    text-align: center;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%;
+    /* 21px */
+  }
+
   header {
     display: flex;
     justify-content: space-between;
@@ -137,6 +153,12 @@
       </div>
 
       <div id="login-error"></div>
+
+      <?php if (isset($_GET['expired']) && $_GET['expired'] == 1): ?>
+        <div class="alert alert-warning">
+          Su sesión ha expirado por inactividad. Por favor, inicie sesión nuevamente.
+        </div>
+      <?php endif; ?>
 
       <div id="inputs">
         <div id="username-input">

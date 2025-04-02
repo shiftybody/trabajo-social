@@ -78,6 +78,9 @@ class AuthController
       session_start();
     }
 
+    // Almacenar tiempo de último acceso en la sesión
+    $tiempoActual = time();
+
     // Crear sesión
     $_SESSION[APP_SESSION_NAME] = [
       'id' => $usuario->usuario_id,
@@ -88,7 +91,9 @@ class AuthController
       'email' => $usuario->usuario_email,
       'foto' => $usuario->usuario_foto,
       'rol' => $usuario->usuario_rol,
-      'rol_descripcion' => $usuario->rol_descripcion
+      'rol_descripcion' => $usuario->rol_descripcion,
+      'last_activity' => $tiempoActual, // Guardar tiempo de último acceso
+      'remember' => $remember // Guardar si se solicitó recordar sesión
     ];
 
     // Configurar cookie si se solicitó "recordar sesión"
@@ -99,7 +104,15 @@ class AuthController
         'token' => hash('sha256', $usuario->usuario_password_hash . TOKEN_SECRET_KEY)
       ];
       $cookieValue = base64_encode(json_encode($cookieData));
-      setcookie(APP_SESSION_NAME . "_remember", $cookieValue, time() + (30 * 24 * 60 * 60), "/");
+      setcookie(
+        APP_SESSION_NAME . "_remember",
+        $cookieValue,
+        time() + REMEMBER_COOKIE_DURATION,
+        "/",
+        "",
+        isset($_SERVER['HTTPS']),
+        true
+      );
     }
 
     // Enviar respuesta según tipo de solicitud
@@ -130,6 +143,8 @@ class AuthController
   /**
    * Verifica si hay una cookie de "recordar sesión" válida
    * y regenera la sesión
+   * 
+   * @return bool Si la sesión fue restaurada exitosamente
    */
   public function checkRememberCookie()
   {
@@ -158,6 +173,9 @@ class AuthController
       // Regenerar sesión
       $this->userModel->actualizarUltimoAcceso($usuario->usuario_id);
 
+      // Almacenar tiempo de último acceso en la sesión
+      $tiempoActual = time();
+
       $_SESSION[APP_SESSION_NAME] = [
         'id' => $usuario->usuario_id,
         'username' => $usuario->usuario_usuario,
@@ -167,8 +185,27 @@ class AuthController
         'email' => $usuario->usuario_email,
         'foto' => $usuario->usuario_foto,
         'rol' => $usuario->usuario_rol,
-        'rol_descripcion' => $usuario->rol_descripcion
+        'rol_descripcion' => $usuario->rol_descripcion,
+        'last_activity' => $tiempoActual, // Guardar tiempo de último acceso
+        'remember' => true // Indicar que se restauró desde cookie
       ];
+
+      // Renovar la cookie de recordar
+      $cookieData = [
+        'id' => $usuario->usuario_id,
+        'username' => $usuario->usuario_usuario,
+        'token' => hash('sha256', $usuario->usuario_password_hash . TOKEN_SECRET_KEY)
+      ];
+      $cookieValue = base64_encode(json_encode($cookieData));
+      setcookie(
+        APP_SESSION_NAME . "_remember",
+        $cookieValue,
+        time() + REMEMBER_COOKIE_DURATION,
+        "/",
+        "",
+        isset($_SERVER['HTTPS']),
+        true
+      );
 
       return true;
     }
@@ -176,8 +213,40 @@ class AuthController
     return false;
   }
 
+
+  /**
+   * Verifica si la sesión ha expirado por inactividad
+   * 
+   * @return bool Si la sesión expiró
+   */
+  public function checkSessionTimeout()
+  {
+    if (isset($_SESSION[APP_SESSION_NAME]) && isset($_SESSION[APP_SESSION_NAME]['last_activity'])) {
+      // Si el usuario eligió "recordar sesión", no realizar cierre por inactividad
+      if (isset($_SESSION[APP_SESSION_NAME]['remember']) && $_SESSION[APP_SESSION_NAME]['remember']) {
+        // Aún así, actualizar el tiempo de actividad para mantener el registro
+        $_SESSION[APP_SESSION_NAME]['last_activity'] = time();
+        return false;
+      }
+
+      $tiempoInactivo = time() - $_SESSION[APP_SESSION_NAME]['last_activity'];
+
+      if ($tiempoInactivo > SESSION_INACTIVE_TIMEOUT) {
+        // La sesión ha expirado por inactividad
+        // Redirigir a logout con parámetro en lugar de llamar a la función directamente
+        header("Location: " . APP_URL . "logout?expired=1");
+        exit;
+      }
+    }
+
+    return false;
+  }
+
   /**
    * Cierra la sesión del usuario
+   * 
+   * Versión compatible con el router que sigue soportando
+   * la notificación de sesión expirada
    */
   public function logout()
   {
@@ -186,26 +255,41 @@ class AuthController
       session_start();
     }
 
-    // Destruir sesión
+    // Detectar si es una expiración por inactividad o un cierre voluntario
+    // Utilizamos $_GET en lugar de parámetros de función
+    $expired = isset($_GET['expired']) && $_GET['expired'] == '1';
+
+    // Limpiar datos de sesión
     if (isset($_SESSION[APP_SESSION_NAME])) {
       unset($_SESSION[APP_SESSION_NAME]);
+      $_SESSION = array(); // Limpiar completamente el array de sesión
     }
 
-    // Eliminar cookie de "recordar sesión" si existe
+    // Eliminar la cookie de recordatorio si existe
     if (isset($_COOKIE[APP_SESSION_NAME . "_remember"])) {
       setcookie(APP_SESSION_NAME . "_remember", "", time() - 3600, "/");
+      // Intentar con parámetros adicionales para mayor compatibilidad
+      setcookie(APP_SESSION_NAME . "_remember", "", time() - 3600, "/", "", isset($_SERVER['HTTPS']), true);
     }
+
+    // Destruir la sesión por completo
+    session_destroy();
 
     // Verificar si es una solicitud API
     $contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
     $isApiRequest = strpos($contentType, 'application/json') !== false;
 
     if ($isApiRequest) {
-      echo json_encode(['status' => 'success', 'message' => 'Sesión cerrada correctamente']);
+      $message = $expired ? 'Sesión expirada por inactividad' : 'Sesión cerrada correctamente';
+      echo json_encode(['status' => 'success', 'message' => $message]);
       exit;
     } else {
-      // Redirigir a login para solicitudes web
-      header("Location: " . APP_URL . "login");
+      // Redireccionar a login con mensaje si es necesario
+      $redirect = APP_URL . "login";
+      if ($expired) {
+        $redirect .= '?expired=1';
+      }
+      header("Location: " . $redirect);
       exit;
     }
   }

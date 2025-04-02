@@ -1,11 +1,10 @@
 <?php
 
-/**
- * Configuración de rutas web
- */
-
 use App\Core\Router;
 use App\Core\Response;
+use App\Middlewares\AuthMiddleware;
+use App\Middlewares\PermissionMiddleware;
+use App\Middlewares\RoleMiddleware;
 
 $router = new Router();
 $response = new Response();
@@ -16,16 +15,8 @@ $router->setErrorView('403', APP_ROOT . 'app/Views/errors/403.php');
 $router->setErrorView('401', APP_ROOT . 'app/Views/errors/401.php');
 $router->setErrorView('500', APP_ROOT . 'app/Views/errors/500.php');
 
-// // Rutas públicas
-// $router->get('/', function () {
-//   if (isset($_SESSION[APP_SESSION_NAME]) && !empty($_SESSION[APP_SESSION_NAME]['id'])) {
-//     return Response::redirect(APP_URL . 'dashboard');
-//   }
-//   return Response::redirect(APP_URL . 'login');
-// });
-
+// Rutas públicas
 $router->get('/login', function () {
-
   try {
     // Si ya hay sesión activa, redirigir al dashboard
     if (isset($_SESSION[APP_SESSION_NAME]) && !empty($_SESSION[APP_SESSION_NAME]['id'])) {
@@ -56,6 +47,9 @@ $router->get('/login', function () {
 
 $router->post('/login', 'AuthController@login');
 $router->get('/logout', 'AuthController@logout');
+
+// Endpoint para ping de sesión (para mantener sesión activa)
+$router->post('/api/session/ping', 'SessionController@ping');
 
 // Rutas de error
 $router->get('/error/404', function () {
