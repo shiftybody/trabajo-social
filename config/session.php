@@ -6,7 +6,7 @@
 
 // Tiempo de inactividad para cerrar sesión (en segundos)
 // Por defecto: 5 minutos = 300 segundos
-define('SESSION_INACTIVE_TIMEOUT', 300);
+define('SESSION_INACTIVE_TIMEOUT', 120);
 
 // Duración de la cookie de "recordar sesión" (en segundos)
 // Por defecto: 30 días = 2592000 segundos

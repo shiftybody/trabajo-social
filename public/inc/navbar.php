@@ -294,7 +294,7 @@
       <img src="<?= APP_URL; ?>public/icons/user.svg" alt="" class="option-icon">
       Mi Perfil
     </a>
-    <img src="<?= APP_URL; ?>app/views/icons/h-line.svg" alt="">
+    <img src="<?= APP_URL; ?>public/icons/h-line.svg" alt="">
     <a href="<?= APP_URL; ?>logout" id="btn_exit">
       <img src="<?= APP_URL; ?>public/icons/logout.svg" class="option-icon">
       Salir

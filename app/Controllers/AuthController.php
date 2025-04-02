@@ -217,14 +217,13 @@ class AuthController
   /**
    * Verifica si la sesión ha expirado por inactividad
    * 
-   * @return bool Si la sesión expiró
+   * @return bool Si la sesión ha expirado
    */
   public function checkSessionTimeout()
   {
     if (isset($_SESSION[APP_SESSION_NAME]) && isset($_SESSION[APP_SESSION_NAME]['last_activity'])) {
       // Si el usuario eligió "recordar sesión", no realizar cierre por inactividad
       if (isset($_SESSION[APP_SESSION_NAME]['remember']) && $_SESSION[APP_SESSION_NAME]['remember']) {
-        // Aún así, actualizar el tiempo de actividad para mantener el registro
         $_SESSION[APP_SESSION_NAME]['last_activity'] = time();
         return false;
       }
@@ -232,13 +231,10 @@ class AuthController
       $tiempoInactivo = time() - $_SESSION[APP_SESSION_NAME]['last_activity'];
 
       if ($tiempoInactivo > SESSION_INACTIVE_TIMEOUT) {
-        // La sesión ha expirado por inactividad
-        // Redirigir a logout con parámetro en lugar de llamar a la función directamente
-        header("Location: " . APP_URL . "logout?expired=1");
-        exit;
+        // CAMBIO: Devolver true en lugar de redireccionar
+        return true;
       }
     }
-
     return false;
   }
 

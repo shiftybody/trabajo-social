@@ -1,22 +1,35 @@
 /**
- * Script para detectar inactividad del usuario con verificación del lado del servidor
- * para respetar la cookie de recordatorio
+ * Script optimizado para detectar inactividad del usuario con verificación del lado del servidor
+ * y ping inteligente que solo ocurre cuando es necesario para mantener la sesión activa
  */
 document.addEventListener('DOMContentLoaded', function() {
     // Tiempo de inactividad configurado en el servidor (en segundos)
-    const SESSION_INACTIVE_TIMEOUT = 300; // 5 minutos
+    const SESSION_INACTIVE_TIMEOUT = 120; // 5 minutos
     
     // Mostrar advertencia cuando queden 60 segundos (1 minuto)
-    const WARNING_BEFORE_TIMEOUT = 60; 
+    const WARNING_BEFORE_TIMEOUT = 60;
+    
+    // Cuánto tiempo antes del timeout se debe enviar un ping (en segundos)
+    const PING_BEFORE_TIMEOUT = 30; // Ping 30 segundos antes del timeout
     
     // Determinar la URL base de la aplicación
     const appUrl = document.querySelector('meta[name="app-url"]')?.content || '/';
     
-    // Timers
+    // Timers y estado
     let inactivityTimer;
+    let pingTimer;
     let countdownInterval;
     let warningShown = false;
     let monitoringActive = false;
+    let modalContainer = null;
+    let lastActivityTime = Date.now();
+    
+    // Log con timestamp para debugging
+    function logWithTime(message) {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString() + '.' + String(now.getMilliseconds()).padStart(3, '0');
+        console.log(`[${timeStr}] ${message}`);
+    }
     
     // Verificar con el servidor si se debe monitorear inactividad
     async function checkServerForMonitoring() {
@@ -31,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             if (!response.ok) {
-                console.log("No hay sesión activa o error en la verificación");
+                logWithTime("No hay sesión activa o error en la verificación");
                 return false;
             }
             
@@ -39,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Si el servidor indica que hay cookie de recordatorio, no monitorear
             if (data.status === 'success' && data.session && data.session.remember === true) {
-                console.log("Servidor indica recordatorio activo, no se monitoreará inactividad");
+                logWithTime("Servidor indica recordatorio activo, no se monitoreará inactividad");
                 return false;
             }
             
@@ -52,228 +65,299 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Iniciar el monitoreo solo si es necesario
-    async function initMonitoring() {
-        const shouldMonitor = await checkServerForMonitoring();
-        
-        if (!shouldMonitor) {
-            console.log("No se iniciará monitoreo de inactividad");
-            return;
-        }
-        
-        console.log("Iniciando monitoreo de inactividad");
-        monitoringActive = true;
-        
-        // Función para reiniciar el temporizador de inactividad
-        function resetInactivityTimer() {
-            if (!warningShown && monitoringActive) {
-                clearTimeout(inactivityTimer);
-                
-                inactivityTimer = setTimeout(function() {
-                    showWarning();
-                }, (SESSION_INACTIVE_TIMEOUT - WARNING_BEFORE_TIMEOUT) * 1000);
+    // Cargar el HTML del modal desde un archivo PHP
+    async function loadModalTemplate() {
+        try {
+            const response = await fetch(appUrl + 'public/inc/modal.php', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            });
+            
+            if (!response.ok) {
+                console.error("Error al cargar la plantilla del modal");
+                return null;
             }
+            
+            return await response.text();
+        } catch (error) {
+            console.error("Error cargando plantilla del modal:", error);
+            return null;
         }
+    }
+    
+    // Hacer ping al servidor para mantener la sesión activa
+    async function pingServer() {
+        logWithTime("Enviando ping al servidor para mantener la sesión activa");
         
-        // Hacer ping al servidor para mantener la sesión activa
-        function pingServer() {
-            return fetch(appUrl + 'api/session/ping', { 
+        try {
+            const response = await fetch(appUrl + 'api/session/ping', { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 credentials: 'same-origin'
-            })
-            .catch(error => {
-                console.error('Error al hacer ping al servidor:', error);
             });
-        }
-        
-        // Mostrar advertencia de sesión a punto de expirar
-        function showWarning() {
-            // Verificar que el monitoreo siga activo
-            if (!monitoringActive) {
-                return;
-            }
             
-            // Marcar que la advertencia está activa
-            warningShown = true;
-            clearTimeout(inactivityTimer);
-            
-            // Crear el modal si no existe
-            let warningModal = document.getElementById('session-warning-modal');
-            
-            if (!warningModal) {
-                // Crear contenedor principal
-                warningModal = document.createElement('div');
-                warningModal.id = 'session-warning-modal';
-                warningModal.style.display = 'flex';
-                warningModal.style.position = 'fixed';
-                warningModal.style.top = '0';
-                warningModal.style.left = '0';
-                warningModal.style.right = '0';
-                warningModal.style.bottom = '0';
-                warningModal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-                warningModal.style.zIndex = '9999';
-                warningModal.style.justifyContent = 'center';
-                warningModal.style.alignItems = 'center';
-                
-                // Crear contenido del modal
-                const modalContent = document.createElement('div');
-                modalContent.style.backgroundColor = '#fff';
-                modalContent.style.padding = '20px';
-                modalContent.style.borderRadius = '5px';
-                modalContent.style.maxWidth = '400px';
-                modalContent.style.width = '100%';
-                modalContent.style.boxShadow = '0 3px 10px rgba(0, 0, 0, 0.2)';
-                modalContent.style.zIndex = '10000';
-                modalContent.style.pointerEvents = 'auto';
-                
-                // Título
-                const title = document.createElement('h3');
-                title.textContent = 'Su sesión está a punto de expirar';
-                title.style.margin = '0 0 15px 0';
-                modalContent.appendChild(title);
-                
-                // Mensaje
-                const message = document.createElement('p');
-                message.innerHTML = 'Debido a inactividad, su sesión se cerrará en <span id="session-countdown">60</span> segundos.';
-                modalContent.appendChild(message);
-                
-                // Contenedor de botones
-                const buttonsContainer = document.createElement('div');
-                buttonsContainer.style.display = 'flex';
-                buttonsContainer.style.justifyContent = 'space-between';
-                buttonsContainer.style.marginTop = '20px';
-                
-                // Botón para mantener sesión
-                const keepButton = document.createElement('button');
-                keepButton.textContent = 'Mantener sesión activa';
-                keepButton.style.padding = '8px 16px';
-                keepButton.style.backgroundColor = '#3498db';
-                keepButton.style.color = 'white';
-                keepButton.style.border = 'none';
-                keepButton.style.borderRadius = '4px';
-                keepButton.style.cursor = 'pointer';
-                
-                keepButton.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    pingServer().then(() => {
-                        hideWarning();
-                    });
-                });
-                
-                // Botón para cerrar sesión
-                const logoutButton = document.createElement('button');
-                logoutButton.textContent = 'Cerrar sesión ahora';
-                logoutButton.style.padding = '8px 16px';
-                logoutButton.style.backgroundColor = '#95a5a6';
-                logoutButton.style.color = 'white';
-                logoutButton.style.border = 'none';
-                logoutButton.style.borderRadius = '4px';
-                logoutButton.style.cursor = 'pointer';
-                
-                logoutButton.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    window.location.href = appUrl + 'logout';
-                });
-                
-                // Agregar botones al contenedor
-                buttonsContainer.appendChild(keepButton);
-                buttonsContainer.appendChild(logoutButton);
-                
-                // Agregar contenedor de botones al modal
-                modalContent.appendChild(buttonsContainer);
-                
-                // Agregar contenido al modal
-                warningModal.appendChild(modalContent);
-                
-                // Agregar modal al body
-                document.body.appendChild(warningModal);
+            if (response.ok) {
+                logWithTime("Ping exitoso, sesión renovada");
+                // Actualizar el tiempo de última actividad después de un ping exitoso
+                lastActivityTime = Date.now();
+                return true;
             } else {
-                warningModal.style.display = 'flex';
+                logWithTime("Error en el ping, el servidor respondió con error");
+                return false;
             }
-            
-            // Iniciar cuenta regresiva
-            let secondsLeft = WARNING_BEFORE_TIMEOUT;
-            const countdownEl = document.getElementById('session-countdown');
-            
-            clearInterval(countdownInterval);
-            
-            countdownInterval = setInterval(function() {
-                // Verificar que el elemento siga existiendo
-                if (countdownEl) {
-                    countdownEl.textContent = secondsLeft;
-                }
-                
-                secondsLeft--;
-                
-                if (secondsLeft < 0) {
-                    clearInterval(countdownInterval);
-                    window.location.href = appUrl + 'logout?expired=1';
-                }
-            }, 1000);
+        } catch (error) {
+            console.error('Error al hacer ping al servidor:', error);
+            return false;
+        }
+    }
+    
+    // Configurar todos los temporizadores basados en la última actividad
+    function setupTimers() {
+        // Limpiar temporizadores existentes
+        clearTimeout(inactivityTimer);
+        clearTimeout(pingTimer);
+        
+        if (warningShown || !monitoringActive) {
+            return;
         }
         
-        // Ocultar advertencia y restablecer temporizadores
-        function hideWarning() {
-            const warningModal = document.getElementById('session-warning-modal');
-            if (warningModal) {
-                warningModal.style.display = 'none';
-            }
-            
-            warningShown = false;
-            clearInterval(countdownInterval);
-            resetInactivityTimer();
+        const currentTime = Date.now();
+        const elapsedTime = (currentTime - lastActivityTime) / 1000; // Convertir a segundos
+        const remainingTime = SESSION_INACTIVE_TIMEOUT - elapsedTime;
+        
+        logWithTime(`Configurando temporizadores. Tiempo transcurrido: ${elapsedTime.toFixed(1)}s, Tiempo restante: ${remainingTime.toFixed(1)}s`);
+        
+        // Si el tiempo restante es negativo, mostrar la advertencia inmediatamente
+        if (remainingTime <= WARNING_BEFORE_TIMEOUT) {
+            logWithTime(`Tiempo restante (${remainingTime.toFixed(1)}s) es menor que el umbral de advertencia (${WARNING_BEFORE_TIMEOUT}s)`);
+            showWarning();
+            return;
         }
         
-        // Lista de eventos que reinician el temporizador
-        const resetEvents = [
+        // Calcular cuándo mostrar la advertencia
+        const timeUntilWarning = remainingTime - WARNING_BEFORE_TIMEOUT;
+        
+        // Calcular cuándo enviar el ping (solo si es antes de la advertencia)
+        const timeUntilPing = remainingTime - PING_BEFORE_TIMEOUT;
+        
+        logWithTime(`Advertencia en: ${timeUntilWarning.toFixed(1)}s, Ping en: ${timeUntilPing.toFixed(1)}s`);
+        
+        // Configurar temporizador para mostrar la advertencia
+        inactivityTimer = setTimeout(() => {
+            logWithTime("Temporizador expirado: Mostrando advertencia");
+            showWarning();
+        }, timeUntilWarning * 1000);
+        
+        // Configurar temporizador para enviar ping solo si es antes de la advertencia
+        if (timeUntilPing > 0 && timeUntilPing < timeUntilWarning) {
+            pingTimer = setTimeout(() => {
+                logWithTime(`Ejecutando ping programado (${PING_BEFORE_TIMEOUT}s antes del timeout)`);
+                pingServer().then(success => {
+                    if (success) {
+                        setupTimers(); // Reiniciar temporizadores después de un ping exitoso
+                    }
+                });
+            }, timeUntilPing * 1000);
+        }
+    }
+    
+    // Registro de actividad del usuario
+    function recordActivity() {
+        if (warningShown || !monitoringActive) {
+            return;
+        }
+        
+        const now = Date.now();
+        const sinceLastActivity = (now - lastActivityTime) / 1000;
+        
+        // Solo registrar y reiniciar temporizadores si pasó un tiempo significativo (más de 1 segundo)
+        // para evitar múltiples reinicios durante eventos frecuentes como scroll o mousemove
+        if (sinceLastActivity > 1) {
+            logWithTime(`Actividad detectada después de ${sinceLastActivity.toFixed(1)}s de inactividad`);
+            lastActivityTime = now;
+            setupTimers();
+        }
+    }
+    
+    // Mostrar advertencia de sesión a punto de expirar
+    function showWarning() {
+        // Verificar que el monitoreo siga activo
+        if (!monitoringActive) {
+            return;
+        }
+        
+        // Marcar que la advertencia está activa
+        warningShown = true;
+        clearTimeout(inactivityTimer);
+        clearTimeout(pingTimer);
+        
+        logWithTime("Mostrando advertencia de sesión por expirar");
+        
+        // Buscar o crear el contenedor del modal
+        let warningModal = document.getElementById('session-warning-modal');
+        
+        if (!warningModal) {
+            if (modalContainer) {
+                // Añadir el modal al body
+                document.body.appendChild(modalContainer);
+                
+                // Asignar el modal a la variable warningModal
+                warningModal = document.getElementById('session-warning-modal');
+                
+                // Configurar los event listeners para los botones
+                const keepButton = document.getElementById('keep-session-button');
+                if (keepButton) {
+                    keepButton.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        logWithTime("Usuario eligió mantener la sesión");
+                        pingServer().then(() => {
+                            hideWarning();
+                        });
+                    });
+                }
+                
+                const logoutButton = document.getElementById('logout-now-button');
+                if (logoutButton) {
+                    logoutButton.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        logWithTime("Usuario eligió cerrar sesión");
+                        window.location.href = appUrl + 'logout';
+                    });
+                }
+            }
+        } else {
+            warningModal.style.display = 'flex';
+        }
+        
+        // Iniciar cuenta regresiva
+        let secondsLeft = WARNING_BEFORE_TIMEOUT;
+        const countdownEl = document.getElementById('session-countdown');
+        
+        clearInterval(countdownInterval);
+        
+        countdownInterval = setInterval(function() {
+            // Verificar que el elemento siga existiendo
+            if (countdownEl) {
+                countdownEl.textContent = secondsLeft;
+            }
+            
+            secondsLeft--;
+            
+            if (secondsLeft < 0) {
+                logWithTime("Cuenta regresiva terminada, cerrando sesión");
+                clearInterval(countdownInterval);
+                window.location.href = appUrl + 'logout';
+            }
+        }, 1000);
+    }
+    
+    // Ocultar advertencia y restablecer temporizadores
+    function hideWarning() {
+        const warningModal = document.getElementById('session-warning-modal');
+        if (warningModal) {
+            warningModal.style.display = 'none';
+        }
+        
+        logWithTime("Ocultando advertencia y restableciendo temporizadores");
+        warningShown = false;
+        clearInterval(countdownInterval);
+        lastActivityTime = Date.now();
+        setupTimers();
+    }
+    
+    // Iniciar el monitoreo solo si es necesario
+    async function initMonitoring() {
+        const shouldMonitor = await checkServerForMonitoring();
+        
+        if (!shouldMonitor) {
+            logWithTime("No se iniciará monitoreo de inactividad");
+            return;
+        }
+        
+        logWithTime("Iniciando monitoreo de inactividad");
+        monitoringActive = true;
+        lastActivityTime = Date.now();
+        
+        // Precargar la plantilla del modal
+        const modalTemplate = await loadModalTemplate();
+        if (!modalTemplate) {
+            console.error("No se pudo cargar la plantilla del modal, utilizando fallback");
+        } else {
+            // Crear un contenedor temporal para parsear el HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = modalTemplate;
+            
+            // Guardar el modal para usarlo después
+            modalContainer = tempDiv.firstElementChild;
+        }
+        
+        // Lista de eventos que registran actividad
+        const activityEvents = [
             'mousedown', 'mousemove', 'keypress', 
             'scroll', 'touchstart', 'click', 'keydown'
         ];
         
-        // Registrar eventos para reiniciar el temporizador
-        resetEvents.forEach(function(event) {
-            document.addEventListener(event, function(e) {
+        // Variable para limitar la frecuencia de actualización en eventos de alta frecuencia
+        let throttlePaused = false;
+        
+        // Registrar eventos para detectar actividad
+        activityEvents.forEach(function(eventName) {
+            document.addEventListener(eventName, function(e) {
                 // No reiniciar si el evento viene del modal
                 if (!warningShown && monitoringActive && 
                     (!e.target.closest || !e.target.closest('#session-warning-modal'))) {
-                    resetInactivityTimer();
+                    
+                    // Usar throttling para eventos de alta frecuencia (mousemove, scroll)
+                    if ((eventName === 'mousemove' || eventName === 'scroll') && throttlePaused) {
+                        return;
+                    }
+                    
+                    if (eventName === 'mousemove' || eventName === 'scroll') {
+                        throttlePaused = true;
+                        setTimeout(() => { throttlePaused = false; }, 1000);
+                    }
+                    
+                    recordActivity();
                 }
             });
         });
         
-        // Ping periódico al servidor (cada 2 minutos)
-        const pingInterval = setInterval(function() {
-            if (!warningShown && monitoringActive) {
-                pingServer().then(() => {
-                    // Verificar si después del ping debemos seguir monitoreando
-                    checkServerForMonitoring().then(shouldMonitor => {
-                        if (!shouldMonitor) {
-                            // Desactivar monitoreo si cambiaron las condiciones
-                            monitoringActive = false;
-                            clearTimeout(inactivityTimer);
-                            clearInterval(pingInterval);
-                            hideWarning();
-                        }
-                    });
-                });
+        // Verificar periódicamente con el servidor si debemos seguir monitoreando (cada 5 minutos)
+        const monitorCheckInterval = setInterval(async function() {
+            if (monitoringActive) {
+                logWithTime("Verificando con el servidor si se debe seguir monitoreando");
+                const shouldMonitor = await checkServerForMonitoring();
+                
+                if (!shouldMonitor) {
+                    logWithTime("Servidor indica que ya no es necesario monitorear");
+                    monitoringActive = false;
+                    clearTimeout(inactivityTimer);
+                    clearTimeout(pingTimer);
+                    clearInterval(monitorCheckInterval);
+                    hideWarning();
+                }
             }
-        }, 120000);
+        }, 300000); // 5 minutos
         
         // Limpiar intervalos al cerrar página
         window.addEventListener('beforeunload', function() {
-            clearInterval(pingInterval);
+            clearInterval(monitorCheckInterval);
             clearInterval(countdownInterval);
             clearTimeout(inactivityTimer);
+            clearTimeout(pingTimer);
         });
         
-        // Iniciar el temporizador
-        resetInactivityTimer();
+        // Iniciar los temporizadores
+        setupTimers();
     }
     
     // Iniciar todo el proceso
+    logWithTime("Iniciando script de monitoreo de sesión");
     initMonitoring();
 });

@@ -1,4 +1,4 @@
-<?php require_once APP_ROOT . "public/inc/head.php" ?>
+<?php require_once APP_ROOT . 'public/inc/head.php' ?>
 <style>
   body {
     overflow: hidden;
@@ -253,6 +253,3 @@
     });
   });
 </script>
-
-<!-- Scripts necesarios -->
-<!-- <script src="<?= APP_URL ?>public/js/auth.js"></script> -->
