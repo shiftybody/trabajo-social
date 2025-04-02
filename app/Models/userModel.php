@@ -351,4 +351,22 @@ class userModel extends mainModel
             return false;
         }
     }
+
+    //obtener todos los usuarios
+    public function obtenerUsuarios()
+    {
+        try {
+            $query = "SELECT u.usuario_id, u.usuario_nombre, u.usuario_apellido_paterno, 
+                     u.usuario_apellido_materno, u.usuario_usuario, u.usuario_email, 
+                     r.rol_descripcion, u.usuario_estado 
+                     FROM usuario u 
+                     JOIN rol r ON u.usuario_rol = r.rol_id";
+
+            $resultado = $this->ejecutarConsulta($query);
+            return $resultado->fetchAll(PDO::FETCH_OBJ);
+        } catch (\Exception $e) {
+            error_log("Error en obtenerUsuarios: " . $e->getMessage());
+            return [];
+        }
+    }
 }

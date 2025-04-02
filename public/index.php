@@ -9,8 +9,8 @@
 // Iniciar sesión
 session_start();
 
-// Cargar configuración y autoload
-require_once __DIR__ . '/../config/init.php';
+require_once '../vendor/autoload.php';
+require_once '../config/env.php'; // Cargar variables de entorno
 
 // Crear instancia de Request
 $request = new App\Core\Request();
@@ -18,6 +18,9 @@ $request = new App\Core\Request();
 // Obtener URI de la solicitud y dividir en segmentos
 $uri = $request->getUri();
 $segments = explode('/', trim($uri, '/'));
+
+$authController = new App\Controllers\AuthController();
+$sessionRestored = $authController->checkRememberCookie();
 
 // Comprobar si estamos en la raíz (URL base)
 if ($uri === '/') {
@@ -53,10 +56,9 @@ try {
   // PASO 2: Enviar la respuesta al cliente (DENTRO DEL TRY)
   $response->send();
 } catch (Exception $e) {
-  // Obtener el código de error, por defecto 500
+
   $code = $e->getCode() ?: 500;
 
-  // Manejar diferentes tipos de errores
   if ($code === 404) {
     // Ruta no encontrada
     if (isset($segments[0]) && $segments[0] === 'api') {

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use PDO;
@@ -22,7 +23,7 @@ class permissionModel extends mainModel
             return [];
         }
     }
-    
+
     /**
      * Obtiene los permisos asignados a un rol
      * 
@@ -42,7 +43,7 @@ class permissionModel extends mainModel
             return [];
         }
     }
-    
+
     /**
      * Obtiene los permisos específicos de un usuario
      * 
@@ -62,7 +63,7 @@ class permissionModel extends mainModel
             return [];
         }
     }
-    
+
     /**
      * Verifica si un usuario tiene un permiso específico
      * 
@@ -83,12 +84,12 @@ class permissionModel extends mainModel
                 ':permiso_slug' => $permisoSlug
             ]);
             $permisoUsuario = $resultado->fetch(PDO::FETCH_OBJ);
-            
+
             // Si existe un permiso específico, retornar según concedido
             if ($permisoUsuario) {
                 return (bool)$permisoUsuario->concedido;
             }
-            
+
             // Si no hay permiso específico, verificar permisos del rol
             $query = "SELECT COUNT(*) FROM rol_permiso rp
                      JOIN permiso p ON rp.permiso_id = p.permiso_id
@@ -99,14 +100,14 @@ class permissionModel extends mainModel
                 ':usuario_id' => $usuarioId,
                 ':permiso_slug' => $permisoSlug
             ]);
-            
+
             return $resultado->fetchColumn() > 0;
         } catch (\Exception $e) {
             error_log("Error en verificarPermiso: " . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Asigna un permiso a un rol
      * 
@@ -124,11 +125,11 @@ class permissionModel extends mainModel
                 ':rol_id' => $rolId,
                 ':permiso_id' => $permisoId
             ]);
-            
+
             if ($resultado->fetchColumn() > 0) {
                 return true; // Ya existe la asignación
             }
-            
+
             // Insertar nueva asignación
             $query = "INSERT INTO rol_permiso (rol_id, permiso_id, fecha_creacion) 
                      VALUES (:rol_id, :permiso_id, NOW())";
@@ -136,14 +137,14 @@ class permissionModel extends mainModel
                 ':rol_id' => $rolId,
                 ':permiso_id' => $permisoId
             ]);
-            
+
             return $resultado->rowCount() > 0;
         } catch (\Exception $e) {
             error_log("Error en asignarPermisoRol: " . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Revoca un permiso de un rol
      * 
@@ -160,14 +161,14 @@ class permissionModel extends mainModel
                 ':rol_id' => $rolId,
                 ':permiso_id' => $permisoId
             ]);
-            
+
             return $resultado->rowCount() > 0;
         } catch (\Exception $e) {
             error_log("Error en revocarPermisoRol: " . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Asigna o deniega un permiso específico a un usuario
      * 
@@ -186,7 +187,7 @@ class permissionModel extends mainModel
                 ':usuario_id' => $usuarioId,
                 ':permiso_id' => $permisoId
             ]);
-            
+
             if ($resultado->fetchColumn() > 0) {
                 // Actualizar asignación existente
                 $query = "UPDATE usuario_permiso SET concedido = :concedido 
@@ -196,20 +197,20 @@ class permissionModel extends mainModel
                 $query = "INSERT INTO usuario_permiso (usuario_id, permiso_id, concedido, fecha_creacion) 
                          VALUES (:usuario_id, :permiso_id, :concedido, NOW())";
             }
-            
+
             $resultado = $this->ejecutarConsulta($query, [
                 ':usuario_id' => $usuarioId,
                 ':permiso_id' => $permisoId,
                 ':concedido' => $concedido ? 1 : 0
             ]);
-            
+
             return $resultado->rowCount() > 0;
         } catch (\Exception $e) {
             error_log("Error en asignarPermisoUsuario: " . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Elimina un permiso específico de un usuario
      * 
@@ -226,14 +227,14 @@ class permissionModel extends mainModel
                 ':usuario_id' => $usuarioId,
                 ':permiso_id' => $permisoId
             ]);
-            
+
             return $resultado->rowCount() > 0;
         } catch (\Exception $e) {
             error_log("Error en eliminarPermisoUsuario: " . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Registra una acción de usuario en el registro de acceso
      * 
@@ -247,23 +248,23 @@ class permissionModel extends mainModel
         try {
             $query = "INSERT INTO registro_acceso (usuario_id, ip_address, accion, detalles, fecha_registro) 
                      VALUES (:usuario_id, :ip_address, :accion, :detalles, NOW())";
-            
-            $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-            
+
+            $ipAddress = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+
             $resultado = $this->ejecutarConsulta($query, [
                 ':usuario_id' => $usuarioId,
                 ':ip_address' => $ipAddress,
                 ':accion' => $accion,
                 ':detalles' => $detalles
             ]);
-            
+
             return $resultado->rowCount() > 0;
         } catch (\Exception $e) {
             error_log("Error en registrarAccion: " . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Obtiene el historial de acciones de un usuario
      * 
@@ -278,19 +279,19 @@ class permissionModel extends mainModel
                      WHERE usuario_id = :usuario_id 
                      ORDER BY fecha_registro DESC 
                      LIMIT :limite";
-            
+
             $resultado = $this->ejecutarConsulta($query, [
                 ':usuario_id' => $usuarioId,
                 ':limite' => $limite
             ]);
-            
+
             return $resultado->fetchAll(PDO::FETCH_OBJ);
         } catch (\Exception $e) {
             error_log("Error en obtenerHistorialUsuario: " . $e->getMessage());
             return [];
         }
     }
-    
+
     /**
      * Obtiene las últimas acciones registradas en el sistema
      * 
@@ -305,7 +306,7 @@ class permissionModel extends mainModel
                      LEFT JOIN usuario u ON ra.usuario_id = u.usuario_id 
                      ORDER BY ra.fecha_registro DESC 
                      LIMIT :limite";
-            
+
             $resultado = $this->ejecutarConsulta($query, [':limite' => $limite]);
             return $resultado->fetchAll(PDO::FETCH_OBJ);
         } catch (\Exception $e) {

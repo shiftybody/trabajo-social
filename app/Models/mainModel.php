@@ -23,7 +23,7 @@ class mainModel
   private $port = MYSQL_PORT;
   private $db = MYSQL_DATABASE;
   private $user = MYSQL_USER;
-  private $pass = MYSQL_PASSWORD;
+  private $pass = MYSQL_ROOT_PASSWORD;
 
   /**
    * Conecta a la base de datos MySQL utilizando PDO.

@@ -41,7 +41,6 @@
     color: #1F2329;
     color: color(display-p3 0.1255 0.1373 0.1569);
     text-align: center;
-    font-family: Geist;
     font-size: 16px;
     font-style: normal;
     font-weight: 600;
@@ -80,7 +79,6 @@
     color: var(--gray-500, var(--gray-500, color(display-p3 0.4196 0.4471 0.502)));
 
     /* leading-tight/text-sm/font-normal */
-    font-family: Inter;
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
@@ -142,7 +140,6 @@
   .sidebar a {
     color: var(--gray-600, #465566);
     color: var(--gray-600, color(display-p3 0.2941 0.3333 0.3882));
-    font-family: Inter;
     font-size: 14px;
     font-style: normal;
     font-weight: 500;
@@ -187,14 +184,14 @@
   <section id="container">
     <div id="left-side">
       <button type="button" id="left-menu">
-        <img src="<?php echo APP_URL; ?>app/views/icons/menu.svg" alt="">
+        <img src="<?php echo APP_URL; ?>public/icons/menu.svg" alt="">
       </button>
       <div id="info-container">
-        <img src="<?php echo APP_URL; ?>app/views/img/logotipo-neurodesarrollo.png" alt="" class="logo">
+        <img src="<?php echo APP_URL; ?>public/images/logotipo-neurodesarrollo.png" alt="" class="logo">
         <?php
         $current_url = $_SERVER['REQUEST_URI'];
         $last_segment = basename($current_url);
-        $page_name = ($last_segment === 'dashboard') ? 'Página principal' : ($_SESSION['nombre'] ? : 'Invitado');
+        $page_name = ($last_segment === 'dashboard') ? 'Página principal' : ($_SESSION['nombre'] ?: 'Invitado');
         ?>
         <span id="page-name"><?php echo $page_name; ?></span>
       </div>
@@ -203,11 +200,11 @@
       <div id="search-container">
         <input type="text" class="search" placeholder="Escribe / para buscar">
         <button type="button" id="uwu">
-          <img src="<?php echo APP_URL; ?>app/views/icons/search-outline.svg" alt="logo">
+          <img src="<?php echo APP_URL; ?>public/icons/search-outline.svg" alt="logo">
         </button>
-        <img src="<?php echo APP_URL; ?>app/views/icons/v-line.svg" alt="">
+        <img src="<?php echo APP_URL; ?>public/icons/v-line.svg" alt="">
         <button type="button" id="uwu">
-          <img src="<?php echo APP_URL; ?>app/views/icons/bell.svg" alt="">
+          <img src="<?php echo APP_URL; ?>public/icons/bell.svg" alt="">
         </button>
       </div>
       <!-- avatar -->
@@ -222,7 +219,7 @@
       } else {
         echo '<style>
         #avatar {
-          background: url(' . APP_URL . 'app/views/fotos/avatar.jpg) lightgray 50% / cover no-repeat;
+          background: url(' . APP_URL . 'public/photos/avatar.jpg) lightgray 50% / cover no-repeat;
         }
       </style>';
       }
@@ -260,20 +257,20 @@
 <!-- left-sidebar -->
 <div id="left-sidebar" class="sidebar left">
   <div class="sidebar-header">
-    <img src="<?php echo APP_URL; ?>app/views/img/logotipo-neurodesarrollo.png" alt="" class="logo">
+    <img src="<?php echo APP_URL; ?>public/images/logotipo-neurodesarrollo.png" alt="" class="logo">
     <a href="javascript:void(0)" class="closebtn" id="left-closeButton">
       <button type="button" id="menu" class="closebtn">
-        <img src="<?php echo APP_URL; ?>app/views/icons/x.svg" alt="">
+        <img src="<?= APP_URL ?>public/icons/x.svg" alt="">
       </button>
     </a>
   </div>
   <div id="sidebar-options">
-    <a href="<?php echo APP_URL; ?>dashboard/">
-      <img src="<?php echo APP_URL; ?>app/views/icons/home.svg" alt="" class="option-icon">
+    <a href="<?= APP_URL ?>dashboard">
+      <img src="<?= APP_URL ?>public/icons/home.svg" alt="" class="option-icon">
       Pagina Principal
     </a>
-    <a href="<?php echo APP_URL; ?>userList/">
-      <img src="<?php echo APP_URL; ?>app/views/icons/users.svg" class="option-icon">
+    <a href="<?= APP_URL ?>userList">
+      <img src="<?= APP_URL ?>public/icons/users.svg" class="option-icon">
       Usuarios
     </a>
   </div>
@@ -288,18 +285,18 @@
     </div>
     <a href="javascript:void(0)" class="closebtn" id="right-closeButton">
       <button type="button" id="menu" class="closebtn">
-        <img src="<?php echo APP_URL; ?>app/views/icons/x.svg" alt="">
+        <img src="<?= APP_URL ?>public/icons/x.svg" alt="">
       </button>
     </a>
   </div>
   <div id="sidebar-options">
-    <a href="<?php echo APP_URL . "userUpdate/" . $_SESSION['id'] . "/"; ?>">
-      <img src="<?php echo APP_URL; ?>app/views/icons/user.svg" alt="" class="option-icon">
+    <a href="<?= APP_URL . "userUpdates" . $_SESSION['id'] . "/"; ?>">
+      <img src="<?= APP_URL; ?>public/icons/user.svg" alt="" class="option-icon">
       Mi Perfil
     </a>
-    <img src="<?php echo APP_URL; ?>app/views/icons/h-line.svg" alt="">
-    <a href="<?php echo APP_URL; ?>logOut/" id="btn_exit">
-      <img src="<?php echo APP_URL; ?>app/views/icons/logout.svg" class="option-icon">
+    <img src="<?= APP_URL; ?>app/views/icons/h-line.svg" alt="">
+    <a href="<?= APP_URL; ?>logout" id="btn_exit">
+      <img src="<?= APP_URL; ?>public/icons/logout.svg" class="option-icon">
       Salir
     </a>
   </div>
