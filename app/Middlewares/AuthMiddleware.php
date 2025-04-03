@@ -40,9 +40,11 @@ class AuthMiddleware
           'message' => 'Sesión expirada por inactividad'
         ), 401);
       }
-      
-      return Response::redirect(APP_URL . 'login?expired=1');
+
+      return Response::redirect(APP_URL . 'logout');
     }
+
+    // TOFIX HERE ESTO NO ESTA VERIFICANDO CORRECTAMENTE
 
     // Verificar si hay sesión activa
     if (!isset($_SESSION[APP_SESSION_NAME]) || empty($_SESSION[APP_SESSION_NAME]['id'])) {
@@ -54,14 +56,10 @@ class AuthMiddleware
             'message' => 'No autenticado'
           ), 401);
         }
-
         return Response::redirect(APP_URL . 'login');
       }
     }
 
-    // Usuario autenticado, actualizar tiempo de último acceso
-    $_SESSION[APP_SESSION_NAME]['last_activity'] = time();
-    
     // Continuar con la petición
     return $next($request);
   }

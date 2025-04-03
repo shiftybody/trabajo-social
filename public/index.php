@@ -3,47 +3,27 @@
 /**
  * Punto de entrada de la aplicación
  * 
- * Este archivo maneja todas las solicitudes entrantes y las dirige al enrutador apropiado
+ * Este archivo maneja todas las solicitudes 
+ * entrantes y las dirige al enrutador apropiado
  */
 
-// Cargar configuraciones
 require_once '../vendor/autoload.php';
-require_once '../config/env.php'; // Cargar variables de entorno
-require_once '../config/session.php'; // Cargar configuración de sesiones
+require_once '../config/env.php';
+require_once '../config/session.php';
 
-// Iniciar sesión
-session_start();
 
-// Crear instancia de Request
+if (session_status() !== PHP_SESSION_ACTIVE) {
+  session_start();
+}
+
 $request = new App\Core\Request();
+$authController = new App\Controllers\AuthController();
 
-// Obtener URI de la solicitud y dividir en segmentos
 $uri = $request->getUri();
 $segments = explode('/', trim($uri, '/'));
 
-$authController = new App\Controllers\AuthController();
-
-// Verificar tiempo de inactividad (antes de cualquier otra operación)
-$sessionExpired = $authController->checkSessionTimeout();
-
-// Solo si la sesión no ha expirado, intentar restaurarla desde la cookie
-if (!$sessionExpired && !isset($_SESSION[APP_SESSION_NAME])) {
-  $sessionRestored = $authController->checkRememberCookie();
-}
-
-// Comprobar si estamos en la raíz (URL base)
-if ($uri === '/') {
-  // Verificar si hay sesión activa
-  if (isset($_SESSION[APP_SESSION_NAME]) && !empty($_SESSION[APP_SESSION_NAME]['id'])) {
-    // Redirigir al dashboard si está autenticado
-    header('Location: ' . APP_URL . 'dashboard');
-    exit();
-  } else {
-    // Redirigir a login si no está autenticado
-    header('Location: ' . APP_URL . 'login');
-    exit();
-  }
-}
+$isSessionExpired = $authController->checkSessionTimeout();
+$rememberCookie = $authController->checkRememberCookie();
 
 try {
   // Si el primer segmento es 'api', usar el router de API
@@ -76,22 +56,13 @@ try {
       http_response_code(404);
       echo json_encode(['status' => 'error', 'message' => 'Ruta no encontrada']);
     } else {
-      // Verificar si hay sesión activa para rutas web
-      if (isset($_SESSION[APP_SESSION_NAME]) && !empty($_SESSION[APP_SESSION_NAME]['id'])) {
-        // Usuario autenticado, mostrar página 404
-        http_response_code(404);
-        echo "<h1>Página no encontrada</h1>";
-        echo "<p>La página que busca no existe.</p>";
-      } else {
-        // Usuario no autenticado, redirigir a login
-        header('Location: ' . APP_URL . 'login');
-      }
+      // Usuario no autenticado, redirigir a login
+      header('Location: ' . APP_URL . 'login');
     }
   } else {
     // Otros errores
     http_response_code($code);
     echo "Error interno del servidor: " . $e->getMessage();
   }
-
   exit();
 }

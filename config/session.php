@@ -6,13 +6,10 @@
 
 // Tiempo de inactividad para cerrar sesión (en segundos)
 // Por defecto: 5 minutos = 300 segundos
-define('SESSION_INACTIVE_TIMEOUT', 120);
+define('SESSION_INACTIVE_TIMEOUT', 300);
+define('SESSION_EXPIRATION_TIME', 600); // una sesion expira a los 5 minutos 
+define('REMEMBER_COOKIE_DURATION', 60); // 30 días
 
-// Duración de la cookie de "recordar sesión" (en segundos)
-// Por defecto: 30 días = 2592000 segundos
-define('REMEMBER_COOKIE_DURATION', 30 * 24 * 60 * 60);
-
-// Configurar los parámetros de sesión PHP
 ini_set('session.gc_maxlifetime', SESSION_INACTIVE_TIMEOUT);
 ini_set('session.cookie_lifetime', 0); // 0 = hasta que se cierre el navegador
 ini_set('session.use_strict_mode', 1); // Seguridad mejorada

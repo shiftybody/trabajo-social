@@ -33,15 +33,14 @@
 
     .message {
       display: flex;
-      width: 400px;
+      width: 25.5rem;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
       gap: 13px;
       flex-shrink: 0;
     }
 
     .message h3 {
-      align-self: stretch;
       margin: 0;
       color: var(--gray-700, #314155);
       color: var(--gray-700, color(display-p3 0.2157 0.2549 0.3176));

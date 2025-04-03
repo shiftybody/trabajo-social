@@ -332,8 +332,8 @@ class userModel extends mainModel
         try {
             $camposActualizar = [
                 [
-                    "campo_nombre" => "usuario_ultimo_acceso",
-                    "campo_marcador" => ":ultimo_acceso",
+                    "campo_nombre" => "usuario_ultima_actividad",
+                    "campo_marcador" => ":ultima_actividad",
                     "campo_valor" => date("Y-m-d H:i:s")
                 ]
             ];

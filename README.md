@@ -11,30 +11,49 @@ trabajo-social
 ├─ .htaccess
 ├─ app
 │  ├─ Controllers
-│  │  └─ AuthController.php
+│  │  ├─ AuthController.php
+│  │  ├─ DashboardController.php
+│  │  ├─ PermissionController.php
+│  │  ├─ SessionController.php
+│  │  └─ UserController.php
+│  ├─ Core
+│  │  ├─ Request.php
+│  │  ├─ Response.php
+│  │  └─ Router.php
 │  ├─ Helpers
 │  ├─ Middlewares
-│  │  └─ SessionMiddleware.php
+│  │  ├─ AuthMiddleware.php
+│  │  ├─ PermissionMiddleware.php
+│  │  └─ RolMiddleware.php
 │  ├─ Models
 │  │  ├─ mainModel.php
+│  │  ├─ permissionModel.php
+│  │  ├─ roleModel.php
 │  │  └─ userModel.php
 │  ├─ Routes
-│  │  ├─ authRoutes.php
-│  │  ├─ index.php
-│  │  └─ userRoutes.php
+│  │  ├─ api.php
+│  │  └─ web.php
 │  ├─ Services
 │  ├─ Utils
 │  │  └─ FormValidator.php
 │  └─ Views
-│     ├─ dashboardView.php
-│     └─ loginView.php
+│     ├─ auth
+│     │  └─ login.php
+│     ├─ dashboard
+│     │  └─ index.php
+│     ├─ errors
+│     │  ├─ 401.php
+│     │  ├─ 403.php
+│     │  └─ 404.php
+│     └─ users
+│        ├─ create.php
+│        └─ index.php
 ├─ compose.yml
 ├─ composer.json
 ├─ composer.lock
 ├─ config
-│  ├─ app.php
-│  ├─ init.php
-│  └─ server.php
+│  ├─ env.php
+│  └─ session.php
 ├─ Dockerfile
 ├─ LICENSE
 ├─ package-lock.json
@@ -66,20 +85,22 @@ trabajo-social
 │  │  └─ logotipo-neurodesarrollo.png
 │  ├─ inc
 │  │  ├─ head.php
+│  │  ├─ modal.php
 │  │  ├─ navbar.php
 │  │  ├─ passgen.php
-│  │  ├─ script.php
-│  │  └─ session_start.php
+│  │  └─ scripts.php
 │  ├─ index.php
 │  ├─ js
-│  │  ├─ auth.js
-│  │  └─ datatables.min.js
+│  │  ├─ datatables.min.js
+│  │  ├─ inactivity.js
+│  │  ├─ main.js
+│  │  └─ navbar.js
 │  └─ photos
+│     └─ avatar.jpg
 ├─ README.md
 ├─ resources
 │  ├─ docs
 │  └─ fonts
 │     └─ Inter.ttf
 └─ vite.config.ts
-
 ```

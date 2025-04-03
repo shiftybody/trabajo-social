@@ -1,3 +1,8 @@
+<title>
+    <?php
+    echo $titulo;
+    ?>
+</title>
 <style>
     .body-container {
         display: flex;
@@ -123,7 +128,7 @@
         width: 5rem;
         height: 5rem;
         padding: 0px 0px 28px 34px;
-        background-image: url("<?= APP_URL ?>/app/views/fotos/avatar.jpg");
+        background-image: url("<?= APP_URL ?>public/photos/avatar.jpg");
         background-position: 50%;
         background-size: cover;
         background-repeat: no-repeat;
@@ -185,7 +190,7 @@
             </div>
 
             <form novalidate action="<?= APP_URL ?>app/ajax/usuarioAjax.php" method="POST" class="form-layout form-ajax"
-                  enctype="multipart/form-data">
+                enctype="multipart/form-data">
 
                 <!-- Input hidden que se utiliza para agregar a la solicitud la intención o acción del formulario  -->
                 <input type="hidden" name="modulo_usuario" value="registrar">
@@ -194,11 +199,11 @@
                 <div class="upload-avatar">
                     <label for="file-label" class="file-label">Escoge una imagen de perfil</label>
                     <div class="file-section">
-              <span class="user-avatar">
-              </span>
+                        <span class="user-avatar">
+                        </span>
                         <div class="file-upload">
                             <input id="file-input" type="file" name="avatar" accept="image/png, image/jpeg"
-                                   class="input input-file"/>
+                                class="input input-file" />
                             <p class="helper" id="file_input_help"> png, gif, jpg tamaño máximo 5MB</p>
                         </div>
                     </div>
@@ -209,12 +214,12 @@
                     <div class="input-field">
                         <label for="nombre" class="file-label">Nombre</label>
                         <input type="text" name="nombre" id="nombre" class="input" placeholder="Nombre"
-                               pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
+                            pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
                     </div>
                     <div class="input-field">
                         <label for="apellidoPaterno" class="file-label">Apellido Paterno</label>
                         <input type="text" name="apellidoPaterno" id="apellidoPaterno" class="input"
-                               placeholder="Apellido Paterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
+                            placeholder="Apellido Paterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
                     </div>
                 </div>
 
@@ -223,12 +228,12 @@
                     <div class="input-field">
                         <label for="apellidoMaterno" class="file-label">Apellido Materno</label>
                         <input type="text" name="apellidoMaterno" id="apellidoMaterno" class="input"
-                               placeholder="Apellido Materno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
+                            placeholder="Apellido Materno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
                     </div>
                     <div class="input-field">
                         <label for="telefono" class="file-label">Teléfono</label>
                         <input type="text" name="telefono" id="telefono" class="input" placeholder="Telefono"
-                               pattern="[0-9]{10}" maxlength="10">
+                            pattern="[0-9]{10}" maxlength="10">
                     </div>
                 </div>
 
@@ -241,7 +246,7 @@
                     <div class="input-field">
                         <label for="correo" class="file-label">Correo</label>
                         <input type="email" name="correo" id="correo" class="input" placeholder="Correo"
-                               maxlength="100">
+                            maxlength="100">
                     </div>
                     <div class="input-field">
                         <label for="rol" class="file-label">Rol</label>
@@ -256,7 +261,7 @@
                     <div class="input-field">
                         <label for="username" class="file-label">Nombre de Usuario</label>
                         <input type="text" name="username" id="username" class="input" placeholder="Nombre de Usuario"
-                               pattern="[a-zA-Z0-9._@!#$%^&*+\-]{3,70}" maxlength="70">
+                            pattern="[a-zA-Z0-9._@!#$%^&*+\-]{3,70}" maxlength="70">
                     </div>
                 </div>
 
@@ -265,14 +270,14 @@
                     <div class="input-field">
                         <label for="password" class="file-label">Contraseña</label>
                         <input type="password" name="password" id="password" class="input" placeholder="Contraseña"
-                               pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20">
+                            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20">
                     </div>
                     <div class="input-field">
                         <label for="password2" class="file-label
             ">Confirmar Contraseña</label>
                         <input type="password" name="password2" id="password2" class="input"
-                               placeholder="Confirmar Contraseña"
-                               pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20">
+                            placeholder="Confirmar Contraseña"
+                            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20">
                     </div>
                 </div>
 
@@ -289,9 +294,9 @@
 <script>
     //hacer fetch de los roles disponibles
     fetch("<?= APP_URL ?>app/api/user.php", {
-        method: "POST",
-        body: new URLSearchParams("action=getRoles")
-    })
+            method: "POST",
+            body: new URLSearchParams("action=getRoles")
+        })
         .then(response => response.json())
         .then(data => {
             console.log(data);

@@ -22,12 +22,6 @@ class AuthController
    */
   public function login()
   {
-    // Si no es una solicitud POST, devolver error 405
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-      http_response_code(405);
-      echo json_encode(['status' => 'error', 'message' => 'Método no permitido']);
-      exit;
-    }
 
     // Determinar el tipo de datos recibidos (JSON o formulario)
     $contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
@@ -70,15 +64,12 @@ class AuthController
       exit;
     }
 
-    // Registrar último acceso
     $this->userModel->actualizarUltimoAcceso($usuario->usuario_id);
 
-    // Iniciar sesión si no está iniciada
     if (session_status() !== PHP_SESSION_ACTIVE) {
       session_start();
     }
 
-    // Almacenar tiempo de último acceso en la sesión
     $tiempoActual = time();
 
     // Crear sesión
@@ -92,8 +83,7 @@ class AuthController
       'foto' => $usuario->usuario_foto,
       'rol' => $usuario->usuario_rol,
       'rol_descripcion' => $usuario->rol_descripcion,
-      'last_activity' => $tiempoActual, // Guardar tiempo de último acceso
-      'remember' => $remember // Guardar si se solicitó recordar sesión
+      'ultima_actividad' => $tiempoActual,
     ];
 
     // Configurar cookie si se solicitó "recordar sesión"
@@ -101,23 +91,23 @@ class AuthController
       $cookieData = [
         'id' => $usuario->usuario_id,
         'username' => $usuario->usuario_usuario,
-        'token' => hash('sha256', $usuario->usuario_password_hash . TOKEN_SECRET_KEY)
+        'token' => $usuario->usuario_password_hash
       ];
+
       $cookieValue = base64_encode(json_encode($cookieData));
+
       setcookie(
-        APP_SESSION_NAME . "_remember",
+        APP_SESSION_NAME,
         $cookieValue,
         time() + REMEMBER_COOKIE_DURATION,
         "/",
-        "",
-        isset($_SERVER['HTTPS']),
-        true
+        "", // Dominio vacío para el mismo dominio
+        isset($_SERVER['HTTPS']), // Secure solo si HTTPS
+        true // HttpOnly para mayor seguridad
       );
     }
 
-    // Enviar respuesta según tipo de solicitud
     if ($isApiRequest) {
-      // Devolver respuesta para API (ahora también basada en sesiones)
       echo json_encode([
         'status' => 'success',
         'usuario' => [
@@ -148,32 +138,35 @@ class AuthController
    */
   public function checkRememberCookie()
   {
-    if (!isset($_SESSION[APP_SESSION_NAME]) && isset($_COOKIE[APP_SESSION_NAME . "_remember"])) {
-      $cookieData = json_decode(base64_decode($_COOKIE[APP_SESSION_NAME . "_remember"]), true);
+
+    // si no existe la variable de sesión, pero existe la cookie de recordar
+    if (!isset($_SESSION[APP_SESSION_NAME]) && isset($_COOKIE[APP_SESSION_NAME])) {
+
+      // almacenar la cookie en una variable para su uso posterior en un array asociativo
+      $cookieData = json_decode(base64_decode($_COOKIE[APP_SESSION_NAME]), true);
 
       if (!$cookieData || !isset($cookieData['id']) || !isset($cookieData['token'])) {
-        setcookie(APP_SESSION_NAME . "_remember", "", time() - 3600, "/");
+        setcookie(APP_SESSION_NAME, "", time() - 1, "/");
         return false;
       }
 
       $usuario = $this->userModel->obtenerUsuarioPorId($cookieData['id']);
 
       if (!$usuario) {
-        setcookie(APP_SESSION_NAME . "_remember", "", time() - 3600, "/");
+        setcookie(APP_SESSION_NAME, "", time() - 1, "/");
         return false;
       }
 
-      $tokenExpected = hash('sha256', $usuario->usuario_password_hash . TOKEN_SECRET_KEY);
-
-      if ($cookieData['token'] !== $tokenExpected) {
-        setcookie(APP_SESSION_NAME . "_remember", "", time() - 3600, "/");
+      // Verificar si el token de la cookie coincide con el hash de la base de datos
+      if ($usuario->usuario_password_hash !== $cookieData['token']) {
+        setcookie(APP_SESSION_NAME, "", time() - 1, "/");
         return false;
       }
 
       // Regenerar sesión
       $this->userModel->actualizarUltimoAcceso($usuario->usuario_id);
 
-      // Almacenar tiempo de último acceso en la sesión
+      // Almacenar tiempo de ultima actividad en la sesión
       $tiempoActual = time();
 
       $_SESSION[APP_SESSION_NAME] = [
@@ -186,25 +179,24 @@ class AuthController
         'foto' => $usuario->usuario_foto,
         'rol' => $usuario->usuario_rol,
         'rol_descripcion' => $usuario->rol_descripcion,
-        'last_activity' => $tiempoActual, // Guardar tiempo de último acceso
-        'remember' => true // Indicar que se restauró desde cookie
+        'ultima_actividad' => $tiempoActual,
       ];
 
-      // Renovar la cookie de recordar
+      // Actualizar la cookie con los nuevos datos de sesión
       $cookieData = [
         'id' => $usuario->usuario_id,
         'username' => $usuario->usuario_usuario,
-        'token' => hash('sha256', $usuario->usuario_password_hash . TOKEN_SECRET_KEY)
+        'token' => $usuario->usuario_password_hash
       ];
       $cookieValue = base64_encode(json_encode($cookieData));
       setcookie(
-        APP_SESSION_NAME . "_remember",
+        APP_SESSION_NAME,
         $cookieValue,
         time() + REMEMBER_COOKIE_DURATION,
         "/",
-        "",
-        isset($_SERVER['HTTPS']),
-        true
+        "", // Dominio vacío para el mismo dominio
+        isset($_SERVER['HTTPS']), // Secure solo si HTTPS
+        true // HttpOnly para mayor seguridad
       );
 
       return true;
@@ -214,27 +206,27 @@ class AuthController
   }
 
 
-  /**
-   * Verifica si la sesión ha expirado por inactividad
-   * 
-   * @return bool Si la sesión ha expirado
-   */
   public function checkSessionTimeout()
   {
-    if (isset($_SESSION[APP_SESSION_NAME]) && isset($_SESSION[APP_SESSION_NAME]['last_activity'])) {
-      // Si el usuario eligió "recordar sesión", no realizar cierre por inactividad
-      if (isset($_SESSION[APP_SESSION_NAME]['remember']) && $_SESSION[APP_SESSION_NAME]['remember']) {
-        $_SESSION[APP_SESSION_NAME]['last_activity'] = time();
-        return false;
-      }
 
-      $tiempoInactivo = time() - $_SESSION[APP_SESSION_NAME]['last_activity'];
+    // Verificar que exista una sesión con registro de ultima actividad ✅
 
-      if ($tiempoInactivo > SESSION_INACTIVE_TIMEOUT) {
-        // CAMBIO: Devolver true en lugar de redireccionar
-        return true;
-      }
+    // si no existe la variable de sesión o no hay tiempo de última actividad
+    if (!isset($_SESSION[APP_SESSION_NAME]) || !isset($_SESSION[APP_SESSION_NAME]['ultima_actividad'])) {
+      // No hay sesión que verificar devuelve falso es decir que no ha expirado
+      return false;
     }
+
+    $currentTime = time();
+
+    if ($currentTime - $_SESSION[APP_SESSION_NAME]['ultima_actividad'] > SESSION_EXPIRATION_TIME) {
+      // true significa que ha expirado la sesión
+      return true;
+    }
+
+    // Actualizar el tiempo de última actividad
+    $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = $currentTime;
+
     return false;
   }
 
@@ -262,10 +254,8 @@ class AuthController
     }
 
     // Eliminar la cookie de recordatorio si existe
-    if (isset($_COOKIE[APP_SESSION_NAME . "_remember"])) {
-      setcookie(APP_SESSION_NAME . "_remember", "", time() - 3600, "/");
-      // Intentar con parámetros adicionales para mayor compatibilidad
-      setcookie(APP_SESSION_NAME . "_remember", "", time() - 3600, "/", "", isset($_SERVER['HTTPS']), true);
+    if (isset($_COOKIE[APP_SESSION_NAME])) {
+      setcookie(APP_SESSION_NAME, "", time() - 1, "/");
     }
 
     // Destruir la sesión por completo

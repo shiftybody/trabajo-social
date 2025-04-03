@@ -30,7 +30,7 @@ class SessionController
     }
 
     // Actualizar el tiempo de último acceso
-    $_SESSION[APP_SESSION_NAME]['last_activity'] = time();
+    $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
 
     // Responder éxito
     return Response::json([
@@ -55,7 +55,7 @@ class SessionController
     if (!isset($_SESSION[APP_SESSION_NAME]) || empty($_SESSION[APP_SESSION_NAME]['id'])) {
       // Verificar si hay cookie de recordatorio
       $remember = false;
-      $cookieName = APP_SESSION_NAME . "_remember";
+      $cookieName = APP_SESSION_NAME;
 
       if (isset($_COOKIE[$cookieName])) {
         // Hay una cookie pero no sesión - probablemente se está restaurando
@@ -86,11 +86,14 @@ class SessionController
     $tiempoTranscurrido = time() - $_SESSION[APP_SESSION_NAME]['last_activity'];
     $tiempoRestante = SESSION_INACTIVE_TIMEOUT - $tiempoTranscurrido;
 
-    // Verificar si el usuario eligió "recordar sesión"
-    $remember = isset($_SESSION[APP_SESSION_NAME]['remember']) && $_SESSION[APP_SESSION_NAME]['remember'];
+    $cookieExists = isset($_COOKIE[APP_SESSION_NAME]);
 
-    // También verificar si existe la cookie de recordatorio
-    $cookieExists = isset($_COOKIE[APP_SESSION_NAME . "_remember"]);
+    // Si remember estaba activo en la sesión, pero la cookie ya no existe (expiró)
+    if (!$cookieExists) {
+      // Cierra la sesión inmediatamente
+      header("Location: " . APP_URL . "logout");
+      exit;
+    }
 
     // Preparar respuesta
     $response = [
@@ -101,8 +104,7 @@ class SessionController
         'username' => $_SESSION[APP_SESSION_NAME]['username'],
         'last_activity' => $_SESSION[APP_SESSION_NAME]['last_activity'],
         'time_elapsed' => $tiempoTranscurrido,
-        'time_remaining' => $tiempoRestante,
-        'remember' => $remember || $cookieExists // Si cualquiera es verdadero, hay recordatorio
+        'time_remaining' => $tiempoRestante
       ]
     ];
 

@@ -40,7 +40,7 @@ class DashboardController
     // Obtener datos para el dashboard
     $estadisticas = [
       'totalUsuarios' => $this->userModel->seleccionarDatos('contar', 'usuario', 'usuario_id'),
-      'ultimoAcceso' => $usuario->usuario_ultimo_acceso ?: 'Primer acceso'
+      'ultimoAcceso' => $usuario->usuario_ultima_actividad ?: 'Primer acceso'
     ];
 
     // Cargar la vista del dashboard

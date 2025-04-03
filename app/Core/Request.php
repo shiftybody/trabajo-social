@@ -104,7 +104,7 @@ class Request
    * Verifica si es una petición AJAX
    * @return bool True si es una petición AJAX
    */
-  public function ajax()
+  public function isAjax()
   {
     return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
       strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
@@ -216,32 +216,6 @@ class Request
   }
 
   /**
-   * Obtiene la IP del cliente
-   * @return string Dirección IP
-   */
-  public function getIp()
-  {
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-      $ip = $_SERVER['HTTP_CLIENT_IP'];
-    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-      $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    } else {
-      $ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-    }
-
-    return $ip;
-  }
-
-  /**
-   * Obtiene el user agent
-   * @return string User agent
-   */
-  public function getUserAgent()
-  {
-    return isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-  }
-
-  /**
    * Obtiene el valor de una cabecera HTTP
    * @param string $name Nombre de la cabecera
    * @param mixed $default Valor por defecto si no existe
@@ -253,43 +227,5 @@ class Request
     $headerName = 'HTTP_' . $name;
 
     return isset($_SERVER[$headerName]) ? $_SERVER[$headerName] : $default;
-  }
-
-  /**
-   * Verifica si la solicitud se realizó con HTTPS
-   * @return bool True si es HTTPS
-   */
-  public function isSecure()
-  {
-    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
-      return true;
-    }
-
-    if (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * Obtiene la URL base (sin query string)
-   * @return string URL base
-   */
-  public function getBaseUrl()
-  {
-    $protocol = $this->isSecure() ? 'https://' : 'http://';
-    $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-    return $protocol . $host;
-  }
-
-  /**
-   * Obtiene la URL completa
-   * @return string URL completa
-   */
-  public function getFullUrl()
-  {
-    $query = isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
-    return $this->getBaseUrl() . $this->getUri() . $query;
   }
 }

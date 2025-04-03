@@ -46,4 +46,17 @@ class UserController
 
     return Response::html($contenido);
   }
+
+  public function create(Request $request)
+  {
+    // Cargar la vista de creación de usuario
+    ob_start();
+
+    // Variables disponibles en la vista
+    $titulo = 'Crear Usuario';
+    include APP_ROOT . 'app/Views/users/create.php';
+    $contenido = ob_get_clean();
+
+    return Response::html($contenido);
+  }
 }

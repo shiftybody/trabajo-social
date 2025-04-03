@@ -4,7 +4,7 @@
  */
 document.addEventListener('DOMContentLoaded', function() {
     // Tiempo de inactividad configurado en el servidor (en segundos)
-    const SESSION_INACTIVE_TIMEOUT = 120; // 5 minutos
+    const SESSION_INACTIVE_TIMEOUT = 300 ; // 5 minutos
     
     // Mostrar advertencia cuando queden 60 segundos (1 minuto)
     const WARNING_BEFORE_TIMEOUT = 60;
@@ -130,9 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentTime = Date.now();
         const elapsedTime = (currentTime - lastActivityTime) / 1000; // Convertir a segundos
         const remainingTime = SESSION_INACTIVE_TIMEOUT - elapsedTime;
-        
-        logWithTime(`Configurando temporizadores. Tiempo transcurrido: ${elapsedTime.toFixed(1)}s, Tiempo restante: ${remainingTime.toFixed(1)}s`);
-        
+         
         // Si el tiempo restante es negativo, mostrar la advertencia inmediatamente
         if (remainingTime <= WARNING_BEFORE_TIMEOUT) {
             logWithTime(`Tiempo restante (${remainingTime.toFixed(1)}s) es menor que el umbral de advertencia (${WARNING_BEFORE_TIMEOUT}s)`);

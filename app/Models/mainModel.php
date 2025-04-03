@@ -255,7 +255,7 @@ class mainModel
   protected function hashearContraseña($password)
   {
     $salt = bin2hex(openssl_random_pseudo_bytes(22));
-    $salt = sprintf('$2y$12$%s$', $salt);
+    $salt = sprintf(TOKEN_SECRET_KEY, $salt);
     return crypt($password, $salt);
   }
 

@@ -23,7 +23,6 @@ $router->get('/login', function () {
       return Response::redirect(APP_URL . 'dashboard');
     }
 
-    // Mostrar vista de login con manejo de errores
     ob_start();
     $loginViewPath = APP_ROOT . 'app/Views/auth/login.php';
 
@@ -47,9 +46,6 @@ $router->get('/login', function () {
 
 $router->post('/login', 'AuthController@login');
 $router->get('/logout', 'AuthController@logout');
-
-// Endpoint para ping de sesión (para mantener sesión activa)
-$router->post('/api/session/ping', 'SessionController@ping');
 
 // Rutas de error
 $router->get('/error/404', function () {
