@@ -121,7 +121,6 @@
       font-style: normal;
       font-weight: 500;
       line-height: 150%;
-      /* 21px */
     }
   </style>
   <div id="session-warning-modal">
@@ -129,7 +128,7 @@
       <div class="message">
         <h3>Su sesión está a punto de expirar</h3>
 
-        <p>Debido a inactividad, su sesión se cerrará en&nbsp;<span id="session-countdown">60</span>&nbsp;segundos.</p>
+        <p>Debido a inactividad, su sesión se cerrará en&nbsp;<span id="session-countdown">30</span>&nbsp;segundos.</p>
 
         <div class="buttons">
           <button id="keep-session-button">

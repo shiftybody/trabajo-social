@@ -38,7 +38,7 @@ y 3 botoncitos para cambiar el estado o el rol -->
     color: var(--gray-600, #465566);
     color: var(--gray-600, color(display-p3 0.2941 0.3333 0.3882));
     /* text-sm/font-semibold */
-    font-family: Inter;
+    font-family: 'Inter';
     font-size: 14px;
     font-style: normal;
     font-weight: 600;
@@ -68,7 +68,7 @@ y 3 botoncitos para cambiar el estado o el rol -->
     border-radius: var(--rounded-lg, 8px);
     color: var(--gray-600, #465566);
     color: var(--gray-600, color(display-p3 0.2941 0.3333 0.3882));
-    font-family: Inter;
+    font-family: 'Inter';
     font-size: 16px;
     font-style: normal;
     font-weight: 500;
@@ -159,7 +159,7 @@ y 3 botoncitos para cambiar el estado o el rol -->
     color: var(--white, color(display-p3 1 1 1));
 
     /* text-sm/font-bold */
-    font-family: Inter;
+    font-family: 'Inter';
     font-size: 14px;
     font-style: normal;
     font-weight: 700;
@@ -196,7 +196,7 @@ y 3 botoncitos para cambiar el estado o el rol -->
 
     color: var(--gray-500, var(--gray-500, #677283));
     color: var(--gray-500, var(--gray-500, color(display-p3 0.4196 0.4471 0.502)));
-    font-family: Inter;
+    font-family: 'Inter';
     font-size: 12px;
     font-style: normal;
     font-weight: 600;
@@ -220,7 +220,7 @@ y 3 botoncitos para cambiar el estado o el rol -->
     color: var(--gray-900, var(--gray-900, color(display-p3 0.0667 0.098 0.1569)));
 
     /* text-sm/font-normal */
-    font-family: Inter;
+    font-family: 'Inter';
     font-size: 14px;
     font-style: normal;
     font-weight: 400;

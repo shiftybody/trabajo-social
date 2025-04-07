@@ -269,7 +269,7 @@
       <img src="<?= APP_URL ?>public/icons/home.svg" alt="" class="option-icon">
       Pagina Principal
     </a>
-    <a href="<?= APP_URL ?>userList">
+    <a href="<?= APP_URL ?>users">
       <img src="<?= APP_URL ?>public/icons/users.svg" class="option-icon">
       Usuarios
     </a>

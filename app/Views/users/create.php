@@ -1,8 +1,7 @@
-<title>
-    <?php
-    echo $titulo;
-    ?>
-</title>
+<?php
+require_once APP_ROOT . 'public/inc/head.php';
+require_once APP_ROOT . 'public/inc/navbar.php';
+?>
 <style>
     .body-container {
         display: flex;
@@ -58,7 +57,7 @@
         color: var(--gray-900, var(--gray-900, #0C192A));
         color: var(--gray-900, var(--gray-900, color(display-p3 0.0667 0.098 0.1569)));
         /* leading-none/text-xl/font-bold */
-        font-family: Inter;
+        font-family: 'Inter';
         font-size: 20px;
         font-style: normal;
         font-weight: 700;
@@ -71,7 +70,7 @@
         align-self: stretch;
         color: var(--gray-500, var(--gray-500, #677283));
         color: var(--gray-500, var(--gray-500, color(display-p3 0.4196 0.4471 0.502)));
-        font-family: Inter;
+        font-family: 'Inter';
         font-size: 12px;
         font-style: normal;
         font-weight: 400;
@@ -110,7 +109,7 @@
         align-self: stretch;
         color: var(--gray-900, var(--gray-900, #0C192A));
         color: var(--gray-900, var(--gray-900, color(display-p3 0.0667 0.098 0.1569)));
-        font-family: Inter;
+        font-family: 'Inter';
         font-size: 14px;
         font-style: normal;
         font-weight: 600;
@@ -148,7 +147,7 @@
         width: 100%;
         color: var(--gray-900, var(--gray-900, #0C192A));
         color: var(--gray-900, var(--gray-900, color(display-p3 0.0667 0.098 0.1569)));
-        font-family: Inter;
+        font-family: 'Inter';
         font-size: 14px;
         font-style: normal;
         font-weight: 400;
@@ -179,6 +178,7 @@
         gap: var(--4, .5rem);
     }
 </style>
+
 <div class="body-container">
     <div class="container">
         <div class="general-information">

@@ -3,7 +3,7 @@
 /**
  * Middleware de Autenticación
  * 
- * Verifica si el usuario está autenticado y gestiona el tiempo de inactividad
+ * Verifica si el usuario está autenticado en las paginas protegidas con autenticación
  */
 
 namespace App\Middlewares;
@@ -23,42 +23,37 @@ class AuthMiddleware
    */
   public function handle(Request $request, callable $next)
   {
-    // Iniciar sesión si no está iniciada
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-      session_start();
+
+    // Verificar si la sesión ha expirado
+    $authController = new AuthController();
+    // Verificar si existe una sesión
+    if (!isset($_SESSION[APP_SESSION_NAME])) {
+      // No hay sesión - redirigir a login
+      if ($request->expectsJson()) {
+        return Response::json(array(
+          'status' => 'error',
+          'message' => 'No autenticado'
+        ), 401);
+      }
+      return Response::redirect(APP_URL . 'login');
     }
 
-    // Verificar si la sesión ha expirado por inactividad
-    $authController = new AuthController();
-    $sessionExpired = $authController->checkSessionTimeout();
+    // Verificar si la sesión ha expirado
+    $isSessionExpired = $authController->checkSessionTimeout();
 
-    // Si la sesión expiró, redirigir a login con mensaje
-    if ($sessionExpired) {
+    if ($isSessionExpired) {
+      // La sesión ha expirado - redirigir a logout con parámetro de expiración
       if ($request->expectsJson()) {
         return Response::json(array(
           'status' => 'error',
           'message' => 'Sesión expirada por inactividad'
         ), 401);
       }
-
-      return Response::redirect(APP_URL . 'logout');
+      return Response::redirect(APP_URL . 'logout?expired=1');
     }
 
-    // TOFIX HERE ESTO NO ESTA VERIFICANDO CORRECTAMENTE
-
-    // Verificar si hay sesión activa
-    if (!isset($_SESSION[APP_SESSION_NAME]) || empty($_SESSION[APP_SESSION_NAME]['id'])) {
-      // Verificar si hay cookie de recordar sesión
-      if (!$authController->checkRememberCookie()) {
-        if ($request->expectsJson()) {
-          return Response::json(array(
-            'status' => 'error',
-            'message' => 'No autenticado'
-          ), 401);
-        }
-        return Response::redirect(APP_URL . 'login');
-      }
-    }
+    // Actualizar última actividad
+    $authController->updateLastActivity();
 
     // Continuar con la petición
     return $next($request);
