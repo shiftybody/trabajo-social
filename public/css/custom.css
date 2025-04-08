@@ -125,6 +125,17 @@ button[type="button"] {
   border-radius: var(--rounded-lg) !important;
   border: 1px solid var(--red-500) !important;
   background: var(--red-50) !important;
+  color: #ee5b62;
+
+}
+
+
+input[type="password"].error-input {
+  color: #ee5b62; /* Color específico para inputs con error */
+}
+
+.error-input::placeholder{
+  color: #ee5b62
 }
 
 .error-input:hover {

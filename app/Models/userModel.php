@@ -334,7 +334,7 @@ class userModel extends mainModel
                 [
                     "campo_nombre" => "usuario_ultimo_acceso",
                     "campo_marcador" => ":ultima_actividad",
-                    "campo_valor" => date("Y-m-d H:i:s")
+                    "campo_valor" => date("Y-m-d H:i:s", time())
                 ]
             ];
 

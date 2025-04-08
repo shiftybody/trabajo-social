@@ -37,6 +37,10 @@
     height: auto;
   }
 
+  header #container #left-side .logo:hover {
+    cursor: pointer;
+  }
+
   header #container #left-side #page-name {
     color: #1F2329;
     color: color(display-p3 0.1255 0.1373 0.1569);
@@ -178,6 +182,10 @@
     height: 4rem;
     padding: 1rem 1rem 1rem 1.75rem;
   }
+
+  .sidebar .sidebar-header .logo:hover {
+    cursor: pointer;
+  }
 </style>
 <!-- header navbar -->
 <header id="app-header">
@@ -188,12 +196,7 @@
       </button>
       <div id="info-container">
         <img src="<?php echo APP_URL; ?>public/images/logotipo-neurodesarrollo.png" alt="" class="logo">
-        <?php
-        $current_url = $_SERVER['REQUEST_URI'];
-        $last_segment = basename($current_url);
-        $page_name = ($last_segment === 'dashboard') ? 'Página principal' : ($_SESSION['nombre'] ?: 'Invitado');
-        ?>
-        <span id="page-name"><?php echo $page_name; ?></span>
+        <span id="page-name"><?php echo $titulo; ?></span>
       </div>
     </div>
     <div id="right-side">

@@ -33,24 +33,9 @@ class DashboardController
    */
   public function index(Request $request)
   {
-    // Obtener información del usuario actual desde la sesión
-    $usuarioId = $_SESSION[APP_SESSION_NAME]['id'];
-    $usuario = $this->userModel->obtenerUsuarioPorId($usuarioId);
 
-    // Obtener datos para el dashboard
-    $estadisticas = [
-      'totalUsuarios' => $this->userModel->seleccionarDatos('contar', 'usuario', 'usuario_id'),
-      'ultimoAcceso' => $usuario->usuario_ultimo_acceso ?: 'Primer acceso'
-    ];
-
-    // Cargar la vista del dashboard
     ob_start();
-
-    // Variables disponibles en la vista
-    $titulo = 'Dashboard - Panel de Control';
-    $nombreUsuario = $usuario->usuario_nombre . ' ' . $usuario->usuario_apellido_paterno;
-    $rolUsuario = $usuario->rol_descripcion;
-
+    $titulo = 'Panel Principal';
     include APP_ROOT . 'app/Views/dashboard/index.php';
     $contenido = ob_get_clean();
 

@@ -6,7 +6,7 @@ plataforma para la gestión de donaciones 💸
 
 ### Estructura del Proyecto
 
-```plaintext
+```
 trabajo-social
 ├─ .htaccess
 ├─ app
@@ -14,7 +14,6 @@ trabajo-social
 │  │  ├─ AuthController.php
 │  │  ├─ DashboardController.php
 │  │  ├─ PermissionController.php
-│  │  ├─ SessionController.php
 │  │  └─ UserController.php
 │  ├─ Core
 │  │  ├─ Request.php
@@ -80,6 +79,7 @@ trabajo-social
 │  │  ├─ v-line.svg
 │  │  └─ x.svg
 │  ├─ images
+│  │  ├─ favicon.ico
 │  │  ├─ imagotipo-neurodesarrollo.png
 │  │  ├─ logo-unam.svg
 │  │  └─ logotipo-neurodesarrollo.png
@@ -94,7 +94,8 @@ trabajo-social
 │  │  ├─ datatables.min.js
 │  │  ├─ inactivity.js
 │  │  ├─ main.js
-│  │  └─ navbar.js
+│  │  ├─ navbar.js
+│  │  └─ validations.js
 │  └─ photos
 │     └─ avatar.jpg
 ├─ README.md
@@ -103,4 +104,5 @@ trabajo-social
 │  └─ fonts
 │     └─ Inter.ttf
 └─ vite.config.ts
+
 ```

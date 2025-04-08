@@ -68,3 +68,13 @@ document.addEventListener("click", function(event) {
     contentBlur.style.display = "none";
   }
 });
+
+
+// cuando se presione un tag img con clase logo
+document.querySelectorAll("img.logo").forEach((logo) => {
+  logo.addEventListener("click", function() {
+    // redirigir a la página principal
+    window.location.href = "dashboard";
+  });
+}
+);

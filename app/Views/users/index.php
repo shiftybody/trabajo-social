@@ -38,7 +38,6 @@ y 3 botoncitos para cambiar el estado o el rol -->
     color: var(--gray-600, #465566);
     color: var(--gray-600, color(display-p3 0.2941 0.3333 0.3882));
     /* text-sm/font-semibold */
-    font-family: 'Inter';
     font-size: 14px;
     font-style: normal;
     font-weight: 600;
@@ -68,7 +67,6 @@ y 3 botoncitos para cambiar el estado o el rol -->
     border-radius: var(--rounded-lg, 8px);
     color: var(--gray-600, #465566);
     color: var(--gray-600, color(display-p3 0.2941 0.3333 0.3882));
-    font-family: 'Inter';
     font-size: 16px;
     font-style: normal;
     font-weight: 500;
@@ -143,6 +141,7 @@ y 3 botoncitos para cambiar el estado o el rol -->
   }
 
   .action_create_new {
+    height: fit-content;
     width: 8rem;
     display: flex;
     padding: var(--25, 10px) var(--5, 20px);
@@ -159,7 +158,6 @@ y 3 botoncitos para cambiar el estado o el rol -->
     color: var(--white, color(display-p3 1 1 1));
 
     /* text-sm/font-bold */
-    font-family: 'Inter';
     font-size: 14px;
     font-style: normal;
     font-weight: 700;
@@ -196,7 +194,6 @@ y 3 botoncitos para cambiar el estado o el rol -->
 
     color: var(--gray-500, var(--gray-500, #677283));
     color: var(--gray-500, var(--gray-500, color(display-p3 0.4196 0.4471 0.502)));
-    font-family: 'Inter';
     font-size: 12px;
     font-style: normal;
     font-weight: 600;
@@ -220,7 +217,6 @@ y 3 botoncitos para cambiar el estado o el rol -->
     color: var(--gray-900, var(--gray-900, color(display-p3 0.0667 0.098 0.1569)));
 
     /* text-sm/font-normal */
-    font-family: 'Inter';
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
@@ -288,7 +284,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 ?>
 <div class="container">
   <div class=" navigation">
-    <a href="../dashboard" class="volver">Volver a la pagina principal</a>
+    <a href="../dashboard" class="volver">Regresar</a>
   </div>
 
   <!-- TODO: cambiar el nombre de la pagina mostrada en el header -->
@@ -328,7 +324,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             </div>
           </form>
 
-          <button class="action_create_new" onclick="goTo('userNew')">Nuevo</button>
+          <button class="action_create_new" onclick="goTo('users/create')">Nuevo</button>
         </div>
         <div class="table">
           <table id="myTable">
@@ -352,6 +348,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </div>
   </div>
 </div>
+<?php
+require_once APP_ROOT . 'public/inc/scripts.php';
+?>
 <script>
   let table = new DataTable('#myTable', {
     lengthChange: false,

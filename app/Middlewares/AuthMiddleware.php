@@ -10,7 +10,7 @@ namespace App\Middlewares;
 
 use App\Core\Request;
 use App\Core\Response;
-use App\Controllers\AuthController;
+use App\Controllers\LoginController;
 
 class AuthMiddleware
 {
@@ -25,7 +25,7 @@ class AuthMiddleware
   {
 
     // Verificar si la sesión ha expirado
-    $authController = new AuthController();
+    $authController = new LoginController();
     // Verificar si existe una sesión
     if (!isset($_SESSION[APP_SESSION_NAME])) {
       // No hay sesión - redirigir a login
@@ -35,7 +35,7 @@ class AuthMiddleware
           'message' => 'No autenticado'
         ), 401);
       }
-      return Response::redirect(APP_URL . 'login');
+      return Response::redirect(APP_URL . 'logout');
     }
 
     // Verificar si la sesión ha expirado
@@ -49,7 +49,7 @@ class AuthMiddleware
           'message' => 'Sesión expirada por inactividad'
         ), 401);
       }
-      return Response::redirect(APP_URL . 'logout?expired=1');
+      return Response::redirect(APP_URL . 'logout');
     }
 
     // Actualizar última actividad

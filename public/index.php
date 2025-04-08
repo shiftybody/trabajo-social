@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Punto de entrada de la aplicación
  * 
@@ -15,7 +16,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 $request = new App\Core\Request();
-$authController = new App\Controllers\AuthController();
+$authController = new App\Controllers\LoginController();
 
 
 $isExpired = $authController->checkSessionTimeout();

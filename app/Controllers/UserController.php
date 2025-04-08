@@ -33,14 +33,12 @@ class UserController
    */
   public function index(Request $request)
   {
-    // Obtener la lista de usuarios desde el modelo
-    $usuarios = $this->userModel->obtenerUsuarios();
 
     // Cargar la vista de la lista de usuarios
     ob_start();
 
     // Variables disponibles en la vista
-    $titulo = 'Lista de Usuarios';
+    $titulo = 'Usuarios';
     include APP_ROOT . 'app/Views/users/index.php';
     $contenido = ob_get_clean();
 

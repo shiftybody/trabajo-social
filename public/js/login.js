@@ -1,0 +1,141 @@
+// seleccionar aquel con id login-form
+// clg del formulario
+
+const formulario = document.getElementById("login-form");
+
+console.log(formulario);
+
+// escuchar el evento submit validar los campos del formulario y enviar los datos
+
+formulario.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  let isValid = true;
+  const data = new FormData(this);
+  const action = this.getAttribute("action");
+  const method = this.getAttribute("method") || "POST";
+
+  // Ocultar mensaje de error anterior
+  const errorDiv = document.getElementById("error-msg");
+
+  // imprimir los datos del formulario como un objeto
+  console.log(Object.fromEntries(data));
+
+  // Limpiar los mensajes de error previos
+  document
+    .querySelectorAll(".error-message")
+    .forEach((errorMsg) => errorMsg.remove());
+  document
+    .querySelectorAll(".error-input")
+    .forEach((errorInput) => errorInput.classList.remove("error-input"));
+
+  // Para cada campo del formulario
+  data.forEach((value, key) => {
+    const input = formulario.querySelector(`[name="${key}"]`);
+
+    // Validar campos obligatorios
+
+    // Si el campo es un string vacío y no es el campo avatar
+    if (typeof value === "string" && value.trim() === "") {
+      let label = input.parentElement.querySelector("label").textContent;
+      showError(input, `El campo ${label.toLowerCase()} no puede estar vacío`);
+      isValid = false;
+      return; // Salir de la validación de este campo
+    }
+  });
+
+  // si no es valido, no hacer la peticion
+  if (!isValid) return;
+
+  // TODO: Eliminar el error-msg cuando se escriba en el input
+
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn ? submitBtn.innerText : '';
+
+  if (submitBtn) {
+    submitBtn.innerText = 'Procesando...';
+    submitBtn.disabled = true;
+  }
+ 
+  // obtener el elemento con id error-msg
+  const errorMsg = document.getElementById("error-msg");
+
+  try {
+    const response = await fetch(action, {
+      method: method,
+      body: data,
+      credentials: "same-origin",
+    });
+
+    const result = await response.json();
+
+    console.log(result);
+
+    if (result.status === 'success') {
+      if (result.redirect) {
+        window.location.href = data.redirect;
+      }
+    }
+
+    else if (result.status === 'error') {
+ 
+      if (errorDiv) {
+        // Crear un párrafo con el mensaje o usar uno existente
+        let errorP = errorDiv.querySelector('p');
+        if (!errorP) {
+          errorP = document.createElement('p');
+          errorDiv.appendChild(errorP);
+          // asgniar la clase error-message
+          errorP.classList.add('error-message');
+        
+        }
+        // Establecer el mensaje
+        errorP.textContent = result.message || 'Ha ocurrido un error';
+        errorDiv.hidden = false;
+
+        submitBtn.innerText = 'Enviar';
+    submitBtn.disabled = false;
+      }
+
+      // mostrar todos los inputs y agregarle la clase error-input
+      const inputs = formulario.querySelectorAll("input, select, textarea");
+      console.log(inputs);
+
+      inputs.forEach((input) => {
+        input.classList.add("error-input");
+      });
+    }
+
+  } catch (error) {
+    console.error("Error:", error);
+    errorMsg.textContent = "Error al enviar el formulario. Inténtalo de nuevo.";
+    errorMsg.classList.add("error-message");
+  }
+  
+});
+
+//Eliminar estilo de error al escribir en el input
+formulario.querySelectorAll("input").forEach((input) => {
+  input.addEventListener("input", function (e) {
+    e.preventDefault();
+    if (this.classList.contains("error-input")) {
+      this.classList.remove("error-input");
+      const error = this.parentElement.querySelector(".error-message");
+      if (error) error.remove();
+    }
+    // esconder el mensaje de error
+    const errorDiv = document.getElementById("error-msg");
+    if (errorDiv) {
+      errorDiv.hidden = true;
+    }
+  });
+});
+
+// Mostrar mensaje de error
+function showError(input, message) {
+  const error = document.createElement("p");
+  error.classList.add("error-message");
+  error.textContent = message;
+  input.parentElement.appendChild(error);
+  input.classList.add("error-input");
+}

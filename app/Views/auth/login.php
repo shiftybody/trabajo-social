@@ -77,7 +77,7 @@
     filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.25));
   }
 
-  main #section-container #login-form #inputs {
+  main #section-container #login-form #login-inputs {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -86,27 +86,36 @@
     align-self: stretch;
   }
 
-  main #section-container #login-form #inputs #username-input,
+  main #section-container #login-form #login-inputs #username-input,
   #password-input {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--2, 8px);
     align-self: stretch;
   }
 
-  div#check {
+  div#remember-check {
     display: flex;
     flex-direction: row-reverse;
     justify-content: flex-end;
     gap: 0.5rem;
   }
 
-  #login-error {
-    color: red;
-    margin-bottom: 10px;
-    display: none;
+
+  /* cuando se autorellene cualquier input no cambiar el background */
+  input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px #f9fafb inset !important;
+    -webkit-text-fill-color: #000 !important;
+  }
+
+
+  input.error-input:-webkit-autofill,
+  input.error-input:-webkit-autofill:hover,
+  input.error-input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px var(--red-50) inset !important;
+    border: 1px solid var(--red-500) !important;
   }
 
   @media (max-height: 800px) {
@@ -142,114 +151,39 @@
   <img src="<?= APP_URL ?>public/images/imagotipo-neurodesarrollo.png" alt="imagotipo neurodesarrollo" id="imagotipo">
   <img src="<?= APP_URL ?>public/images/logo-unam.svg" alt="escudo UNAM" id="escudo">
 </header>
+
 <main>
   <section id="section-container">
     <img src="<?= APP_URL ?>public/images/logotipo-neurodesarrollo.png" alt="logitipo neurodesarrollo" id="logotipo">
 
-    <form novalidate action="<?= APP_URL ?>login" method="POST" id="login-form" class="form-ajax">
+    <form novalidate action="<?= APP_URL ?>login" method="POST" id="login-form" class="ajax-form">
       <div id="login-info">
         <h1>Iniciar Sesión</h1>
         <p>Ingresa tu usuario & contraseña para acceder a tu cuenta</p>
       </div>
-
-      <div id="login-error"></div>
-
-      <?php if (isset($_GET['expired']) && $_GET['expired'] == 1): ?>
-        <div class="alert alert-warning">
-          Su sesión ha expirado por inactividad. Por favor, inicie sesión nuevamente.
-        </div>
-      <?php endif; ?>
-
-      <div id="inputs">
+      <div id="login-inputs">
         <div id="username-input">
           <label for="username">Correo o Nombre de Usuario</label>
-          <input type="text" name="username" id="username" placeholder="usuario@dominio.com" pattern="^((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}|[a-zA-Z0-9._@!#$%^&*+\-]{3,70})$">
+          <input type="text" name="username" id="username" placeholder="usuario@dominio.com">
         </div>
+        <!-- el patron puede ser cualquiera -->
         <div id="password-input">
           <label for="password">Contraseña</label>
-          <input type="password" name="password" id="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" placeholder="•••••••••••">
+          <input type="password" name="password" id="password" placeholder="•••••••••••">
         </div>
       </div>
 
-      <div id="check">
-        <label for="recordar">Recordar Sesión</label>
-        <input type="checkbox" name="recordar" id="recordar">
+      <div id="remember-check">
+        <label for="remember">Recordar Sesión</label>
+        <input type="checkbox" name="remember" id="remember">
       </div>
 
       <button type="submit">Iniciar Sesión</button>
+
+      <!-- Mensaje de error general oculto -->
+      <div id="error-msg" hidden></div>
     </form>
   </section>
 </main>
 
-<!-- Scripts necesarios -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Capturar envío de formularios con clase form-ajax
-    const forms = document.querySelectorAll('.form-ajax');
-
-    forms.forEach(form => {
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-        const action = this.getAttribute('action');
-        const method = this.getAttribute('method') || 'POST';
-
-        // Mostrar indicador de carga si existe
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn ? submitBtn.innerText : '';
-
-        if (submitBtn) {
-          submitBtn.innerText = 'Procesando...';
-          submitBtn.disabled = true;
-        }
-
-        // Ocultar mensaje de error anterior
-        const errorElement = document.getElementById('login-error');
-        if (errorElement) {
-          errorElement.style.display = 'none';
-          errorElement.textContent = '';
-        }
-
-        try {
-          const response = await fetch(action, {
-            method: method,
-            body: formData,
-            credentials: 'same-origin' // Importante para cookies de sesión
-          });
-
-          const data = await response.json();
-
-          if (data.status === 'success') {
-            // Si hay redirección, navegar a esa URL
-            if (data.redirect) {
-              window.location.href = data.redirect;
-            }
-          } else {
-            // Mostrar mensaje de error si existe
-            if (errorElement) {
-              errorElement.textContent = data.message || 'Ha ocurrido un error';
-              errorElement.style.display = 'block';
-            } else {
-              alert(data.message || 'Ha ocurrido un error');
-            }
-          }
-        } catch (error) {
-          console.error('Error en envío de formulario:', error);
-          if (errorElement) {
-            errorElement.textContent = 'Error de conexión. Intente nuevamente.';
-            errorElement.style.display = 'block';
-          } else {
-            alert('Error de conexión. Intente nuevamente.');
-          }
-        } finally {
-          // Restaurar el botón
-          if (submitBtn) {
-            submitBtn.innerText = originalText;
-            submitBtn.disabled = false;
-          }
-        }
-      });
-    });
-  });
-</script>
+<script src="<?= APP_URL ?>public/js/login.js"></script>

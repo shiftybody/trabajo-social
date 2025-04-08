@@ -13,12 +13,12 @@ use App\Middlewares\RoleMiddleware;
 $router = new Router();
 
 // Rutas API públicas
-$router->post('/auth/login', 'AuthController@login');
+$router->post('/auth/login', 'LoginController@login');
 $router->post('/session/ping', 'SessionController@ping');
 
 // Rutas API protegidas (requieren autenticación)
 $router->group(array('middleware' => 'Auth'), function ($router) {
-  $router->post('/auth/logout', 'AuthController@logout');
+  $router->post('/auth/logout', 'LoginController@logout');
 
   // Verificar estado de sesión
   $router->get('/session/status', 'SessionController@status');

@@ -7,92 +7,39 @@ use App\Models\userModel;
 /**
  * Controlador para autenticación API con sesiones
  */
-class AuthController
+class LoginController extends userModel
 {
-  private $userModel;
-
-
-  public function __construct()
-  {
-    $this->userModel = new userModel();
-  }
 
   /**
-   * Endpoint para autenticar un usuario usando sesiones
-   * Acepta tanto JSON como datos de formulario
+   * Inicia sesión del usuario
    */
   public function login()
   {
 
-    // Determinar el tipo de datos recibidos (JSON o formulario)
-    $contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
-    $isApiRequest = strpos($contentType, 'application/json') !== false;
+    $usuario = $_POST['username'];
+    $password = $_POST['password'];
+    $recordar =  isset($_POST['recordar']) ? true : false;
 
-    // Procesar según el tipo de contenido
-    if ($isApiRequest) {
-      // Obtener datos JSON del cuerpo de la petición
-      $json = file_get_contents('php://input');
-      $data = json_decode($json);
-
-      if (!$data || !isset($data->username) || !isset($data->password)) {
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Datos de inicio de sesión incompletos']);
-        exit;
-      }
-
-      $username = $data->username;
-      $password = $data->password;
-      $remember = isset($data->remember) ? $data->remember : false;
-    } else {
-      // Obtener datos de formulario
-      if (!isset($_POST['username']) || !isset($_POST['password'])) {
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Datos de inicio de sesión incompletos']);
-        exit;
-      }
-
-      $username = $_POST['username'];
-      $password = $_POST['password'];
-      $remember = isset($_POST['recordar']) ? true : false;
-    }
-
-    // Autenticar usuario usando el modelo
-    $usuario = $this->userModel->autenticarUsuario($username, $password);
+    $usuario = $this->autenticarUsuario($usuario, $password);
 
     if (!$usuario) {
       http_response_code(401);
-      echo json_encode(['status' => 'error', 'message' => 'Credenciales inválidas']);
+      echo json_encode(['status' => 'error', 'message' => 'El usuario o contraseña son incorrectos']);
       exit;
     }
 
-
-    $this->userModel->actualizarUltimoAcceso($usuario->usuario_id);
-
+    $this->actualizarUltimoAcceso($usuario->usuario_id);
     $this->createSession($usuario);
 
-    if ($remember) {
+    if ($recordar) {
       $this->createCookie($usuario);
     }
 
-    if ($isApiRequest) {
-      echo json_encode([
-        'status' => 'success',
-        'usuario' => [
-          'id' => $usuario->usuario_id,
-          'username' => $usuario->usuario_usuario,
-          'nombre' => $usuario->usuario_nombre,
-          'apellido_paterno' => $usuario->usuario_apellido_paterno,
-          'rol' => $usuario->usuario_rol,
-          'rol_descripcion' => $usuario->rol_descripcion
-        ],
-        'redirect' => APP_URL . 'dashboard'
-      ]);
-    } else {
-      echo json_encode([
-        'status' => 'success',
-        'redirect' => APP_URL . 'dashboard'
-      ]);
-    }
+    echo json_encode([
+      'status' => 'success',
+      'redirect' => APP_URL . 'dashboard'
+    ]);
+
     exit;
   }
 
@@ -198,7 +145,7 @@ class AuthController
       return false;
     }
 
-    $usuario = $this->userModel->obtenerUsuarioPorId($cookieData['id']);
+    $usuario = $this->obtenerUsuarioPorId($cookieData['id']);
 
     if (!$usuario) {
       return false;
@@ -228,7 +175,7 @@ class AuthController
 
       if ($this->validRememberCookie()) {
 
-        $usuario = $this->userModel->obtenerUsuarioPorId($cookieData['id']);
+        $usuario = $this->obtenerUsuarioPorId($cookieData['id']);
         // no se actualiza el último acceso porque no es un inicio de sesión 
         // $this->userModel->actualizarUltimoAcceso($usuario->usuario_id);
         $this->createSession($usuario);
@@ -294,7 +241,7 @@ class AuthController
       exit;
     } else {
       // Redireccionar a login con mensaje si es necesario
-      $redirect = APP_URL . "login";
+      $redirect = APP_URL . "login?expired=0";
       if ($expired) {
         $redirect .= '?expired=1';
       }

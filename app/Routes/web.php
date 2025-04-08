@@ -44,8 +44,8 @@ $router->get('/login', function () {
   }
 });
 
-$router->post('/login', 'AuthController@login');
-$router->get('/logout', 'AuthController@logout');
+$router->post('/login', 'LoginController@login');
+$router->get('/logout', 'LoginController@logout');
 
 // Rutas de error
 $router->get('/error/404', function () {
