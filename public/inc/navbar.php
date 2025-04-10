@@ -202,9 +202,9 @@
     <div id="right-side">
       <div id="search-container">
         <input type="text" class="search" placeholder="Escribe / para buscar">
-        <button type="button" id="uwu">
+        <!-- <button type="button" id="uwu">
           <img src="<?php echo APP_URL; ?>public/icons/search-outline.svg" alt="logo">
-        </button>
+        </button> -->
         <img src="<?php echo APP_URL; ?>public/icons/v-line.svg" alt="">
         <button type="button" id="uwu">
           <img src="<?php echo APP_URL; ?>public/icons/bell.svg" alt="">

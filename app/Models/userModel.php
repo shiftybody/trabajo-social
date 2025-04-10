@@ -21,54 +21,54 @@ class userModel extends mainModel
      * @param int $rol ID del rol
      * @return bool True si el registro fue exitoso, false en caso contrario
      */
-    public function registrarUsuario($nombre, $apellidoPaterno, $apellidoMaterno, $telefono, $correo, $username, $password, $foto, $rol)
+    public function registrarUsuario($data)
     {
         try {
             $datos = [
                 [
                     "campo_nombre" => "usuario_nombre",
                     "campo_marcador" => ":nombre",
-                    "campo_valor" => $nombre
+                    "campo_valor" => $data['nombre']
                 ],
                 [
                     "campo_nombre" => "usuario_apellido_paterno",
                     "campo_marcador" => ":apellidoPaterno",
-                    "campo_valor" => $apellidoPaterno
+                    "campo_valor" => $data['apellidoPaterno']
                 ],
                 [
                     "campo_nombre" => "usuario_apellido_materno",
                     "campo_marcador" => ":apellidoMaterno",
-                    "campo_valor" => $apellidoMaterno
+                    "campo_valor" => $data['apellidoMaterno']
                 ],
                 [
                     "campo_nombre" => "usuario_telefono",
                     "campo_marcador" => ":telefono",
-                    "campo_valor" => $telefono
+                    "campo_valor" => $data['telefono']
                 ],
                 [
                     "campo_nombre" => "usuario_email",
                     "campo_marcador" => ":correo",
-                    "campo_valor" => $correo
+                    "campo_valor" => $data['correo']
                 ],
                 [
                     "campo_nombre" => "usuario_usuario",
                     "campo_marcador" => ":username",
-                    "campo_valor" => $username
+                    "campo_valor" => $data['username']
                 ],
                 [
                     "campo_nombre" => "usuario_password_hash",
                     "campo_marcador" => ":clave",
-                    "campo_valor" => $password
+                    "campo_valor" => $data['password']
                 ],
                 [
                     "campo_nombre" => "usuario_foto",
                     "campo_marcador" => ":foto",
-                    "campo_valor" => $foto
+                    "campo_valor" => $data['foto']
                 ],
                 [
                     "campo_nombre" => "usuario_rol",
                     "campo_marcador" => ":rol",
-                    "campo_valor" => $rol
+                    "campo_valor" => $data['rol']
                 ],
                 [
                     "campo_nombre" => "usuario_estado",
@@ -78,12 +78,12 @@ class userModel extends mainModel
                 [
                     "campo_nombre" => "usuario_fecha_creacion",
                     "campo_marcador" => ":fechaCreacion",
-                    "campo_valor" => date("Y-m-d H:i:s")
+                    "campo_valor" => date("Y-m-d H:i:s", time())
                 ],
                 [
                     "campo_nombre" => "usuario_ultima_modificacion",
                     "campo_marcador" => ":ultimaModificacion",
-                    "campo_valor" => date("Y-m-d H:i:s")
+                    "campo_valor" => date("Y-m-d H:i:s", time())
                 ]
             ];
 

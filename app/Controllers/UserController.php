@@ -49,12 +49,22 @@ class UserController
   {
     // Cargar la vista de creación de usuario
     ob_start();
-
     // Variables disponibles en la vista
     $titulo = 'Crear Usuario';
     include APP_ROOT . 'app/Views/users/create.php';
     $contenido = ob_get_clean();
 
     return Response::html($contenido);
+  }
+
+  public function store(Request $request)
+  {
+
+    $data = $request->post();
+    $this->userModel->registrarUsuario($data);
+
+    // Redirigir a la lista de usuarios después de crear el usuario
+    header('Location: /users');
+    exit;
   }
 }

@@ -16,6 +16,7 @@ echo date("Y-m-d H:i:s");
 
 $cookieValues = base64_decode($_COOKIE[APP_SESSION_NAME]);
 $cookieData = json_decode($cookieValues, true);
+
 echo "<pre>";
 print_r($cookieData);
 echo "</pre>";

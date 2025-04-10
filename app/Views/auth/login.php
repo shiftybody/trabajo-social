@@ -103,19 +103,8 @@
     gap: 0.5rem;
   }
 
-
-  /* cuando se autorellene cualquier input no cambiar el background */
-  input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 30px #f9fafb inset !important;
-    -webkit-text-fill-color: #000 !important;
-  }
-
-
-  input.error-input:-webkit-autofill,
-  input.error-input:-webkit-autofill:hover,
-  input.error-input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 30px var(--red-50) inset !important;
-    border: 1px solid var(--red-500) !important;
+  input[type="checkbox"] {
+    accent-color: #2f2f31;
   }
 
   @media (max-height: 800px) {

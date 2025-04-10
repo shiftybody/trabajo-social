@@ -1,8 +1,8 @@
-const formularios = document.querySelectorAll(".form-api");
+const formularios = document.querySelectorAll(".form-ajax");
 
 const PATTERN_MSG = {
   '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}': 'El campo solo puede contener letras y espacios',
-  '[0-9]{10}': 'El campo solo puede contener diez digitos',
+  '[0-9]{10}': 'El campo debe contener diez digitos',
   '(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}': 'Como mínimo una minúscula, mayuscula, número y caracter especial',
   '^((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}|[a-zA-Z0-9._@!#$%^&*+\\-]{3,70})$': 'El correo o nombre de usuario no es válido',
 }
@@ -20,7 +20,6 @@ document.querySelectorAll('.input-file').forEach(input => {
     reader.onload = function () {
       document.querySelector('.user-avatar').style.backgroundImage = `url(${reader.result})`;
     }
-
     reader.readAsDataURL(file);
   });
 
@@ -69,6 +68,16 @@ formularios.forEach(formulario => {
         return; // Salir de la validación de este campo
       }
 
+      // si el input es de tipo email y no es un string vacio
+      if (input.type === "email" && value.trim() !== "") {
+        // Validar formato de email
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(value)) {
+          showError(input, "El correo electrónico no es válido");
+          isValid = false;
+        }
+      }
+
       // Validar patrón si el campo tiene el atributo pattern
       if (input.hasAttribute('pattern')) {
         const pattern = input.getAttribute('pattern');
@@ -95,7 +104,6 @@ formularios.forEach(formulario => {
 
     let method = this.getAttribute("method");
     let action = this.getAttribute("action");
-    let encabezados = new Headers();
     console.log(data);
 
     let config = {
@@ -104,33 +112,10 @@ formularios.forEach(formulario => {
       mode: 'cors',
       cache: 'no-cache',
       body: data
-    };
+    }; 
 
-    // si este formulario con id login-form
-    if (this.id === 'login-form'){
-      fetch(action, config)
-        .then(respuesta => {return respuesta.json() })
-      return;
-    }
+    // realizar la solicitud ajax
 
-    Swal.fire({
-      title: '¿Estás seguro?',
-      text: "Quieres realizar la acción solicitada",
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Si',
-      cancelButtonText: 'No'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        fetch(action, config)
-          .then(respuesta => {return respuesta.json() })
-          .then(respuesta => {
-            return alertas_ajax(respuesta);
-        });
-      }
-    });
   });
 });
 
@@ -143,70 +128,27 @@ function showError(input, message) {
   input.classList.add('error-input');
 }
 
-// manejar las alertas de respuesta del servidor
-function alertas_ajax(alerta) {
-  if (alerta.tipo == "simple") {
 
-    Swal.fire({
-      icon: alerta.icono,
-      title: alerta.titulo,
-      text: alerta.texto,
-      confirmButtonText: 'Aceptar'
-    });
+// si button type["reset"] se hace click regresar el .user-avatar a la imagen por defecto
 
-  } else if (alerta.tipo == "recargar") {
-
-    Swal.fire({
-      icon: alerta.icono,
-      title: alerta.titulo,
-      text: alerta.texto,
-      confirmButtonText: 'Aceptar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        location.reload();
-      }
-    });
-
-  } else if (alerta.tipo == "limpiar") {
-
-    Swal.fire({
-      icon: alerta.icono,
-      title: alerta.titulo,
-      text: alerta.texto,
-      confirmButtonText: 'Aceptar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        document.querySelector(".form-api").reset();
-        // cambiar la imagen de la vista previa 
-        document.querySelector('.user-avatar').style.backgroundImage = `url(../fotos/avatar.jpg)`;
-      }
-    });
-
-  } else if (alerta.tipo == "redireccionar") {
-    window.location.href = alerta.url;
-  }
+document.querySelector('button[type="reset"]').addEventListener('click', function () {
+  document.querySelector('.user-avatar').style.backgroundImage = `url(../public/photos/avatar.jpg)`;
 }
+);
+// borrar el formulario y la imagen de avatar por defecto
+// document.querySelector(".form-api").reset();
+// document.querySelector('.user-avatar').style.backgroundImage = `url(../fotos/avatar.jpg)`;
 
-// Cerrar sesión
-if(document.getElementById("btn_exit") != null) {
-  let btn_exit = document.getElementById("btn_exit");
-
-  btn_exit.addEventListener('click', function (e) {
-    e.preventDefault();
-    Swal.fire({
-      title: '¿Quieres salir del sistema?',
-      text: "La sesión actual se cerrara",
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Si',
-      cancelButtonText: 'No'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        let url = this.getAttribute('href');
-        window.location.href = url;
+//Eliminar estilo de error al escribir en el input
+formularios.forEach(formulario => {
+  formulario.addEventListener("input", function (e) {
+    const input = e.target;
+    if (input.classList.contains('error-input')) {
+      input.classList.remove('error-input');
+      const errorMsg = input.parentElement.querySelector('.error-message');
+      if (errorMsg) {
+        errorMsg.remove();
       }
-    })
-  })
-}
+    }
+  });
+});

@@ -3,8 +3,6 @@
 
 const formulario = document.getElementById("login-form");
 
-console.log(formulario);
-
 // escuchar el evento submit validar los campos del formulario y enviar los datos
 
 formulario.addEventListener("submit", async function (e) {
@@ -17,10 +15,7 @@ formulario.addEventListener("submit", async function (e) {
 
   // Ocultar mensaje de error anterior
   const errorDiv = document.getElementById("error-msg");
-
-  // imprimir los datos del formulario como un objeto
-  console.log(Object.fromEntries(data));
-
+  
   // Limpiar los mensajes de error previos
   document
     .querySelectorAll(".error-message")
@@ -47,8 +42,6 @@ formulario.addEventListener("submit", async function (e) {
   // si no es valido, no hacer la peticion
   if (!isValid) return;
 
-  // TODO: Eliminar el error-msg cuando se escriba en el input
-
   const submitBtn = this.querySelector('button[type="submit"]');
   const originalText = submitBtn ? submitBtn.innerText : '';
 
@@ -69,7 +62,6 @@ formulario.addEventListener("submit", async function (e) {
 
     const result = await response.json();
 
-    console.log(result);
 
     if (result.status === 'success') {
       if (result.redirect) {
@@ -98,8 +90,7 @@ formulario.addEventListener("submit", async function (e) {
       }
 
       // mostrar todos los inputs y agregarle la clase error-input
-      const inputs = formulario.querySelectorAll("input, select, textarea");
-      console.log(inputs);
+      const inputs = formulario.querySelectorAll("input");
 
       inputs.forEach((input) => {
         input.classList.add("error-input");
@@ -107,7 +98,6 @@ formulario.addEventListener("submit", async function (e) {
     }
 
   } catch (error) {
-    console.error("Error:", error);
     errorMsg.textContent = "Error al enviar el formulario. Inténtalo de nuevo.";
     errorMsg.classList.add("error-message");
   }
@@ -122,12 +112,12 @@ formulario.querySelectorAll("input").forEach((input) => {
       this.classList.remove("error-input");
       const error = this.parentElement.querySelector(".error-message");
       if (error) error.remove();
-    }
-    // esconder el mensaje de error
-    const errorDiv = document.getElementById("error-msg");
-    if (errorDiv) {
+    } 
+    // esconder el mensaje de error si existe
+    if(document. getElementById("error-msg") ){
+      const errorDiv = document.getElementById("error-msg");
       errorDiv.hidden = true;
-    }
+    } 
   });
 });
 

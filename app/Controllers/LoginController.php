@@ -18,7 +18,7 @@ class LoginController extends userModel
 
     $usuario = $_POST['username'];
     $password = $_POST['password'];
-    $recordar =  isset($_POST['recordar']) ? true : false;
+    $remember =  isset($_POST['remember']) ? true : false;
 
     $usuario = $this->autenticarUsuario($usuario, $password);
 
@@ -31,7 +31,7 @@ class LoginController extends userModel
     $this->actualizarUltimoAcceso($usuario->usuario_id);
     $this->createSession($usuario);
 
-    if ($recordar) {
+    if ($remember) {
       $this->createCookie($usuario);
     }
 

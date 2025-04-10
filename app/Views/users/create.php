@@ -14,10 +14,10 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     .container {
         display: flex;
         width: 672px;
-        padding: var(--4, 16px) var(--0, 0px);
+        /* padding: var(--4, 16px) var(--0, 0px); */
         flex-direction: column;
         align-items: flex-start;
-        gap: var(--8, 32px);
+        gap: var(--8, 24px);
     }
 
     input[type="file"] {
@@ -170,13 +170,41 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
     .buttons-options {
         display: flex;
-        flex-direction: row;
+        flex-direction: row-reverse;
         gap: var(--4, .5rem);
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .error-message {
+        text-align: left;
     }
 </style>
 
 <div class="body-container">
     <div class="container">
+        <div class="navigation-header">
+            <!-- boton para regresar -->
+            <style>
+                .return-btn:hover {
+                    /* TODO: mejorar el comportamiento on hover */
+                    color: rgb(42, 42, 42);
+                }
+
+                .return-btn-symbol {
+                    text-decoration: none;
+                }
+
+                .return-btn-content {
+                    text-decoration: underline;
+                }
+            </style>
+            <a href="<?= APP_URL ?>users" class="return-btn">
+                <span class="return-btn-symbol">
+                    < </span>
+                        <span class="return-btn-content">Regresar</span>
+            </a>
+        </div>
         <div class="general-information">
             <div class="form-information">
                 <h1 class="form-title">
@@ -185,15 +213,11 @@ require_once APP_ROOT . 'public/inc/navbar.php';
                 <p class="helper">Ingrese los datos del usuario que desea crear</p>
             </div>
 
-            <form novalidate action="<?= APP_URL ?>app/ajax/usuarioAjax.php" method="POST" class="form-layout form-ajax"
-                enctype="multipart/form-data">
-
-                <!-- Input hidden que se utiliza para agregar a la solicitud la intención o acción del formulario  -->
-                <input type="hidden" name="modulo_usuario" value="registrar">
+            <form novalidate action="<?= APP_URL ?>api/users.php" method="POST" class="form-layout form-ajax" enctype="multipart/form-data">
 
                 <!-- Avatar -->
                 <div class="upload-avatar">
-                    <label for="file-label" class="file-label">Escoge una imagen de perfil</label>
+                    <label for="file-input" class="file-label">Escoge una imagen de perfil</label>
                     <div class="file-section">
                         <span class="user-avatar">
                         </span>
@@ -233,9 +257,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
                     </div>
                 </div>
 
-                <?php
-                // realizar consulta de los roles disponibles a la base de datos desde la tabla
-                ?>
 
                 <!-- correo y rol -->
                 <div class="row-layout">
@@ -273,13 +294,20 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             ">Confirmar Contraseña</label>
                         <input type="password" name="password2" id="password2" class="input"
                             placeholder="Confirmar Contraseña"
-                            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20">
+                            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20" autocomplete="new-password">
                     </div>
                 </div>
 
                 <!-- clear and submit -->
                 <div class="buttons-options">
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <style>
+                        .plus-icon {
+                            font-weight: 300;
+                            font-size: 1.2em;
+                            font-family: 'Helvetica Neue', Arial, sans-serif;
+                        }
+                    </style>
+                    <button type="submit" class="btn btn-primary"><span class="plus-icon">+</span>Crear Usuario</button>
                     <button type="reset" class="btn btn-secondary">Limpiar</button>
                 </div>
 
@@ -287,11 +315,12 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         </div>
     </div>
 </div>
+<script src="<?= APP_URL ?>public/js/ajax.js"></script>
 <script>
     //hacer fetch de los roles disponibles
     fetch("<?= APP_URL ?>app/api/user.php", {
             method: "POST",
-            body: new URLSearchParams("action=getRoles")
+            
         })
         .then(response => response.json())
         .then(data => {
