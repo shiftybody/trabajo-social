@@ -126,10 +126,11 @@ class Request
   }
 
   /**
-   * Obtiene un valor de la petición POST
-   * @param string|null $key Nombre del parámetro (null para todos)
-   * @param mixed $default Valor por defecto si no existe
-   * @return mixed Valor del parámetro o todos los parámetros
+   * Obtiene datos enviados por POST
+   * 
+   * @param string|null $key Clave específica a obtener (opcional)
+   * @param mixed $default Valor por defecto si la clave no existe
+   * @return mixed Valor del POST o array completo
    */
   public function post($key = null, $default = null)
   {
@@ -137,7 +138,22 @@ class Request
       return $_POST;
     }
 
-    return isset($_POST[$key]) ? $_POST[$key] : $default;
+    return isset($postData[$key]) ? $postData[$key] : $default;
+  }
+
+  /**
+   * Obtiene archivos enviados en la solicitud
+   * 
+   * @param string|null $key Clave específica a obtener (opcional)
+   * @return mixed Archivo específico o array completo de archivos
+   */
+  public function files($key = null)
+  {
+    if ($key === null) {
+      return $_FILES;
+    }
+
+    return isset($_FILES[$key]) ? $_FILES[$key] : null;
   }
 
   /**

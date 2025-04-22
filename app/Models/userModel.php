@@ -24,7 +24,7 @@ class userModel extends mainModel
     public function registrarUsuario($data)
     {
         try {
-            $datos = [
+            $datosUsuario = [
                 [
                     "campo_nombre" => "usuario_nombre",
                     "campo_marcador" => ":nombre",
@@ -87,7 +87,8 @@ class userModel extends mainModel
                 ]
             ];
 
-            $resultado = $this->insertarDatos("usuario", $datos);
+            $resultado = $this->insertarDatos("usuario", $datosUsuario);
+
             return $resultado->rowCount() == 1;
         } catch (\Exception $e) {
             error_log("Error en registrarUsuario: " . $e->getMessage());

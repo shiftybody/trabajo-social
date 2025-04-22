@@ -113,22 +113,17 @@ class LoginController extends userModel
     // Si existe una sesión activa
     if (isset($_SESSION[APP_SESSION_NAME]) && isset($_SESSION[APP_SESSION_NAME]['ultima_actividad'])) {
       $currentTime = time();
-
-      // Verificar si la sesión ha expirado 
-      // si la diferencia entre el tiempo actual y la última actividad es mayor al tiempo de expiración
       if ($currentTime - $_SESSION[APP_SESSION_NAME]['ultima_actividad'] > SESSION_EXPIRATION_TIMOUT) {
-        // Si no debemos ignorar la cookie y hay una cookie válida, la sesión no expira
         if (!$ignoreRememberCookie && $this->validRememberCookie()) {
           return false;
         }
-        return true; // La sesión ha expirado
+        return true;
       }
     } else {
-      // Si no hay sesión, también consideramos que ha "expirado"
       return true;
     }
 
-    return false; // La sesión no ha expirado
+    return false;
   }
 
   /**
@@ -151,7 +146,6 @@ class LoginController extends userModel
       return false;
     }
 
-    // Verificar si el token de la cookie coincide con el hash de la base de datos
     if ($usuario->usuario_password_hash !== $cookieData['token']) {
       return false;
     }
@@ -176,8 +170,6 @@ class LoginController extends userModel
       if ($this->validRememberCookie()) {
 
         $usuario = $this->obtenerUsuarioPorId($cookieData['id']);
-        // no se actualiza el último acceso porque no es un inicio de sesión 
-        // $this->userModel->actualizarUltimoAcceso($usuario->usuario_id);
         $this->createSession($usuario);
 
         return true;
@@ -186,7 +178,7 @@ class LoginController extends userModel
         return false;
       }
     } else {
-      return false; // No hay cookie o ya hay sesión activa
+      return false;
     }
   }
 
@@ -213,25 +205,19 @@ class LoginController extends userModel
   public function logout()
   {
 
-    // Detectar si es una expiración por inactividad o un cierre voluntario
-    // Utilizamos $_GET en lugar de parámetros de función
     $expired = isset($_GET['expired']) && $_GET['expired'] == '1';
 
-    // Limpiar datos de sesión
     if (isset($_SESSION[APP_SESSION_NAME])) {
       unset($_SESSION[APP_SESSION_NAME]);
-      $_SESSION = array(); // Limpiar completamente el array de sesión
+      $_SESSION = array();
     }
 
-    // Eliminar la cookie de recordatorio si existe
     if (isset($_COOKIE[APP_SESSION_NAME])) {
       setcookie(APP_SESSION_NAME, "", time() - 1, "/");
     }
 
-    // Destruir la sesión por completo
     session_destroy();
 
-    // Verificar si es una solicitud API
     $contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
     $isApiRequest = strpos($contentType, 'application/json') !== false;
 
@@ -240,7 +226,6 @@ class LoginController extends userModel
       echo json_encode(['status' => 'success', 'message' => $message]);
       exit;
     } else {
-      // Redireccionar a login con mensaje si es necesario
       $redirect = APP_URL . "login?expired=0";
       if ($expired) {
         $redirect .= '?expired=1';

@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\Response;
 use App\Models\userModel;
+use Exception;
 
 /**
  * Controlador para la gestión de usuarios
@@ -57,14 +58,173 @@ class UserController
     return Response::html($contenido);
   }
 
+  /**
+   * 1. El UserController recibe la solicitud POST
+     2. Extrae y valida los datos que no esten vacios,
+        que sean del tipo correcto, sanitización,
+        tamaños maximos y mínimos.
+     3. Llama al UserModel pasándole los datos ya procesados
+     4. El UserModel aplica la lógica de negocio y realiza operaciones en la base de datos
+     5. El UserController recibe la respuesta del modelo y devuelve la vista correspondiente
+   */
+
+  // TODO: verificar porque sale el error mime_content_type(): Empty filename or path in /var/www/html/app/Controllers/UserController.php on line 190
+  // TODO: resolver que se tiene que borrar en caso de que la subida al servidor no sea exitosa. 
   public function store(Request $request)
   {
+    # --- Obtener datos de la solicitud --- #
+    $avatar = $request->FILES('avatar');
+    $datos = $request->POST();
 
-    $data = $request->post();
-    $this->userModel->registrarUsuario($data);
+    # --- Validar datos de inputs --- #
+    $validar = [
+      'nombre' => [
+        'requerido' => true,
+        'min' => 2,
+        'max' => 50,
+        'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',
+        'sanitizar' => true
+      ],
+      'apellidoPaterno' => [
+        'requerido' => true,
+        'min' => 2,
+        'max' => 50,
+        'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',
+        'sanitizar' => true
+      ],
+      'apellidoMaterno' => [
+        'min' => 2,
+        'max' => 50,
+        'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',
+        'sanitizar' => true
+      ],
+      'telefono' => [
+        'formato' => '^\d{10}$',
+        'sanitizar' => true
+      ],
+      'correo' => [
+        'requerido' => true,
+        'formato' => 'email',
+        'sanitizar' => true
+      ],
+      'username' => [
+        'requerido' => true,
+        'min' => 5,
+        'max' => 20,
+        'formato' => 'alfanumerico',
+        'sanitizar' => true
+      ],
+      'rol' => [
+        'requerido' => true,
+        'formato' => 'entero'
+      ],
+      'password' => [
+        'requerido' => true,
+        'formato' => '(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}'
+      ],
+      'password2' => [
+        'requerido' => true
+      ]
+    ];
 
-    // Redirigir a la lista de usuarios después de crear el usuario
-    header('Location: /users');
-    exit;
+    $resultado = $this->userModel->validarDatos($datos, $validar);
+
+    // Verificar errores de validación
+    if (!empty($resultado['errores'])) {
+      return Response::json([
+        'status' => 'error',
+        'errores' => $resultado['errores']
+      ]);
+    }
+
+    // Verificar coincidencia de contraseñas
+    if ($resultado['datos']['password'] !== $datos['password2']) {
+      return Response::json([
+        'status' => 'error',
+        'errores' => ['password2' => 'Las contraseñas no coinciden']
+      ]);
+    }
+
+    // si las contraseñas coinciden borrar el campo password2
+    unset($resultado['datos']['password2']);
+
+    // Verificar si el correo ya existe
+    if ($this->userModel->localizarCorreo($resultado['datos']['correo'])) {
+      return Response::json([
+        'status' => 'error',
+        'errores' => ['correo' => 'Este correo ya está registrado']
+      ]);
+    }
+
+    // verificar que el username no exista
+    if ($this->userModel->localizarUsername($resultado['datos']['username'])) {
+      return Response::json([
+        'status' => 'error',
+        'errores' => ['username' => 'Este nombre de usuario ya está registrado']
+      ]);
+    }
+
+    # --- Validar del avatar --- #
+    if (!empty($avatar['tmp_name'])) {
+      $validacionArchivo = $this->userModel->validarArchivo($avatar, [
+        'tipos' => ['image/jpeg', 'image/png', 'image/gif'],
+        'tamano_max' => 5 * 1024 * 1024, // 5MB
+        'extensiones' => ['jpg', 'jpeg', 'png', 'gif']
+      ]);
+
+      if (!$validacionArchivo['valido']) {
+        return Response::json([
+          'status' => 'error',
+          'errores' => ['avatar' => $validacionArchivo['mensaje']]
+        ]);
+      }
+
+      $directorio = APP_ROOT . 'storage/photos/';
+
+      // crear el directorio si no existe
+      if (!file_exists($directorio)) {
+        mkdir($directorio, 0777, true);
+      }
+
+      // darle normbre a la foto
+      $foto = str_ireplace(" ", "_", $datos['nombre']);
+      $foto = $foto . "_" . rand(0, 100);
+
+      // colocar extension
+      switch (mime_content_type($_FILES['avatar']['tmp_name'])) {
+        case "image/jpg":
+          $foto = $foto . ".jpg";
+          break;
+        case "image/jpeg":
+          $foto = $foto . ".jpg";
+          break;
+        case "image/png":
+          $foto = $foto . ".png";
+          break;
+        case "image/gif":
+          $foto = $foto . ".gif";
+          break;
+      }
+
+      // mover la imagen al directorio
+      move_uploaded_file($_FILES['avatar']['tmp_name'], $directorio . "/" . $foto);
+
+      // agregar al array de datos
+      $resultado['datos']['avatar'] = $foto;
+    } else {
+      $foto = "";
+      $resultado['datos']['avatar'] = $foto;
+    }
+
+    // enviar un Response::json para pruebas de que se recibieron los datos
+
+    return Response::json([
+      'status' => 'success',
+      'datos' => $resultado['datos']
+    ]);
+
+    # --- Enviar los datos al modelo para que realice el registro --- #
+
+
   }
 }

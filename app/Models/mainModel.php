@@ -198,51 +198,6 @@ class mainModel
   }
 
   /**
-   * Sanitiza una cadena para prevenir ataques XSS y otros tipos de inyección.
-   * 
-   * @param string $cadena La cadena a sanitizar.
-   * @return string La cadena sanitizada.
-   * 
-   * @description
-   * Esta función elimina o neutraliza código potencialmente malicioso
-   * de una cadena de entrada, como scripts, inyecciones SQL y otros ataques.
-   * Usar para sanitizar entradas de usuario antes de mostrarlas, no para SQL.
-   */
-  public function sanitizarEntrada($cadena)
-  {
-    if (is_null($cadena) || !is_string($cadena)) {
-      return '';
-    }
-
-    // Patrones peligrosos a eliminar
-    $patrones = [
-      // Scripts
-      '/<script\b[^>]*>(.*?)<\/script>/is',
-      '/<\s*script\s*>(.*?)<\s*\/\s*script\s*>/is',
-      // SQL Injection
-      '/SELECT\s+.*?\s+FROM/is',
-      '/INSERT\s+INTO/is',
-      '/UPDATE\s+.*?\s+SET/is',
-      '/DELETE\s+FROM/is',
-      '/DROP\s+.*?/is',
-      '/TRUNCATE\s+TABLE/is',
-      '/SHOW\s+TABLES/is',
-      '/SHOW\s+DATABASES/is',
-      // PHP Tags
-      '/<\?php/i',
-      '/\?>/i'
-    ];
-
-    // Primero filtramos con una expresión regular
-    $cadena = preg_replace($patrones, '', $cadena);
-
-    // Luego eliminamos caracteres peligrosos
-    $cadena = htmlspecialchars($cadena, ENT_QUOTES, 'UTF-8');
-
-    return trim($cadena);
-  }
-
-  /**
    * Encripta una contraseña utilizando un algoritmo de hash seguro.
    * 
    * @param string $password La contraseña a encriptar.
@@ -291,6 +246,142 @@ class mainModel
   }
 
   /**
+   * Verificar si un username ya existe en la base de datos.
+   * 
+   * @param string $username El username a verificar.
+   * @return bool True si el username existe, false en caso contrario.
+   *
+   */
+  public function localizarUsername($username)
+  {
+    $query = "SELECT COUNT(*) as total FROM usuario WHERE usuario_usuario = :username";
+    $result = $this->ejecutarConsulta($query, [':username' => $username]);
+    $data = $result->fetch(PDO::FETCH_ASSOC);
+    return $data['total'] > 0;
+  }
+
+  /**
+   * Sanitiza y valida un array de datos según reglas específicas.
+   * 
+   * @param array $datos Array de datos a sanitizar y validar
+   * @param array $reglas Array asociativo con reglas de validación
+   * @return array Array con datos sanitizados y errores encontrados
+   */
+  public function validarDatos($datos, $reglas)
+  {
+    $resultado = [
+      'datos' => [],
+      'errores' => []
+    ];
+
+    foreach ($reglas as $campo => $regla) {
+      // Obtener el valor o usar valor por defecto
+      $valor = isset($datos[$campo]) ? $datos[$campo] : null;
+
+      // Aplicar sanitización básica si se especifica
+      if (isset($regla['sanitizar']) && $regla['sanitizar'] === true) {
+        $valor = $this->sanitizarEntrada($valor);
+      }
+
+      // Verificar si el campo es requerido
+      if (isset($regla['requerido']) && $regla['requerido'] === true && empty($valor)) {
+        $resultado['errores'][$campo] = "El campo $campo es requerido";
+        continue;
+      }
+
+      // Validar longitud mínima
+      if (isset($regla['min']) && strlen($valor) < $regla['min']) {
+        $resultado['errores'][$campo] = "El campo $campo debe tener al menos {$regla['min']} caracteres";
+        continue;
+      }
+
+      // Validar longitud máxima
+      if (isset($regla['max']) && strlen($valor) > $regla['max']) {
+        $resultado['errores'][$campo] = "El campo $campo no debe exceder {$regla['max']} caracteres";
+        continue;
+      }
+
+      // Validar formatos específicos
+      if (isset($regla['formato'])) {
+        switch ($regla['formato']) {
+          case 'email':
+            if (!filter_var($valor, FILTER_VALIDATE_EMAIL)) {
+              $resultado['errores'][$campo] = "El formato de correo electrónico no es válido";
+              continue 2; // Sale del switch y del foreach actual
+            }
+            break;
+
+          case 'numero':
+            if (!is_numeric($valor)) {
+              $resultado['errores'][$campo] = "El campo $campo debe ser un número";
+              continue 2;
+            }
+            // Convertir a número si es válido
+            $valor = (float)$valor;
+            break;
+
+          case 'entero':
+            if (!filter_var($valor, FILTER_VALIDATE_INT)) {
+              $resultado['errores'][$campo] = "El campo $campo debe ser un número entero";
+              continue 2;
+            }
+            // Convertir a entero si es válido
+            $valor = (int)$valor;
+            break;
+
+          case 'alfa':
+            if (!ctype_alpha($valor)) {
+              $resultado['errores'][$campo] = "El campo $campo solo debe contener letras";
+              continue 2;
+            }
+            break;
+
+          case 'alfanumerico':
+            if (!ctype_alnum($valor)) {
+              $resultado['errores'][$campo] = "El campo $campo solo debe contener letras y números";
+              continue 2;
+            }
+            break;
+
+          default:
+            // Si es una expresión regular personalizada
+            if (!$this->validarFormato($regla['formato'], $valor)) {
+              $resultado['errores'][$campo] = "El formato del campo $campo no es válido";
+              continue 2;
+            }
+        }
+      }
+
+      // Aplicar filtros específicos
+      if (isset($regla['filtro'])) {
+        switch ($regla['filtro']) {
+          case 'striptags':
+            $valor = strip_tags($valor);
+            break;
+
+          case 'lower':
+            $valor = strtolower($valor);
+            break;
+
+          case 'upper':
+            $valor = strtoupper($valor);
+            break;
+
+          case 'trim':
+            $valor = trim($valor);
+            break;
+        }
+      }
+
+      // Guardar valor sanitizado y validado
+      $resultado['datos'][$campo] = $valor;
+    }
+
+    return $resultado;
+  }
+
+
+  /**
    * Verifica si una cadena cumple con un patrón específico.
    * @param string $regEx El patrón a verificar.
    * @param string $cadena La cadena a verificar.
@@ -304,5 +395,158 @@ class mainModel
   protected function validarFormato($regEx, $cadena)
   {
     return preg_match("/^" . $regEx . "$/", $cadena) === 1;
+  }
+
+  /**
+   * Sanitiza datos para inserción segura en base de datos
+   * 
+   * @param array $datos Array asociativo con datos a sanitizar
+   * @return array Datos sanitizados
+   */
+  public function sanitizarParaBD($datos)
+  {
+    $sanitizados = [];
+
+    foreach ($datos as $clave => $valor) {
+      if (is_string($valor)) {
+        // Sanitizar strings
+        $sanitizados[$clave] = $this->sanitizarEntrada($valor);
+      } elseif (is_array($valor)) {
+        // Recursivamente sanitizar arrays
+        $sanitizados[$clave] = $this->sanitizarParaBD($valor);
+      } else {
+        // Mantener otros tipos sin cambios (números, booleanos, etc.)
+        $sanitizados[$clave] = $valor;
+      }
+    }
+
+    return $sanitizados;
+  }
+
+  /**
+   * Valida y sanitiza un archivo subido
+   * 
+   * @param array $archivo Elemento de $_FILES a validar
+   * @param array $opciones Opciones de validación (tipos, tamaño máximo, etc.)
+   * @return array Resultado con estado y mensaje
+   */
+  public function validarArchivo($archivo, $opciones = [])
+  {
+    $resultado = [
+      'valido' => false,
+      'mensaje' => '',
+      'ruta_temp' => '',
+      'nombre_original' => '',
+      'extension' => ''
+    ];
+
+    // Verificar si no hay archivo
+    if (empty($archivo) || !isset($archivo['tmp_name']) || empty($archivo['tmp_name'])) {
+      $resultado['mensaje'] = "No se ha subido ningún archivo";
+      return $resultado;
+    }
+
+    // Verificar errores en la subida
+    if ($archivo['error'] !== UPLOAD_ERR_OK) {
+      switch ($archivo['error']) {
+        case UPLOAD_ERR_INI_SIZE:
+        case UPLOAD_ERR_FORM_SIZE:
+          $resultado['mensaje'] = "El archivo excede el tamaño máximo permitido";
+          break;
+        case UPLOAD_ERR_PARTIAL:
+          $resultado['mensaje'] = "El archivo se subió parcialmente";
+          break;
+        case UPLOAD_ERR_NO_FILE:
+          $resultado['mensaje'] = "No se seleccionó ningún archivo";
+          break;
+        default:
+          $resultado['mensaje'] = "Error desconocido al subir el archivo";
+      }
+      return $resultado;
+    }
+
+    // Verificar el tipo MIME
+    if (isset($opciones['tipos']) && !empty($opciones['tipos'])) {
+      $finfo = new \finfo(FILEINFO_MIME_TYPE);
+      $tipo_mime = $finfo->file($archivo['tmp_name']);
+
+      if (!in_array($tipo_mime, $opciones['tipos'])) {
+        $resultado['mensaje'] = "El tipo de archivo no es válido. Se esperaba: " . implode(', ', $opciones['tipos']);
+        return $resultado;
+      }
+    }
+
+    // Verificar tamaño máximo
+    if (isset($opciones['tamano_max']) && $archivo['size'] > $opciones['tamano_max']) {
+      $tamano_mb = $opciones['tamano_max'] / (1024 * 1024);
+      $resultado['mensaje'] = "El archivo excede el tamaño máximo permitido de {$tamano_mb}MB";
+      return $resultado;
+    }
+
+    // Obtener extensión
+    $extension = pathinfo($archivo['name'], PATHINFO_EXTENSION);
+
+    // Verificar extensiones permitidas
+    if (isset($opciones['extensiones']) && !in_array(strtolower($extension), array_map('strtolower', $opciones['extensiones']))) {
+      $resultado['mensaje'] = "La extensión del archivo no es válida. Se esperaba: " . implode(', ', $opciones['extensiones']);
+      return $resultado;
+    }
+
+    // Si llegamos aquí, el archivo es válido
+    $resultado['valido'] = true;
+    $resultado['ruta_temp'] = $archivo['tmp_name'];
+    $resultado['nombre_original'] = $archivo['name'];
+    $resultado['extension'] = $extension;
+
+    return $resultado;
+  }
+
+  /**
+   * Mejora de la función sanitizarEntrada para mayor seguridad
+   */
+  public function sanitizarEntrada($cadena)
+  {
+    if (is_null($cadena) || !is_string($cadena)) {
+      return '';
+    }
+
+    // Eliminar caracteres invisibles y potencialmente peligrosos
+    $cadena = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $cadena);
+
+    // Patrones peligrosos a eliminar (mantener los que ya tenías)
+    $patrones = [
+      // Scripts
+      '/<script\b[^>]*>(.*?)<\/script>/is',
+      '/<\s*script\s*>(.*?)<\s*\/\s*script\s*>/is',
+      // SQL Injection
+      '/SELECT\s+.*?\s+FROM/is',
+      '/INSERT\s+INTO/is',
+      '/UPDATE\s+.*?\s+SET/is',
+      '/DELETE\s+FROM/is',
+      '/DROP\s+.*?/is',
+      '/TRUNCATE\s+TABLE/is',
+      '/SHOW\s+TABLES/is',
+      '/SHOW\s+DATABASES/is',
+      // PHP Tags
+      '/<\?php/i',
+      '/\?>/i',
+      // Más patrones HTML peligrosos
+      '/<iframe/i',
+      '/<object/i',
+      '/<embed/i',
+      '/javascript:/i',
+      '/vbscript:/i',
+      '/onclick/i',
+      '/onload/i',
+      '/onerror/i'
+    ];
+
+    // Aplicar patrones
+    $cadena = preg_replace($patrones, '', $cadena);
+
+    // Convertir caracteres especiales a entidades HTML
+    $cadena = htmlspecialchars($cadena, ENT_QUOTES, 'UTF-8');
+
+    return trim($cadena);
   }
 }

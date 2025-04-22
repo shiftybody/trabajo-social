@@ -10,9 +10,6 @@ const PATTERN_MSG = {
 // Para cada input de tipo file en la pagina con la clase .input-file
 document.querySelectorAll('.input-file').forEach(input => {
 
-  console.log(document.querySelectorAll('.input-file'));
-  console.log(document.querySelector('.user-avatar'));
-
   input.addEventListener('change', function () {
     const file = this.files[0];
     const reader = new FileReader();
@@ -43,7 +40,6 @@ formularios.forEach(formulario => {
     const data = new FormData(this);
 
     // imprimir los datos del formulario como un objeto
-    console.log(Object.fromEntries(data));
 
     // Limpiar los mensajes de error previos
     document.querySelectorAll('.error-message').forEach(errorMsg => errorMsg.remove());
@@ -104,18 +100,27 @@ formularios.forEach(formulario => {
 
     let method = this.getAttribute("method");
     let action = this.getAttribute("action");
-    console.log(data);
 
-    let config = {
-      method: method,
-      headers: encabezados,
-      mode: 'cors',
-      cache: 'no-cache',
-      body: data
-    }; 
+    // TODO: realizar la solicitud ajax
 
-    // realizar la solicitud ajax
-
+    try {
+     fetch(action, {
+        method: method,
+        body: data,
+        credentials: "same-origin",
+        redirect: "follow",
+      })
+       .then((response) => {
+        if (response.redirected) {
+          window.location.href = response.url;
+      }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    } catch (error) {
+      console.error('Error:', error);
+    }
   });
 });
 
@@ -152,3 +157,20 @@ formularios.forEach(formulario => {
     }
   });
 });
+
+// Si es un select tambien eliminar el estilo de error al hacer click
+document.querySelectorAll('select').forEach(select => {
+  select.addEventListener("click", function (e) {
+    if (this.classList.contains('error-input')) {
+      this.classList.remove('error-input');
+      const errorMsg = this.parentElement.querySelector('.error-message');
+      if (errorMsg) {
+        errorMsg.remove();
+      }
+    }
+  });
+});
+
+
+
+

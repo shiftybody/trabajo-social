@@ -5,9 +5,6 @@
  */
 
 use App\Core\Router;
-use App\Middlewares\AuthMiddleware;
-use App\Middlewares\PermissionMiddleware;
-use App\Middlewares\RoleMiddleware;
 
 // Crear instancia del router
 $router = new Router();
@@ -30,7 +27,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   });
 
   $router->group(array('middleware' => 'Permission:users.create'), function ($router) {
-    $router->post('/users', 'ApiController@createUser');
+    $router->post('/users', 'UserController@store');
   });
 
   $router->group(array('middleware' => 'Permission:users.edit'), function ($router) {
@@ -43,7 +40,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
 
   // Roles
   $router->group(array('middleware' => 'Permission:roles.view'), function ($router) {
-    $router->get('/roles', 'ApiController@getAllRoles');
+    $router->get('/roles', 'RoleController@getAllRoles');
     $router->get('/roles/:id', 'ApiController@getRoleById');
   });
 

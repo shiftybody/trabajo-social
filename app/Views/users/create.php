@@ -213,7 +213,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
                 <p class="helper">Ingrese los datos del usuario que desea crear</p>
             </div>
 
-            <form novalidate action="<?= APP_URL ?>api/users.php" method="POST" class="form-layout form-ajax" enctype="multipart/form-data">
+            <form novalidate action="<?= APP_URL ?>api/users" method="POST" class="form-layout form-ajax" enctype="multipart/form-data">
 
                 <!-- Avatar -->
                 <div class="upload-avatar">
@@ -222,9 +222,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
                         <span class="user-avatar">
                         </span>
                         <div class="file-upload">
-                            <input id="file-input" type="file" name="avatar" accept="image/png, image/jpeg"
+                            <input id="file-input" type="file" name="avatar" accept="image/png, image/jpeg, image/gif"
                                 class="input input-file" />
-                            <p class="helper" id="file_input_help"> png, gif, jpg tamaño máximo 5MB</p>
+                            <p class="helper" id="file_input_help">jpg, jpeg, png, gif tamaño máximo 5MB</p>
                         </div>
                     </div>
                 </div>
@@ -317,14 +317,11 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 </div>
 <script src="<?= APP_URL ?>public/js/ajax.js"></script>
 <script>
-    //hacer fetch de los roles disponibles
-    fetch("<?= APP_URL ?>app/api/user.php", {
-            method: "POST",
-            
+    fetch("<?= APP_URL ?>api/roles", {
+            method: "GET",
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
             const select = document.getElementById("rol");
             data.forEach(rol => {
                 const option = document.createElement("option");
@@ -333,5 +330,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
                 select.appendChild(option);
             });
         })
-        .catch(error => console.error(error));
+        // to string
+        .catch(error => console.error('Error al cargar los roles:', error));
 </script>

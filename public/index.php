@@ -9,7 +9,7 @@
 
 require_once '../vendor/autoload.php';
 require_once '../config/env.php';
-require_once '../config/session.php';
+require_once '../config/init.php';
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
   session_start();
