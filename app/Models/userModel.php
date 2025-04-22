@@ -24,71 +24,23 @@ class userModel extends mainModel
     public function registrarUsuario($data)
     {
         try {
-            $datosUsuario = [
-                [
-                    "campo_nombre" => "usuario_nombre",
-                    "campo_marcador" => ":nombre",
-                    "campo_valor" => $data['nombre']
-                ],
-                [
-                    "campo_nombre" => "usuario_apellido_paterno",
-                    "campo_marcador" => ":apellidoPaterno",
-                    "campo_valor" => $data['apellidoPaterno']
-                ],
-                [
-                    "campo_nombre" => "usuario_apellido_materno",
-                    "campo_marcador" => ":apellidoMaterno",
-                    "campo_valor" => $data['apellidoMaterno']
-                ],
-                [
-                    "campo_nombre" => "usuario_telefono",
-                    "campo_marcador" => ":telefono",
-                    "campo_valor" => $data['telefono']
-                ],
-                [
-                    "campo_nombre" => "usuario_email",
-                    "campo_marcador" => ":correo",
-                    "campo_valor" => $data['correo']
-                ],
-                [
-                    "campo_nombre" => "usuario_usuario",
-                    "campo_marcador" => ":username",
-                    "campo_valor" => $data['username']
-                ],
-                [
-                    "campo_nombre" => "usuario_password_hash",
-                    "campo_marcador" => ":clave",
-                    "campo_valor" => $data['password']
-                ],
-                [
-                    "campo_nombre" => "usuario_foto",
-                    "campo_marcador" => ":foto",
-                    "campo_valor" => $data['foto']
-                ],
-                [
-                    "campo_nombre" => "usuario_rol",
-                    "campo_marcador" => ":rol",
-                    "campo_valor" => $data['rol']
-                ],
-                [
-                    "campo_nombre" => "usuario_estado",
-                    "campo_marcador" => ":estado",
-                    "campo_valor" => 1
-                ],
-                [
-                    "campo_nombre" => "usuario_fecha_creacion",
-                    "campo_marcador" => ":fechaCreacion",
-                    "campo_valor" => date("Y-m-d H:i:s", time())
-                ],
-                [
-                    "campo_nombre" => "usuario_ultima_modificacion",
-                    "campo_marcador" => ":ultimaModificacion",
-                    "campo_valor" => date("Y-m-d H:i:s", time())
-                ]
+            // Mapear las claves del array asociativo a los nombres de los campos en la BD
+            $datosParaInsertar = [
+                'usuario_nombre' => $data['nombre'],
+                'usuario_apellido_paterno' => $data['apellidoPaterno'],
+                'usuario_apellido_materno' => $data['apellidoMaterno'],
+                'usuario_telefono' => $data['telefono'],
+                'usuario_email' => $data['correo'],
+                'usuario_usuario' => $data['username'],
+                'usuario_password_hash' => $this->hashearContraseña($data['password']), // Asegúrate de hacer hash
+                'usuario_avatar' => $data['avatar'] ? $data['avatar'] : "default.png",
+                'usuario_rol' => $data['rol'],
+                'usuario_estado' => 1,
+                'usuario_fecha_creacion' => date("Y-m-d H:i:s", time()),
+                'usuario_ultima_modificacion' => date("Y-m-d H:i:s", time())
             ];
 
-            $resultado = $this->insertarDatos("usuario", $datosUsuario);
-
+            $resultado = $this->insertarDatos("usuario", $datosParaInsertar);
             return $resultado->rowCount() == 1;
         } catch (\Exception $e) {
             error_log("Error en registrarUsuario: " . $e->getMessage());

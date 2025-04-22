@@ -61,7 +61,7 @@ class LoginController extends userModel
       'apellido_paterno' => $usuario->usuario_apellido_paterno,
       'apellido_materno' => $usuario->usuario_apellido_materno,
       'email' => $usuario->usuario_email,
-      'foto' => $usuario->usuario_foto,
+      'avatar' => $usuario->usuario_avatar,
       'rol' => $usuario->usuario_rol,
       'rol_descripcion' => $usuario->rol_descripcion,
       'ultima_actividad' => time(),

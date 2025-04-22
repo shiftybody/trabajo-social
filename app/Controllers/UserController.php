@@ -216,15 +216,20 @@ class UserController
       $resultado['datos']['avatar'] = $foto;
     }
 
-    // enviar un Response::json para pruebas de que se recibieron los datos
-
-    return Response::json([
-      'status' => 'success',
-      'datos' => $resultado['datos']
-    ]);
-
     # --- Enviar los datos al modelo para que realice el registro --- #
 
+    $registrarUsuario = $this->userModel->registrarUsuario($resultado['datos']);
 
+    if ($registrarUsuario) {
+      return Response::json([
+        'status' => 'success',
+        'mensaje' => 'Usuario registrado correctamente'
+      ]);
+    } else {
+      return Response::json([
+        'status' => 'error',
+        'errores' => ['general' => 'Error al registrar el usuario']
+      ]);
+    }
   }
 }

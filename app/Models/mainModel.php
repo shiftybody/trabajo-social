@@ -89,28 +89,27 @@ class mainModel
   {
     try {
       // Arrays para almacenar nombres de campos y marcadores
-      $campos = [];
+      $campos = array_keys($datos);
       $marcadores = [];
       $parametros = [];
 
-      // Separar datos en arrays para mejor manipulación
-      foreach ($datos as $dato) {
-        $campos[] = $dato["campo_nombre"];
-        $marcadores[] = $dato["campo_marcador"];
-        $parametros[$dato["campo_marcador"]] = $dato["campo_valor"];
+      // Crear marcadores y parámetros
+      foreach ($campos as $campo) {
+        $marcador = ":{$campo}";
+        $marcadores[] = $marcador;
+        $parametros[$marcador] = $datos[$campo];
       }
 
-      // Construir la consulta de forma más eficiente
+      // Construir la consulta
       $query = "INSERT INTO $tabla (" . implode(", ", $campos) .
         ") VALUES (" . implode(", ", $marcadores) . ")";
 
       // Usar la función ejecutarConsulta existente para preparar, bindear y ejecutar
       $sql = $this->ejecutarConsulta($query, $parametros);
-
       return $sql;
     } catch (Exception $e) {
       // Registrar el error en lugar de terminar la ejecución
-      error_log("Error en guardarDatos: " . $e->getMessage());
+      error_log("Error en insertarDatos: " . $e->getMessage());
       throw new Exception("Error al guardar datos en la tabla $tabla");
     }
   }
