@@ -124,7 +124,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         width: 5rem;
         height: 5rem;
         padding: 0px 0px 28px 34px;
-        background-image: url("<?= APP_URL ?>public/photos/avatar.jpg");
+        background-image: url("<?= APP_URL ?>public/photos/default.jpg");
         background-position: 50%;
         background-size: cover;
         background-repeat: no-repeat;

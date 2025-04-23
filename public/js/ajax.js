@@ -95,32 +95,52 @@ formularios.forEach(formulario => {
       }
     });
 
-    // si no es valido, no hacer la peticion
     if (!isValid) return;
 
     let method = this.getAttribute("method");
     let action = this.getAttribute("action");
 
-    // TODO: realizar la solicitud ajax
-
-    try {
-     fetch(action, {
-        method: method,
-        body: data,
-        credentials: "same-origin",
-        redirect: "follow",
-      })
-       .then((response) => {
-        if (response.redirected) {
-          window.location.href = response.url;
+    fetch(action, {
+      method: method,
+      body: data,
+      credentials: "same-origin",
+    })
+    .then((response) => {
+      // Primero comprobar si es una respuesta de redirección
+      if (response.redirected) {
+        window.location.href = response.url;
+        return;
       }
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-    } catch (error) {
+      
+      // Si no es redirección, entonces procesamos el JSON
+      return response.json().then(responseData => {
+        if (responseData.status === 'success') {
+          // Mostrar mensaje de éxito
+          alert(responseData.mensaje || 'Operación completada con éxito');
+          
+          // Opcional: redireccionar si se quiere volver a la lista
+          window.location.href = window.location.href.replace('/create', '');
+        } else if (responseData.status === 'error') {
+          // Mostrar errores en formulario
+          if (responseData.errores) {
+            Object.entries(responseData.errores).forEach(([key, message]) => {
+              const input = formulario.querySelector(`[name="${key}"]`);
+              if (input) {
+                showError(input, message);
+              } else if (key === 'general') {
+                // Error general que no está asociado a un campo específico
+                alert(message);
+              }
+            });
+          }
+        }
+      });
+    })
+    .catch((error) => {
       console.error('Error:', error);
-    }
+      alert('Ocurrió un error al procesar la solicitud. Por favor, inténtalo de nuevo.');
+    });
+
   });
 });
 
@@ -135,14 +155,10 @@ function showError(input, message) {
 
 
 // si button type["reset"] se hace click regresar el .user-avatar a la imagen por defecto
-
 document.querySelector('button[type="reset"]').addEventListener('click', function () {
-  document.querySelector('.user-avatar').style.backgroundImage = `url(../public/photos/avatar.jpg)`;
+  document.querySelector('.user-avatar').style.backgroundImage = `url(../public/photos/default.jpg)`;
 }
 );
-// borrar el formulario y la imagen de avatar por defecto
-// document.querySelector(".form-api").reset();
-// document.querySelector('.user-avatar').style.backgroundImage = `url(../fotos/avatar.jpg)`;
 
 //Eliminar estilo de error al escribir en el input
 formularios.forEach(formulario => {

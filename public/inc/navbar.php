@@ -212,17 +212,16 @@
       </div>
       <!-- avatar -->
       <?php
-      if (is_file("./app/views/fotos/" . $_SESSION['foto'])) {
-
+      if (file_exists(APP_ROOT . 'public/photos/thumbnail/' . $_SESSION['trabajo_social']['avatar'])) {
         echo '<style>
         #avatar {
-          background: url(' . APP_URL . 'app/views/fotos/' . $_SESSION['foto'] . ') lightgray 50% / cover no-repeat;
+          background: url(' . APP_URL . 'public/photos/thumbnail/' . $_SESSION['trabajo_social']['avatar'] . ') lightgray 50% / cover no-repeat;
         }
       </style>';
       } else {
         echo '<style>
         #avatar {
-          background: url(' . APP_URL . 'public/photos/avatar.jpg) lightgray 50% / cover no-repeat;
+          background: url(' . APP_URL . 'public/photos/default.jpg) lightgray 50% / cover no-repeat;
         }
       </style>';
       }

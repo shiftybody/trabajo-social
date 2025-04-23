@@ -23,5 +23,4 @@ ini_set('log_errors', 1);      // Habilitar registro de errores
 ini_set('upload_max_filesize', '5M');
 ini_set('post_max_size', '5M');
 ini_set('max_execution_time', 30);
-ini_set('upload_tmp_dir', APP_ROOT . '/storage/tmp');
-ini_set('error_log', APP_ROOT . '/storage/logs/php_errors.log');
+ini_set('error_log', APP_ROOT . 'logs/php_errors.log');

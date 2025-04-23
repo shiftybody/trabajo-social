@@ -4,3 +4,7 @@
 **/vendor/
 **/storage/
 .env
+**/public/photos/original/*
+**/public/photos/thumbnail/*
+**/logs/*
+/logs

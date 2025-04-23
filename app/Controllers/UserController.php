@@ -7,31 +7,16 @@ use App\Core\Response;
 use App\Models\userModel;
 use Exception;
 
-/**
- * Controlador para la gestión de usuarios
- */
 class UserController
 {
-  /**
-   * Modelo de usuario
-   * @var userModel
-   */
+
   private $userModel;
 
-  /**
-   * Constructor
-   */
   public function __construct()
   {
     $this->userModel = new userModel();
   }
 
-  /**
-   * Muestra la lista de usuarios
-   * 
-   * @param Request $request Petición actual
-   * @return Response Respuesta HTML
-   */
   public function index(Request $request)
   {
 
@@ -58,18 +43,7 @@ class UserController
     return Response::html($contenido);
   }
 
-  /**
-   * 1. El UserController recibe la solicitud POST
-     2. Extrae y valida los datos que no esten vacios,
-        que sean del tipo correcto, sanitización,
-        tamaños maximos y mínimos.
-     3. Llama al UserModel pasándole los datos ya procesados
-     4. El UserModel aplica la lógica de negocio y realiza operaciones en la base de datos
-     5. El UserController recibe la respuesta del modelo y devuelve la vista correspondiente
-   */
 
-  // TODO: verificar porque sale el error mime_content_type(): Empty filename or path in /var/www/html/app/Controllers/UserController.php on line 190
-  // TODO: resolver que se tiene que borrar en caso de que la subida al servidor no sea exitosa. 
   public function store(Request $request)
   {
     # --- Obtener datos de la solicitud --- #
@@ -179,57 +153,113 @@ class UserController
         ]);
       }
 
-      $directorio = APP_ROOT . 'storage/photos/';
+      // Definir directorios para imágenes originales y miniaturas
+      $baseDir = APP_ROOT . 'public/photos';
+      $originalDir = $baseDir . '/original';
+      $thumbnailDir = $baseDir . '/thumbnail';
 
-      // crear el directorio si no existe
-      if (!file_exists($directorio)) {
-        mkdir($directorio, 0777, true);
+      // Crear los directorios si no existen
+      foreach ([$baseDir, $originalDir, $thumbnailDir] as $dir) {
+        if (!file_exists($dir)) {
+          mkdir($dir, 0777, true);
+        }
       }
 
-      // darle normbre a la foto
-      $foto = str_ireplace(" ", "_", $datos['nombre']);
-      $foto = $foto . "_" . rand(0, 100);
+      // Darle nombre a la foto (sanitizado y único)
+      $nombreBase = str_ireplace(" ", "_", $datos['nombre']);
+      $nombreBase = $nombreBase . "_" . uniqid(); // Usar uniqid() en lugar de rand para evitar colisiones
 
-      // colocar extension
+      // Determinar la extensión según el tipo MIME
+      $extension = "";
       switch (mime_content_type($_FILES['avatar']['tmp_name'])) {
         case "image/jpg":
-          $foto = $foto . ".jpg";
-          break;
         case "image/jpeg":
-          $foto = $foto . ".jpg";
+          $extension = ".jpg";
           break;
         case "image/png":
-          $foto = $foto . ".png";
+          $extension = ".png";
           break;
         case "image/gif":
-          $foto = $foto . ".gif";
+          $extension = ".gif";
           break;
+        default:
+          // Manejar tipos no soportados
+          return Response::json([
+            'status' => 'error',
+            'errores' => ['avatar' => 'Formato de imagen no soportado']
+          ]);
       }
 
-      // mover la imagen al directorio
-      move_uploaded_file($_FILES['avatar']['tmp_name'], $directorio . "/" . $foto);
+      // Nombre de archivo completo con extensión
+      $nombreArchivo = $nombreBase . $extension;
 
-      // agregar al array de datos
-      $resultado['datos']['avatar'] = $foto;
+      // Rutas completas para archivo original y miniatura
+      $rutaOriginal = $originalDir . '/' . $nombreArchivo;
+      $rutaThumbnail = $thumbnailDir . '/' . $nombreArchivo;
+
+      // Mover la imagen subida al directorio de originales
+      if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $rutaOriginal)) {
+        return Response::json([
+          'status' => 'error',
+          'errores' => ['avatar' => 'Error al guardar la imagen']
+        ]);
+      }
+
+      // Crear la miniatura solo si la carga original fue exitosa
+      if (file_exists($rutaOriginal)) {
+        try {
+          // Asegurarse de que la clase ImageUtils está disponible
+          if (!class_exists('\App\Utils\ImageUtils')) {
+            require_once APP_ROOT . 'Utils/ImageUtils.php';
+          }
+
+          // Crear miniatura
+          \App\Utils\ImageUtils::createThumbnail(
+            $rutaOriginal,  // Origen: imagen original
+            $rutaThumbnail, // Destino: carpeta de miniaturas
+            200             // Tamaño máximo
+          );
+        } catch (\Exception $e) {
+          error_log("Error al crear miniatura: " . $e->getMessage());
+          // Continuar aunque falle la miniatura, al menos tenemos la original
+        }
+      }
+
+      // Agregar al array de datos (guardar ruta relativa para la base de datos)
+      $resultado['datos']['avatar'] = $nombreArchivo;
+
+      # --- Enviar los datos al modelo para que realice el registro --- #
+      $registrarUsuario = $this->userModel->registrarUsuario($resultado['datos']);
+
+      if ($registrarUsuario) {
+        return Response::json([
+          'status' => 'success',
+          'mensaje' => 'Usuario registrado correctamente'
+        ]);
+      } else {
+        return Response::json([
+          'status' => 'error',
+          'errores' => ['general' => 'Error al registrar el usuario']
+        ]);
+      }
     } else {
-      $foto = "";
-      $resultado['datos']['avatar'] = $foto;
-    }
+      // Si no se subió un avatar, solo registrar los datos sin la imagen
+      $resultado['datos']['avatar'] = "default.jpg"; // O cualquier valor por defecto que desees
 
-    # --- Enviar los datos al modelo para que realice el registro --- #
+      # --- Enviar los datos al modelo para que realice el registro --- #
+      $registrarUsuario = $this->userModel->registrarUsuario($resultado['datos']);
 
-    $registrarUsuario = $this->userModel->registrarUsuario($resultado['datos']);
-
-    if ($registrarUsuario) {
-      return Response::json([
-        'status' => 'success',
-        'mensaje' => 'Usuario registrado correctamente'
-      ]);
-    } else {
-      return Response::json([
-        'status' => 'error',
-        'errores' => ['general' => 'Error al registrar el usuario']
-      ]);
+      if ($registrarUsuario) {
+        return Response::json([
+          'status' => 'success',
+          'mensaje' => 'Usuario registrado correctamente'
+        ]);
+      } else {
+        return Response::json([
+          'status' => 'error',
+          'errores' => ['general' => 'Error al registrar el usuario']
+        ]);
+      }
     }
   }
 }
