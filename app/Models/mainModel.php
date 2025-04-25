@@ -439,30 +439,37 @@ class mainModel
       'extension' => ''
     ];
 
-    // Verificar si no hay archivo
-    if (empty($archivo) || !isset($archivo['tmp_name']) || empty($archivo['tmp_name'])) {
-      $resultado['mensaje'] = "No se ha subido ningún archivo";
-      return $resultado;
-    }
-
-    // Verificar errores en la subida
+    // si en el archivo error es diferente a 0, entonces hubo un error en la subida que no es 0 
     if ($archivo['error'] !== UPLOAD_ERR_OK) {
       switch ($archivo['error']) {
         case UPLOAD_ERR_INI_SIZE:
+          $max_size = ini_get('upload_max_filesize');
+          $resultado['mensaje'] = "El archivo excede el tamaño máximo permitido por el servidor ($max_size)";
+          break;
         case UPLOAD_ERR_FORM_SIZE:
-          $resultado['mensaje'] = "El archivo excede el tamaño máximo permitido";
+          $resultado['mensaje'] = "El archivo excede el tamaño máximo permitido por el formulario";
           break;
         case UPLOAD_ERR_PARTIAL:
-          $resultado['mensaje'] = "El archivo se subió parcialmente";
+          $resultado['mensaje'] = "El archivo se subió parcialmente. Intente nuevamente";
           break;
         case UPLOAD_ERR_NO_FILE:
           $resultado['mensaje'] = "No se seleccionó ningún archivo";
           break;
+        case UPLOAD_ERR_NO_TMP_DIR:
+          $resultado['mensaje'] = "No se encuentra la carpeta temporal en el servidor";
+          break;
+        case UPLOAD_ERR_CANT_WRITE:
+          $resultado['mensaje'] = "No se pudo guardar el archivo en el servidor";
+          break;
+        case UPLOAD_ERR_EXTENSION:
+          $resultado['mensaje'] = "Una extensión de PHP detuvo la carga del archivo";
+          break;
         default:
-          $resultado['mensaje'] = "Error desconocido al subir el archivo";
+          $resultado['mensaje'] = "Error desconocido al subir el archivo (código: {$archivo['error']})";
       }
       return $resultado;
     }
+
 
     // Verificar el tipo MIME
     if (isset($opciones['tipos']) && !empty($opciones['tipos'])) {
@@ -470,15 +477,17 @@ class mainModel
       $tipo_mime = $finfo->file($archivo['tmp_name']);
 
       if (!in_array($tipo_mime, $opciones['tipos'])) {
-        $resultado['mensaje'] = "El tipo de archivo no es válido. Se esperaba: " . implode(', ', $opciones['tipos']);
+        $tipos_permitidos = implode(', ', $opciones['tipos']);
+        $resultado['mensaje'] = "El tipo de archivo no es válido ($tipo_mime). Se esperaba: $tipos_permitidos";
         return $resultado;
       }
     }
 
     // Verificar tamaño máximo
     if (isset($opciones['tamano_max']) && $archivo['size'] > $opciones['tamano_max']) {
-      $tamano_mb = $opciones['tamano_max'] / (1024 * 1024);
-      $resultado['mensaje'] = "El archivo excede el tamaño máximo permitido de {$tamano_mb}MB";
+      $tamano_mb = round($opciones['tamano_max'] / (1024 * 1024), 2);
+      $tamano_actual_mb = round($archivo['size'] / (1024 * 1024), 2);
+      $resultado['mensaje'] = "El archivo excede el tamaño máximo permitido: {$tamano_actual_mb}MB (máximo: {$tamano_mb}MB)";
       return $resultado;
     }
 
@@ -487,7 +496,8 @@ class mainModel
 
     // Verificar extensiones permitidas
     if (isset($opciones['extensiones']) && !in_array(strtolower($extension), array_map('strtolower', $opciones['extensiones']))) {
-      $resultado['mensaje'] = "La extensión del archivo no es válida. Se esperaba: " . implode(', ', $opciones['extensiones']);
+      $extensiones_permitidas = implode(', ', $opciones['extensiones']);
+      $resultado['mensaje'] = "La extensión del archivo ($extension) no es válida. Se esperaba: $extensiones_permitidas";
       return $resultado;
     }
 
