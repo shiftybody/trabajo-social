@@ -1,5 +1,6 @@
 <style>
   header#app-header {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     position: relative;
     top: 0;
     width: 100%;
@@ -114,6 +115,7 @@
 
   /* Estilos del menú lateral */
   .sidebar.left {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     height: 100%;
     width: 0;
     position: fixed;
@@ -121,13 +123,14 @@
     left: 0;
     background-color: #fbfbfb;
     overflow-x: hidden;
-    transition: 0.2s;
+    transition: 0.05s;
     z-index: 1000;
     border: 1px solid #d2d2d2;
     border-radius: 0 1rem 1rem 0;
   }
 
   .sidebar.right {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     height: 100%;
     width: 0;
     position: fixed;
@@ -135,7 +138,7 @@
     right: 0;
     background-color: #fbfbfb;
     overflow-x: hidden;
-    transition: 0.2s;
+    transition: 0.05s;
     z-index: 1000;
     border: 1px solid #d2d2d2;
     border-radius: 1rem 0 0 1rem;
@@ -284,6 +287,14 @@
   <div class="sidebar-header">
     <div id="avatar">
       <span id="avatar-status"></span>
+    </div>
+    <div class="user-info" id="user-info">
+      <span id="user-name">
+        <?php echo $_SESSION['trabajo_social']['username'] ?> </span>
+      <span id="user-role">
+        <?php echo $_SESSION['trabajo_social']['rol']; ?>
+      </span>
+
     </div>
     <a href="javascript:void(0)" class="closebtn" id="right-closeButton">
       <button type="button" id="menu" class="closebtn">

@@ -453,7 +453,8 @@ class mainModel
           $resultado['mensaje'] = "El archivo se subió parcialmente. Intente nuevamente";
           break;
         case UPLOAD_ERR_NO_FILE:
-          $resultado['mensaje'] = "No se seleccionó ningún archivo";
+          // es valido poque no se subio ningun archivo por lo que se usara el valor por defecto
+          $resultado['valido'] = true;
           break;
         case UPLOAD_ERR_NO_TMP_DIR:
           $resultado['mensaje'] = "No se encuentra la carpeta temporal en el servidor";

@@ -116,8 +116,9 @@ formularios.forEach(formulario => {
       return response.json().then(responseData => {
         if (responseData.status === 'success') {
           // Mostrar mensaje de éxito
+          // TODO: llamar a un modal para mostrar el mensaje de éxito
           alert(responseData.mensaje || 'Operación completada con éxito');
-          
+          // TODO: decidir si ocurrira o no esta redireccion
           // Opcional: redireccionar si se quiere volver a la lista
           window.location.href = window.location.href.replace('/create', '');
         } else if (responseData.status === 'error') {
@@ -128,7 +129,7 @@ formularios.forEach(formulario => {
               if (input) {
                 showError(input, message);
               } else if (key === 'general') {
-                // Error general que no está asociado a un campo específico
+                // TODO: llamar a un modal para mostrar el error general 
                 alert(message);
               }
             });
@@ -140,25 +141,8 @@ formularios.forEach(formulario => {
       console.error('Error:', error);
       alert('Ocurrió un error al procesar la solicitud. Por favor, inténtalo de nuevo.');
     });
-
   });
 });
-
-// Mostrar mensaje de error
-function showError(input, message) {
-  const error = document.createElement('p');
-  error.classList.add('error-message');
-  error.textContent = message;
-  input.parentElement.appendChild(error);
-  input.classList.add('error-input');
-}
-
-
-// si button type["reset"] se hace click regresar el .user-avatar a la imagen por defecto
-document.querySelector('button[type="reset"]').addEventListener('click', function () {
-  document.querySelector('.user-avatar').style.backgroundImage = `url(../public/photos/default.jpg)`;
-}
-);
 
 //Eliminar estilo de error al escribir en el input
 formularios.forEach(formulario => {
@@ -184,6 +168,64 @@ document.querySelectorAll('select').forEach(select => {
         errorMsg.remove();
       }
     }
+  });
+});
+
+// Mostrar mensaje de error
+function showError(input, message) {
+  // Eliminar mensajes de error previos si existen
+  clearError(input);
+  
+  const error = document.createElement('p');
+  error.classList.add('error-message');
+  error.textContent = message;
+  
+  // Si es un input de tipo file, buscar y ocultar el helper
+  if (input.type === 'file') {
+    const helper = input.parentElement.querySelector('.helper');
+    if (helper) {
+      helper.style.display = 'none';
+    }
+  }
+  
+  input.parentElement.appendChild(error);
+  input.classList.add('error-input');
+}
+
+// Función para limpiar errores
+function clearError(input) {
+  // Eliminar mensaje de error si existe
+  const errorMessage = input.parentElement.querySelector('.error-message');
+  if (errorMessage) {
+    errorMessage.remove();
+  }
+  
+  // Quitar clase de error del input
+  input.classList.remove('error-input');
+  
+  // Si es un input de tipo file, mostrar el helper nuevamente
+  if (input.type === 'file') {
+    const helper = input.parentElement.querySelector('.helper');
+    if (helper) {
+      helper.style.display = '';
+    }
+  }
+}
+
+// Manejar el evento reset para limpiar todos los errores y restaurar la imagen por defecto
+document.querySelector('button[type="reset"]').addEventListener('click', function() {
+  // Restaurar imagen por defecto
+  document.querySelector('.user-avatar').style.backgroundImage = `url(../public/photos/default.jpg)`;
+  
+  // Limpiar todos los mensajes de error
+  const errorInputs = document.querySelectorAll('.error-input');
+  errorInputs.forEach(input => {
+    clearError(input);
+  });
+  
+  // Asegurar que todos los helpers estén visibles
+  document.querySelectorAll('.helper').forEach(helper => {
+    helper.style.display = '';
   });
 });
 

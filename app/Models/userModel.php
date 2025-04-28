@@ -273,6 +273,7 @@ class userModel extends mainModel
             return [];
         }
     }
+    
 
     /**
      * Actualiza la última fecha de acceso de un usuario

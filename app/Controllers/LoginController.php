@@ -54,6 +54,19 @@ class LoginController extends userModel
   public function createSession($usuario)
   {
     // Crear sesión
+    // basado obtener la descripcion del rol utilizando el id del rol
+
+    $userRoles = $this->obtenerRoles();
+    $rolDescripcion = null;
+
+    foreach ($userRoles as $rol) {
+      if ($rol->rol_id == $usuario->usuario_rol) {
+        $rolDescripcion = $rol->rol_descripcion;
+        break;
+      }
+    }
+
+
     $_SESSION[APP_SESSION_NAME] = [
       'id' => $usuario->usuario_id,
       'username' => $usuario->usuario_usuario,
@@ -62,7 +75,7 @@ class LoginController extends userModel
       'apellido_materno' => $usuario->usuario_apellido_materno,
       'email' => $usuario->usuario_email,
       'avatar' => $usuario->usuario_avatar,
-      'rol' => $usuario->usuario_rol,
+      'rol' => $rolDescripcion,
       'rol_descripcion' => $usuario->rol_descripcion,
       'ultima_actividad' => time(),
     ];
