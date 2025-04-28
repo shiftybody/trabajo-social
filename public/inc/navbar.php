@@ -189,6 +189,59 @@
   .sidebar .sidebar-header .logo:hover {
     cursor: pointer;
   }
+
+  .user-container {
+    display: flex;
+    ;
+  }
+
+  .close-container {
+    display: flex;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 1rem;
+  }
+
+  .user-info #user-name {
+    color: var(--gray-900, var(--gray-900, #0C192A));
+    /* text-lg/font-semibold */
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 1.25;
+    /* 27px */
+  }
+
+  .user-info #user-role {
+    color: var(--gray-500, #677283);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.25;
+  }
+
+  .contentblur {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* filter blur*/
+    backdrop-filter: blur(1px);
+    /* darker */
+    background-color: rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    display: none;
+  }
+
+  .option-icon {
+    width: 1.25rem;
+    height: auto;
+  }
 </style>
 <!-- header navbar -->
 <header id="app-header">
@@ -237,26 +290,7 @@
   </section>
 </header>
 
-<style>
-  .contentblur {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* filter blur*/
-    backdrop-filter: blur(1px);
-    /* darker */
-    background-color: rgba(0, 0, 0, 0.1);
-    z-index: 999;
-    display: none;
-  }
-
-  .option-icon {
-    width: 1.25rem;
-    height: auto;
-  }
-</style>
+<!-- used for the blur effect when the sidebar is open -->
 <div class="contentblur"></div>
 
 <!-- left-sidebar -->
@@ -283,24 +317,28 @@
 </div>
 
 <!-- right-sidebar  -->
-<div id="right-sidebar" class="sidebar right">
+<div class="sidebar right" id="right-sidebar">
   <div class="sidebar-header">
-    <div id="avatar">
-      <span id="avatar-status"></span>
-    </div>
-    <div class="user-info" id="user-info">
-      <span id="user-name">
-        <?php echo $_SESSION['trabajo_social']['username'] ?> </span>
-      <span id="user-role">
-        <?php echo $_SESSION['trabajo_social']['rol']; ?>
-      </span>
+    <div class="user-container">
+      <div id="avatar">
+        <span id="avatar-status"></span>
+      </div>
+      <div class="user-info" id="user-info">
+        <span id="user-name">
+          <?php echo $_SESSION['trabajo_social']['username'] ?> </span>
+        <span id="user-role">
+          <?php echo $_SESSION['trabajo_social']['rol']; ?>
+        </span>
 
+      </div>
     </div>
-    <a href="javascript:void(0)" class="closebtn" id="right-closeButton">
-      <button type="button" id="menu" class="closebtn">
-        <img src="<?= APP_URL ?>public/icons/x.svg" alt="">
-      </button>
-    </a>
+    <div class="close-container">
+      <a href="javascript:void(0)" class="closebtn" id="right-closeButton">
+        <button type="button" id="menu" class="closebtn">
+          <img src="<?= APP_URL ?>public/icons/x.svg" alt="">
+        </button>
+      </a>
+    </div>
   </div>
   <div id="sidebar-options">
     <a href="<?= APP_URL . "userUpdates" . $_SESSION['id'] . "/"; ?>">
