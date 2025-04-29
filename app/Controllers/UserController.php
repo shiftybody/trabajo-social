@@ -257,4 +257,20 @@ class UserController
       ]);
     }
   }
+
+  public function getAllUsers(Request $request)
+  {
+    try {
+      $usuarios = $this->userModel->obtenerTodosUsuarios();
+      return Response::json([
+        'status' => 'success',
+        'data' => $usuarios
+      ]);
+    } catch (Exception $e) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Error al obtener los usuarios: ' . $e->getMessage()
+      ]);
+    }
+  }
 }

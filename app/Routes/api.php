@@ -22,7 +22,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
 
   // Usuarios
   $router->group(array('middleware' => 'Permission:users.view'), function ($router) {
-    $router->get('/users', 'ApiController@getAllUsers');
+    $router->get('/users', 'UserController@getAllUsers');
     $router->get('/users/:id', 'ApiController@getUserById');
   });
 

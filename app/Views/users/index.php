@@ -1,14 +1,6 @@
-<!-- los campos de la tabla deben ser NO, NOMBRE COMPLETO, 
-NOMBRE DE USUARIO, CORREO, ESTADO, ROL y ACCIONES -->
-
-<!-- EL CAMPO ACCIONES debe de permitir editar ✏️, remover ❌, 
-y 3 botoncitos para cambiar el estado o el rol -->
-
-<!-- TODO: cambiar de img a iconos en svg -->
-
 <style>
   .container {
-    padding: 0 10rem;
+    padding: 2.5rem 10rem 0 10rem;
   }
 
   .navigation {
@@ -34,7 +26,6 @@ y 3 botoncitos para cambiar el estado o el rol -->
     border: 1px solid var(--gray-300, color(display-p3 0.8196 0.8353 0.8588));
     background: #ECECEC;
     background: color(display-p3 0.9255 0.9255 0.9255);
-
     color: var(--gray-600, #465566);
     color: var(--gray-600, color(display-p3 0.2941 0.3333 0.3882));
     /* text-sm/font-semibold */
@@ -43,12 +34,6 @@ y 3 botoncitos para cambiar el estado o el rol -->
     font-weight: 600;
     line-height: 150%;
     /* 21px */
-  }
-
-  .body {
-    display: grid;
-    grid-template-columns: 0.7fr 3fr;
-    gap: 2rem;
   }
 
   hr {
@@ -108,7 +93,6 @@ y 3 botoncitos para cambiar el estado o el rol -->
     width: 1.375rem;
     height: 1.375rem;
   }
-
 
   .left_side {
     display: flex;
@@ -215,7 +199,6 @@ y 3 botoncitos para cambiar el estado o el rol -->
   td {
     color: var(--gray-900, var(--gray-900, #0C192A));
     color: var(--gray-900, var(--gray-900, color(display-p3 0.0667 0.098 0.1569)));
-
     /* text-sm/font-normal */
     font-size: 14px;
     font-style: normal;
@@ -224,10 +207,11 @@ y 3 botoncitos para cambiar el estado o el rol -->
     /* 21px */
   }
 
-  /* ultimo td de un tr */
-  td:last-child {
+  /* Cambiarlo por esto */
+  td:not(.dt-empty):last-child {
     display: flex;
     gap: 0.4rem;
+    padding: 11px;
   }
 
   /* botton con el atributo bottom y clase editar*/
@@ -253,11 +237,11 @@ y 3 botoncitos para cambiar el estado o el rol -->
 
   .clear-button {
     position: absolute;
-    right: 8px;
+    right: 1rem;
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    font-size: 18px;
+    font-size: 1.5rem;
     color: #aaa;
     display: none;
     /* Ocultar por defecto */
@@ -266,6 +250,10 @@ y 3 botoncitos para cambiar el estado o el rol -->
   .input-container input:focus+.clear-button,
   .input-container input:not(:placeholder-shown)+.clear-button {
     display: inline;
+  }
+
+  th {
+    background-color: #f2f2f2;
   }
 
   td.activo {
@@ -277,47 +265,118 @@ y 3 botoncitos para cambiar el estado o el rol -->
     color: #dc3545;
     font-weight: bold;
   }
+
+  .dt-info {
+    font-family: 'Inter', sans-serif;
+  }
+
+  .select-container {
+    position: relative;
+  }
+
+  .custom-select {
+    width: 100%;
+    padding: 8px 36px 8px 16px;
+    /* Clave: 36px de padding a la derecha */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    appearance: none;
+    /* Elimina la apariencia nativa */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* Flecha personalizada */
+  .select-container::after {
+    content: '';
+    position: absolute;
+    right: 16px;
+    top: calc(50% - 4px);
+    width: 8px;
+    height: 8px;
+    border-bottom: 2px solid #000;
+    border-right: 2px solid #000;
+    transform: translateY(-30%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  /* Estilos adicionales para mejorar la apariencia */
+  .custom-select:focus {
+    outline: none;
+    border-color: rgb(152, 152, 152);
+    box-shadow: 0 0 0 2px rgba(222, 222, 222, 0.2);
+  }
+
+  /* Elimina el borde de enfoque en Firefox */
+  .custom-select:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 #000;
+  }
+
+
+  /* Estilos para el menú desplegable */
+  .dropdown-menu {
+    position: absolute;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 160px;
+    z-index: 1000;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  }
+
+  .dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: #465566;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .dropdown-item:hover {
+    background-color: #f8f8f8;
+  }
+
+  .dropdown-item svg {
+    margin-right: 8px;
+  }
 </style>
 <?php
 require_once APP_ROOT . 'public/inc/head.php';
 require_once APP_ROOT . 'public/inc/navbar.php';
 ?>
 <div class="container">
-  <div class=" navigation">
-    <a href="../dashboard" class="volver">Regresar</a>
-  </div>
-
-  <!-- TODO: cambiar el nombre de la pagina mostrada en el header -->
-
   <div class="body">
-    <!-- left side  -->
-    <div class="left_side">
-      <hr>
-      <div class="side_button active">
-        <a href="#" class="side_button_content">
-          <img src="<?= APP_URL; ?>public/icons/user.svg" alt="" class="side_icon_button">
-          Usuarios</a>
-      </div>
-      <div class="side_button">
-        <a href="#" class="side_button_content">
-          <img src="<?= APP_URL; ?>public/icons/golf.svg" alt="" class="side_icon_button">
-          Roles</a>
-      </div>
-    </div>
-
     <!-- right side -->
     <div class="right_side">
       <div class="right_content">
         <div class="tools">
           <form action="" class="filter_form" id="filter_form">
-            <select name="filterColumn" id="filterColumn">
-              <option value="0">Todo</option>
-              <option value="1">Nombre</option>
-              <option value="2">Usuario</option>
-              <option value="3">Correo</option>
-              <option value="4">Estado</option>
-              <option value="5">Rol</option>
-            </select>
+            <div class="select-container">
+              <select class="custom-select" name="filterColumn" title="" id="filterColumn">
+                <option value="0">Todo</option>
+                <option value="1">Nombre</option>
+                <option value="2">Usuario</option>
+                <option value="3">Correo</option>
+                <option value="4">Estado</option>
+                <option value="5">Rol</option>
+              </select>
+            </div>
             <div class="input-container">
               <input type="text" name="matchingColumn" id="matchingInput" placeholder="Buscar">
               <span class="clear-button">×</span>
@@ -327,15 +386,15 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           <button class="action_create_new" onclick="goTo('users/create')">Nuevo</button>
         </div>
         <div class="table">
-          <table id="myTable">
+          <table id="users-table" class="hover">
             <thead>
               <tr>
-                <th>NO</th>
+                <th class="dt-head-center">NO</th>
                 <th>NOMBRE COMPLETO</th>
                 <th>NOMBRE DE USUARIO</th>
                 <th>CORREO</th>
-                <th>ESTADO</th>
-                <th>ROL</th>
+                <th class="dt-head-center">ESTADO</th>
+                <th class="dt-head-center">ROL</th>
                 <th>ACCIONES</th>
               </tr>
             </thead>
@@ -351,8 +410,13 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 <?php
 require_once APP_ROOT . 'public/inc/scripts.php';
 ?>
+<script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
 <script>
-  let table = new DataTable('#myTable', {
+  let table = new DataTable('#users-table', {
+    columnDefs: [{
+      targets: [0, 4],
+      className: 'dt-body-center'
+    }, ],
     lengthChange: false,
     layout: {
       topStart: null,
@@ -361,6 +425,7 @@ require_once APP_ROOT . 'public/inc/scripts.php';
     },
     language: {
       "zeroRecords": "No se encontraron registros",
+      "emptyTable": "Aún no hay registros crea uno nuevo aquí",
       "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
       "infoEmpty": "Mostrando 0 a 0 de 0 registros",
       "infoFiltered": "(filtrado de _MAX_ registros totales)",
@@ -369,44 +434,50 @@ require_once APP_ROOT . 'public/inc/scripts.php';
 
   let headers = new Headers();
 
-  let data = new FormData();
-  data.append('modulo_usuario', 'leer');
-
   let config = {
-    method: 'POST',
+    method: 'GET',
     headers: headers,
     mode: 'cors',
     cache: 'no-cache',
-    body: data
   };
 
   loadData();
 
   function loadData() {
     let incremental = 1;
-    fetch('<?= APP_URL ?>public/js/ajax/usuarioAjax.php', config)
+    fetch('<?= APP_URL ?>api/users', config)
       .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        data.forEach(item => {
-          table.row.add([
-            incremental++,
-            `${item.usuario_nombre} ${item.usuario_apellido_paterno} ${item.usuario_apellido_materno}`,
-            item.usuario_usuario,
-            item.usuario_email,
-            item.rol_descripcion,
-            item.usuario_estado === "1" ? 'activo' : 'inactivo',
-            `<button type="button" class="editar" onClick="actualizar(${item.usuario_id})">
-              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-pencil"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
-            </button>
-            <button type="button" class="remover" onClick="remover(${item.usuario_id})">
-              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-            </button> 
-            <button type="button" class="opciones" onClick="mostrarOpciones($item.usuario_id)">
-              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-dots-vertical"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>
-            </button>`
-          ]).draw()
-        });
+      .then(response => {
+        console.log(response);
+
+        // Verificar si la respuesta es exitosa y tiene datos
+        if (response.status === "success" && response.data) {
+          // Ahora iteramos sobre response.data donde están los usuarios
+          response.data.forEach(item => {
+            table.row.add([
+              incremental++,
+              `${item.usuario_nombre} ${item.usuario_apellido_paterno} ${item.usuario_apellido_materno}`,
+              item.usuario_usuario,
+              item.usuario_email,
+              item.usuario_estado === "1" ? 'activo' : 'inactivo',
+              item.rol_descripcion,
+              `<button type="button" class="editar" onClick="actualizar(${item.usuario_id})">
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-pencil"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
+              </button>
+              <button type="button" class="remover" onClick="remover(${item.usuario_id})">
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+              </button>
+              <button type="button" class="opciones" onClick="mostrarOpciones(${item.usuario_id})">
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-dots-vertical"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>
+              </button>`
+            ]).draw();
+          });
+        } else {
+          console.error("Error al cargar los datos o no hay datos disponibles");
+        }
+      })
+      .catch(error => {
+        console.error("Error al obtener datos:", error);
       });
   }
 
@@ -509,5 +580,147 @@ require_once APP_ROOT . 'public/inc/scripts.php';
 
   function actualizar(usuario_id) {
     window.location.href = `<?= APP_URL ?>users/update/${usuario_id}`;
+  }
+  // Función para mostrar y posicionar el menú desplegable
+  function mostrarOpciones(usuario_id) {
+    // Prevenir comportamiento por defecto
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Cerrar cualquier menú abierto anteriormente
+    cerrarTodosLosMenus();
+
+    // Obtener el botón que se hizo clic
+    const boton = event.currentTarget;
+
+    // Verificar si ya existe un menú para este usuario
+    let menu = document.getElementById(`menu-${usuario_id}`);
+
+    // Si no existe, crear el menú
+    if (!menu) {
+      menu = document.createElement('div');
+      menu.id = `menu-${usuario_id}`;
+      menu.className = 'dropdown-menu';
+      menu.innerHTML = `
+      <div class="dropdown-item" onclick="verDetalles(${usuario_id})">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="8" r="1"></circle><line x1="12" y1="12" x2="12" y2="16"></line>
+        </svg>
+        Ver detalles
+      </div>
+      <div class="dropdown-item" onclick="cambiarEstado(${usuario_id})">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        Cambiar estado
+      </div>
+      <div class="dropdown-item" onclick="resetearPassword(${usuario_id})">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        Resetear contraseña
+      </div>
+    `;
+      document.body.appendChild(menu);
+    }
+
+    // Posicionar el menú
+    posicionarMenu(boton, menu);
+
+    // Mostrar el menú
+    menu.classList.add('show');
+
+    // Agregar listener para cerrar el menú cuando se haga clic fuera de él
+    setTimeout(() => {
+      document.addEventListener('click', cerrarMenuAlClickearFuera);
+    }, 10);
+  }
+
+  // Función para posicionar el menú correctamente
+  function posicionarMenu(boton, menu) {
+    const rect = boton.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+    // Calcular posición inicial (debajo y a la derecha del botón)
+    let top = rect.bottom + scrollTop;
+    let left = rect.left + scrollLeft;
+
+    // Mostrar temporalmente el menú para obtener sus dimensiones
+    menu.style.visibility = 'hidden';
+    menu.style.display = 'block';
+    menu.style.opacity = '0';
+
+    // Obtener dimensiones del menú
+    const menuWidth = menu.offsetWidth;
+    const menuHeight = menu.offsetHeight;
+
+    // Obtener dimensiones de la ventana
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    // Ajustar posición si el menú se sale por la derecha
+    if (left + menuWidth > windowWidth - 20) {
+      left = rect.right + scrollLeft - menuWidth;
+    }
+
+    // Ajustar posición si el menú se sale por abajo
+    if (top + menuHeight > windowHeight + scrollTop - 20) {
+      top = rect.top + scrollTop - menuHeight;
+    }
+
+    // Aplicar posición
+    menu.style.top = `${top}px`;
+    menu.style.left = `${left}px`;
+
+    // Restaurar visibilidad
+    menu.style.visibility = '';
+    menu.style.display = '';
+    menu.style.opacity = '';
+  }
+
+  // Función para cerrar todos los menús
+  function cerrarTodosLosMenus() {
+    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+      menu.classList.remove('show');
+    });
+  }
+
+  // Función para cerrar el menú cuando se hace clic fuera de él
+  function cerrarMenuAlClickearFuera(event) {
+    const menus = document.querySelectorAll('.dropdown-menu.show');
+    let clickDentroDeMenu = false;
+
+    menus.forEach(menu => {
+      if (menu.contains(event.target)) {
+        clickDentroDeMenu = true;
+      }
+    });
+
+    // Si el clic no fue dentro de un menú o en un botón de opciones
+    if (!clickDentroDeMenu && !event.target.classList.contains('opciones')) {
+      cerrarTodosLosMenus();
+      document.removeEventListener('click', cerrarMenuAlClickearFuera);
+    }
+  }
+
+  // Funciones de ejemplo para las acciones del menú
+  function verDetalles(usuario_id) {
+    console.log(`Ver detalles del usuario ${usuario_id}`);
+    // Implementa tu lógica aquí
+    cerrarTodosLosMenus();
+  }
+
+  function cambiarEstado(usuario_id) {
+    console.log(`Cambiar estado del usuario ${usuario_id}`);
+    // Implementa tu lógica aquí
+    cerrarTodosLosMenus();
+  }
+
+  function resetearPassword(usuario_id) {
+    console.log(`Resetear contraseña del usuario ${usuario_id}`);
+    // Implementa tu lógica aquí
+    cerrarTodosLosMenus();
   }
 </script>
