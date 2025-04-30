@@ -179,26 +179,31 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     .error-message {
         text-align: left;
     }
+
+    .return-btn:hover {
+        /* TODO: mejorar el comportamiento on hover */
+        color: rgb(42, 42, 42);
+    }
+
+    .return-btn-symbol {
+        text-decoration: none;
+    }
+
+    .return-btn-content {
+        text-decoration: underline;
+    }
+
+    .plus-icon {
+        font-weight: 300;
+        font-size: 1.2em;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
 </style>
 
 <div class="body-container">
     <div class="container">
         <div class="navigation-header">
             <!-- boton para regresar -->
-            <style>
-                .return-btn:hover {
-                    /* TODO: mejorar el comportamiento on hover */
-                    color: rgb(42, 42, 42);
-                }
-
-                .return-btn-symbol {
-                    text-decoration: none;
-                }
-
-                .return-btn-content {
-                    text-decoration: underline;
-                }
-            </style>
             <a href="<?= APP_URL ?>users" class="return-btn">
                 <span class="return-btn-symbol">
                     < </span>
@@ -300,17 +305,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
                 <!-- clear and submit -->
                 <div class="buttons-options">
-                    <style>
-                        .plus-icon {
-                            font-weight: 300;
-                            font-size: 1.2em;
-                            font-family: 'Helvetica Neue', Arial, sans-serif;
-                        }
-                    </style>
                     <button type="submit" class="btn btn-primary"><span class="plus-icon">+</span>Crear Usuario</button>
                     <button type="reset" class="btn btn-secondary">Limpiar</button>
                 </div>
-
             </form>
         </div>
     </div>

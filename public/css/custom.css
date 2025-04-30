@@ -63,6 +63,7 @@ select {
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-small);
   height: 2.625rem;
+  width: 20rem;
   padding: var(--spacing-medium) var(--spacing-large);
   align-items: center;
   gap: var(--spacing-small);
@@ -70,6 +71,10 @@ select {
   border-radius: var(--rounded-lg);
   border: 1px solid var(--gray-300);
   background: var(--gray-50);
+}
+
+input[type="file"] {
+  width: 35.5rem;
 }
 
 button[type="submit"],
@@ -128,7 +133,6 @@ button[type="button"] {
   color: #ee5b62;
 
 }
-
 
 input[type="password"].error-input {
   color: #ee5b62; /* Color específico para inputs con error */

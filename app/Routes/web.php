@@ -87,11 +87,9 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
 
   // Usuarios (requiere permiso específico)
   $router->group(array('middleware' => 'Permission:users.view'), function ($router) {
-    $router->get('/users', 'UserController@index')->name('users.index');
-    $router->get('/users/create', 'UserController@create')->name('users.create');
-    $router->post('/users/store', 'UserController@store')->name('users.store');
-    $router->get('/users/edit/:id', 'UserController@edit')->name('users.edit');
-    $router->post('/users/update/:id', 'UserController@update')->name('users.update');
+    $router->get('/users', 'UserController@indexView')->name('users.index');
+    $router->get('/users/create', 'UserController@createView')->name('users.create');
+    $router->get('/users/edit/:id', 'UserController@editView')->name('users.update');
     $router->post('/users/delete/:id', 'UserController@delete')->name('users.delete');
   });
 

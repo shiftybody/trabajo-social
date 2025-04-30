@@ -17,7 +17,7 @@ class UserController
     $this->userModel = new userModel();
   }
 
-  public function index(Request $request)
+  public function indexView(Request $request)
   {
 
     // Cargar la vista de la lista de usuarios
@@ -31,7 +31,7 @@ class UserController
     return Response::html($contenido);
   }
 
-  public function create(Request $request)
+  public function createView(Request $request)
   {
     // Cargar la vista de creación de usuario
     ob_start();
@@ -43,6 +43,19 @@ class UserController
     return Response::html($contenido);
   }
 
+  public function editView(Request $request)
+  {
+    // Cargar la vista de edición de usuario
+    ob_start();
+    $id = $request->param('id');
+    // Variables disponibles en la vista
+    $titulo = 'Editar Usuario';
+    $usuario = $this->userModel->obtenerUsuarioPorId($id);
+    include APP_ROOT . 'app/Views/users/edit.php';
+    $contenido = ob_get_clean();
+
+    return Response::html($contenido);
+  }
 
   public function store(Request $request)
   {

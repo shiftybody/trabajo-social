@@ -579,7 +579,7 @@ require_once APP_ROOT . 'public/inc/scripts.php';
   }
 
   function actualizar(usuario_id) {
-    window.location.href = `<?= APP_URL ?>users/update/${usuario_id}`;
+    window.location.href = `<?= APP_URL ?>users/edit/${usuario_id}`;
   }
   // Función para mostrar y posicionar el menú desplegable
   function mostrarOpciones(usuario_id) {

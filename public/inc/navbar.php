@@ -233,7 +233,7 @@
     /* filter blur*/
     backdrop-filter: blur(1px);
     /* darker */
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.25);
     z-index: 999;
     display: none;
   }
