@@ -145,7 +145,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   }
 
   /* Estilos para la imagen de perfil */
-  .profile-picture-container {
+    .profile-picture-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -354,118 +354,108 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 </style>
 <div class="general-container">
   <div class="content-container">
-    <div>
-      <div class="form-information">
-        <h1 class="form-title">
-          Editar Usuario
-        </h1>
-        <p class="helper">Ingrese los datos del usuario que desea modificar</p>
-      </div>
+    <div class="form-information">
+      <h1 class="form-title">
+        Editar Usuario
+      </h1>
+      <p class="helper">Ingrese los datos del usuario que desea modificar</p>
     </div>
-    <div class="form-container">
-
+    <form class="form-container form-ajax" novalidate action="<?= APP_URL ?>api/users/<?= $usuario->usuario_id ?>" method="POST" enctype="multipart/form-data">
       <div class="left-side">
         <div class="general-information">
+          <!-- Nombre Completo & Apellido Paterno -->
+          <div class="row-layout">
+            <div class="input-field">
+              <label for="nombre" class="file-label">Nombre</label>
+              <input type="text" name="nombre" id="nombre" value="<?= $usuario->usuario_nombre ?>" class="input" placeholder="Nombre"
+                pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
+            </div>
+            <div class="input-field">
+              <label for="apellidoPaterno" class="file-label">Apellido Paterno</label>
+              <input type="text" name="apellidoPaterno" id="apellidoPaterno" value="<?= $usuario->usuario_apellido_paterno ?>" class="input"
+                placeholder="Apellido Paterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
+            </div>
+          </div>
 
-          <form novalidate action="<?= APP_URL ?>api/users/<?= $usuario->usuario_id ?>" method="POST" class="form-layout form-ajax" enctype="multipart/form-data">
-            <input type="hidden" name="_method" value="PUT">
-            <input type="hidden" name="change_password" id="change_password" value="0">
+          <!-- Apellido Materno & Telefono -->
+          <div class="row-layout">
+            <div class="input-field">
+              <label for="apellidoMaterno" class="file-label">Apellido Materno</label>
+              <input type="text" name="apellidoMaterno" id="apellidoMaterno" value="<?= $usuario->usuario_apellido_materno ?>" class="input"
+                placeholder="Apellido Materno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
+            </div>
+            <div class="input-field">
+              <label for="telefono" class="file-label">Teléfono</label>
+              <input type="text" name="telefono" id="telefono" value="<?= $usuario->usuario_telefono ?>" class="input" placeholder="Telefono"
+                pattern="[0-9]{10}" maxlength="10">
+            </div>
+          </div>
 
-            <!-- Nombre Completo & Apellido Paterno -->
-            <div class="row-layout">
-              <div class="input-field">
-                <label for="nombre" class="file-label">Nombre</label>
-                <input type="text" name="nombre" id="nombre" value="<?= $usuario->usuario_nombre ?>" class="input" placeholder="Nombre"
-                  pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
-              </div>
-              <div class="input-field">
-                <label for="apellidoPaterno" class="file-label">Apellido Paterno</label>
-                <input type="text" name="apellidoPaterno" id="apellidoPaterno" value="<?= $usuario->usuario_apellido_paterno ?>" class="input"
-                  placeholder="Apellido Paterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
-              </div>
+          <!-- correo y rol -->
+          <div class="row-layout">
+            <div class="input-field">
+              <label for="correo" class="file-label">Correo</label>
+              <input type="email" name="correo" id="correo" value="<?= $usuario->usuario_email ?>" class="input" placeholder="Correo"
+                maxlength="100">
+            </div>
+            <div class="input-field">
+              <label for="rol" class="file-label">Rol</label>
+              <select name="rol" id="rol" class="input">
+                <option value="" selected>Selecciona un rol</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Nombre de usuario y estado -->
+          <div class="row-layout">
+            <div class="input-field">
+              <label for="username" class="file-label">Nombre de Usuario</label>
+              <input type="text" name="username" id="username" value="<?= $usuario->usuario_usuario ?>" class="input" placeholder="Nombre de Usuario"
+                pattern="[a-zA-Z0-9._@!#$%^&*+\-]{3,70}" maxlength="70">
+            </div>
+            <div class="input-field">
+              <label for="estado" class="file-label">Estado</label>
+              <select name="estado" id="estado" class="input">
+                <option value="" selected>Selecciona un estado</option>
+              </select>
             </div>
 
-            <!-- Apellido Materno & Telefono -->
-            <div class="row-layout">
-              <div class="input-field">
-                <label for="apellidoMaterno" class="file-label">Apellido Materno</label>
-                <input type="text" name="apellidoMaterno" id="apellidoMaterno" value="<?= $usuario->usuario_apellido_materno ?>" class="input"
-                  placeholder="Apellido Materno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
-              </div>
-              <div class="input-field">
-                <label for="telefono" class="file-label">Teléfono</label>
-                <input type="text" name="telefono" id="telefono" value="<?= $usuario->usuario_telefono ?>" class="input" placeholder="Telefono"
-                  pattern="[0-9]{10}" maxlength="10">
-              </div>
+          </div>
+
+          <!-- Enlace para cambiar contraseña -->
+          <div class="row-layout">
+            <div class="input-field">
+              <span id="toggle_password_section" class="password-toggle">Cambiar contraseña</span>
             </div>
+          </div>
 
-            <!-- correo y rol -->
-            <div class="row-layout">
-              <div class="input-field">
-                <label for="correo" class="file-label">Correo</label>
-                <input type="email" name="correo" id="correo" value="<?= $usuario->usuario_email ?>" class="input" placeholder="Correo"
-                  maxlength="100">
-              </div>
-              <div class="input-field">
-                <label for="rol" class="file-label">Rol</label>
-                <select name="rol" id="rol" class="input">
-                  <option value="" selected>Selecciona un rol</option>
-                </select>
-              </div>
+          <!-- Contraseña & confirmar contraseña (oculto inicialmente) -->
+          <div id="password_section" class="row-layout password-section">
+            <div class="input-field">
+              <label for="password" class="file-label">Nueva contraseña</label>
+              <input type="password" name="password" id="password" class="input" placeholder="Nueva contraseña"
+                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20">
             </div>
-
-            <!-- Nombre de usuario y estado -->
-            <div class="row-layout">
-              <div class="input-field">
-                <label for="username" class="file-label">Nombre de Usuario</label>
-                <input type="text" name="username" id="username" value="<?= $usuario->usuario_usuario ?>" class="input" placeholder="Nombre de Usuario"
-                  pattern="[a-zA-Z0-9._@!#$%^&*+\-]{3,70}" maxlength="70">
-              </div>
-              <div class="input-field">
-                <label for="estado" class="file-label">Estado</label>
-                <select name="estado" id="estado" class="input">
-                  <option value="" selected>Selecciona un estado</option>
-                </select>
-              </div>
-
+            <div class="input-field">
+              <label for="password2" class="file-label">Confirmar nueva contraseña</label>
+              <input type="password" name="password2" id="password2" class="input"
+                placeholder="Confirmar nueva contraseña"
+                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20" autocomplete="new-password">
             </div>
+          </div>
 
-            <!-- Enlace para cambiar contraseña -->
-            <div class="row-layout">
-              <div class="input-field">
-                <span id="toggle_password_section" class="password-toggle">Cambiar contraseña</span>
-              </div>
-            </div>
-
-            <!-- Contraseña & confirmar contraseña (oculto inicialmente) -->
-            <div id="password_section" class="row-layout password-section">
-              <div class="input-field">
-                <label for="password" class="file-label">Nueva contraseña</label>
-                <input type="password" name="password" id="password" class="input" placeholder="Nueva contraseña"
-                  pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20">
-              </div>
-              <div class="input-field">
-                <label for="password2" class="file-label">Confirmar nueva contraseña</label>
-                <input type="password" name="password2" id="password2" class="input"
-                  placeholder="Confirmar nueva contraseña"
-                  pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20" autocomplete="new-password">
-              </div>
-            </div>
-
-            <!-- clear and submit -->
-            <div class="buttons-options">
-              <style>
-                .plus-icon {
-                  font-weight: 300;
-                  font-size: 1.2em;
-                  font-family: 'Helvetica Neue', Arial, sans-serif;
-                }
-              </style>
-              <button type="submit" class="btn btn-primary"><span class="plus-icon">+</span>Guardar</button>
-              <button type="reset" class="btn btn-secondary">Limpiar</button>
-            </div>
-
-          </form>
+          <!-- clear and submit -->
+          <div class="buttons-options">
+            <style>
+              .plus-icon {
+                font-weight: 300;
+                font-size: 1.2em;
+                font-family: 'Helvetica Neue', Arial, sans-serif;
+              }
+            </style>
+            <button type="submit" class="btn btn-primary"><span class="plus-icon">+</span>Guardar</button>
+            <button type="reset" class="btn btn-secondary">Limpiar</button>
+          </div>
         </div>
       </div>
       <div class="right-side">
@@ -490,8 +480,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           </div>
         </div>
       </div>
-
-    </div>
+    </form>
   </div>
 </div>
 
@@ -512,13 +501,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         const option = document.createElement("option");
         option.value = rol.rol_id;
         option.textContent = rol.rol_descripcion;
-
-        // Comparamos el valor del rol con el rol actual del usuario
-        if (rol.rol_id == rolActual) {
-          option.selected = true; // Marcamos esta opción como seleccionada
-        }
-
-
+        (rol.rol_id == rolActualoption.selected) ? true: false;
         select.appendChild(option);
       });
 
@@ -565,22 +548,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       this.textContent = 'Cambiar contraseña';
     }
   });
-
-  // TODO: ESTA FUNCION PUEDE FUNCIONAR PARA EL TOGGLE DE ESTADO
-  // // Funcionalidad para el toggle de estado
-  // document.getElementById('estado_toggle').addEventListener('change', function() {
-  //   const statusText = document.getElementById('status_text');
-
-  //   if (this.checked) {
-  //     statusText.textContent = 'Activo';
-  //     statusText.classList.remove('status-text-inactive');
-  //     statusText.classList.add('status-text-active');
-  //   } else {
-  //     statusText.textContent = 'Inactivo';
-  //     statusText.classList.remove('status-text-active');
-  //     statusText.classList.add('status-text-inactive');
-  //   }
-  // });
 
   // Validación para contraseñas coincidentes
   document.querySelector('form').addEventListener('submit', function(e) {
