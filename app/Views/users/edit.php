@@ -447,6 +447,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           <!-- clear and submit -->
           <div class="buttons-options">
             <style>
+              /* TODO: Esta clase debe de estar en un estilo mas elevado */
               .plus-icon {
                 font-weight: 300;
                 font-size: 1.2em;

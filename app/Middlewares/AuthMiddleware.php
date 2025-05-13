@@ -1,61 +1,58 @@
 <?php
 
-/**
- * Middleware de Autenticación
- * 
- * Verifica si el usuario está autenticado en las paginas protegidas con autenticación
- */
-
 namespace App\Middlewares;
 
 use App\Core\Request;
 use App\Core\Response;
 use App\Controllers\LoginController;
 
-class AuthMiddleware
-{
-  /**
-   * Procesa la petición
-   * 
-   * @param Request $request Petición a procesar
-   * @param callable $next Siguiente función en la cadena
-   * @return mixed Respuesta
-   */
-  public function handle(Request $request, callable $next)
-  {
+class AuthMiddleware {
+    private $authController;
+    private $publicRoutes = [
+        '/login',
+        '/error/404',
+        '/error/403',
+        '/error/401',
+        '/error/500'
+    ];
 
-    // Verificar si la sesión ha expirado
-    $authController = new LoginController();
-    // Verificar si existe una sesión
-    if (!isset($_SESSION[APP_SESSION_NAME])) {
-      // No hay sesión - redirigir a login
-      if ($request->expectsJson()) {
-        return Response::json(array(
-          'status' => 'error',
-          'message' => 'No autenticado'
-        ), 401);
-      }
-      return Response::redirect(APP_URL . 'logout');
+    public function __construct() {
+        $this->authController = new LoginController();
     }
 
-    // Verificar si la sesión ha expirado
-    $isSessionExpired = $authController->checkSessionTimeout();
+    public function handle(Request $request, callable $next) {
+        // Verificar si la ruta actual es pública
+        if (in_array($request->getUri(), $this->publicRoutes)) {
+            return $next($request);
+        }
 
-    if ($isSessionExpired) {
-      // La sesión ha expirado - redirigir a logout con parámetro de expiración
-      if ($request->expectsJson()) {
-        return Response::json(array(
-          'status' => 'error',
-          'message' => 'Sesión expirada por inactividad'
-        ), 401);
-      }
-      return Response::redirect(APP_URL . 'logout');
+        // Verificar estado de la sesión
+        if ($this->authController->checkSessionTimeout()) {
+            // Si la sesión expiró, intentar restaurar desde cookie
+            if ($this->authController->validRememberCookie()) {
+                $this->authController->RestoreSessionFromCookie();
+            } else {
+                // Si no hay cookie válida, redirigir al login
+                return Response::redirect(APP_URL . 'login');
+            }
+        } else {
+            // Actualizar timestamp de última actividad
+            $this->authController->updateLastActivity();
+        }
+
+        // Verificar si el usuario está autenticado
+        if (!isset($_SESSION[APP_SESSION_NAME]) || empty($_SESSION[APP_SESSION_NAME]['id'])) {
+            return Response::redirect(APP_URL . 'login');
+        }
+
+        // Continuar con la siguiente middleware o controlador
+        return $next($request);
     }
 
-    // Actualizar última actividad
-    $authController->updateLastActivity();
-
-    // Continuar con la petición
-    return $next($request);
-  }
+    /**
+     * Agregar una ruta pública
+     */
+    public function addPublicRoute($route) {
+        $this->publicRoutes[] = $route;
+    }
 }

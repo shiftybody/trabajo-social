@@ -437,7 +437,6 @@ class Router
     if ($lastUri) {
       $this->routes[$lastMethod][$lastUri]['name'] = $name;
     }
-
     return $this;
   }
 }

@@ -313,6 +313,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </div>
 </div>
 <script src="<?= APP_URL ?>public/js/ajax.js"></script>
+<!-- Script para  -->
 <script>
     fetch("<?= APP_URL ?>api/roles", {
             method: "GET",
@@ -327,6 +328,5 @@ require_once APP_ROOT . 'public/inc/navbar.php';
                 select.appendChild(option);
             });
         })
-        // to string
         .catch(error => console.error('Error al cargar los roles:', error));
 </script>

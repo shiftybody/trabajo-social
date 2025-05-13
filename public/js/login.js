@@ -1,9 +1,4 @@
-// seleccionar aquel con id login-form
-// clg del formulario
-
 const formulario = document.getElementById("login-form");
-
-// escuchar el evento submit validar los campos del formulario y enviar los datos
 
 formulario.addEventListener("submit", async function (e) {
   e.preventDefault();
@@ -15,7 +10,7 @@ formulario.addEventListener("submit", async function (e) {
 
   // Ocultar mensaje de error anterior
   const errorDiv = document.getElementById("error-msg");
-  
+
   // Limpiar los mensajes de error previos
   document
     .querySelectorAll(".error-message")
@@ -43,13 +38,13 @@ formulario.addEventListener("submit", async function (e) {
   if (!isValid) return;
 
   const submitBtn = this.querySelector('button[type="submit"]');
-  const originalText = submitBtn ? submitBtn.innerText : '';
+  const originalText = submitBtn ? submitBtn.innerText : "";
 
   if (submitBtn) {
-    submitBtn.innerText = 'Procesando...';
+    submitBtn.innerText = "Procesando...";
     submitBtn.disabled = true;
   }
- 
+
   // obtener el elemento con id error-msg
   const errorMsg = document.getElementById("error-msg");
 
@@ -62,31 +57,25 @@ formulario.addEventListener("submit", async function (e) {
 
     const result = await response.json();
 
-
-    if (result.status === 'success') {
+    if (result.status === "success") {
       if (result.redirect) {
         window.location.href = data.redirect;
       }
-    }
-
-    else if (result.status === 'error') {
- 
+    } else if (result.status === "error") {
       if (errorDiv) {
-        // Crear un párrafo con el mensaje o usar uno existente
-        let errorP = errorDiv.querySelector('p');
+        let errorP = errorDiv.querySelector("p");
         if (!errorP) {
-          errorP = document.createElement('p');
+          errorP = document.createElement("p");
           errorDiv.appendChild(errorP);
-          // asgniar la clase error-message
-          errorP.classList.add('error-message');
-        
+          errorP.classList.add("error-message");
         }
-        // Establecer el mensaje
-        errorP.textContent = result.message || 'Ha ocurrido un error';
-        errorDiv.hidden = false;
 
-        submitBtn.innerText = 'Enviar';
-    submitBtn.disabled = false;
+        // mostrar el
+        errorDiv.hidden = false;
+        errorP.textContent = result.message || "Ha ocurrido un error";
+
+        submitBtn.innerText = "Enviar";
+        submitBtn.disabled = false;
       }
 
       // mostrar todos los inputs y agregarle la clase error-input
@@ -96,12 +85,10 @@ formulario.addEventListener("submit", async function (e) {
         input.classList.add("error-input");
       });
     }
-
   } catch (error) {
     errorMsg.textContent = "Error al enviar el formulario. Inténtalo de nuevo.";
     errorMsg.classList.add("error-message");
   }
-  
 });
 
 //Eliminar estilo de error al escribir en el input
@@ -112,12 +99,12 @@ formulario.querySelectorAll("input").forEach((input) => {
       this.classList.remove("error-input");
       const error = this.parentElement.querySelector(".error-message");
       if (error) error.remove();
-    } 
+    }
     // esconder el mensaje de error si existe
-    if(document. getElementById("error-msg") ){
+    if (document.getElementById("error-msg")) {
       const errorDiv = document.getElementById("error-msg");
       errorDiv.hidden = true;
-    } 
+    }
   });
 });
 

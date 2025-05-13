@@ -266,10 +266,6 @@
     font-weight: bold;
   }
 
-  .dt-info {
-    font-family: 'Inter', sans-serif;
-  }
-
   .select-container {
     position: relative;
   }

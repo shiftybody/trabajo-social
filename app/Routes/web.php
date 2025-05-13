@@ -24,7 +24,7 @@ $router->get('/login', function () {
     }
 
     ob_start();
-    $loginViewPath = APP_ROOT . 'app/Views/auth/login.php';
+    $loginViewPath = APP_ROOT . 'app/Views/auth/index.php';
 
     if (!file_exists($loginViewPath)) {
       throw new Exception("Vista de login no encontrada: " . $loginViewPath);

@@ -5,10 +5,6 @@
     background-color: #F7F7F7;
   }
 
-  h1 {
-    padding-bottom: 0.5rem;
-  }
-
   p {
     justify-content: center;
     color: var(--gray-500, #677283);

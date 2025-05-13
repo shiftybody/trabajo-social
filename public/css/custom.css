@@ -1,6 +1,6 @@
 :root {
   /* Common typography styles */
-  --font-family: Inter, sans-serif;
+  --font-family: 'Inter', console;
   --font-size-small: 14px;
   --font-size-large: 24px;
   --font-weight-normal: 400;
@@ -34,6 +34,7 @@ h1 {
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-large);
   letter-spacing: -0.24px;
+  padding-bottom: 0.5rem;
 }
 
 p {
@@ -63,7 +64,6 @@ select {
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-small);
   height: 2.625rem;
-  width: 20rem;
   padding: var(--spacing-medium) var(--spacing-large);
   align-items: center;
   gap: var(--spacing-small);
@@ -146,7 +146,8 @@ input[type="password"].error-input {
   border-width: 2px;
 }
 
-  /* cuando se autorellene cualquier input no cambiar el background */
+
+  /*  */
 input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 30px #f9fafb inset !important;
   -webkit-text-fill-color: #000 !important;

@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Inter';
-  src: url('../../resources/fonts/Inter.ttf') format('ttf');
+  src: url('../fonts/Inter.ttf');
 }
 
 *,
@@ -23,7 +23,7 @@ html,
 }
 
 body {
-  font-family: 'Inter', sans-serif; /* Usa 'Inter' como fuente principal y una fuente de respaldo */
+  font-family: 'Inter', console;
   margin: 0;
   line-height: inherit;
 }
