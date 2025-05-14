@@ -1,7 +1,7 @@
 <?php
-$errorCode = '404';
-$errorTitle = 'Page Not Found';
-$errorMessage =  'Lo sentimos, la página que estás buscando no existe.';
+$errorCode = '500';
+$errorTitle = 'Internal Server Error';
+$errorMessage = ' Lo sentimos, ha ocurrido un error interno en el servidor.';
 require_once APP_ROOT . 'public/inc/head.php';
 require_once APP_ROOT . 'public/inc/navbar.php';
 ?>

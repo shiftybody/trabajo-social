@@ -6,56 +6,73 @@ use App\Models\userModel;
 
 /**
  * Controlador para autenticación API con sesiones
+ * Compatible con PHP 5.6+
  */
 class LoginController extends userModel
 {
-
   /**
    * Inicia sesión del usuario
    */
   public function login()
   {
-
-    $usuario = $_POST['username'];
-    $password = $_POST['password'];
-    $remember =  isset($_POST['remember']) ? true : false;
-
-    $usuario = $this->autenticarUsuario($usuario, $password);
-
-    if (!$usuario) {
-      http_response_code(401);
-      echo json_encode(['status' => 'error', 'message' => 'El usuario o contraseña son incorrectos']);
+    // Verificar que APP_URL esté definida
+    if (!defined('APP_URL')) {
+      error_log('ERROR: APP_URL no está definida en login()');
+      http_response_code(500);
+      echo json_encode(array('status' => 'error', 'message' => 'Error de configuración del servidor'));
       exit;
     }
 
-    $this->actualizarUltimoAcceso($usuario->usuario_id);
-    $this->createSession($usuario);
+    $usuario = isset($_POST['username']) ? $_POST['username'] : '';
+    $password = isset($_POST['password']) ? $_POST['password'] : '';
+    $remember = isset($_POST['remember']) ? true : false;
 
-    if ($remember) {
-      $this->createCookie($usuario);
+    // Validar datos de entrada
+    if (empty($usuario) || empty($password)) {
+      http_response_code(400);
+      echo json_encode(array('status' => 'error', 'message' => 'Usuario y contraseña son requeridos'));
+      exit;
     }
 
-    echo json_encode([
+    // Autenticar usuario
+    $usuarioAuth = $this->autenticarUsuario($usuario, $password);
+
+    if (!$usuarioAuth) {
+      error_log("Login fallido para usuario: $usuario");
+      http_response_code(401);
+      echo json_encode(array('status' => 'error', 'message' => 'El usuario o contraseña son incorrectos'));
+      exit;
+    }
+
+    // Login exitoso
+    error_log("Login exitoso para usuario: $usuario");
+
+    $this->actualizarUltimoAcceso($usuarioAuth->usuario_id);
+    $this->createSession($usuarioAuth);
+
+    if ($remember) {
+      $this->createCookie($usuarioAuth);
+    }
+
+    // Crear URL de redirección
+    $redirectUrl = rtrim(APP_URL, '/') . '/dashboard';
+    error_log("Redirigiendo a: $redirectUrl");
+
+    echo json_encode(array(
       'status' => 'success',
-      'redirect' => APP_URL . 'dashboard'
-    ]);
+      'message' => 'Login exitoso',
+      'redirect' => $redirectUrl
+    ));
 
     exit;
   }
 
-
   /**
-   * Crea una nueva sesión ✅
-   * 
-   * @param object $usuario Objeto de usuario autenticado
-   *
-   * @return void
+   * Crea una nueva sesión
    */
   public function createSession($usuario)
   {
-    // Crear sesión
-    // basado obtener la descripcion del rol utilizando el id del rol
-
+    // Obtener descripción del rol
     $userRoles = $this->obtenerRoles();
     $rolDescripcion = null;
 
@@ -66,8 +83,7 @@ class LoginController extends userModel
       }
     }
 
-
-    $_SESSION[APP_SESSION_NAME] = [
+    $_SESSION[APP_SESSION_NAME] = array(
       'id' => $usuario->usuario_id,
       'username' => $usuario->usuario_usuario,
       'nombre' => $usuario->usuario_nombre,
@@ -75,27 +91,24 @@ class LoginController extends userModel
       'apellido_materno' => $usuario->usuario_apellido_materno,
       'email' => $usuario->usuario_email,
       'avatar' => $usuario->usuario_avatar,
-      'rol' => $rolDescripcion,
-      'rol_descripcion' => $usuario->rol_descripcion,
+      'rol' => $usuario->usuario_rol,
+      'rol_descripcion' => $rolDescripcion,
       'ultima_actividad' => time(),
-    ];
+    );
+
+    error_log("Sesión creada para usuario ID: " . $usuario->usuario_id);
   }
 
-
   /**
-   * Crea una cookie de recordar sesión ✅
-   * 
-   * @param object $usuario Objeto de usuario autenticado
-   * 
-   * @return void
+   * Crea una cookie de recordar sesión
    */
   public function createCookie($usuario)
   {
-    $cookieData = [
+    $cookieData = array(
       'id' => $usuario->usuario_id,
       'username' => $usuario->usuario_usuario,
       'token' => $usuario->usuario_password_hash
-    ];
+    );
 
     $cookieValue = base64_encode(json_encode($cookieData));
 
@@ -104,26 +117,19 @@ class LoginController extends userModel
       $cookieValue,
       time() + REMEMBER_COOKIE_DURATION,
       "/",
-      "", // Dominio vacío para el mismo dominio
-      isset($_SERVER['HTTPS']), // Secure solo si HTTPS
-      true // HttpOnly para mayor seguridad
+      "",
+      isset($_SERVER['HTTPS']),
+      true
     );
-  }
 
+    error_log("Cookie creada para usuario: " . $usuario->usuario_usuario);
+  }
 
   /**
    * Verifica si la sesión ha expirado por inactividad
-   * Basado en la variable de sesión 'ultima_actividad'
-   * & en la constante SESSION_EXPIRATION_TIMEOUT ✅
-   *
-   * @param bool $ignoreRememberCookie Si se debe ignorar la cookie de recordar sesión  
-   *  
-   * @return bool true si la sesión ha expirado por inactividad, false si no
-   *
    */
   public function checkSessionTimeout($ignoreRememberCookie = false)
   {
-    // Si existe una sesión activa
     if (isset($_SESSION[APP_SESSION_NAME]) && isset($_SESSION[APP_SESSION_NAME]['ultima_actividad'])) {
       $currentTime = time();
       if ($currentTime - $_SESSION[APP_SESSION_NAME]['ultima_actividad'] > SESSION_EXPIRATION_TIMOUT) {
@@ -140,12 +146,13 @@ class LoginController extends userModel
   }
 
   /**
-   * Verifica si hay una cookie de "recordar sesión" valida
-   * 
-   * @return bool Si la sesión fue restaurada exitosamente
+   * Verifica si hay una cookie de "recordar sesión" válida
    */
   public function validRememberCookie()
   {
+    if (!isset($_COOKIE[APP_SESSION_NAME])) {
+      return false;
+    }
 
     $cookieData = json_decode(base64_decode($_COOKIE[APP_SESSION_NAME]), true);
 
@@ -163,17 +170,11 @@ class LoginController extends userModel
       return false;
     }
 
-    // TODO:   verificar que la diferencia entre
-    // time() y SESSION_EXPIRATION_TIMEOUT no sea mayor a COOKIE_EXPIRATION_TIMEOUT 
-    // para validar que la cookie no haya expirado.
-
     return true;
   }
 
   /**
    * Restaura la sesión desde la cookie de recordar sesión
-   * 
-   * @return bool true si se restauró la sesión, false si no
    */
   public function RestoreSessionFromCookie()
   {
@@ -181,50 +182,41 @@ class LoginController extends userModel
       $cookieData = json_decode(base64_decode($_COOKIE[APP_SESSION_NAME]), true);
 
       if ($this->validRememberCookie()) {
-
         $usuario = $this->obtenerUsuarioPorId($cookieData['id']);
         $this->createSession($usuario);
-
         return true;
       } else {
         setcookie(APP_SESSION_NAME, "", time() - 1, "/");
         return false;
       }
-    } else {
-      return false;
     }
-  }
 
+    return false;
+  }
 
   /**
    * Actualiza el tiempo de la última actividad del usuario
-   * 
-   * @return void
-   * 
    */
   public function updateLastActivity()
   {
-    $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
+    if (isset($_SESSION[APP_SESSION_NAME])) {
+      $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
+    }
   }
 
   /**
    * Cierra la sesión del usuario
-   * 
-   * TODO: evaluar si es necesario el uso de la variable $expired
-   * 
-   * Versión compatible con el router que sigue soportando
-   * la notificación de sesión expirada
    */
   public function logout()
   {
-
     $expired = isset($_GET['expired']) && $_GET['expired'] == '1';
 
+    // Limpiar sesión
     if (isset($_SESSION[APP_SESSION_NAME])) {
       unset($_SESSION[APP_SESSION_NAME]);
-      $_SESSION = array();
     }
 
+    // Limpiar cookie
     if (isset($_COOKIE[APP_SESSION_NAME])) {
       setcookie(APP_SESSION_NAME, "", time() - 1, "/");
     }
@@ -236,15 +228,15 @@ class LoginController extends userModel
 
     if ($isApiRequest) {
       $message = $expired ? 'Sesión expirada por inactividad' : 'Sesión cerrada correctamente';
-      echo json_encode(['status' => 'success', 'message' => $message]);
-      exit;
+      echo json_encode(array('status' => 'success', 'message' => $message));
     } else {
-      $redirect = APP_URL . "login?expired=0";
+      $redirect = APP_URL . "login";
       if ($expired) {
         $redirect .= '?expired=1';
       }
       header("Location: " . $redirect);
-      exit;
     }
+
+    exit;
   }
 }

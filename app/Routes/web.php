@@ -2,12 +2,8 @@
 
 use App\Core\Router;
 use App\Core\Response;
-use App\Middlewares\AuthMiddleware;
-use App\Middlewares\PermissionMiddleware;
-use App\Middlewares\RoleMiddleware;
 
 $router = new Router();
-$response = new Response();
 
 // Establecer vistas de error personalizadas
 $router->setErrorView('404', APP_ROOT . 'app/Views/errors/404.php');
@@ -15,7 +11,7 @@ $router->setErrorView('403', APP_ROOT . 'app/Views/errors/403.php');
 $router->setErrorView('401', APP_ROOT . 'app/Views/errors/401.php');
 $router->setErrorView('500', APP_ROOT . 'app/Views/errors/500.php');
 
-// Rutas públicas
+// Rutas públicas - CORREGIDO: usar LoginController en lugar de AuthController
 $router->get('/login', function () {
   try {
     // Si ya hay sesión activa, redirigir al dashboard
@@ -39,11 +35,11 @@ $router->get('/login', function () {
 
     return Response::html($content);
   } catch (Exception $e) {
-    // Mostrar error en lugar de contenido vacío
     return Response::html("<h1>Error al cargar la página de login</h1><p>{$e->getMessage()}</p>");
   }
 });
 
+// CORREGIDO: usar LoginController
 $router->post('/login', 'LoginController@login');
 $router->get('/logout', 'LoginController@logout');
 
@@ -81,30 +77,34 @@ $router->get('/error/500', function () {
 });
 
 // Rutas protegidas (requieren autenticación)
-$router->group(array('middleware' => 'Auth'), function ($router) {
+$router->group(['middleware' => 'Auth'], function ($router) {
+
   // Dashboard
   $router->get('/dashboard', 'DashboardController@index')->name('dashboard');
 
-  // Usuarios (requiere permiso específico)
-  $router->group(array('middleware' => 'Permission:users.view'), function ($router) {
+  // Usuarios (requiere permiso específico para ver el listado y editar)
+  $router->group(['middleware' => 'Permission:users.view'], function ($router) {
+    // 
     $router->get('/users', 'UserController@indexView')->name('users.index');
-    $router->get('/users/create', 'UserController@createView')->name('users.create');
+    // $router->get('/users/create', 'UserController@createView')->name('users.create'); // Se mueve de aquí
     $router->get('/users/edit/:id', 'UserController@editView')->name('users.update');
-    $router->post('/users/delete/:id', 'UserController@delete')->name('users.delete');
+  });
+
+  // Crear usuario (vista y acción)
+  $router->group(['middleware' => 'Permission:users.create'], function ($router) {
+    $router->get('/users/create', 'UserController@createView')->name('users.create'); // Se añade aquí
+    $router->post('/users', 'UserController@store')->name('users.store');
   });
 
   // Roles (requiere permiso específico)
-  $router->group(array('middleware' => 'Permission:roles.view'), function ($router) {
-    $router->get('/roles', 'PermissionController@roles')->name('roles.index');
-    $router->get('/roles/edit/:id', 'PermissionController@editRole')->name('roles.edit');
-    $router->post('/roles/update/:id', 'PermissionController@updateRole')->name('roles.update');
-    $router->get('/roles/create', 'PermissionController@createRole')->name('roles.create');
-    $router->post('/roles/store', 'PermissionController@storeRole')->name('roles.store');
-    $router->post('/roles/delete/:id', 'PermissionController@deleteRole')->name('roles.delete');
+  $router->group(['middleware' => 'Permission:roles.view'], function ($router) {
+    $router->get('/roles', 'RoleController@index')->name('roles.index');
+    $router->get('/roles/edit/:id', 'RoleController@edit')->name('roles.edit');
+    $router->get('/roles/create', 'RoleController@create')->name('roles.create');
   });
 
   // Permisos (solo accesible para administradores)
-  $router->group(array('middleware' => 'Role:1'), function ($router) {
+  $router->group(['middleware' => 'Role:1'], function ($router) {
     $router->get('/permissions', 'PermissionController@index')->name('permissions.index');
     $router->get('/permissions/assign/:role_id', 'PermissionController@assignForm')->name('permissions.assign');
     $router->post('/permissions/assign/:role_id', 'PermissionController@assignSave')->name('permissions.assign.save');
@@ -114,6 +114,11 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   $router->get('/profile', 'UserController@profile')->name('profile');
   $router->post('/profile/update', 'UserController@updateProfile')->name('profile.update');
   $router->post('/profile/password', 'UserController@updatePassword')->name('profile.password');
+});
+
+// Ruta por defecto (opcional)
+$router->get('/', function () {
+  return Response::redirect(APP_URL . 'dashboard');
 });
 
 return $router;

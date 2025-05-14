@@ -7,15 +7,22 @@ use App\Core\Request;
 use App\Core\Response;
 
 /**
- * Middleware de Permisos Simplificado
+ * Middleware de Roles Simplificado
  */
-class PermissionMiddleware
+class RoleMiddleware
 {
-    private $permission;
+    private $roles;
 
-    public function __construct($permission)
+    public function __construct($roles)
     {
-        $this->permission = $permission;
+        // Convertir string separado por comas a array
+        if (is_string($roles) && strpos($roles, ',') !== false) {
+            $this->roles = array_map('intval', explode(',', $roles));
+        } elseif (is_string($roles)) {
+            $this->roles = [intval($roles)];
+        } else {
+            $this->roles = is_array($roles) ? $roles : [$roles];
+        }
     }
 
     public function handle(Request $request, callable $next)
@@ -31,10 +38,10 @@ class PermissionMiddleware
             return Response::redirect(APP_URL . 'login');
         }
 
-        // Verificar permiso si se especifica uno
-        if ($this->permission && !Auth::can($this->permission)) {
+        // Verificar roles si se especifican
+        if (!empty($this->roles) && !Auth::hasRole($this->roles)) {
             if ($request->expectsJson()) {
-                return Response::json(['error' => 'Permiso denegado'], 403);
+                return Response::json(['error' => 'Acceso denegado'], 403);
             }
             return Response::redirect(APP_URL . 'error/403');
         }

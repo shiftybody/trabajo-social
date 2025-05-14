@@ -68,13 +68,13 @@
     background: color(display-p3 0.9255 0.9255 0.9255);
   }
 
-  .side_button:hover::before {
+  /* Estilos base para el indicador del botón lateral */
+  .side_button::before {
     content: "";
     position: absolute;
     left: -0.4rem;
     /* Separa el indicador del botón */
     top: 50%;
-    transform: translateY(-50%);
     height: 80%;
     /* Altura del indicador */
     width: 4px;
@@ -82,6 +82,21 @@
     background-color: #007bff;
     /* Azul del indicador */
     border-radius: 2px;
+    /* Estado inicial para la animación: invisible y ligeramente desplazado */
+    opacity: 0;
+    transform: translateY(-50%) translateX(-10px);
+    /* Centrado verticalmente, inicia 10px a la izquierda */
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    /* Transición suave para opacidad y posición */
+  }
+
+  /* Estilos para el indicador cuando el botón lateral está en hover */
+  .side_button:hover::before {
+    /* Estado final para la animación: visible y en su posición final */
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+    /* Centrado verticalmente y en su posición horizontal final */
+    /* Las propiedades estáticas como content, position, etc., se movieron a .side_button::before */
   }
 
   .side_button_content {
@@ -379,7 +394,10 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             </div>
           </form>
 
-          <button class="action_create_new" onclick="goTo('users/create')">Nuevo</button>
+          <?php if (\App\Core\Auth::can('users.create')): ?>
+            <button class="action_create_new" onclick="goTo('users/create')">Nuevo</button>
+          <?php endif; ?>
+
         </div>
         <div class="table">
           <table id="users-table" class="hover">

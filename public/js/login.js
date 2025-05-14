@@ -59,7 +59,7 @@ formulario.addEventListener("submit", async function (e) {
 
     if (result.status === "success") {
       if (result.redirect) {
-        window.location.href = data.redirect;
+        window.location.href = result.redirect; // CORREGIDO: Usar result.redirect en lugar de data.redirect
       }
     } else if (result.status === "error") {
       if (errorDiv) {

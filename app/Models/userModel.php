@@ -32,7 +32,7 @@ class userModel extends mainModel
                 'usuario_telefono' => $data['telefono'],
                 'usuario_email' => $data['correo'],
                 'usuario_usuario' => $data['username'],
-                'usuario_password_hash' => $this->hashearContraseña($data['password']), // Asegúrate de hacer hash
+                'usuario_password_hash' => $this->hashearContraseña($data['password']),
                 'usuario_avatar' => $data['avatar'] ? $data['avatar'] : "default.png",
                 'usuario_rol' => $data['rol'],
                 'usuario_estado' => 1,

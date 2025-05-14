@@ -4,13 +4,13 @@ require_once '../vendor/autoload.php';
 require_once '../config/env.php';
 require_once '../config/init.php';
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-  session_start();
-}
+use App\Core\Auth;
+use App\Core\Request;
+use App\Core\Response;
 
-$request = new App\Core\Request();
+Auth::init();
 
-// Obtener la URI y segmentos
+$request = new Request();
 $uri = $request->getUri();
 $segments = explode('/', trim($uri, '/'));
 
@@ -26,28 +26,56 @@ try {
     $router = require_once '../app/Routes/web.php';
   }
 
+  // Despachar la ruta
   $response = $router->dispatch($request);
   $response->send();
 } catch (Exception $e) {
-
   $code = $e->getCode() ?: 500;
 
   if ($code === 404) {
-    // Manejar rutas no encontradas
-    if (isset($segments[0]) && $segments[0] === 'api') {
-      // Respuesta JSON para API
-      header('Content-Type: application/json');
-      http_response_code(404);
-      echo json_encode(['status' => 'error', 'message' => 'Ruta no encontrada']);
+    if ($isApiRequest) {
+      $response = Response::json([
+        'status' => 'error',
+        'message' => 'Ruta no encontrada'
+      ], 404);
     } else {
-      // Redirigir a login para solicitudes web
-      header('Location: ' . APP_URL . 'login');
+      // Para rutas web, verificar autenticación antes de redirigir
+      if (Auth::check()) {
+        $response = Response::redirect(APP_URL . 'error/404');
+      } else {
+        $response = Response::redirect(APP_URL . 'login');
+      }
+    }
+  } elseif ($code === 403) {
+    if ($isApiRequest) {
+      $response = Response::json([
+        'status' => 'error',
+        'message' => 'Acceso denegado'
+      ], 403);
+    } else {
+      $response = Response::redirect(APP_URL . 'error/403');
+    }
+  } elseif ($code === 401) {
+    if ($isApiRequest) {
+      $response = Response::json([
+        'status' => 'error',
+        'message' => 'No autenticado'
+      ], 401);
+    } else {
+      $response = Response::redirect(APP_URL . 'login');
     }
   } else {
-    // Manejar otros errores
-    http_response_code($code);
-    echo "Error interno del servidor: " . $e->getMessage();
+    error_log("Error en index.php: " . $e->getMessage());
+
+    if ($isApiRequest) {
+      $response = Response::json([
+        'status' => 'error',
+        'message' => 'Error interno del servidor'
+      ], 500);
+    } else {
+      $response = Response::redirect(APP_URL . 'error/500');
+    }
   }
 
-  exit();
+  $response->send();
 }
