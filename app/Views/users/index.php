@@ -229,6 +229,10 @@
     padding: 11px;
   }
 
+  td.dt-empty {
+    align-content: center;
+  }
+
   /* botton con el atributo bottom y clase editar*/
   button[bottom].editar {
     background: #007bff;
@@ -253,13 +257,12 @@
   .clear-button {
     position: absolute;
     right: 1rem;
-    top: 50%;
+    top: 48%;
     transform: translateY(-50%);
     cursor: pointer;
     font-size: 1.5rem;
     color: #aaa;
     display: none;
-    /* Ocultar por defecto */
   }
 
   .input-container input:focus+.clear-button,
@@ -455,7 +458,7 @@ require_once APP_ROOT . 'public/inc/scripts.php';
     cache: 'no-cache',
   };
 
-  loadData();
+  // loadData();
 
   function loadData() {
     let incremental = 1;
@@ -585,7 +588,6 @@ require_once APP_ROOT . 'public/inc/scripts.php';
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        // volver a cargar la tabla
         table.clear();
         loadData();
       })

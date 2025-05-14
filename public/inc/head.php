@@ -6,4 +6,5 @@
 <link rel="shortcut icon" href="<?= APP_URL . 'public/images/favicon.ico' ?>">
 <link rel="stylesheet" href="<?= APP_URL . 'public/css/styles.css' ?>">
 <link rel="stylesheet" href="<?= APP_URL . 'public/css/custom.css' ?>">
+<link rel="preload" href="<?= APP_URL . 'public/css/datatables.min.css' ?>" as="style">
 <link rel="stylesheet" href="<?= APP_URL . 'public/css/datatables.min.css' ?>">

@@ -73,11 +73,3 @@ document.addEventListener("click", function (event) {
     }
   }
 });
-
-// cuando se presione un tag img con clase logo
-document.querySelectorAll("img.logo").forEach((logo) => {
-  logo.addEventListener("click", function () {
-    // redirigir a la página principal
-    window.location.href = "dashboard"; // Asegúrate que esta URL sea la correcta o usa APP_URL si es necesario
-  });
-});

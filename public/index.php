@@ -26,7 +26,6 @@ try {
     $router = require_once '../app/Routes/web.php';
   }
 
-  // Despachar la ruta
   $response = $router->dispatch($request);
   $response->send();
 } catch (Exception $e) {

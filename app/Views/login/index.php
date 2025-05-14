@@ -9,7 +9,6 @@
     justify-content: center;
     color: var(--gray-500, #677283);
     color: var(--gray-500, color(display-p3 0.4196 0.4471 0.502));
-    text-align: center;
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
@@ -51,7 +50,7 @@
     align-items: center;
     flex-direction: column;
     gap: 1rem;
-    width: 28rem;
+    width: 28.6rem;
   }
 
   main #section-container #login-form {
@@ -89,7 +88,7 @@
     justify-content: flex-end;
     align-items: flex-start;
     gap: var(--2, 8px);
-    align-self: stretch;
+    align-self: stretch
   }
 
   div#remember-check {
@@ -97,11 +96,20 @@
     flex-direction: row-reverse;
     justify-content: flex-end;
     gap: 0.5rem;
+    align-items: center;
+  }
+
+  div#remember-check label:hover {
+    cursor: pointer;
   }
 
   input[type="checkbox"] {
     accent-color: #2f2f31;
+    width: 1.2em;
+    height: 1.2em;
+    cursor: pointer;
   }
+
 
   @media (max-height: 800px) {
     main #section-container #logotipo {

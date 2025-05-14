@@ -117,14 +117,18 @@
   .sidebar.left {
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     height: 100%;
-    /* width: 0; */ /* Eliminado: el ancho ahora es fijo, la visibilidad se controla con transform/opacity */
-    width: 20rem; /* Ancho deseado cuando está abierto */
+    /* width: 0; */
+    /* Eliminado: el ancho ahora es fijo, la visibilidad se controla con transform/opacity */
+    width: 20rem;
+    /* Ancho deseado cuando está abierto */
     position: fixed;
     top: 0;
     left: 0;
     background-color: #fbfbfb;
-    overflow-x: hidden; /* Importante para que el contenido no se vea durante la transformación */
-    /* transition: 0.05s; */ /* Eliminado: reemplazado por la nueva transición */
+    overflow-x: hidden;
+    /* Importante para que el contenido no se vea durante la transformación */
+    /* transition: 0.05s; */
+    /* Eliminado: reemplazado por la nueva transición */
     z-index: 1000;
     border: 1px solid #d2d2d2;
     border-radius: 0 1rem 1rem 0;
@@ -132,7 +136,8 @@
     /* Estilos de animación */
     opacity: 0;
     visibility: hidden;
-    transform: translateX(-100%); /* Posición inicial: fuera de pantalla a la izquierda */
+    transform: translateX(-100%);
+    /* Posición inicial: fuera de pantalla a la izquierda */
     /* Transición para cerrar (fade-out y deslizamiento) */
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s 0.2s;
   }
@@ -140,7 +145,8 @@
   .sidebar.left.open {
     opacity: 1;
     visibility: visible;
-    transform: translateX(0); /* Posición final: en pantalla */
+    transform: translateX(0);
+    /* Posición final: en pantalla */
     /* Transición para abrir (fade-in y deslizamiento) */
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s 0s;
   }
@@ -148,14 +154,17 @@
   .sidebar.right {
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     height: 100%;
-    /* width: 0; */ /* Eliminado */
-    width: 20rem; /* Ancho deseado cuando está abierto */
+    /* width: 0; */
+    /* Eliminado */
+    width: 20rem;
+    /* Ancho deseado cuando está abierto */
     position: fixed;
     top: 0;
     right: 0;
     background-color: #fbfbfb;
     overflow-x: hidden;
-    /* transition: 0.05s; */ /* Eliminado */
+    /* transition: 0.05s; */
+    /* Eliminado */
     z-index: 1000;
     border: 1px solid #d2d2d2;
     border-radius: 1rem 0 0 1rem;
@@ -163,7 +172,8 @@
     /* Estilos de animación */
     opacity: 0;
     visibility: hidden;
-    transform: translateX(100%); /* Posición inicial: fuera de pantalla a la derecha */
+    transform: translateX(100%);
+    /* Posición inicial: fuera de pantalla a la derecha */
     /* Transición para cerrar (fade-out y deslizamiento) */
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s 0.2s;
   }
@@ -171,7 +181,8 @@
   .sidebar.right.open {
     opacity: 1;
     visibility: visible;
-    transform: translateX(0); /* Posición final: en pantalla */
+    transform: translateX(0);
+    /* Posición final: en pantalla */
     /* Transición para abrir (fade-in y deslizamiento) */
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s 0s;
   }
@@ -265,7 +276,8 @@
     backdrop-filter: blur(1px);
     background-color: rgba(0, 0, 0, 0.25);
     z-index: 999;
-    /* display: none; */ /* Eliminado: Reemplazado por opacity/visibility para la transición */
+    /* display: none; */
+    /* Eliminado: Reemplazado por opacity/visibility para la transición */
     opacity: 0;
     visibility: hidden;
     /* Transición para cerrar (fade-out) */
@@ -278,6 +290,7 @@
     /* Transición para abrir (fade-in) */
     transition: opacity 0.2s ease, visibility 0s 0s;
   }
+
   .option-icon {
     width: 1.25rem;
     height: auto;
@@ -395,3 +408,13 @@
 </div>
 
 <script src="<?= APP_URL . "public/js/navbar.js" ?>"></script>
+
+<script>
+  // cuando se presione un tag img con clase logo
+  document.querySelectorAll("img.logo").forEach((logo) => {
+    logo.addEventListener("click", function() {
+      // redirigir a la página principal
+      window.location.href = "<?= APP_URL ?>dashboard";
+    });
+  });
+</script>

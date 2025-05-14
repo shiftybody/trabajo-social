@@ -39,7 +39,6 @@ h1 {
 
 p {
   display: flex;
-  text-align: center;
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-large);
@@ -122,7 +121,7 @@ button[type="button"] {
   color: var(--red-600);
   font-family: var(--font-family);
   font-size: var(--font-size-small);
-  font-weight: var(--font-weight-normal);
+  font-weight: var(--font-weight-medium);
   line-height: var(--line-height-large);
 }
 
@@ -131,23 +130,26 @@ button[type="button"] {
   border: 1px solid var(--red-500) !important;
   background: var(--red-50) !important;
   color: #ee5b62;
+}
 
+/* Estilo modificado para campos de error cuando están en foco */
+.error-input:focus-visible {
+  border-color: var(--red-50) !important;
+  outline: 2px solid rgb(237, 44, 44) !important;
+  outline-offset: -2px !important;
+  box-shadow: none !important;
 }
 
 input[type="password"].error-input {
-  color: #ee5b62; /* Color específico para inputs con error */
+  color: #ee5b62;
 }
 
 .error-input::placeholder{
   color: #ee5b62
 }
 
-.error-input:hover {
-  border-width: 2px;
-}
 
 
-  /*  */
 input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 30px #f9fafb inset !important;
   -webkit-text-fill-color: #000 !important;
