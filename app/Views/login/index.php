@@ -51,6 +51,7 @@
     flex-direction: column;
     gap: 1rem;
     width: 28.6rem;
+    padding-bottom: 3rem;
   }
 
   main #section-container #login-form {
@@ -61,7 +62,7 @@
     width: 100%;
     height: 100%;
     background-color: #ffffff;
-    border-radius: .5rem;
+    border-radius: var(--rounded-lg);
     padding: 2rem;
     gap: 1.25rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.05);

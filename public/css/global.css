@@ -20,10 +20,10 @@
   --black: #000;
 
   /* Common spacings and radii */
-  --spacing-small: 10px;
-  --spacing-medium: 12px;
-  --spacing-large: 16px;
-  --rounded-lg: 8px;
+  --spacing-small: 0.625rem;
+  --spacing-medium: 0.75rem;
+  --spacing-large: 1rem;
+  --rounded-lg: 0.5rem;
 }
 
 h1 {
@@ -74,14 +74,34 @@ select {
 
 input[type="file"] {
   width: 35.5rem;
+  border: 1px solid #ccc;
+  border-radius: .5rem;
+  display: inline-block;
+  line-height: .5rem;
+  background-color: #f9fafb;
+}
+
+input::file-selector-button {
+  background-color: #14171d;
+  background-position-x: 0%;
+  background-size: 100%;
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  padding: .8rem 1.25rem;
+  margin-right: 1rem;
+}
+
+input::file-selector-button:hover {
+  background-color: #002b7A;
 }
 
 button[type="submit"],
 button[type="reset"] {
   display: flex;
-  padding: var(--spacing-small) var(--spacing-large);
   justify-content: center;
   align-items: center;
+  padding: var(--spacing-small) var(--spacing-large);
   gap: var(--spacing-small);
   border-radius: var(--rounded-lg);
   font-family: var(--font-family);

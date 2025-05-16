@@ -4,10 +4,8 @@
   }
 
   .navigation {
-    /* mover todo a la derecha utilizando flex */
     display: flex;
     justify-content: flex-end;
-    /* espacio arriba y abajo de 2 rem por lado */
     padding: 2rem 0;
     padding-bottom: 1.5rem;
   }
@@ -28,19 +26,22 @@
     background: color(display-p3 0.9255 0.9255 0.9255);
     color: var(--gray-600, #465566);
     color: var(--gray-600, color(display-p3 0.2941 0.3333 0.3882));
-    /* text-sm/font-semibold */
     font-size: 14px;
     font-style: normal;
     font-weight: 600;
     line-height: 150%;
-    /* 21px */
   }
 
   hr {
     width: 251px;
   }
 
-  /* a partir de aqui es lo bueno  */
+  .dt-info {
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+  }
+
   .side_button {
     display: flex;
     width: 251px;
@@ -57,7 +58,6 @@
     font-weight: 500;
     line-height: 150%;
     position: relative;
-    /* Necesario para el indicador */
   }
 
   .side_button.active {
@@ -68,35 +68,23 @@
     background: color(display-p3 0.9255 0.9255 0.9255);
   }
 
-  /* Estilos base para el indicador del botón lateral */
   .side_button::before {
     content: "";
     position: absolute;
     left: -0.4rem;
-    /* Separa el indicador del botón */
     top: 50%;
     height: 80%;
-    /* Altura del indicador */
     width: 4px;
-    /* Ancho del indicador */
     background-color: #007bff;
-    /* Azul del indicador */
     border-radius: 2px;
-    /* Estado inicial para la animación: invisible y ligeramente desplazado */
     opacity: 0;
     transform: translateY(-50%) translateX(-10px);
-    /* Centrado verticalmente, inicia 10px a la izquierda */
     transition: opacity 0.2s ease, transform 0.2s ease;
-    /* Transición suave para opacidad y posición */
   }
 
-  /* Estilos para el indicador cuando el botón lateral está en hover */
   .side_button:hover::before {
-    /* Estado final para la animación: visible y en su posición final */
     opacity: 1;
     transform: translateY(-50%) translateX(0);
-    /* Centrado verticalmente y en su posición horizontal final */
-    /* Las propiedades estáticas como content, position, etc., se movieron a .side_button::before */
   }
 
   .side_button_content {
@@ -115,7 +103,6 @@
     flex-direction: column;
   }
 
-  /* right side styles */
   .right_side {
     display: flex;
     flex-direction: column;
@@ -156,12 +143,10 @@
     color: var(--white, #FFF);
     color: var(--white, color(display-p3 1 1 1));
 
-    /* text-sm/font-bold */
     font-size: 14px;
     font-style: normal;
     font-weight: 700;
     line-height: 150%;
-    /* 21px */
   }
 
   .filter_icon {
@@ -170,15 +155,7 @@
   }
 
 
-  table {
-    border-radius: var(--rounded-lg, 8px);
-    background: var(--white, #FFF);
-    background: var(--white, color(display-p3 1 1 1));
 
-    /* shadow */
-    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.10), 0px 1px 2px -1px rgba(0, 0, 0, 0.10);
-    box-shadow: 0px 1px 3px 0px color(display-p3 0 0 0 / 0.10), 0px 1px 2px -1px color(display-p3 0 0 0 / 0.10);
-  }
 
   tbody>tr:last-child>* {
     border: 0 !important;
@@ -214,15 +191,12 @@
   td {
     color: var(--gray-900, var(--gray-900, #0C192A));
     color: var(--gray-900, var(--gray-900, color(display-p3 0.0667 0.098 0.1569)));
-    /* text-sm/font-normal */
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
     line-height: 150%;
-    /* 21px */
   }
 
-  /* Cambiarlo por esto */
   td:not(.dt-empty):last-child {
     display: flex;
     gap: 0.4rem;
@@ -233,7 +207,6 @@
     align-content: center;
   }
 
-  /* botton con el atributo bottom y clase editar*/
   button[bottom].editar {
     background: #007bff;
     background: color(display-p3 0 0.4824 1);
@@ -249,9 +222,18 @@
     display: inline-block;
   }
 
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    stroke: #465566;
+    pointer-events: none;
+  }
+
   #matchingInput {
+    padding-left: 40px;
     padding-right: 24px;
-    /* Espacio para el botón de limpiar */
   }
 
   .clear-button {
@@ -291,46 +273,38 @@
   .custom-select {
     width: 100%;
     padding: 8px 36px 8px 16px;
-    /* Clave: 36px de padding a la derecha */
     border: 1px solid #ccc;
     border-radius: 8px;
     appearance: none;
-    /* Elimina la apariencia nativa */
     -webkit-appearance: none;
     -moz-appearance: none;
     font-size: 14px;
     cursor: pointer;
+    background-color: var(--gray-50);
   }
 
-  /* Flecha personalizada */
-  .select-container::after {
-    content: '';
+  .select-filter-icon {
     position: absolute;
-    right: 16px;
-    top: calc(50% - 4px);
-    width: 8px;
-    height: 8px;
-    border-bottom: 2px solid #000;
-    border-right: 2px solid #000;
-    transform: translateY(-30%) rotate(45deg);
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
     pointer-events: none;
+    stroke: #465566;
   }
 
-  /* Estilos adicionales para mejorar la apariencia */
   .custom-select:focus {
     outline: none;
     border-color: rgb(152, 152, 152);
     box-shadow: 0 0 0 2px rgba(222, 222, 222, 0.2);
   }
 
-  /* Elimina el borde de enfoque en Firefox */
   .custom-select:-moz-focusring {
     color: transparent;
     text-shadow: 0 0 0 #000;
   }
 
-
-  /* Estilos para el menú desplegable */
   .dropdown-menu {
     position: absolute;
     background-color: white;
@@ -369,72 +343,115 @@
   .dropdown-item svg {
     margin-right: 8px;
   }
+
+
+  #users-table_wrapper {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  thead:nth-child(2) {
+    visibility: collapse;
+  }
+
+  table.dataTable thead tr>.dtfc-fixed-start,
+  table.dataTable thead tr>.dtfc-fixed-end,
+  table.dataTable tfoot tr>.dtfc-fixed-start,
+  table.dataTable tfoot tr>.dtfc-fixed-end {
+    background-color: #f2f2f2 !important;
+  }
+
+
+
+  table.dataTable.cell-border tbody th,
+  table.dataTable.cell-border tbody td {
+    border-top: 1px solid #ddd;
+    border-right: 1px solid red;
+  }
+
+  table.dataTable.cell-border tbody tr th:first-child,
+  table.dataTable.cell-border tbody tr td:first-child {
+    border-left: 1px solid red;
+  }
+
+  table.dataTable.no-footer {
+    border-bottom: 0px solid #111;
+  }
+
+  /* lamda */
+
+  div.dt-layout-table {
+    overflow: hidden;
+    background-color: #fff;
+    border-radius: var(--rounded-lg, 8px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  }
 </style>
 <?php
 require_once APP_ROOT . 'public/inc/head.php';
 require_once APP_ROOT . 'public/inc/navbar.php';
 ?>
 <div class="container">
-  <div class="body">
-    <!-- right side -->
-    <div class="right_side">
-      <div class="right_content">
-        <div class="tools">
-          <form action="" class="filter_form" id="filter_form">
-            <div class="select-container">
-              <select class="custom-select" name="filterColumn" title="" id="filterColumn">
-                <option value="0">Todo</option>
-                <option value="1">Nombre</option>
-                <option value="2">Usuario</option>
-                <option value="3">Correo</option>
-                <option value="4">Estado</option>
-                <option value="5">Rol</option>
-              </select>
-            </div>
-            <div class="input-container">
-              <input type="text" name="matchingColumn" id="matchingInput" placeholder="Buscar">
-              <span class="clear-button">×</span>
-            </div>
-          </form>
+  <div class="right_content">
+    <div class="tools">
 
-          <?php if (\App\Core\Auth::can('users.create')): ?>
-            <button class="action_create_new" onclick="goTo('users/create')">Nuevo</button>
-          <?php endif; ?>
+      <form class="filter_form" id="filter_form">
+        <div class="input-container">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" name="matchingColumn" id="matchingInput" placeholder="Buscar">
+          <span class="clear-button">×</span>
+        </div>
+        <div class="select-container">
+          <select class="custom-select" name="filterColumn" title="" id="filterColumn">
+            <option value="0">Todo</option>
+            <option value="1">Nombre</option>
+            <option value="2">Usuario</option>
+            <option value="3">Correo</option>
+            <option value="4">Estado</option>
+            <option value="5">Rol</option>
+          </select>
+          <svg class="select-filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.414 -4.414a2 2 0 0 1 -.586 -1.414v-2.172" />
+          </svg>
+        </div>
+      </form>
 
-        </div>
-        <div class="table">
-          <table id="users-table" class="hover">
-            <thead>
-              <tr>
-                <th class="dt-head-center">NO</th>
-                <th>NOMBRE COMPLETO</th>
-                <th>NOMBRE DE USUARIO</th>
-                <th>CORREO</th>
-                <th class="dt-head-center">ESTADO</th>
-                <th class="dt-head-center">ROL</th>
-                <th>ACCIONES</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!--  -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <?php if (\App\Core\Auth::can('users.create')): ?>
+        <button class="action_create_new" onclick="goTo('users/create')">Nuevo</button>
+      <?php endif; ?>
     </div>
+
+    <table id="users-table" class="hover nowrap cell-borders">
+      <thead>
+        <tr>
+          <th class="dt-head-center">NO</th>
+          <th>NOMBRE COMPLETO</th>
+          <th>NOMBRE DE USUARIO</th>
+          <th>CORREO</th>
+          <th class="dt-head-center">ESTADO</th>
+          <th class="dt-head-center">ROL</th>
+          <th>ACCIONES</th>
+        </tr>
+      </thead>
+    </table>
   </div>
 </div>
-<?php
-require_once APP_ROOT . 'public/inc/scripts.php';
-?>
+<?php require_once APP_ROOT . 'public/inc/scripts.php'; ?>
 <script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
 <script>
   let table = new DataTable('#users-table', {
+    fixedColumns: {
+      end: 1
+    },
+    scrollX: true,
     columnDefs: [{
-      targets: [0, 4],
+      targets: [0, 4, 5],
       className: 'dt-body-center'
-    }, ],
-    lengthChange: false,
+    }],
     layout: {
       topStart: null,
       buttomStart: null,
@@ -446,30 +463,36 @@ require_once APP_ROOT . 'public/inc/scripts.php';
       "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
       "infoEmpty": "Mostrando 0 a 0 de 0 registros",
       "infoFiltered": "(filtrado de _MAX_ registros totales)",
+    },
+    initComplete: () => {
+      loadData();
+    },
+    drawCallback: () => {
+      document.querySelectorAll('td').forEach(td => {
+        if (td.textContent === 'inactivo') {
+          td.classList.add('inactivo');
+        }
+        if (td.textContent === 'activo') {
+          td.classList.add('activo');
+        }
+      });
     }
   });
 
-  let headers = new Headers();
-
-  let config = {
-    method: 'GET',
-    headers: headers,
-    mode: 'cors',
-    cache: 'no-cache',
-  };
-
-  // loadData();
-
   function loadData() {
     let incremental = 1;
-    fetch('<?= APP_URL ?>api/users', config)
+    fetch('<?= APP_URL ?>api/users', {
+        method: 'GET',
+        headers: new Headers(),
+        mode: 'cors',
+        cache: 'no-cache',
+      })
       .then(response => response.json())
       .then(response => {
         console.log(response);
 
-        // Verificar si la respuesta es exitosa y tiene datos
         if (response.status === "success" && response.data) {
-          // Ahora iteramos sobre response.data donde están los usuarios
+
           response.data.forEach(item => {
             table.row.add([
               incremental++,
@@ -487,32 +510,35 @@ require_once APP_ROOT . 'public/inc/scripts.php';
               <button type="button" class="opciones" onClick="mostrarOpciones(${item.usuario_id})">
                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-dots-vertical"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>
               </button>`
-            ]).draw();
+            ]);
           });
+          table.draw();
+          table.columns.adjust();
+          document.getElementById('users-table_wrapper').style.opacity = '1';
         } else {
           console.error("Error al cargar los datos o no hay datos disponibles");
+          document.getElementById('users-table_wrapper').style.opacity = '1';
         }
       })
       .catch(error => {
         console.error("Error al obtener datos:", error);
+        document.getElementById('users-table_wrapper').style.opacity = '1';
       });
   }
 
-  let filter_form = document.getElementById('filter_form');
-
   let matchingInput = document.getElementById('matchingInput');
+  let filter_form = document.getElementById('filter_form');
   let filterColumn = document.getElementById('filterColumn');
-
-  filter_form.addEventListener('submit', () => {
-    event.preventDefault();
-  });
 
   // Evento para el input de búsqueda
   matchingInput.addEventListener('input', () => {
     applyFilter();
   });
 
-  // Evento para el cambio en el select
+  filter_form.addEventListener('submit', () => {
+    event.preventDefault();
+  });
+
   filterColumn.addEventListener('change', () => {
     applyFilter();
   });
@@ -553,22 +579,6 @@ require_once APP_ROOT . 'public/inc/scripts.php';
       } else {
         clearButton.style.display = 'none';
       }
-    });
-
-    // cuando table cambie 
-    table.on('draw', () => {
-      document.querySelectorAll('td').forEach(td => {
-        if (td.textContent === 'inactivo') {
-          td.classList.add('inactivo');
-        }
-      });
-
-      // si tiene la palabra activo se le agrega la clase activo
-      document.querySelectorAll('td').forEach(td => {
-        if (td.textContent === 'activo') {
-          td.classList.add('activo');
-        }
-      });
     });
   });
 

@@ -3,47 +3,23 @@ require_once APP_ROOT . 'public/inc/head.php';
 require_once APP_ROOT . 'public/inc/navbar.php';
 ?>
 <style>
-    .body-container {
+    main.container {
         display: flex;
-        padding: var(--8, 32px) var(--0, 0px);
+        padding-top: 2rem;
         flex-direction: column;
         align-items: center;
-        gap: var(--4, 16px);
+        gap: 1rem;
     }
 
-    .container {
+    .content {
         display: flex;
-        width: 672px;
-        /* padding: var(--4, 16px) var(--0, 0px); */
+        width: 42rem;
         flex-direction: column;
         align-items: flex-start;
         gap: var(--8, 24px);
     }
 
-    input[type="file"] {
-        border: 1px solid #ccc;
-        border-radius: .5rem;
-        display: inline-block;
-        line-height: .5rem;
-        background-color: #f9fafb;
-    }
-
-    input::file-selector-button {
-        background-color: #14171d;
-        background-position-x: 0%;
-        background-size: 100%;
-        border: 0;
-        border-radius: 0;
-        color: #fff;
-        padding: .8rem 1.25rem;
-        margin-right: 1rem;
-    }
-
-    input::file-selector-button:hover {
-        background-color: #384051;
-    }
-
-    .form-layout {
+    .form-content {
         display: flex;
         padding: var(--0, 0px);
         flex-direction: column;
@@ -65,7 +41,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         /* 100% */
     }
 
-    .helper {
+    .form-helper {
         align-self: stretch;
         color: var(--gray-500, var(--gray-500, #677283));
         color: var(--gray-500, var(--gray-500, color(display-p3 0.4196 0.4471 0.502)));
@@ -94,7 +70,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         align-self: stretch;
     }
 
-    .general-information {
+    .form-wrapper {
         display: flex;
         padding: var(--0, 0px);
         flex-direction: column;
@@ -116,7 +92,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     .form-information {
         display: flex;
         flex-direction: column;
-        gap: .4rem;
     }
 
     .user-avatar {
@@ -200,25 +175,24 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
 </style>
 
-<div class="body-container">
-    <div class="container">
+<main class="container">
+    <div class="content">
         <div class="navigation-header">
-            <!-- boton para regresar -->
             <a href="<?= APP_URL ?>users" class="return-btn">
                 <span class="return-btn-symbol">
                     < </span>
                         <span class="return-btn-content">Regresar</span>
             </a>
         </div>
-        <div class="general-information">
+        <div class="form-wrapper">
             <div class="form-information">
                 <h1 class="form-title">
                     Crear nuevo usuario
                 </h1>
-                <p class="helper">Ingrese los datos del usuario que desea crear</p>
+                <p class="form-helper">Ingrese los datos del usuario que desea crear</p>
             </div>
 
-            <form novalidate action="<?= APP_URL ?>api/users" method="POST" class="form-layout form-ajax" enctype="multipart/form-data">
+            <form novalidate action="<?= APP_URL ?>api/users" method="POST" class="form-content form-ajax" enctype="multipart/form-data">
 
                 <!-- Avatar -->
                 <div class="upload-avatar">
@@ -295,8 +269,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
                             pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20">
                     </div>
                     <div class="input-field">
-                        <label for="password2" class="file-label
-            ">Confirmar Contraseña</label>
+                        <label for="password2" class="file-label">Confirmar Contraseña</label>
                         <input type="password" name="password2" id="password2" class="input"
                             placeholder="Confirmar Contraseña"
                             pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" maxlength="20" autocomplete="new-password">
@@ -311,7 +284,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             </form>
         </div>
     </div>
-</div>
+</main>
 <script src="<?= APP_URL ?>public/js/ajax.js"></script>
 <!-- Script para  -->
 <script>

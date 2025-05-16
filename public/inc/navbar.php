@@ -1,15 +1,11 @@
 <style>
   header#app-header {
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    box-shadow: 0px 1px 3px 0px color(display-p3 0 0 0 / 0.10), 0px 1px 2px -1px color(display-p3 0 0 0 / 0.10);
     position: relative;
     top: 0;
     width: 100%;
     height: 4rem;
-    background-color: red;
-    border: 1px solid #D2D2D2;
-    border: 1px solid color(display-p3 0.825 0.825 0.825);
     background: #F2F2F2;
-    background: color(display-p3 0.95 0.95 0.95);
   }
 
   header #container {
@@ -98,8 +94,7 @@
     padding: 0px 0px 28px 34px;
     cursor: pointer;
     border-radius: 100px;
-    border: 1px solid var(--white, #FFF);
-    border: 1px solid var(--white, color(display-p3 1 1 1));
+    border: 1px solid #F2F2F2;
   }
 
   #avatar-status {
@@ -107,10 +102,8 @@
     width: 1rem;
     height: 1rem;
     border-radius: var(--rounded-lg, 8px);
-    border: 2px solid var(--white, #FFF);
-    border: 2px solid var(--white, color(display-p3 1 1 1));
+    border: 2px solid #F2F2F2;
     background: var(--green-400, #00CB84);
-    background: var(--green-400, color(display-p3 0.1922 0.7686 0.5529));
   }
 
   /* Estilos del menú lateral */
@@ -310,7 +303,7 @@
     </div>
     <div id="right-side">
       <div id="search-container">
-        <input type="text" class="search" placeholder="Escribe / para buscar">
+        <input type="text" class="search" placeholder="Escribe / para navegar">
         <!-- <button type="button" id="uwu">
           <img src="<?php echo APP_URL; ?>public/icons/search-outline.svg" alt="logo">
         </button> -->

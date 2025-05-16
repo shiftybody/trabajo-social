@@ -15,7 +15,6 @@ $uri = $request->getUri();
 $segments = explode('/', trim($uri, '/'));
 
 try {
-  // Determinar si es una solicitud de API
   $isApiRequest = isset($segments[0]) && $segments[0] === 'api';
 
   if ($isApiRequest) {
