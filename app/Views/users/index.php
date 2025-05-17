@@ -304,6 +304,36 @@
     color: transparent;
     text-shadow: 0 0 0 #000;
   }
+  .editar:hover svg {
+  stroke: #f0c231;
+}
+
+.remover:hover svg {
+  stroke: red;
+}
+
+
+  .editar:hover {
+    background-color: 	lightgray;
+  }
+
+  .remover:hover {
+    background-color: 	lightgray;
+  }
+
+  .opciones:hover {
+    background-color: lightgray;
+  }
+  .editar,
+  .remover,
+  .opciones {
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+  }
+
 
   .dropdown-menu {
     position: absolute;
