@@ -153,11 +153,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
   .profile-picture-container {
     position: relative;
-    /* Añadimos posición relativa para el posicionamiento absoluto del botón */
     width: 12rem;
-    /* Mismo ancho que la imagen */
     margin: 0 auto;
-    /* Centramos el contenedor */
   }
 
   .profile-picture {
@@ -169,15 +166,10 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     border: 2px solid #e2e8f0;
   }
 
-
-
   .btn-upload-avatar {
     position: absolute;
-    /* Posicionamiento absoluto */
     bottom: -10px;
-    /* Ajusta según necesites */
     left: -10px;
-    /* Ajusta según necesites */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -192,7 +184,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    /* Añadimos sombra suave */
   }
 
   .btn-upload-avatar:hover {
@@ -209,7 +200,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   button.btn-upload-avatar {
     width: auto;
   }
-
 
   #file-input {
     width: 100%;
@@ -373,9 +363,14 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         </h1>
         <p class="form-helper">Ingrese los datos del usuario que desea modificar</p>
       </div>
-      <form class="form-container form-ajax" novalidate action="<?= APP_URL ?>api/users/<?= $usuario->usuario_id ?>" method="POST" enctype="multipart/form-data">
+      <form class="form-container form-ajax" novalidate action="<?= APP_URL ?>api/users/update/<?= $usuario->usuario_id ?>" method="POST" enctype="multipart/form-data">
         <div class="left-side">
           <div class="general-information">
+
+            <input type="hidden" name="usuario_id" value="<?php $usuario->usuario_id ?>">
+
+            <input type="hidden" name="change_password" id="change_password" value="0">
+
             <!-- Nombre Completo & Apellido Paterno -->
             <div class="row-layout">
               <div class="input-field">
@@ -476,11 +471,11 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           <!-- Avatar a la derecha -->
           <label class="file-label">Foto de perfil</label>
           <div class="profile-picture-container">
-            <div class="profile-picture" style="background-image: url('<?= !empty($usuario->usuario_foto) ? APP_URL . 'public/photos/' . $usuario->usuario_foto : APP_URL . 'public/photos/default.jpg' ?>')">
+            <div class="profile-picture" style="background-image: url('<?= !empty($usuario->usuario_foto) ? APP_URL . 'public/photos/original/' . $usuario->usuario_foto : APP_URL . 'public/photos/default.jpg' ?>')">
 
             </div>
 
-            <input type="file" name="foto" id="foto" accept="image/*" style="display: none;">
+            <input type="file" name="foto" id="foto" accept="image/png, image/jpeg, image/gif" style="display: none;">
 
             <button type="button" id="upload_photo_btn" class="btn-upload-avatar" onclick="document.getElementById('foto').click()">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
@@ -501,6 +496,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   <script>
     // Guardamos el rol actual del usuario en una variable JavaScript
     const rolActual = "<?= $usuario->usuario_rol ?>";
+    console.log(rolActual);
     const estadoActual = "<?= $usuario->usuario_estado ?>";
 
     // Cargar los roles disponibles
@@ -514,7 +510,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           const option = document.createElement("option");
           option.value = rol.rol_id;
           option.textContent = rol.rol_descripcion;
-          (rol.rol_id == rolActualoption.selected) ? true: false;
+          (rol.rol_id == rolActual.selected) ? true: false;
           select.appendChild(option);
         });
 

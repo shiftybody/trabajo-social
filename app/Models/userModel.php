@@ -262,18 +262,18 @@ class userModel extends mainModel
      * 
      * @return array Lista de roles
      */
-    public function obtenerRoles()
+    public function getRoles()
     {
         try {
             $query = "SELECT rol_id, rol_descripcion FROM rol WHERE rol_estado = 1";
             $resultado = $this->ejecutarConsulta($query);
             return $resultado->fetchAll(PDO::FETCH_OBJ);
         } catch (\Exception $e) {
-            error_log("Error en obtenerRoles: " . $e->getMessage());
+            error_log("Error en getRoles: " . $e->getMessage());
             return [];
         }
     }
-    
+
 
     /**
      * Actualiza la última fecha de acceso de un usuario

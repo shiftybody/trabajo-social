@@ -72,8 +72,8 @@ class LoginController extends userModel
    */
   public function createSession($usuario)
   {
-    // Obtener descripción del rol
-    $userRoles = $this->obtenerRoles();
+
+    $userRoles = $this->getRoles();
     $rolDescripcion = null;
 
     foreach ($userRoles as $rol) {

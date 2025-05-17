@@ -239,7 +239,7 @@
   .clear-button {
     position: absolute;
     right: 1rem;
-    top: 48%;
+    top: 46%;
     transform: translateY(-50%);
     cursor: pointer;
     font-size: 1.5rem;
@@ -308,7 +308,7 @@
   .dropdown-menu {
     position: absolute;
     background-color: white;
-    border-radius: 8px;
+    border-radius: var(--rounded-lg);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     min-width: 160px;
     z-index: 1000;

@@ -20,10 +20,7 @@ class UserController
   public function indexView(Request $request)
   {
 
-    // Cargar la vista de la lista de usuarios
     ob_start();
-
-    // Variables disponibles en la vista
     $titulo = 'Usuarios';
     include APP_ROOT . 'app/Views/users/index.php';
     $contenido = ob_get_clean();
@@ -33,9 +30,8 @@ class UserController
 
   public function createView(Request $request)
   {
-    // Cargar la vista de creación de usuario
+
     ob_start();
-    // Variables disponibles en la vista
     $titulo = 'Crear Usuario';
     include APP_ROOT . 'app/Views/users/create.php';
     $contenido = ob_get_clean();
@@ -45,10 +41,8 @@ class UserController
 
   public function editView(Request $request)
   {
-    // Cargar la vista de edición de usuario
     ob_start();
     $id = $request->param('id');
-    // Variables disponibles en la vista
     $titulo = 'Editar Usuario';
     $usuario = $this->userModel->obtenerUsuarioPorId($id);
     include APP_ROOT . 'app/Views/users/edit.php';
@@ -59,11 +53,10 @@ class UserController
 
   public function store(Request $request)
   {
-    # --- Obtener datos de la solicitud --- #
+    
     $avatar = $request->FILES('avatar');
     $datos = $request->POST();
 
-    # --- Validar datos de inputs --- #
     $validar = [
       'nombre' => [
         'requerido' => true,
