@@ -328,7 +328,10 @@ class Auth
       setcookie(APP_SESSION_NAME, "", time() - 1, "/");
     }
 
-    session_destroy();
+    // Solo destruir la sesión si está activa
+    if (session_status() === PHP_SESSION_ACTIVE) {
+      session_destroy();
+    }
   }
 
   /**
