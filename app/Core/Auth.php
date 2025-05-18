@@ -55,19 +55,81 @@ class Auth
    */
   public static function init()
   {
-    if (session_status() !== PHP_SESSION_ACTIVE) {
+    if (session_status() == PHP_SESSION_NONE) {
       session_start();
     }
 
-    self::$userModel = new userModel();
-    self::$permissionModel = new permissionModel();
+    // Asegurar que los modelos estén disponibles
+    if (!self::$userModel) {
+      self::$userModel = new userModel();
+    }
 
-    // Cargar usuario de la sesión
+    // Si no hay una sesión activa (self::$user aún no está cargado),
+    // intentar restaurar desde la cookie.
+    // self::check() aquí podría ser prematuro si loadUser aún no se ha ejecutado
+    // con una sesión existente. Es mejor verificar directamente la variable de sesión.
+    if (!isset($_SESSION[APP_SESSION_NAME]['id'])) {
+      self::tryRestoreFromCookie();
+    }
+
+    // Cargar datos del usuario si hay una sesión (ya sea original o restaurada)
+    // y manejar la expiración de la sesión.
     self::loadUser();
   }
 
   /**
-   * Cargar usuario desde la sesión
+   * Intenta restaurar la sesión desde la cookie de "recordar sesión"
+   * @return bool True si la sesión fue restaurada, false en caso contrario
+   */
+  private static function tryRestoreFromCookie()
+  {
+    if (!isset($_COOKIE[APP_SESSION_NAME])) {
+      return false;
+    }
+
+    $cookieValue = $_COOKIE[APP_SESSION_NAME];
+    // Asegurarse de que la cookie no esté vacía para evitar errores con base64_decode
+    if (empty($cookieValue)) {
+        setcookie(APP_SESSION_NAME, "", time() - 3600, "/"); // Limpiar cookie malformada/vacía
+        return false;
+    }
+    
+    $cookieData = json_decode(base64_decode($cookieValue), true);
+
+    if (!$cookieData || !isset($cookieData['id']) || !isset($cookieData['token'])) {
+      // Cookie inválida o malformada, eliminarla
+      setcookie(APP_SESSION_NAME, "", time() - 3600, "/");
+      return false;
+    }
+
+    if (!self::$userModel) { // Asegurar que userModel esté instanciado
+        self::$userModel = new userModel();
+    }
+    
+    $user = self::$userModel->obtenerUsuarioPorId($cookieData['id']);
+
+    if (!$user) {
+      setcookie(APP_SESSION_NAME, "", time() - 3600, "/"); // Usuario no encontrado
+      return false;
+    }
+
+    // Comparar el token de la cookie con el hash de la contraseña actual del usuario
+    // Esto invalida la cookie si la contraseña del usuario ha cambiado.
+    if ($user->usuario_password_hash !== $cookieData['token']) {
+      setcookie(APP_SESSION_NAME, "", time() - 3600, "/"); // Token inválido
+      return false;
+    }
+
+    // Cookie válida, crear la sesión
+    self::createSession($user);
+    // Opcional: Refrescar la cookie de "recordarme" para extender su duración si se desea.
+    // self::createRememberCookie($user); 
+    error_log("Sesión restaurada desde cookie para usuario ID: " . $user->usuario_id);
+    return true;
+  }
+
+  /**
+   * Carga los datos del usuario desde la sesión si existe y no ha expirado
    */
   private static function loadUser()
   {
