@@ -45,7 +45,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         align-self: stretch;
         color: var(--gray-500, var(--gray-500, #677283));
         color: var(--gray-500, var(--gray-500, color(display-p3 0.4196 0.4471 0.502)));
-        font-size: 12px;
         font-style: normal;
         font-weight: 400;
         line-height: 12px;
@@ -278,7 +277,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
                 <!-- clear and submit -->
                 <div class="buttons-options">
-                    <button type="submit" class="btn btn-primary"><span class="plus-icon">+</span>Crear Usuario</button>
+                    <button type="submit" class="btn btn-primary dark-button"><span class="plus-icon">+</span>Crear Usuario</button>
                     <button type="reset" class="btn btn-secondary">Limpiar</button>
                 </div>
             </form>

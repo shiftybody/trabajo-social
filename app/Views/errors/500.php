@@ -1,6 +1,6 @@
 <?php
 $errorCode = '500';
-$errorTitle = 'Internal Server Error';
+$errorTitle = 'Error Interno del Servidor';
 $errorMessage = ' Lo sentimos, ha ocurrido un error interno en el servidor.';
 require_once APP_ROOT . 'public/inc/head.php';
 require_once APP_ROOT . 'public/inc/navbar.php';

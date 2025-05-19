@@ -172,7 +172,7 @@
         <input type="checkbox" name="remember" id="remember">
       </div>
 
-      <button type="submit">Iniciar Sesión</button>
+      <button type="submit" class="dark-button">Iniciar Sesión</button>
 
       <!-- Mensaje de error general oculto -->
       <div id="error-msg" hidden></div>

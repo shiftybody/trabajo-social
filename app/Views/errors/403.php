@@ -1,6 +1,6 @@
 <?php
 $errorCode = '403';
-$errorTitle = 'Forbidden'; // En la imagen dice "Forbidden"
+$errorTitle = 'Prohibido'; // En la imagen dice "Forbidden"
 $errorMessage = 'Lo sentimos, no tienes permiso para acceder a este recurso en el servidor.';
 require_once APP_ROOT . 'public/inc/head.php';
 require_once APP_ROOT . 'public/inc/navbar.php';

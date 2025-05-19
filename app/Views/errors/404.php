@@ -1,6 +1,6 @@
 <?php
 $errorCode = '404';
-$errorTitle = 'Page Not Found';
+$errorTitle = 'Página no encontrada';
 $errorMessage =  'Lo sentimos, la página que estás buscando no existe.';
 require_once APP_ROOT . 'public/inc/head.php';
 require_once APP_ROOT . 'public/inc/navbar.php';

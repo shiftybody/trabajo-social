@@ -3,6 +3,7 @@
   --font-family: 'Inter', console;
   --font-size-small: 14px;
   --font-size-large: 24px;
+  --font-weight-thin: 300; 
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-bold: 700;
@@ -33,8 +34,11 @@ h1 {
   font-size: var(--font-size-large);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-large);
-  letter-spacing: -0.24px;
-  padding-bottom: 0.5rem;
+  letter-spacing: -0.24px;  
+}
+
+h1.form-title {
+  padding-bottom: 0.3rem;
 }
 
 p {
@@ -62,7 +66,7 @@ select {
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-small);
-  height: 2.625rem;
+  height: 3rem;
   padding: var(--spacing-medium) var(--spacing-large);
   align-items: center;
   gap: var(--spacing-small);
@@ -74,6 +78,7 @@ select {
 
 input[type="file"] {
   width: 35.5rem;
+  height: 3rem;
   border: 1px solid #ccc;
   border-radius: .5rem;
   display: inline-block;
@@ -86,6 +91,7 @@ input::file-selector-button {
   background-position-x: 0%;
   background-size: 100%;
   border: 0;
+  height: 3rem;
   border-radius: 0;
   color: #fff;
   padding: .8rem 1.25rem;
@@ -93,7 +99,10 @@ input::file-selector-button {
 }
 
 input::file-selector-button:hover {
-  background-color: #002b7A;
+  background-color: #252525;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(0px);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 button[type="submit"],
@@ -101,6 +110,7 @@ button[type="reset"] {
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 3rem;
   padding: var(--spacing-small) var(--spacing-large);
   gap: var(--spacing-small);
   border-radius: var(--rounded-lg);
@@ -124,8 +134,8 @@ button[type="button"] {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 2.625rem;
-  width: 2.625rem;
+  height: 3rem;
+  width: 3rem;
   border-radius: var(--rounded-lg);
   border: 1px solid var(--gray-300);
   background-color: #f2f2f2;
@@ -186,4 +196,52 @@ input.error-input:-webkit-autofill:focus {
 #error-msg {
   display: flex;
   justify-content: flex-start;
+}
+
+
+.dark-button {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dark-button:hover {
+  background-color: #252525;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(0px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark-button:active {
+  transform: translateY(0px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Para añadir un efecto de brillo en los bordes */
+.dark-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.dark-button:hover::before {
+  left: 100%;
 }

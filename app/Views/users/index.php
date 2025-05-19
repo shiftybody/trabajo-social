@@ -304,26 +304,28 @@
     color: transparent;
     text-shadow: 0 0 0 #000;
   }
-  .editar:hover svg {
-  stroke: #f0c231;
-}
 
-.remover:hover svg {
-  stroke: red;
-}
+  .editar:hover svg {
+    stroke: #f0c231;
+  }
+
+  .remover:hover svg {
+    stroke: red;
+  }
 
 
   .editar:hover {
-    background-color: 	lightgray;
+    background-color: lightgray;
   }
 
   .remover:hover {
-    background-color: 	lightgray;
+    background-color: lightgray;
   }
 
   .opciones:hover {
     background-color: lightgray;
   }
+
   .editar,
   .remover,
   .opciones {
@@ -451,12 +453,12 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       </form>
 
       <?php if (\App\Core\Auth::can('users.create')): ?>
-        <button class="action_create_new" onclick="goTo('users/create')">Nuevo</button>
+        <button class="action_create_new dark-button" onclick="goTo('users/create')">Nuevo</button>
       <?php endif; ?>
     </div>
 
     <table id="users-table" class="hover nowrap cell-borders">
-      <thead>
+      <thead style="display: none;">
         <tr>
           <th class="dt-head-center">NO</th>
           <th>NOMBRE COMPLETO</th>
@@ -510,6 +512,12 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   });
 
   function loadData() {
+    // Mostrar el thead al iniciar la carga de datos
+    const thead = document.querySelector('thead');
+    if (thead) {
+      thead.style.display = '';
+    }
+
     let incremental = 1;
     fetch('<?= APP_URL ?>api/users', {
         method: 'GET',

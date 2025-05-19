@@ -63,6 +63,10 @@ class Auth
     if (!self::$userModel) {
       self::$userModel = new userModel();
     }
+    // AÑADIR ESTA VERIFICACIÓN E INICIALIZACIÓN PARA PERMISSIONMODEL
+    if (!self::$permissionModel) {
+      self::$permissionModel = new permissionModel();
+    }
 
     // Si no hay una sesión activa (self::$user aún no está cargado),
     // intentar restaurar desde la cookie.
@@ -148,15 +152,15 @@ class Auth
       if ($user) {
         self::$user = $user;
 
-
+        // Verificar si la sesión está marcada como recordada pero la cookie ya no existe
         if (isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true) {
           if (!isset($_COOKIE[APP_SESSION_NAME])) {
-
+            // La cookie de recordar ha desaparecido, actualizar el estado de la sesión
             $_SESSION[APP_SESSION_NAME]['is_remembered'] = false;
-
+            $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time(); // Reiniciar el temporizador
+            error_log("Cookie 'recordarme' no encontrada para sesión recordada. Actualizando a sesión normal.");
           }
         }
-
       } else {
         // El ID de usuario en la sesión no se encontró en la BD, tratar como sesión inválida
         error_log("Auth::loadUser - User ID " . $_SESSION[APP_SESSION_NAME]['id'] . " from session not found in DB.");
@@ -177,10 +181,19 @@ class Auth
       return true;
     }
 
-    // Si la sesión es "recordada", no expira por el TIMEOUT corto de inactividad.
-    // Su validez está ligada a la cookie "remember me" misma.
+    // Si la sesión es "recordada", verificar que la cookie siga existiendo
     if (isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true) {
-      return false;
+      // Si la cookie existe, la sesión no expira por el TIMEOUT corto
+      if (isset($_COOKIE[APP_SESSION_NAME])) {
+        return false;
+      } else {
+        // Si la cookie ya no existe, convertir a sesión normal y evaluar tiempo
+        $_SESSION[APP_SESSION_NAME]['is_remembered'] = false;
+        // IMPORTANTE: Reiniciar 'ultima_actividad' para iniciar el conteo de sesión normal
+        $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
+        error_log("Auth::isExpired - Cookie 'recordarme' no encontrada. Transicionando a sesión normal, temporizador reiniciado.");
+        // No hacemos return true aquí para continuar evaluando el timeout normal con la nueva 'ultima_actividad'
+      }
     }
 
     return (time() - $_SESSION[APP_SESSION_NAME]['ultima_actividad']) > SESSION_EXPIRATION_TIMOUT;
@@ -193,8 +206,14 @@ class Auth
   public static function refreshSessionActivity()
   {
     if (self::check() && isset($_SESSION[APP_SESSION_NAME]['id'])) {
-      $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
-      error_log("Session activity refreshed for user ID: " . self::id());
+      // Solo actualizar última_actividad si NO es una sesión recordada o si
+      // específicamente queremos mantener actualizada la última actividad para ambos tipos
+      if (!isset($_SESSION[APP_SESSION_NAME]['is_remembered']) || $_SESSION[APP_SESSION_NAME]['is_remembered'] !== true) {
+        $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
+        error_log("Session activity refreshed for user ID: " . self::id());
+      } else {
+        error_log("Session activity refresh skipped for remembered session, user ID: " . self::id());
+      }
       return true;
     }
     error_log("Attempted to refresh session activity, but no active session or user not checked.");
@@ -207,39 +226,47 @@ class Auth
    */
   public static function getSessionStatus()
   {
-    if (!self::check() || !isset($_SESSION[APP_SESSION_NAME]['id']) || !isset($_SESSION[APP_SESSION_NAME]['ultima_actividad'])) {
+    if (!self::check() || !isset($_SESSION[APP_SESSION_NAME]['id'])) {
       return [
         'isActive' => false,
         'timeRemaining' => 0,
         'expirationTimestamp' => 0,
         'sessionTotalDuration' => defined('SESSION_EXPIRATION_TIMOUT') ? SESSION_EXPIRATION_TIMOUT : 0,
-        'isRememberedSession' => false, // Añadido
+        'isRememberedSession' => false,
       ];
     }
 
     $isRemembered = isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true;
-    $expirationTimestamp = $_SESSION[APP_SESSION_NAME]['ultima_actividad'] + SESSION_EXPIRATION_TIMOUT;
-    $timeRemaining = $expirationTimestamp - time();
 
-    if ($timeRemaining <= 0 && !$isRemembered) { // Solo expira si no es recordada y el tiempo se agotó
-      return [
-        'isActive' => false,
-        'timeRemaining' => 0,
-        'expirationTimestamp' => $expirationTimestamp,
-        'sessionTotalDuration' => SESSION_EXPIRATION_TIMOUT,
-        'isRememberedSession' => $isRemembered, // Añadido
-      ];
+    // Verificar si la cookie recordarme sigue existiendo para sesiones marcadas como recordadas
+    if ($isRemembered && !isset($_COOKIE[APP_SESSION_NAME])) {
+      // La cookie ha desaparecido, pero la sesión sigue marcada como recordada
+      // Actualizar el estado y calcular el tiempo restante como una sesión normal
+      $isRemembered = false;
+      $_SESSION[APP_SESSION_NAME]['is_remembered'] = false;
+      $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time(); // Reiniciar el contador
+      error_log("getSessionStatus: cookie 'recordarme' no encontrada para sesión recordada. Actualizando estado.");
     }
 
-    // Si es recordada y el tiempo corto de actividad pasó, isActive sigue true, pero el cliente decidirá no mostrar modal corto.
-    // timeRemaining para una sesión recordada se calculará basado en SESSION_EXPIRATION_TIMOUT para la ventana de actividad actual.
-    // El cliente usará 'isRememberedSession' para la lógica del modal.
+    // Calcular el tiempo de expiración basado en la última actividad
+    $expirationTimestamp = $_SESSION[APP_SESSION_NAME]['ultima_actividad'] + SESSION_EXPIRATION_TIMOUT;
+
+    // Para sesiones recordadas, establecer un tiempo restante constante alto
+    // o calcular el tiempo restante real para sesiones normales
+    $timeRemaining = $isRemembered
+      ? SESSION_EXPIRATION_TIMOUT // Valor constante alto para sesiones recordadas
+      : max(0, $expirationTimestamp - time());
+
+    // Una sesión recordada siempre está activa mientras exista la cookie
+    // Una sesión normal está activa si tiene tiempo restante
+    $isActive = $isRemembered ? true : ($timeRemaining > 0);
+
     return [
-      'isActive' => true,
-      'timeRemaining' => $isRemembered ? max(0, $timeRemaining) : max(0, $timeRemaining), // Asegurar que no sea negativo
+      'isActive' => $isActive,
+      'timeRemaining' => $timeRemaining,
       'expirationTimestamp' => $expirationTimestamp,
-      'sessionTotalDuration' => SESSION_EXPIRATION_TIMOUT, // El modal de inactividad siempre se basa en este periodo corto
-      'isRememberedSession' => $isRemembered, // Añadido
+      'sessionTotalDuration' => SESSION_EXPIRATION_TIMOUT,
+      'isRememberedSession' => $isRemembered,
     ];
   }
 
@@ -427,7 +454,7 @@ class Auth
       'rol' => $user->usuario_rol,
       'rol_descripcion' => $user->rol_descripcion,
       'ultima_actividad' => time(),
-      'is_remembered' => $isRemembered, // Guardar si la sesión es recordada 
+      'is_remembered' => $isRemembered,
     ];
 
     self::$user = $user;

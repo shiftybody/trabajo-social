@@ -4,7 +4,7 @@
     position: relative;
     top: 0;
     width: 100%;
-    height: 4rem;
+    height: 4.1rem;
     background: #F2F2F2;
   }
 
@@ -266,7 +266,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
     background-color: rgba(0, 0, 0, 0.25);
     z-index: 999;
     /* display: none; */
