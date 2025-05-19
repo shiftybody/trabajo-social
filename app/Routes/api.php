@@ -19,6 +19,8 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
 
   // Verificar estado de sesión
   $router->get('/session/status', 'SessionController@status');
+  // Ruta para refrescar la sesión
+  $router->post('/session/refresh', 'SessionController@refresh');
 
   // Usuarios
   $router->group(array('middleware' => 'Permission:users.view'), function ($router) {

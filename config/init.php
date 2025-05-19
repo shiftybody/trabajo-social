@@ -4,8 +4,8 @@
  * Configuración de sesiones y cookies
  */
 
-define('SESSION_EXPIRATION_TIMOUT', 60 * 5); // 5 minutos
-define('REMEMBER_COOKIE_DURATION', 60 * 60 * 30 * 24); // 30 días
+define('SESSION_EXPIRATION_TIMOUT', 60); // 1 minutos
+define('REMEMBER_COOKIE_DURATION', 60 * 2); // 2 min
 
 ini_set('session.cookie_lifetime', 0); // Hasta que se cierre el navegador
 ini_set('session.use_strict_mode', 1); // Seguridad mejorada

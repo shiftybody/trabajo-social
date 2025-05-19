@@ -411,3 +411,7 @@
     });
   });
 </script>
+
+<?php
+include 'modal.php'
+?>

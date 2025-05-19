@@ -88,40 +88,36 @@ class Auth
     }
 
     $cookieValue = $_COOKIE[APP_SESSION_NAME];
-    // Asegurarse de que la cookie no esté vacía para evitar errores con base64_decode
     if (empty($cookieValue)) {
-        setcookie(APP_SESSION_NAME, "", time() - 3600, "/"); // Limpiar cookie malformada/vacía
-        return false;
-    }
-    
-    $cookieData = json_decode(base64_decode($cookieValue), true);
-
-    if (!$cookieData || !isset($cookieData['id']) || !isset($cookieData['token'])) {
-      // Cookie inválida o malformada, eliminarla
       setcookie(APP_SESSION_NAME, "", time() - 3600, "/");
       return false;
     }
 
-    if (!self::$userModel) { // Asegurar que userModel esté instanciado
-        self::$userModel = new userModel();
+    $cookieData = json_decode(base64_decode($cookieValue), true);
+
+    if (!$cookieData || !isset($cookieData['id']) || !isset($cookieData['token'])) {
+      setcookie(APP_SESSION_NAME, "", time() - 3600, "/");
+      return false;
     }
-    
+
+    if (!self::$userModel) {
+      self::$userModel = new userModel();
+    }
+
     $user = self::$userModel->obtenerUsuarioPorId($cookieData['id']);
 
     if (!$user) {
-      setcookie(APP_SESSION_NAME, "", time() - 3600, "/"); // Usuario no encontrado
+      setcookie(APP_SESSION_NAME, "", time() - 3600, "/");
       return false;
     }
 
-    // Comparar el token de la cookie con el hash de la contraseña actual del usuario
-    // Esto invalida la cookie si la contraseña del usuario ha cambiado.
     if ($user->usuario_password_hash !== $cookieData['token']) {
-      setcookie(APP_SESSION_NAME, "", time() - 3600, "/"); // Token inválido
+      setcookie(APP_SESSION_NAME, "", time() - 3600, "/");
       return false;
     }
 
-    // Cookie válida, crear la sesión
-    self::createSession($user);
+    // Cookie válida, crear la sesión, indicando que SÍ es una sesión recordada
+    self::createSession($user, true);
     // Opcional: Refrescar la cookie de "recordarme" para extender su duración si se desea.
     // self::createRememberCookie($user); 
     error_log("Sesión restaurada desde cookie para usuario ID: " . $user->usuario_id);
@@ -136,15 +132,37 @@ class Auth
     if (isset($_SESSION[APP_SESSION_NAME]['id'])) {
       // Verificar si la sesión ha expirado
       if (self::isExpired()) {
-        self::logout();
-        return;
+        // error_log("Auth::loadUser - Session expired for user ID: " . $_SESSION[APP_SESSION_NAME]['id']);
+        self::logout(); // Limpia los datos de la sesión y las variables estáticas
+        return; // No continuar cargando el usuario
       }
 
-      // Actualizar última actividad
-      $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
+      // Si la sesión es válida y no ha expirado, cargar datos del usuario
+      // Asegurar que el modelo de usuario esté instanciado
+      if (!self::$userModel) {
+        self::$userModel = new userModel();
+      }
 
-      // Cargar datos completos del usuario
-      self::$user = self::$userModel->obtenerUsuarioPorId($_SESSION[APP_SESSION_NAME]['id']);
+      $user = self::$userModel->obtenerUsuarioPorId($_SESSION[APP_SESSION_NAME]['id']);
+
+      if ($user) {
+        self::$user = $user;
+        // self::$permissions = null; // Opcional: reiniciar permisos para carga diferida si es necesario
+        // error_log("Auth::loadUser - User loaded from session: " . $user->usuario_usuario);
+
+        // NO ACTUALIZAR 'ultima_actividad' AQUÍ EN CADA CARGA.
+        // Esta marca de tiempo solo se actualiza en:
+        // 1. Auth::createSession() (al iniciar sesión o restaurar desde cookie)
+        // 2. Auth::refreshSessionActivity() (cuando el cliente lo solicita explícitamente)
+
+      } else {
+        // El ID de usuario en la sesión no se encontró en la BD, tratar como sesión inválida
+        // error_log("Auth::loadUser - User ID " . $_SESSION[APP_SESSION_NAME]['id'] . " from session not found in DB.");
+        self::logout();
+      }
+    } else {
+      // No hay ID de sesión activa, self::$user permanecerá null
+      // error_log("Auth::loadUser - No active session ID found.");
     }
   }
 
@@ -157,7 +175,70 @@ class Auth
       return true;
     }
 
+    // Si la sesión es "recordada", no expira por el TIMEOUT corto de inactividad.
+    // Su validez está ligada a la cookie "remember me" misma.
+    if (isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true) {
+      return false;
+    }
+
     return (time() - $_SESSION[APP_SESSION_NAME]['ultima_actividad']) > SESSION_EXPIRATION_TIMOUT;
+  }
+
+  /**
+   * Refresca la marca de tiempo de la última actividad de la sesión.
+   * @return bool True si la actividad fue refrescada, false en caso contrario.
+   */
+  public static function refreshSessionActivity()
+  {
+    if (self::check() && isset($_SESSION[APP_SESSION_NAME]['id'])) {
+      $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
+      error_log("Session activity refreshed for user ID: " . self::id());
+      return true;
+    }
+    error_log("Attempted to refresh session activity, but no active session or user not checked.");
+    return false;
+  }
+
+  /**
+   * Obtiene el estado actual de la sesión.
+   * @return array Un array con el estado de la sesión.
+   */
+  public static function getSessionStatus()
+  {
+    if (!self::check() || !isset($_SESSION[APP_SESSION_NAME]['id']) || !isset($_SESSION[APP_SESSION_NAME]['ultima_actividad'])) {
+      return [
+        'isActive' => false,
+        'timeRemaining' => 0,
+        'expirationTimestamp' => 0,
+        'sessionTotalDuration' => defined('SESSION_EXPIRATION_TIMOUT') ? SESSION_EXPIRATION_TIMOUT : 0,
+        'isRememberedSession' => false, // Añadido
+      ];
+    }
+
+    $isRemembered = isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true;
+    $expirationTimestamp = $_SESSION[APP_SESSION_NAME]['ultima_actividad'] + SESSION_EXPIRATION_TIMOUT;
+    $timeRemaining = $expirationTimestamp - time();
+
+    if ($timeRemaining <= 0 && !$isRemembered) { // Solo expira si no es recordada y el tiempo se agotó
+      return [
+        'isActive' => false,
+        'timeRemaining' => 0,
+        'expirationTimestamp' => $expirationTimestamp,
+        'sessionTotalDuration' => SESSION_EXPIRATION_TIMOUT,
+        'isRememberedSession' => $isRemembered, // Añadido
+      ];
+    }
+
+    // Si es recordada y el tiempo corto de actividad pasó, isActive sigue true, pero el cliente decidirá no mostrar modal corto.
+    // timeRemaining para una sesión recordada se calculará basado en SESSION_EXPIRATION_TIMOUT para la ventana de actividad actual.
+    // El cliente usará 'isRememberedSession' para la lógica del modal.
+    return [
+      'isActive' => true,
+      'timeRemaining' => $isRemembered ? max(0, $timeRemaining) : max(0, $timeRemaining), // Asegurar que no sea negativo
+      'expirationTimestamp' => $expirationTimestamp,
+      'sessionTotalDuration' => SESSION_EXPIRATION_TIMOUT, // El modal de inactividad siempre se basa en este periodo corto
+      'isRememberedSession' => $isRemembered, // Añadido
+    ];
   }
 
   /**
@@ -311,8 +392,8 @@ class Auth
       return false;
     }
 
-    // Crear sesión
-    self::createSession($user);
+    // Crear sesión, usando el valor de $remember
+    self::createSession($user, $remember);
 
     // Crear cookie si se solicita
     if ($remember) {
@@ -328,8 +409,10 @@ class Auth
 
   /**
    * Crea una nueva sesión para el usuario
+   * @param object $user El objeto del usuario
+   * @param bool $isRemembered Indica si la sesión se está creando a partir de una cookie "recordarme"
    */
-  public static function createSession($user)
+  public static function createSession($user, $isRemembered = false)
   {
     $_SESSION[APP_SESSION_NAME] = [
       'id' => $user->usuario_id,
@@ -342,6 +425,7 @@ class Auth
       'rol' => $user->usuario_rol,
       'rol_descripcion' => $user->rol_descripcion,
       'ultima_actividad' => time(),
+      'is_remembered' => $isRemembered, // Guardar si la sesión es recordada 
     ];
 
     self::$user = $user;
