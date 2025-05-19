@@ -29,7 +29,6 @@
     // ... y luego, donde configuras los event listeners:
     if (inactivityModalCloseBtn) {
       inactivityModalCloseBtn.addEventListener("click", function () {
-        console.log("Botón X del modal clickeado. Ocultando modal.");
         hideModal();
         refreshSession();
       });
@@ -49,10 +48,6 @@
       // Event listener para clic fuera del modal (en el overlay)
       inactivityModal.addEventListener("click", function (event) {
         if (event.target === inactivityModal) {
-          // Si el clic fue directamente en el overlay
-          console.log(
-            "Clic detectado fuera del contenido del modal. Refrescando sesión."
-          );
           refreshSession();
         }
       });
@@ -76,14 +71,12 @@
 
   function showModal() {
     if (inactivityModal) {
-      console.log("showModal() llamado");
       inactivityModal.style.display = "flex"; // Cambiado de "block" a "flex" para el centrado
     }
   }
 
   function hideModal() {
     if (inactivityModal) {
-      console.log("hideModal() llamado");
       inactivityModal.style.display = "none";
       if (modalCountdownIntervalId) {
         clearInterval(modalCountdownIntervalId);
@@ -113,11 +106,6 @@
           clearInterval(sessionCheckIntervalId);
         }
 
-        console.log(
-          `Ajustando intervalo de verificación: ${currentCheckInterval}ms (sesión ${
-            isRemembered ? "recordada" : "normal"
-          })`
-        );
         sessionCheckIntervalId = setInterval(
           checkSessionStatus,
           currentCheckInterval
@@ -131,7 +119,6 @@
   }
 
   function forceLogout() {
-    console.log("forceLogout() llamado");
     if (sessionCheckIntervalId) clearInterval(sessionCheckIntervalId);
     if (modalCountdownIntervalId) clearInterval(modalCountdownIntervalId);
 
@@ -141,7 +128,6 @@
   }
 
   function refreshSession() {
-    console.log("refreshSession() llamado");
     if (!serverRefreshUrl && BASE_APP_URL) {
       // Asegurar que serverRefreshUrl se use si está disponible
       // Si serverRefreshUrl no está seteado pero BASE_APP_URL sí, construirlo.
@@ -177,10 +163,6 @@
       })
       .then((data) => {
         if (data.success) {
-          console.log("Sesión refrescada exitosamente.");
-
-          // Verificar si el estado de recordar cambió y actualizar el intervalo si es necesario
-          // data.checkFrequency ya no se envía desde el servidor
           if (data.isRememberedSession !== undefined) {
             adjustCheckInterval(data.isRememberedSession); // Se pasa solo isRememberedSession
           }
@@ -202,9 +184,6 @@
   }
 
   function showInactivityWarning(timeRemaining) {
-    console.log(
-      `showInactivityWarning() llamado con timeRemaining: ${timeRemaining}`
-    );
     if (!inactivityModal || !inactivityMessage || !inactivityCountdownDisplay) {
       console.warn(
         "Elementos del modal no encontrados, no se puede mostrar la advertencia de inactividad."
@@ -214,7 +193,6 @@
 
     // No mostrar advertencia para sesiones recordadas
     if (isRememberedSession) {
-      console.log("Sesión recordada, ignorando advertencia de inactividad.");
       hideModal();
       return;
     }
@@ -234,7 +212,6 @@
       if (countdown <= 0) {
         clearInterval(modalCountdownIntervalId);
         modalCountdownIntervalId = null;
-        console.log("Contador del modal llegó a cero. Forzando logout.");
         forceLogout();
       }
       countdown--;
@@ -252,17 +229,8 @@
       inactivityModal &&
       inactivityModal.style.display !== "none"
     ) {
-      console.log(
-        "checkSessionStatus: Sesión recordada con modal abierto, ocultando."
-      );
       hideModal();
     }
-
-    console.log(
-      `checkSessionStatus() llamado (sesión ${
-        isRememberedSession ? "recordada" : "normal"
-      })`
-    );
 
     if (!BASE_APP_URL && (!serverLogoutUrl || !serverRefreshUrl)) {
       console.error(
@@ -282,9 +250,6 @@
     })
       .then((response) => {
         if (response.status === 401) {
-          console.log(
-            "checkSessionStatus: Respuesta 401 del servidor, asumiendo desconexión."
-          );
           forceLogout();
           return Promise.reject(new Error("Logged out (401)"));
         }
@@ -297,16 +262,8 @@
       })
       .then((data) => {
         if (!data) {
-          console.log(
-            "checkSessionStatus: No data received from server after .json() or promise was rejected earlier."
-          );
           return;
         }
-
-        console.log(
-          "checkSessionStatus - Datos recibidos del servidor:",
-          JSON.parse(JSON.stringify(data))
-        );
 
         // Actualizar URLs y parámetros del servidor
         serverLogoutUrl = data.logoutUrl;
@@ -315,9 +272,6 @@
 
         // Si la sesión no está activa, forzar cierre
         if (!data.isActive) {
-          console.log(
-            "checkSessionStatus: Sesión INACTIVA según el servidor (data.isActive es false). Forzando logout."
-          );
           hideModal();
           forceLogout();
           if (sessionCheckIntervalId) clearInterval(sessionCheckIntervalId);
@@ -331,30 +285,13 @@
           data.isRememberedSession === 1 ||
           data.isRememberedSession === "1";
 
-        console.log(
-          `checkSessionStatus: Sesión ACTIVA. Verificando si es recordada. data.isRememberedSession = ${
-            data.isRememberedSession
-          } (tipo: ${typeof data.isRememberedSession}), estado actual: ${isRememberedSession}`
-        );
-
-        // Si el estado de recordado cambió, actualizar el intervalo de verificación
         if (newRememberedState !== isRememberedSession) {
-          console.log(
-            `El estado de recordado cambió de ${isRememberedSession} a ${newRememberedState}`
-          );
+          adjustCheckInterval(newRememberedState);
 
-          // Usar el checkFrequency del servidor si está disponible, o valores predeterminados
-          // data.checkFrequency ya no se envía, adjustCheckInterval usará sus valores por defecto.
-          adjustCheckInterval(newRememberedState); // No se pasa data.checkFrequency
-
-          // Si pasó de recordada a normal, verificar inmediatamente el tiempo restante
           if (
             !newRememberedState &&
             data.timeRemaining <= serverWarningThreshold
           ) {
-            console.log(
-              `Sesión cambió de recordada a normal con poco tiempo restante (${data.timeRemaining}s). Mostrando advertencia.`
-            );
             showInactivityWarning(data.timeRemaining);
             return;
           }
@@ -362,26 +299,15 @@
 
         // Para sesiones recordadas, nunca mostrar modal y retornar temprano
         if (newRememberedState) {
-          console.log(
-            "checkSessionStatus: Sesión RECORDADA. Ocultando modal y retornando."
-          );
           hideModal();
           return;
         }
 
         // Proceder solo para sesiones NO recordadas con verificación de tiempo
-        console.log(
-          `checkSessionStatus: Verificando tiempo restante (${data.timeRemaining}) contra umbral (${serverWarningThreshold}) para sesión NO recordada.`
-        );
+
         if (data.timeRemaining <= serverWarningThreshold) {
-          console.log(
-            "checkSessionStatus: Tiempo restante MENOR o IGUAL al umbral. Mostrando/actualizando advertencia."
-          );
           showInactivityWarning(data.timeRemaining);
         } else {
-          console.log(
-            "checkSessionStatus: Tiempo restante MAYOR al umbral. Ocultando modal."
-          );
           hideModal();
         }
       })
@@ -393,7 +319,6 @@
   }
 
   function init() {
-    console.log("inactivity.js: init()");
     if (typeof APP_URL === "undefined" || !APP_URL) {
       console.warn(
         "Variable global APP_URL no está definida. El script de inactividad podría no funcionar correctamente."
@@ -421,8 +346,16 @@
       DEFAULT_CHECK_INTERVAL
     );
 
+    // Eventos de actividad del usuario para refrescar la sesión
+    const activityEvents = ["click"];
+
+    activityEvents.forEach((eventName) => {
+      window.addEventListener(eventName, () => {
+        refreshSession();
+      });
+    });
+
     window.addEventListener("beforeunload", () => {
-      console.log("inactivity.js: beforeunload - limpiando intervalos.");
       if (sessionCheckIntervalId) clearInterval(sessionCheckIntervalId);
       if (modalCountdownIntervalId) clearInterval(modalCountdownIntervalId);
     });

@@ -65,7 +65,6 @@
     font-weight: 600;
     color: #333333;
     line-height: 1;
-    /* Para asegurar que no haya espacio extra */
   }
 
   #legend {
@@ -73,7 +72,6 @@
     justify-content: center;
     font-size: 1.2rem;
     color: #888888;
-
   }
 
   .modal-buttons {
@@ -94,7 +92,6 @@
     text-decoration: none;
     display: inline-block;
     min-width: 150px;
-    /* Ancho mínimo para los botones */
   }
 
   .btn-modal-primary {
@@ -125,9 +122,8 @@
   button {
     height: 3rem;
   }
-</style>
+</style>s
 
-<!-- Coloca esto donde se renderiza tu modal, por ejemplo, al final del body o via modal.php -->
 <div id="inactivityWarningModal" class="modal" style="display: none;">
   <div class="modal-content">
     <button id="inactivityModalCloseBtn" class="modal-close-btn" aria-label="Cerrar">&times;</button>

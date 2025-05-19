@@ -9,11 +9,6 @@ print_r($_SESSION);
 echo date("Y-m-d H:i:s", $_SESSION[APP_SESSION_NAME]['ultima_actividad']);
 echo "</pre>";
 
-echo date("Y-m-d H:i:s");
-// imprimir lo que esta en la cookie de recordar sesion 
-// primero convertir lo que se encuentra dentro utilizando la inversa de
-//       $cookieValue = base64_encode(json_encode($cookieData));
-
 $cookieValues = base64_decode($_COOKIE[APP_SESSION_NAME]);
 $cookieData = json_decode($cookieValues, true);
 

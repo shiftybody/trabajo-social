@@ -206,17 +206,17 @@ class Auth
   public static function refreshSessionActivity()
   {
     if (self::check() && isset($_SESSION[APP_SESSION_NAME]['id'])) {
-      // Solo actualizar última_actividad si NO es una sesión recordada o si
-      // específicamente queremos mantener actualizada la última actividad para ambos tipos
-      if (!isset($_SESSION[APP_SESSION_NAME]['is_remembered']) || $_SESSION[APP_SESSION_NAME]['is_remembered'] !== true) {
-        $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
-        error_log("Session activity refreshed for user ID: " . self::id());
-      } else {
-        error_log("Session activity refresh skipped for remembered session, user ID: " . self::id());
-      }
+      // Actualizar siempre la última actividad si la sesión está activa
+      $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
+
+      // Opcional: Log mejorado para depuración
+      $sessionTypeDetail = (isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true) ? " (remembered session)" : " (standard session)";
+      error_log("Session activity refreshed for user ID: " . self::id() . $sessionTypeDetail);
+
       return true;
     }
-    error_log("Attempted to refresh session activity, but no active session or user not checked.");
+    // Mantener este log puede ser útil para depurar por qué no se refrescó una sesión
+    error_log("Attempted to refresh session activity, but no active session or user ID found in session.");
     return false;
   }
 
