@@ -147,17 +147,19 @@ class Auth
 
       if ($user) {
         self::$user = $user;
-        // self::$permissions = null; // Opcional: reiniciar permisos para carga diferida si es necesario
-        // error_log("Auth::loadUser - User loaded from session: " . $user->usuario_usuario);
 
-        // NO ACTUALIZAR 'ultima_actividad' AQUÍ EN CADA CARGA.
-        // Esta marca de tiempo solo se actualiza en:
-        // 1. Auth::createSession() (al iniciar sesión o restaurar desde cookie)
-        // 2. Auth::refreshSessionActivity() (cuando el cliente lo solicita explícitamente)
+
+        if (isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true) {
+          if (!isset($_COOKIE[APP_SESSION_NAME])) {
+
+            $_SESSION[APP_SESSION_NAME]['is_remembered'] = false;
+
+          }
+        }
 
       } else {
         // El ID de usuario en la sesión no se encontró en la BD, tratar como sesión inválida
-        // error_log("Auth::loadUser - User ID " . $_SESSION[APP_SESSION_NAME]['id'] . " from session not found in DB.");
+        error_log("Auth::loadUser - User ID " . $_SESSION[APP_SESSION_NAME]['id'] . " from session not found in DB.");
         self::logout();
       }
     } else {
