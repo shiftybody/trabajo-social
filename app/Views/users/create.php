@@ -169,7 +169,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
     .plus-icon {
         font-weight: 300;
-        font-size: 1.2em;
+        font-size: 1.5em;
         font-family: 'Helvetica Neue', Arial, sans-serif;
     }
 </style>

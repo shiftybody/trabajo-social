@@ -155,8 +155,6 @@
   }
 
 
-
-
   tbody>tr:last-child>* {
     border: 0 !important;
   }
@@ -183,7 +181,7 @@
     border-bottom: 1px solid color(display-p3 0.898 0.898 0.898);
   }
 
-  /* el ultimo tr */
+
   tr:last-child {
     border-bottom: 0;
   }
@@ -242,7 +240,8 @@
     top: 46%;
     transform: translateY(-50%);
     cursor: pointer;
-    font-size: 1.5rem;
+    font-size: 2rem;
+    font-weight: 300;
     color: #aaa;
     display: none;
   }
@@ -288,8 +287,6 @@
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
     pointer-events: none;
     stroke: #465566;
   }
@@ -305,37 +302,57 @@
     text-shadow: 0 0 0 #000;
   }
 
-  .editar:hover svg {
-    stroke: #f0c231;
-  }
-
-  .remover:hover svg {
-    stroke: red;
-  }
-
-
-  .editar:hover {
-    background-color: lightgray;
-  }
-
-  .remover:hover {
-    background-color: lightgray;
-  }
-
-  .opciones:hover {
-    background-color: lightgray;
-  }
-
   .editar,
   .remover,
   .opciones {
     border: none;
     padding: 6px;
     border-radius: 6px;
-    transition: background-color 0.2s ease;
+    background-color: transparent;
+    transition: all 0.25s ease;
     cursor: pointer;
   }
 
+  .editar:hover {
+    background-color: #f2f2f2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .editar:hover svg {
+    transform: translateY(-1px) scale(1.05);
+    stroke: #ffc107;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  }
+
+  .remover:hover {
+    background-color: #f2f2f2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .remover:hover svg {
+    transform: translateY(-1px) rotate(-5deg);
+    stroke: #dc3545;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  }
+
+  /* Estilo hover para botón opciones */
+  .opciones:hover {
+    background-color: #f2f2f2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .opciones:hover svg {
+    transform: translateY(-1px);
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  }
+
+  /* Transiciones para los SVG */
+  .editar svg,
+  .remover svg,
+  .opciones svg {
+    transition: all 0.25s ease;
+    stroke: #465566;
+  }
 
   .dropdown-menu {
     position: absolute;
@@ -375,7 +392,6 @@
   .dropdown-item svg {
     margin-right: 8px;
   }
-
 
   #users-table_wrapper {
     opacity: 0;
@@ -429,9 +445,10 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
       <form class="filter_form" id="filter_form">
         <div class="input-container">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon icon icon-tabler icons-tabler-outline icon-tabler-search">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+            <path d="M21 21l-6 -6" />
           </svg>
           <input type="text" name="matchingColumn" id="matchingInput" placeholder="Buscar">
           <span class="clear-button">×</span>
@@ -445,9 +462,10 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             <option value="4">Estado</option>
             <option value="5">Rol</option>
           </select>
-          <svg class="select-filter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="select-filter-icon icon icon-tabler icons-tabler-outline icon-tabler-filter">
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.414 -4.414a2 2 0 0 1 -.586 -1.414v-2.172" />
+            <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" />
+          </svg>
           </svg>
         </div>
       </form>
@@ -472,7 +490,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </table>
   </div>
 </div>
-<?php require_once APP_ROOT . 'public/inc/scripts.php'; ?>
 <script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
 <script>
   let table = new DataTable('#users-table', {

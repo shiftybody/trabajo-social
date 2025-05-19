@@ -122,7 +122,7 @@
   button {
     height: 3rem;
   }
-</style>s
+</style>
 
 <div id="inactivityWarningModal" class="modal" style="display: none;">
   <div class="modal-content">

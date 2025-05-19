@@ -34,7 +34,7 @@ class DashboardController
   public function index(Request $request)
   {
     ob_start();
-    $titulo = 'Panel Principal';
+    $titulo = 'Inicio';
     include APP_ROOT . 'app/Views/dashboard/index.php';
     $contenido = ob_get_clean();
     return Response::html($contenido);

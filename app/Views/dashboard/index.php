@@ -16,4 +16,3 @@ echo "<pre>";
 print_r($cookieData);
 echo "</pre>";
 
-require_once APP_ROOT . 'public/inc/scripts.php';

@@ -162,13 +162,8 @@ class Auth
           }
         }
       } else {
-        // El ID de usuario en la sesión no se encontró en la BD, tratar como sesión inválida
-        error_log("Auth::loadUser - User ID " . $_SESSION[APP_SESSION_NAME]['id'] . " from session not found in DB.");
         self::logout();
       }
-    } else {
-      // No hay ID de sesión activa, self::$user permanecerá null
-      // error_log("Auth::loadUser - No active session ID found.");
     }
   }
 
@@ -181,18 +176,14 @@ class Auth
       return true;
     }
 
-    // Si la sesión es "recordada", verificar que la cookie siga existiendo
     if (isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true) {
-      // Si la cookie existe, la sesión no expira por el TIMEOUT corto
+      
       if (isset($_COOKIE[APP_SESSION_NAME])) {
         return false;
       } else {
-        // Si la cookie ya no existe, convertir a sesión normal y evaluar tiempo
+      
         $_SESSION[APP_SESSION_NAME]['is_remembered'] = false;
-        // IMPORTANTE: Reiniciar 'ultima_actividad' para iniciar el conteo de sesión normal
         $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
-        error_log("Auth::isExpired - Cookie 'recordarme' no encontrada. Transicionando a sesión normal, temporizador reiniciado.");
-        // No hacemos return true aquí para continuar evaluando el timeout normal con la nueva 'ultima_actividad'
       }
     }
 
@@ -269,6 +260,108 @@ class Auth
       'isRememberedSession' => $isRemembered,
     ];
   }
+
+  // En Auth.php
+public static function logout($reason = null)
+{
+    // Limpiar variables estáticas
+    self::$user = null;
+    self::$permissions = null;
+
+    // Guardar la razón del cierre de sesión si se proporciona
+    if ($reason) {
+        $_SESSION['logout_reason'] = $reason;
+    }
+
+    // Limpiar sesión
+    if (isset($_SESSION[APP_SESSION_NAME])) {
+        unset($_SESSION[APP_SESSION_NAME]);
+    }
+
+    // Limpiar cookie
+    if (isset($_COOKIE[APP_SESSION_NAME])) {
+        setcookie(APP_SESSION_NAME, "", time() - 1, "/");
+    }
+
+    // Solo destruir la sesión si está activa
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_destroy();
+    }
+}
+
+// Modificar el método isExpired para marcar cuando expira por inactividad
+private static function isExpired()
+{
+    if (!isset($_SESSION[APP_SESSION_NAME]['ultima_actividad'])) {
+        return true;
+    }
+
+    // Si la sesión es "recordada", verificar que la cookie siga existiendo
+    if (isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true) {
+        // Si la cookie existe, la sesión no expira por el TIMEOUT corto
+        if (isset($_COOKIE[APP_SESSION_NAME])) {
+            return false;
+        } else {
+            // Si la cookie ya no existe, convertir a sesión normal y evaluar tiempo
+            $_SESSION[APP_SESSION_NAME]['is_remembered'] = false;
+            // IMPORTANTE: Reiniciar 'ultima_actividad' para iniciar el conteo de sesión normal
+            $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
+            error_log("Auth::isExpired - Cookie 'recordarme' no encontrada. Transicionando a sesión normal, temporizador reiniciado.");
+            // No hacemos return true aquí para continuar evaluando el timeout normal con la nueva 'ultima_actividad'
+        }
+    }
+
+    $isSessionExpired = (time() - $_SESSION[APP_SESSION_NAME]['ultima_actividad']) > SESSION_EXPIRATION_TIMOUT;
+    
+    // Si la sesión expiró, establecer la razón del cierre
+    if ($isSessionExpired) {
+        $_SESSION['logout_reason'] = 'inactivity';
+    }
+    
+    return $isSessionExpired;
+}
+
+// Modificar loadUser para manejar la expiración
+private static function loadUser()
+{
+    if (isset($_SESSION[APP_SESSION_NAME]['id'])) {
+        // Verificar si la sesión ha expirado
+        if (self::isExpired()) {
+            // error_log("Auth::loadUser - Session expired for user ID: " . $_SESSION[APP_SESSION_NAME]['id']);
+            self::logout('inactivity'); // Pasar la razón de cierre de sesión
+            return; // No continuar cargando el usuario
+        }
+
+        // Si la sesión es válida y no ha expirado, cargar datos del usuario
+        // Asegurar que el modelo de usuario esté instanciado
+        if (!self::$userModel) {
+            self::$userModel = new userModel();
+        }
+
+        $user = self::$userModel->obtenerUsuarioPorId($_SESSION[APP_SESSION_NAME]['id']);
+
+        if ($user) {
+            self::$user = $user;
+
+            // Verificar si la sesión está marcada como recordada pero la cookie ya no existe
+            if (isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true) {
+                if (!isset($_COOKIE[APP_SESSION_NAME])) {
+                    // La cookie de recordar ha desaparecido, actualizar el estado de la sesión
+                    $_SESSION[APP_SESSION_NAME]['is_remembered'] = false;
+                    $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time(); // Reiniciar el temporizador
+                    error_log("Cookie 'recordarme' no encontrada para sesión recordada. Actualizando a sesión normal.");
+                }
+            }
+        } else {
+            // El ID de usuario en la sesión no se encontró en la BD, tratar como sesión inválida
+            error_log("Auth::loadUser - User ID " . $_SESSION[APP_SESSION_NAME]['id'] . " from session not found in DB.");
+            self::logout('user_not_found');
+        }
+    } else {
+        // No hay ID de sesión activa, self::$user permanecerá null
+        // error_log("Auth::loadUser - No active session ID found.");
+    }
+}
 
   /**
    * Verifica si el usuario está autenticado

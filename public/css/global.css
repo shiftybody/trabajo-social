@@ -27,6 +27,12 @@
   --rounded-lg: 0.5rem;
 }
 
+hr{
+  height: 2px;
+  width: auto;
+  background-color: #ececec;
+}
+
 h1 {
   text-align: center;
   text-overflow: ellipsis;

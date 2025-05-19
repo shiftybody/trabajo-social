@@ -4,8 +4,8 @@
  * Configuración de sesiones y cookies
  */
 
-define('SESSION_EXPIRATION_TIMOUT', 35); // 1 minutos
-define('REMEMBER_COOKIE_DURATION', 60 * 2); // 2 min
+define('SESSION_EXPIRATION_TIMOUT', 60 * 5); // 5 minutos
+define('REMEMBER_COOKIE_DURATION', 60 * 60 * 24 * 30); // 30 días
 
 ini_set('session.cookie_lifetime', 0); // Hasta que se cierre el navegador
 ini_set('session.use_strict_mode', 1); // Seguridad mejorada
@@ -16,7 +16,7 @@ ini_set('session.cookie_secure', isset($_SERVER['HTTPS'])); // Cookies seguras e
 ini_set('session.cookie_samesite', 'Lax'); // Protección contra CSRF
 
 ini_set('file_uploads', 1); // Habilitar subida de archivos
-ini_set('log_errors', 1);      // Habilitar registro de errores
+ini_set('log_errors', 1); // Habilitar registro de errores
 
 ini_set('max_execution_time', 30);
 ini_set('error_log', APP_ROOT . 'logs/php_errors.log');

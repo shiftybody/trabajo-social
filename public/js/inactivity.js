@@ -21,7 +21,6 @@
   let serverWarningThreshold = 30; // Segundos, se actualizará desde el servidor
 
   function getDOMReferences() {
-    // ... en inactivity.js dentro de getDOMReferences()
     let inactivityModalCloseBtn = document.getElementById(
       "inactivityModalCloseBtn"
     );
@@ -348,10 +347,15 @@
 
     // Eventos de actividad del usuario para refrescar la sesión
     const activityEvents = ["click"];
+    // obtener el elemento con clase modal-content
+    const modalContent = document.querySelector(".modal-content");
 
     activityEvents.forEach((eventName) => {
       window.addEventListener(eventName, () => {
-        refreshSession();
+        // si lo que se esta dando click no es el modal, refrescar la sesión
+        if (!modalContent.contains(event.target)) {
+          refreshSession();
+        }
       });
     });
 

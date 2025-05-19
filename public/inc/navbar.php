@@ -193,7 +193,7 @@
   #sidebar-options a {
     display: flex;
     min-width: 200px;
-    height: 30px;
+    height: 3rem;
     padding: var(--25, 10px) var(--5, 20px) var(--25, 10px) var(--3, 12px);
     align-items: center;
     gap: .5rem;
@@ -206,7 +206,7 @@
     display: flex;
     flex-direction: column;
     padding: 1rem 1rem 1rem 1.75rem;
-    gap: 0.4rem;
+    gap: 0.2rem;
   }
 
 
@@ -270,8 +270,6 @@
     backdrop-filter: blur(5px);
     background-color: rgba(0, 0, 0, 0.25);
     z-index: 999;
-    /* display: none; */
-    /* Eliminado: Reemplazado por opacity/visibility para la transición */
     opacity: 0;
     visibility: hidden;
     /* Transición para cerrar (fade-out) */
@@ -295,7 +293,12 @@
   <section id="container">
     <div id="left-side">
       <button type="button" id="left-menu">
-        <img src="<?php echo APP_URL; ?>public/icons/menu.svg" alt="">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path d="M4 6h16" />
+          <path d="M7 12h13" />
+          <path d="M10 18h10" />
+        </svg>
       </button>
       <div id="info-container">
         <img src="<?php echo APP_URL; ?>public/images/logotipo-neurodesarrollo.png" alt="" class="logo">
@@ -305,12 +308,13 @@
     <div id="right-side">
       <div id="search-container">
         <input type="text" class="search" placeholder="Escribe / para navegar">
-        <!-- <button type="button" id="uwu">
-          <img src="<?php echo APP_URL; ?>public/icons/search-outline.svg" alt="logo">
-        </button> -->
-        <img src="<?php echo APP_URL; ?>public/icons/v-line.svg" alt="">
+        <!-- Aquí debería de haber una vline -->
         <button type="button" id="uwu">
-          <img src="<?php echo APP_URL; ?>public/icons/bell.svg" alt="">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-bell">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" />
+            <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
+          </svg>
         </button>
       </div>
       <!-- avatar -->
@@ -346,17 +350,33 @@
     <img src="<?php echo APP_URL; ?>public/images/logotipo-neurodesarrollo.png" alt="" class="logo">
     <a href="javascript:void(0)" class="closebtn" id="left-closeButton">
       <button type="button" id="menu" class="closebtn">
-        <img src="<?= APP_URL ?>public/icons/x.svg" alt="">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path d="M18 6l-12 12" />
+          <path d="M6 6l12 12" />
+        </svg>
       </button>
     </a>
   </div>
   <div id="sidebar-options">
     <a href="<?= APP_URL ?>dashboard">
-      <img src="<?= APP_URL ?>public/icons/home.svg" alt="" class="option-icon">
-      Pagina Principal
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-layout-dashboard">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" />
+        <path d="M5 16h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" />
+        <path d="M15 12h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" />
+        <path d="M15 4h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" />
+      </svg>
+      Inicio
     </a>
     <a href="<?= APP_URL ?>users">
-      <img src="<?= APP_URL ?>public/icons/users.svg" class="option-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-users">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+        <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
+      </svg>
       Usuarios
     </a>
   </div>
@@ -382,19 +402,33 @@
     <div class="close-container">
       <a href="javascript:void(0)" class="closebtn" id="right-closeButton">
         <button type="button" id="menu" class="closebtn">
-          <img src="<?= APP_URL ?>public/icons/x.svg" alt="">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M18 6l-12 12" />
+            <path d="M6 6l12 12" />
+          </svg>
         </button>
       </a>
     </div>
   </div>
   <div id="sidebar-options">
     <a href="<?= APP_URL . "userUpdates" . $_SESSION['id'] . "/"; ?>">
-      <img src="<?= APP_URL; ?>public/icons/user.svg" alt="" class="option-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user-square-rounded">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M12 13a3 3 0 1 0 0 -6a3 3 0 0 0 0 6z" />
+        <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z" />
+        <path d="M6 20.05v-.05a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v.05" />
+      </svg>
       Mi Perfil
     </a>
-    <img src="<?= APP_URL; ?>public/icons/h-line.svg" alt="">
+    <hr>
     <a href="<?= APP_URL; ?>logout" id="btn_exit">
-      <img src="<?= APP_URL; ?>public/icons/logout.svg" class="option-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-logout">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+        <path d="M9 12h12l-3 -3" />
+        <path d="M18 15l3 -3" />
+      </svg>
       Salir
     </a>
   </div>
@@ -402,7 +436,7 @@
 </div>
 
 <script src="<?= APP_URL . "public/js/navbar.js" ?>"></script>
-
+<?php require_once APP_ROOT . 'public/inc/scripts.php'; ?>
 <script>
   // cuando se presione un tag img con clase logo
   document.querySelectorAll("img.logo").forEach((logo) => {
