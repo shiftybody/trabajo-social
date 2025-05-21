@@ -600,16 +600,18 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
   // Función para aplicar el filtro global o por columna
   function applyFilter() {
-    let searchValue = matchingInput.value.trim(); // Elimina espacios en blanco
-    let columnIndex = filterColumn.value;
+    let searchValue = matchingInput.value.trim();
+  let columnIndex = filterColumn.value;
 
-    if (columnIndex == 0) {
-      // Filtro global
-      table.search(searchValue, false, true).draw();
-    } else {
-      // Filtro por columna
-      table.columns().search(''); // Limpia todos los filtros de columna
-      table.column(columnIndex).search(searchValue, false, true).draw();
+  if (columnIndex == 0) {
+    // Filtro global
+    table.columns().search(''); // ✅ Limpia todos los filtros de columna
+    table.search(searchValue, false, true).draw();
+  } else {
+    // Filtro por columna
+    table.search(''); // ✅ Limpia filtro global
+    table.columns().search(''); // Limpia filtros de columnas
+    table.column(columnIndex).search(searchValue, false, true).draw();
     }
   }
 
