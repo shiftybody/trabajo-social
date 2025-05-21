@@ -14,9 +14,9 @@ $router->setErrorView('500', APP_ROOT . 'app/Views/errors/500.php');
 // Rutas públicas - CORREGIDO: usar LoginController en lugar de AuthController
 $router->get('/login', function () {
   try {
-    // Si ya hay sesión activa, redirigir al dashboard
+    // Si ya hay sesión activa, redirigir al home
     if (isset($_SESSION[APP_SESSION_NAME]) && !empty($_SESSION[APP_SESSION_NAME]['id'])) {
-      return Response::redirect(APP_URL . 'dashboard');
+      return Response::redirect(APP_URL . 'home');
     }
 
     ob_start();
@@ -79,8 +79,8 @@ $router->get('/error/500', function () {
 // Rutas protegidas (requieren autenticación)
 $router->group(['middleware' => 'Auth'], function ($router) {
 
-  // Dashboard
-  $router->get('/dashboard', 'DashboardController@index')->name('dashboard');
+  // home
+  $router->get('/home', 'homeController@index')->name('home');
 
   // Usuarios (requiere permiso específico para ver el listado y editar)
   $router->group(['middleware' => 'Permission:users.view'], function ($router) {
@@ -118,7 +118,7 @@ $router->group(['middleware' => 'Auth'], function ($router) {
 
 // Ruta por defecto (opcional)
 $router->get('/', function () {
-  return Response::redirect(APP_URL . 'dashboard');
+  return Response::redirect(APP_URL . 'home');
 });
 
 return $router;

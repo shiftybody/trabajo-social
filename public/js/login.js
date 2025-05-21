@@ -5,6 +5,12 @@ formulario.addEventListener("submit", async function (e) {
 
   let isValid = true;
   const data = new FormData(this);
+  // imprimir los valores del formulario
+  // Display the key/value pairs
+  for (var pair of data.entries()) {
+    console.log(pair[0] + ", " + pair[1]);
+  }
+  
   const action = this.getAttribute("action");
   const method = this.getAttribute("method") || "POST";
 
@@ -38,7 +44,6 @@ formulario.addEventListener("submit", async function (e) {
   if (!isValid) return;
 
   const submitBtn = this.querySelector('button[type="submit"]');
-  const originalText = submitBtn ? submitBtn.innerText : "";
 
   if (submitBtn) {
     submitBtn.innerText = "Procesando...";
@@ -59,7 +64,7 @@ formulario.addEventListener("submit", async function (e) {
 
     if (result.status === "success") {
       if (result.redirect) {
-        window.location.href = result.redirect; // CORREGIDO: Usar result.redirect en lugar de data.redirect
+        window.location.href = result.redirect;
       }
     } else if (result.status === "error") {
       if (errorDiv) {
@@ -74,7 +79,7 @@ formulario.addEventListener("submit", async function (e) {
         errorDiv.hidden = false;
         errorP.textContent = result.message || "Ha ocurrido un error";
 
-        submitBtn.innerText = "Enviar";
+        submitBtn.innerText = "Iniciar Sesión";
         submitBtn.disabled = false;
       }
 

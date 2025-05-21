@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\Auth; // Añadido
+use App\Core\Request; // Asegúrate de que esta línea esté presente o añádela
 
 /**
  * Controlador para autenticación API con sesiones
@@ -46,7 +47,7 @@ class LoginController // Modificado: ya no extiende userModel
     error_log("Login exitoso para usuario: $usuario");
 
     // Crear URL de redirección
-    $redirectUrl = rtrim(APP_URL, '/') . '/dashboard';
+    $redirectUrl = rtrim(APP_URL, '/') . '/home';
     error_log("Redirigiendo a: $redirectUrl");
 
     echo json_encode(array(
@@ -61,14 +62,18 @@ class LoginController // Modificado: ya no extiende userModel
   /**
    * Cierra la sesión del usuario
    */
-  public function logout()
+  public function logout(Request $request) // Modificar la firma del método
   {
     Auth::logout();
+
+    $expired = $request->get('expired'); // Obtener el parámetro 'expired' de la URL
 
     // Verificar que APP_URL esté definida
     if (!defined('APP_URL')) {
       error_log('ERROR: APP_URL no está definida en logout()');
-      if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+      // Determinar si es una solicitud AJAX para la respuesta de error
+      $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+      if ($isAjax || ($request->isAjax() || $request->expectsJson())) {
         http_response_code(500);
         echo json_encode(array('status' => 'error', 'message' => 'Error de configuración del servidor.'));
       } else {
@@ -77,11 +82,19 @@ class LoginController // Modificado: ya no extiende userModel
       exit;
     }
 
-    // Redirigir a la página de login
-    $loginUrl = rtrim(APP_URL, '/') . '/login';
+    // Construir la URL de login base
+    $loginUrlBase = rtrim(APP_URL, '/') . '/login';
+    $loginUrl = $loginUrlBase;
+
+    // Si la sesión expiró, añadir el parámetro correspondiente a la URL
+    if ($expired === '1') {
+      $loginUrl .= '?expired_session=1';
+    }
+
     error_log("Cierre de sesión, redirigiendo a: $loginUrl");
 
-    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+    // Determinar si es una solicitud AJAX para la respuesta
+    if ($request->isAjax() || $request->expectsJson()) {
       echo json_encode(array('status' => 'success', 'message' => 'Logout exitoso', 'redirect' => $loginUrl));
     } else {
       header('Location: ' . $loginUrl);

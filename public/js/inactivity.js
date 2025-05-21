@@ -121,9 +121,40 @@
     if (sessionCheckIntervalId) clearInterval(sessionCheckIntervalId);
     if (modalCountdownIntervalId) clearInterval(modalCountdownIntervalId);
 
-    const logoutUrlToUse =
-      serverLogoutUrl || (BASE_APP_URL ? BASE_APP_URL + "logout" : "/logout");
-    window.location.href = logoutUrlToUse;
+    let finalLogoutUrl = "";
+
+    // Construir la URL de logout con el parámetro expired=1
+    const expiredParam = "expired=1";
+
+    if (serverLogoutUrl) {
+      if (serverLogoutUrl.includes("?")) {
+        finalLogoutUrl = serverLogoutUrl + "&" + expiredParam;
+      } else {
+        finalLogoutUrl = serverLogoutUrl + "?" + expiredParam;
+      }
+    }
+    else if (BASE_APP_URL) {
+      // Asegurarse de que BASE_APP_URL termine con / o la URL de logout sea correcta
+      let logoutPath = "logout";
+      if (BASE_APP_URL.endsWith("/")) {
+          logoutPath = logoutPath;
+      } else {
+          logoutPath = "/" + logoutPath;
+      }
+      finalLogoutUrl = BASE_APP_URL + logoutPath + "?" + expiredParam;
+    }
+    else {
+      console.error(
+        "URL de logout no disponible. No se puede cerrar sesión automáticamente."
+      );
+      alert(
+        "Tu sesión ha expirado. Por favor, cierra esta ventana y vuelve a iniciar sesión."
+      );
+      return;
+    }
+
+    console.log("Forzando logout a: " + finalLogoutUrl);
+    window.location.href = finalLogoutUrl;
   }
 
   function refreshSession() {

@@ -201,7 +201,7 @@ input.error-input:-webkit-autofill:focus {
 
 #error-msg {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 

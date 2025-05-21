@@ -89,8 +89,8 @@
 
   #avatar {
     display: flex;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 3rem;
+    height: 3rem;
     padding: 0px 0px 28px 34px;
     cursor: pointer;
     border-radius: 100px;
@@ -359,8 +359,8 @@
     </a>
   </div>
   <div id="sidebar-options">
-    <a href="<?= APP_URL ?>dashboard">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-layout-dashboard">
+    <a href="<?= APP_URL ?>home">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-layout-home">
         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
         <path d="M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" />
         <path d="M5 16h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" />
@@ -442,7 +442,7 @@
   document.querySelectorAll("img.logo").forEach((logo) => {
     logo.addEventListener("click", function() {
       // redirigir a la página principal
-      window.location.href = "<?= APP_URL ?>dashboard";
+      window.location.href = "<?= APP_URL ?>home";
     });
   });
 </script>

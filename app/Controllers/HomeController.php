@@ -7,9 +7,9 @@ use App\Core\Response;
 use App\Models\userModel;
 
 /**
- * Controlador del Dashboard principal
+ * Controlador del home principal
  */
-class DashboardController
+class homeController
 {
   /**
    * Modelo de usuario
@@ -26,7 +26,7 @@ class DashboardController
   }
 
   /**
-   * Muestra la página principal del dashboard
+   * Muestra la página principal del home
    * 
    * @param Request $request Petición actual
    * @return Response Respuesta HTML
@@ -35,7 +35,7 @@ class DashboardController
   {
     ob_start();
     $titulo = 'Inicio';
-    include APP_ROOT . 'app/Views/dashboard/index.php';
+    include APP_ROOT . 'app/Views/home/index.php';
     $contenido = ob_get_clean();
     return Response::html($contenido);
   }

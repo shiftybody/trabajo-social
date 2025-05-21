@@ -107,5 +107,3 @@ class ImageUtils
     return $resultado;
   }
 }
-
-

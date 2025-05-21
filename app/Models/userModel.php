@@ -240,8 +240,6 @@ class userModel extends mainModel
 
             // Si no encontramos el usuario o está inactivo
             if (!$usuario || $usuario->usuario_estado != 1) {
-                // loggear el intento de acceso fallido en la carpeta storage/logs
-                error_log("\nIntento de acceso fallido para el tipo de usuario: " . $tipo_usuario, 3, APP_ROOT . "logs/access.log");
                 return false;
             }
 

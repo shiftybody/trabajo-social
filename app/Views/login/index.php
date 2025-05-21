@@ -1,4 +1,12 @@
 <?php require_once APP_ROOT . 'public/inc/head.php' ?>
+
+<?php
+$expired_message = '';
+if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
+  $expired_message = '<p class="expired-session-message">Tu sesión ha expirado. Por favor, inicia sesión de nuevo.</p>';
+}
+?>
+
 <style>
   body {
     overflow: hidden;
@@ -139,6 +147,18 @@
       margin-right: 5%;
     }
   }
+
+  .expired-session-message {
+    width: 100%;
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 0.75rem 1.25rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+    text-align: center;
+  }
 </style>
 
 <header>
@@ -149,6 +169,8 @@
 <main>
   <section id="section-container">
     <img src="<?= APP_URL ?>public/images/logotipo-neurodesarrollo.png" alt="logitipo neurodesarrollo" id="logotipo">
+
+    <?= $expired_message ?> <!-- Mostrar el mensaje aquí -->
 
     <form novalidate action="<?= APP_URL ?>login" method="POST" id="login-form" class="ajax-form">
       <div id="login-info">
@@ -176,6 +198,7 @@
 
       <!-- Mensaje de error general oculto -->
       <div id="error-msg" hidden></div>
+
     </form>
   </section>
 </main>
