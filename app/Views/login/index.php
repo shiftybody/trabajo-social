@@ -149,15 +149,11 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
   }
 
   .expired-session-message {
-    width: 100%;
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    padding: 0.75rem 1.25rem;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 0.25rem;
-    text-align: center;
+    color: var(--red-600);
+    font-family: var(--font-family);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-large);
   }
 </style>
 
@@ -170,13 +166,18 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
   <section id="section-container">
     <img src="<?= APP_URL ?>public/images/logotipo-neurodesarrollo.png" alt="logitipo neurodesarrollo" id="logotipo">
 
-    <?= $expired_message ?> <!-- Mostrar el mensaje aquí -->
-
     <form novalidate action="<?= APP_URL ?>login" method="POST" id="login-form" class="ajax-form">
+
       <div id="login-info">
         <h1>Iniciar Sesión</h1>
         <p>Ingresa tu usuario & contraseña para acceder a tu cuenta</p>
       </div>
+
+      <!-- Mensaje de error general oculto -->
+      <div id="error-msg" hidden>
+        <?= $expired_message ?>
+      </div>
+
       <div id="login-inputs">
         <div id="username-input">
           <label for="username">Correo o Nombre de Usuario</label>
@@ -195,9 +196,6 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
       </div>
 
       <button type="submit" class="dark-button">Iniciar Sesión</button>
-
-      <!-- Mensaje de error general oculto -->
-      <div id="error-msg" hidden></div>
 
     </form>
   </section>
