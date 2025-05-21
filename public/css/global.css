@@ -151,6 +151,13 @@ button[type="button"] {
 .closebtn {
   background: none !important;
   border: none !important;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* rotate the .closebtn */
+.closebtn:hover {
+  transform: rotate(45deg);
+  color: #000000;
 }
 
 .error-message {
