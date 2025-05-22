@@ -355,6 +355,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             <span class="return-btn-content">Regresar</span>
       </a>
     </div>
+    <?= var_dump($usuario) ?>
     <div class="form-wrapper">
       <div class="form-information">
         <h1 class="form-title">
@@ -366,7 +367,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         <div class="left-side">
           <div class="general-information">
 
-            <input type="hidden" name="usuario_id" value="<?php $usuario->usuario_id ?>">
+            <input type="hidden" name="usuario_id" value="<?= $usuario->usuario_id ?>">
 
             <input type="hidden" name="change_password" id="change_password" value="0">
 
@@ -460,18 +461,20 @@ require_once APP_ROOT . 'public/inc/navbar.php';
                   font-family: 'Helvetica Neue', Arial, sans-serif;
                 }
               </style>
-              <button type="submit" class="btn btn-primary"><span class="plus-icon">+</span>Guardar</button>
-              <button type="reset" class="btn btn-secondary">Limpiar</button>
+              <button type="submit" class="btn btn-primary"><span class="plus-icon">+</span>Actualizar</button>
+              <!-- <button type="reset" class="btn btn-secondary">Limpiar</button> -->
             </div>
           </div>
         </div>
         <div class="right-side">
-
           <!-- Avatar a la derecha -->
           <label class="file-label">Foto de perfil</label>
           <div class="profile-picture-container">
-            <div class="profile-picture" style="background-image: url('<?= !empty($usuario->usuario_foto) ? APP_URL . 'public/photos/original/' . $usuario->usuario_foto : APP_URL . 'public/photos/default.jpg' ?>')">
-
+            <?php $avatar_url = (!empty($usuario->usuario_avatar) && $usuario->usuario_avatar !== 'default.jpg')
+              ? APP_URL . 'public/photos/original/' . $usuario->usuario_avatar
+              : APP_URL . 'public/photos/default.jpg';
+            ?>
+            <div class="profile-picture" style="background-image: url('<?= $avatar_url ?>')">
             </div>
 
             <input type="file" name="foto" id="foto" accept="image/png, image/jpeg, image/gif" style="display: none;">
@@ -509,7 +512,12 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           const option = document.createElement("option");
           option.value = rol.rol_id;
           option.textContent = rol.rol_descripcion;
-          (rol.rol_id == rolActual.selected) ? true: false;
+
+          // Comparamos el valor del rol con el rol actual del usuario
+          if (rol.rol_id == rolActual) {
+            option.selected = true; // Marcamos esta opción como seleccionada
+          }
+
           select.appendChild(option);
         });
 

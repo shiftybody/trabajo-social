@@ -30,7 +30,6 @@
     position: relative;
   }
 
-  /* Estilos para el botón de cierre (X) */
   .modal-close-btn {
     position: absolute;
     top: 10px;
@@ -126,7 +125,7 @@
 
 <div id="inactivityWarningModal" class="modal" style="display: none;">
   <div class="modal-content">
-    <button id="inactivityModalCloseBtn" class="modal-close-btn" aria-label="Cerrar">&times;</button>
+    <button id="inactivityModalCloseBtn" class="modal-close-btn closebtn" aria-label="Cerrar">&times;</button>
     <h3 id="inactivityMessage"></h3>
     <p id="inactivityCountdown"></p>
     <p id="legend"> segundos </p>

@@ -19,7 +19,6 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
     font-style: normal;
     font-weight: 400;
     line-height: 150%;
-    /* 21px */
   }
 
   header {
@@ -74,7 +73,7 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
   }
 
   main #section-container #logotipo {
-    width: 4.5rem;
+    width: 6rem;
     filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.25));
   }
 
@@ -158,7 +157,6 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
     display: none;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 0.5rem;
     border-radius: var(--rounded-md);
   }
 
