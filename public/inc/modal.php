@@ -131,7 +131,7 @@
     <p id="inactivityCountdown"></p>
     <p id="legend"> segundos </p>
     <div class="modal-buttons">
-      <button id="inactivityStayLoggedInBtn" class="btn-modal btn-modal-primary">Permanecer Conectado</button>
+      <button id="inactivityStayLoggedInBtn" class="btn-modal btn-modal-primary">Continuar</button>
       <button id="inactivityLogoutBtn" class="btn-modal btn-modal-secondary">Cerrar Sesión</button>
     </div>
   </div>

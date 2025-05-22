@@ -344,6 +344,7 @@
   .opciones:hover svg {
     transform: translateY(-1px);
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+    stroke: #14171d;
   }
 
   /* Transiciones para los SVG */

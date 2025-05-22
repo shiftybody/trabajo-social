@@ -139,8 +139,6 @@
     opacity: 1;
     visibility: visible;
     transform: translateX(0);
-    /* Posición final: en pantalla */
-    /* Transición para abrir (fade-in y deslizamiento) */
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s 0s;
   }
 
@@ -212,6 +210,7 @@
 
   #sidebar-options a:hover {
     background-color: #ececec;
+    color: #1F2329;
   }
 
   .sidebar .sidebar-header {

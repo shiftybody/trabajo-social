@@ -117,33 +117,39 @@
     return false; // No se necesitó ajuste
   }
 
-  function forceLogout() {
+  function forceLogout(isExpired = false) {
     if (sessionCheckIntervalId) clearInterval(sessionCheckIntervalId);
     if (modalCountdownIntervalId) clearInterval(modalCountdownIntervalId);
 
     let finalLogoutUrl = "";
 
-    // Construir la URL de logout con el parámetro expired=1
-    const expiredParam = "expired=1";
+    // Construir la URL de logout con el parámetro expired=1 solo si la sesión expiró
+    const expiredParam = isExpired ? "expired=1" : "";
 
     if (serverLogoutUrl) {
-      if (serverLogoutUrl.includes("?")) {
-        finalLogoutUrl = serverLogoutUrl + "&" + expiredParam;
+      if (expiredParam) {
+        if (serverLogoutUrl.includes("?")) {
+          finalLogoutUrl = serverLogoutUrl + "&" + expiredParam;
+        } else {
+          finalLogoutUrl = serverLogoutUrl + "?" + expiredParam;
+        }
       } else {
-        finalLogoutUrl = serverLogoutUrl + "?" + expiredParam;
+        finalLogoutUrl = serverLogoutUrl;
       }
-    }
-    else if (BASE_APP_URL) {
+    } else if (BASE_APP_URL) {
       // Asegurarse de que BASE_APP_URL termine con / o la URL de logout sea correcta
       let logoutPath = "logout";
       if (BASE_APP_URL.endsWith("/")) {
-          logoutPath = logoutPath;
+        logoutPath = logoutPath;
       } else {
-          logoutPath = "/" + logoutPath;
+        logoutPath = "/" + logoutPath;
       }
-      finalLogoutUrl = BASE_APP_URL + logoutPath + "?" + expiredParam;
-    }
-    else {
+      
+      finalLogoutUrl = BASE_APP_URL + logoutPath;
+      if (expiredParam) {
+        finalLogoutUrl += "?" + expiredParam;
+      }
+    } else {
       console.error(
         "URL de logout no disponible. No se puede cerrar sesión automáticamente."
       );
@@ -242,7 +248,7 @@
       if (countdown <= 0) {
         clearInterval(modalCountdownIntervalId);
         modalCountdownIntervalId = null;
-        forceLogout();
+        forceLogout(true); // Pasar true porque la sesión expiró
       }
       countdown--;
     }
@@ -280,7 +286,7 @@
     })
       .then((response) => {
         if (response.status === 401) {
-          forceLogout();
+          forceLogout(true); // Pasar true porque la sesión expiró (401 Unauthorized)
           return Promise.reject(new Error("Logged out (401)"));
         }
         if (!response.ok) {
@@ -303,7 +309,7 @@
         // Si la sesión no está activa, forzar cierre
         if (!data.isActive) {
           hideModal();
-          forceLogout();
+          forceLogout(true); // Pasar true porque la sesión expiró
           if (sessionCheckIntervalId) clearInterval(sessionCheckIntervalId);
           return;
         }
@@ -359,7 +365,9 @@
 
     if (inactivityModal && inactivityStayLoggedInBtn && inactivityLogoutBtn) {
       inactivityStayLoggedInBtn.addEventListener("click", refreshSession);
-      inactivityLogoutBtn.addEventListener("click", forceLogout);
+      inactivityLogoutBtn.addEventListener("click", function() {
+        forceLogout(false); // Pasar false porque es un logout manual
+      });
     } else if (inactivityModal) {
       console.warn(
         "Modal de inactividad encontrado, pero faltan botones. Las acciones del modal no funcionarán."

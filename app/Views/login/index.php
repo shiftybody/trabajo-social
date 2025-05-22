@@ -1,6 +1,5 @@
-<?php require_once APP_ROOT . 'public/inc/head.php' ?>
+<?php require_once APP_ROOT . 'public/inc/head.php';
 
-<?php
 $expired_message = '';
 if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
   $expired_message = '<p class="expired-session-message">Tu sesión ha expirado. Por favor, inicia sesión de nuevo.</p>';
@@ -14,7 +13,6 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
   }
 
   p {
-    justify-content: center;
     color: var(--gray-500, #677283);
     color: var(--gray-500, color(display-p3 0.4196 0.4471 0.502));
     font-size: 14px;
@@ -27,9 +25,9 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
   header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-start;
     width: 100%;
-    height: 6.25rem;
+    padding-top: 2rem;
   }
 
   main {
@@ -38,16 +36,15 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
     align-items: center;
     width: 100%;
     height: calc(100vh - 12rem);
-    /* Resta la altura del header */
   }
 
   header #imagotipo {
-    width: 14rem;
+    width: 19rem;
     margin-left: 10%;
   }
 
   header #escudo {
-    width: 4rem;
+    width: 6rem;
     margin-right: 10%;
   }
 
@@ -155,6 +152,37 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
     font-weight: var(--font-weight-medium);
     line-height: var(--line-height-large);
   }
+
+  /* Estilo para el contenedor de mensajes de error */
+  #error-msg {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    border-radius: var(--rounded-md);
+  }
+
+  #error-msg.visible {
+    display: flex;
+  }
+
+  /* Estilo para mensajes de error */
+  .error-message {
+    color: var(--red-600);
+    font-family: var(--font-family);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-large);
+    width: 100%;
+  }
+
+  .expired-session-message {
+    color: var(--red-600);
+    font-family: var(--font-family);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-large);
+  }
 </style>
 
 <header>
@@ -173,9 +201,11 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
         <p>Ingresa tu usuario & contraseña para acceder a tu cuenta</p>
       </div>
 
-      <!-- Mensaje de error general oculto -->
-      <div id="error-msg" hidden>
+      <!-- Contenedor de mensajes de error -->
+      <div id="error-msg" <?= $expired_message ? 'class="visible"' : '' ?>>
         <?= $expired_message ?>
+        <!-- Los mensajes de error de autenticación se añadirán aquí -->
+        <div id="auth-error"></div>
       </div>
 
       <div id="login-inputs">

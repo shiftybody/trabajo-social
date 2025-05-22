@@ -21,7 +21,6 @@ class SessionController
       'logoutUrl' => APP_URL . 'logout',
       'refreshUrl' => APP_URL . 'api/session/refresh',
       'isRememberedSession' => $status['isRememberedSession'],
-
     ]);
   }
 
