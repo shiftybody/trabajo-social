@@ -17,7 +17,7 @@ ini_set('session.cookie_samesite', 'Lax'); // Protección contra CSRF
 
 ini_set('file_uploads', 1); // Habilitar subida de archivos
 ini_set('max_execution_time', 30); // tiempo maximo de ejecucion
-ini_set('memory_limit', '512M'); // limite de memoria
+ini_set('memory_limit', '1024M'); // limite de memoria
 
 ini_set('log_errors', 1); // Habilitar registro de errores
 ini_set('error_log', APP_ROOT . 'logs/php_errors.log');

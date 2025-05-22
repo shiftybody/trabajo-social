@@ -60,31 +60,78 @@ class userModel extends mainModel
         try {
             $camposActualizar = [];
 
+            error_log("Datos recibidos en actualizarUsuario: " . print_r($datos, true));
+
+            // Mapeo de claves de entrada a nombres de columna de BD
+            $mapeoColumnas = [
+                'nombre' => 'usuario_nombre',
+                'apellidoPaterno' => 'usuario_apellido_paterno',
+                'apellidoMaterno' => 'usuario_apellido_materno',
+                'telefono' => 'usuario_telefono',
+                'correo' => 'usuario_email',
+                'username' => 'usuario_usuario',
+                // 'password' se maneja de forma especial más abajo
+                'avatar' => 'usuario_avatar',
+                'rol' => 'usuario_rol',
+                'estado' => 'usuario_estado'
+            ];
+
             // Construir array de datos a actualizar
-            foreach ($datos as $campo => $valor) {
-                $camposActualizar[] = [
-                    "campo_nombre" => $campo,
-                    "campo_marcador" => ":" . $campo,
-                    "campo_valor" => $valor
-                ];
+            foreach ($datos as $claveEntrada => $valor) {
+                if ($claveEntrada === 'password') {
+                    // Solo actualizar y hashear la contraseña si se proporciona un valor no vacío
+                    if (!empty($valor)) {
+                        $camposActualizar[] = [
+                            "campo_nombre" => "usuario_password_hash",
+                            "campo_marcador" => ":password_hash", // Usar un marcador único para la contraseña
+                            "campo_valor" => $this->hashearContraseña($valor)
+                        ];
+                    }
+                    // Si el campo password está vacío en $datos, se ignora (no se actualiza la contraseña)
+                } elseif (array_key_exists($claveEntrada, $mapeoColumnas)) {
+                    $nombreColumnaBD = $mapeoColumnas[$claveEntrada];
+                    $camposActualizar[] = [
+                        "campo_nombre" => $nombreColumnaBD,
+                        "campo_marcador" => ":" . $claveEntrada, // El marcador puede seguir usando la clave de entrada
+                        "campo_valor" => $valor
+                    ];
+                }
             }
 
-            // Añadir fecha de última modificación
-            $camposActualizar[] = [
-                "campo_nombre" => "usuario_ultima_modificacion",
-                "campo_marcador" => ":ultimaModificacion",
-                "campo_valor" => date("Y-m-d H:i:s")
-            ];
+            // Si no hay campos para actualizar (ej. solo se envió un password vacío), no continuar
+            if (empty($camposActualizar)) {
+                // Opcionalmente, puedes retornar true si consideras que no hacer nada es un "éxito"
+                // o false/un mensaje si esperabas alguna actualización.
+                // Por ahora, si no hay cambios efectivos, no se añade la fecha de modificación y podría no ejecutar la consulta.
+                // Considera el caso en que $datos solo trae un password vacío.
+                // Si $camposActualizar está vacío, la llamada a actualizarDatos podría fallar o no hacer nada.
+                // Podrías retornar true aquí si es un caso válido no actualizar nada.
+                // O, si siempre se debe actualizar 'usuario_ultima_modificacion', manejarlo fuera de este if.
+            }
 
-            // Condición para actualizar solo el usuario específico
-            $condicion = [
-                "condicion_campo" => "usuario_id",
-                "condicion_marcador" => ":id",
-                "condicion_valor" => $id
-            ];
+            // Añadir fecha de última modificación solo si hay algo que actualizar
+            if (!empty($camposActualizar)) {
+                $camposActualizar[] = [
+                    "campo_nombre" => "usuario_ultima_modificacion",
+                    "campo_marcador" => ":ultimaModificacion",
+                    "campo_valor" => date("Y-m-d H:i:s")
+                ];
 
-            $resultado = $this->actualizarDatos("usuario", $camposActualizar, $condicion);
-            return $resultado->rowCount() > 0;
+                // Condición para actualizar solo el usuario específico
+                $condicion = [
+                    "condicion_campo" => "usuario_id",
+                    "condicion_marcador" => ":id",
+                    "condicion_valor" => $id
+                ];
+
+                $resultado = $this->actualizarDatos("usuario", $camposActualizar, $condicion);
+                return $resultado->rowCount() > 0;
+            } else {
+                // Si no hubo campos válidos para actualizar (ej. solo se envió un password vacío y nada más)
+                // puedes decidir si esto es un éxito o no.
+                // Retornar true podría ser apropiado si no se esperaba un cambio obligatorio.
+                return true; // O false, dependiendo de la lógica de negocio.
+            }
         } catch (\Exception $e) {
             error_log("Error en actualizarUsuario: " . $e->getMessage());
             return false;

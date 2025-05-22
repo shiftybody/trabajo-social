@@ -33,7 +33,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   });
 
   $router->group(array('middleware' => 'Permission:users.edit'), function ($router) {
-    $router->put('/users/:id', 'ApiController@updateUser');
+    $router->post('/users/:id', 'UserController@update');
   });
 
   $router->group(array('middleware' => 'Permission:users.delete'), function ($router) {

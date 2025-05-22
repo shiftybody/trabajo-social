@@ -142,6 +142,46 @@ class Request
   }
 
   /**
+   * Obtiene datos enviados por PUT
+   * 
+   * @param string|null $key Clave específica a obtener (opcional)
+   * @param mixed $default Valor por defecto si la clave no existe
+   * @return mixed Valor del PUT o array completo
+   */
+  public function put($key = null, $default = null)
+  {
+    // PHP no procesa automáticamente los datos PUT como lo hace con POST
+    // Debemos leerlos del flujo de entrada php://input
+    $putData = [];
+
+    // Verificar si es un método PUT
+    if ($this->getMethod() === 'PUT') {
+      // Leer los datos del cuerpo de la petición
+      $inputData = file_get_contents('php://input');
+
+      // Verificar el tipo de contenido
+      $contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
+
+      // Si es JSON, decodificarlo
+      if (strpos($contentType, 'application/json') !== false) {
+        $putData = json_decode($inputData, true) ?: [];
+      }
+      // Si es form-data, parsearlo como query string
+      else if (strpos($contentType, 'application/x-www-form-urlencoded') !== false) {
+        parse_str($inputData, $putData);
+      }
+    }
+
+    // Si no se especifica clave, devolver todos los datos
+    if ($key === null) {
+      return $putData;
+    }
+
+    // Devolver el valor específico o el valor por defecto
+    return isset($putData[$key]) ? $putData[$key] : $default;
+  }
+
+  /**
    * Obtiene archivos enviados en la solicitud
    * 
    * @param string|null $key Clave específica a obtener (opcional)

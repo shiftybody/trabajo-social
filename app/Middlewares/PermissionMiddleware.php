@@ -36,6 +36,9 @@ class PermissionMiddleware
             if ($request->expectsJson()) {
                 return Response::json(['error' => 'Permiso denegado'], 403);
             }
+            error_log('Permiso denegado para el usuario: ' . Auth::user()->usuario_id);
+            error_log($this->permission);
+
             return Response::redirect(APP_URL . 'error/403');
         }
 

@@ -1,250 +1,189 @@
 <?php
 
-namespace App\Models;
+namespace App\Controllers;
 
-use PDO;
-use App\Models\mainModel;
+use App\Core\Request;
+use App\Core\Response;
+use App\Models\permissionModel;
+use App\Models\roleModel;
 
 /**
- * Modelo de permisos simplificado
- * 
- * Maneja los permisos siguiendo la estructura:
- * rol -> rol_permiso -> permiso
- * usuario -> usuario_permiso -> permiso
+ * Controlador para la gestión de permisos
  */
-class permissionModel extends mainModel
+class PermissionController
 {
     /**
-     * Obtiene todos los permisos activos
+     * Modelo de permisos
+     * @var permissionModel
      */
-    public function obtenerTodosPermisos()
+    private $permissionModel;
+
+    /**
+     * Modelo de roles
+     * @var roleModel
+     */
+    private $roleModel;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
     {
-        try {
-            $query = "SELECT * FROM permiso WHERE permiso_estado = 1 ORDER BY permiso_nombre";
-            $resultado = $this->ejecutarConsulta($query);
-            return $resultado->fetchAll(PDO::FETCH_OBJ);
-        } catch (\Exception $e) {
-            error_log("Error en obtenerTodosPermisos: " . $e->getMessage());
-            return [];
-        }
+        $this->permissionModel = new permissionModel();
+        $this->roleModel = new roleModel();
     }
 
     /**
-     * Obtiene los permisos asignados a un rol
+     * Muestra la vista de listado de permisos
      */
-    public function obtenerPermisosPorRol($rolId)
+    public function index(Request $request)
     {
-        try {
-            $query = "SELECT p.permiso_id, p.permiso_nombre, p.permiso_slug, p.permiso_descripcion
-                     FROM permiso p
-                     INNER JOIN rol_permiso rp ON p.permiso_id = rp.permiso_id
-                     WHERE rp.rol_id = :rol_id AND p.permiso_estado = 1
-                     ORDER BY p.permiso_nombre";
-            
-            $resultado = $this->ejecutarConsulta($query, [':rol_id' => $rolId]);
-            return $resultado->fetchAll(PDO::FETCH_OBJ);
-        } catch (\Exception $e) {
-            error_log("Error en obtenerPermisosPorRol: " . $e->getMessage());
-            return [];
-        }
+        ob_start();
+        $titulo = 'Permisos';
+        $permisos = $this->permissionModel->obtenerTodosPermisos(false);
+        include APP_ROOT . 'app/Views/permissions/index.php';
+        $contenido = ob_get_clean();
+
+        return Response::html($contenido);
     }
 
     /**
-     * Obtiene los permisos específicos de un usuario
+     * Muestra el formulario para asignar permisos a un rol
      */
-    public function obtenerPermisosUsuario($usuarioId)
+    public function assignForm(Request $request)
     {
-        try {
-            $query = "SELECT p.permiso_id, p.permiso_nombre, p.permiso_slug, 
-                            p.permiso_descripcion, up.concedido
-                     FROM permiso p
-                     INNER JOIN usuario_permiso up ON p.permiso_id = up.permiso_id
-                     WHERE up.usuario_id = :usuario_id AND p.permiso_estado = 1
-                     ORDER BY p.permiso_nombre";
-            
-            $resultado = $this->ejecutarConsulta($query, [':usuario_id' => $usuarioId]);
-            return $resultado->fetchAll(PDO::FETCH_OBJ);
-        } catch (\Exception $e) {
-            error_log("Error en obtenerPermisosUsuario: " . $e->getMessage());
-            return [];
+        $rolId = $request->param('role_id');
+        $rol = $this->roleModel->obtenerRolPorId($rolId);
+
+        if (!$rol) {
+            return Response::redirect(APP_URL . 'error/404');
         }
+
+        ob_start();
+        $titulo = 'Asignar Permisos a Rol: ' . $rol->rol_descripcion;
+        $todosPermisos = $this->permissionModel->obtenerTodosPermisos();
+        $permisosAsignados = $this->permissionModel->obtenerPermisosPorRol($rolId);
+
+        // Convertir permisos asignados a un array de IDs para facilitar la comparación
+        $permisosAsignadosIds = array_map(function ($permiso) {
+            return $permiso->permiso_id;
+        }, $permisosAsignados);
+
+        include APP_ROOT . 'app/Views/permissions/assign.php';
+        $contenido = ob_get_clean();
+
+        return Response::html($contenido);
     }
 
     /**
-     * Verifica si un usuario tiene un permiso específico
-     * Primero verifica permisos específicos del usuario, luego del rol
+     * Guarda la asignación de permisos a un rol
      */
-    public function verificarPermiso($usuarioId, $permisoSlug)
+    public function assignSave(Request $request)
     {
-        try {
-            // 1. Verificar permiso específico del usuario
-            $query = "SELECT up.concedido 
-                     FROM usuario_permiso up
-                     INNER JOIN permiso p ON up.permiso_id = p.permiso_id
-                     WHERE up.usuario_id = :usuario_id 
-                     AND p.permiso_slug = :permiso_slug
-                     AND p.permiso_estado = 1";
-            
-            $resultado = $this->ejecutarConsulta($query, [
-                ':usuario_id' => $usuarioId,
-                ':permiso_slug' => $permisoSlug
-            ]);
-            
-            $permisoUsuario = $resultado->fetch(PDO::FETCH_OBJ);
-            
-            // Si existe un permiso específico del usuario, usar ese
-            if ($permisoUsuario !== false) {
-                return (bool)$permisoUsuario->concedido;
+        $rolId = $request->param('role_id');
+        $permisoIds = $request->post('permisos', []);
+
+        // Verificar que el rol existe
+        $rol = $this->roleModel->obtenerRolPorId($rolId);
+        if (!$rol) {
+            if ($request->expectsJson()) {
+                return Response::json(['error' => 'Rol no encontrado'], 404);
             }
-
-            // 2. Si no hay permiso específico, verificar permisos del rol
-            $query = "SELECT COUNT(*) 
-                     FROM usuario u
-                     INNER JOIN rol_permiso rp ON u.usuario_rol = rp.rol_id
-                     INNER JOIN permiso p ON rp.permiso_id = p.permiso_id
-                     WHERE u.usuario_id = :usuario_id 
-                     AND p.permiso_slug = :permiso_slug
-                     AND p.permiso_estado = 1";
-            
-            $resultado = $this->ejecutarConsulta($query, [
-                ':usuario_id' => $usuarioId,
-                ':permiso_slug' => $permisoSlug
-            ]);
-
-            return $resultado->fetchColumn() > 0;
-        } catch (\Exception $e) {
-            error_log("Error en verificarPermiso: " . $e->getMessage());
-            return false;
+            return Response::redirect(APP_URL . 'error/404');
         }
-    }
 
-    /**
-     * Asigna un permiso a un rol
-     */
-    public function asignarPermisoRol($rolId, $permisoId)
-    {
-        try {
-            // Verificar si ya existe
-            $query = "SELECT COUNT(*) FROM rol_permiso 
-                     WHERE rol_id = :rol_id AND permiso_id = :permiso_id";
-            $resultado = $this->ejecutarConsulta($query, [
-                ':rol_id' => $rolId,
-                ':permiso_id' => $permisoId
-            ]);
+        // Asignar permisos
+        $resultado = $this->permissionModel->asignarPermisosARol($rolId, $permisoIds);
 
-            if ($resultado->fetchColumn() > 0) {
-                return true; // Ya existe
-            }
-
-            // Insertar nuevo
-            $datos = [
-                'rol_id' => $rolId,
-                'permiso_id' => $permisoId,
-                'fecha_creacion' => date('Y-m-d H:i:s')
-            ];
-
-            $resultado = $this->insertarDatos('rol_permiso', $datos);
-            return $resultado->rowCount() > 0;
-        } catch (\Exception $e) {
-            error_log("Error en asignarPermisoRol: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Revoca un permiso de un rol
-     */
-    public function revocarPermisoRol($rolId, $permisoId)
-    {
-        try {
-            $query = "DELETE FROM rol_permiso 
-                     WHERE rol_id = :rol_id AND permiso_id = :permiso_id";
-            $resultado = $this->ejecutarConsulta($query, [
-                ':rol_id' => $rolId,
-                ':permiso_id' => $permisoId
-            ]);
-
-            return $resultado->rowCount() > 0;
-        } catch (\Exception $e) {
-            error_log("Error en revocarPermisoRol: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Asigna un permiso específico a un usuario
-     */
-    public function asignarPermisoUsuario($usuarioId, $permisoId, $concedido = true)
-    {
-        try {
-            // Verificar si ya existe
-            $query = "SELECT COUNT(*) FROM usuario_permiso 
-                     WHERE usuario_id = :usuario_id AND permiso_id = :permiso_id";
-            $resultado = $this->ejecutarConsulta($query, [
-                ':usuario_id' => $usuarioId,
-                ':permiso_id' => $permisoId
-            ]);
-
-            $datos = [
-                'usuario_id' => $usuarioId,
-                'permiso_id' => $permisoId,
-                'concedido' => $concedido ? 1 : 0,
-                'fecha_creacion' => date('Y-m-d H:i:s')
-            ];
-
-            if ($resultado->fetchColumn() > 0) {
-                // Actualizar existente
-                $camposActualizar = [
-                    [
-                        'campo_nombre' => 'concedido',
-                        'campo_marcador' => ':concedido',
-                        'campo_valor' => $concedido ? 1 : 0
-                    ]
-                ];
-
-                $condicion = [
-                    'condicion_campo' => 'usuario_id',
-                    'condicion_marcador' => ':usuario_id',
-                    'condicion_valor' => $usuarioId
-                ];
-
-                // Agregar condición para permiso_id
-                $query = "UPDATE usuario_permiso SET concedido = :concedido 
-                         WHERE usuario_id = :usuario_id AND permiso_id = :permiso_id";
-                $resultado = $this->ejecutarConsulta($query, [
-                    ':concedido' => $concedido ? 1 : 0,
-                    ':usuario_id' => $usuarioId,
-                    ':permiso_id' => $permisoId
+        if ($request->expectsJson()) {
+            if ($resultado) {
+                return Response::json([
+                    'status' => 'success',
+                    'mensaje' => 'Permisos asignados correctamente'
                 ]);
             } else {
-                // Insertar nuevo
-                $resultado = $this->insertarDatos('usuario_permiso', $datos);
+                return Response::json([
+                    'status' => 'error',
+                    'mensaje' => 'Error al asignar permisos'
+                ]);
             }
+        }
 
-            return $resultado->rowCount() > 0;
-        } catch (\Exception $e) {
-            error_log("Error en asignarPermisoUsuario: " . $e->getMessage());
-            return false;
+        // Si no es una petición AJAX, redirigir
+        if ($resultado) {
+            // Redirigir con mensaje de éxito
+            return Response::redirect(APP_URL . 'roles');
+        } else {
+            // Redirigir con mensaje de error
+            return Response::redirect(APP_URL . 'permissions/assign/' . $rolId);
         }
     }
 
     /**
-     * Elimina un permiso específico de un usuario
+     * API: Obtiene todos los permisos
      */
-    public function eliminarPermisoUsuario($usuarioId, $permisoId)
+    public function getAllPermissions(Request $request)
     {
-        try {
-            $query = "DELETE FROM usuario_permiso 
-                     WHERE usuario_id = :usuario_id AND permiso_id = :permiso_id";
-            $resultado = $this->ejecutarConsulta($query, [
-                ':usuario_id' => $usuarioId,
-                ':permiso_id' => $permisoId
-            ]);
+        $permisos = $this->permissionModel->obtenerTodosPermisos();
+        return Response::json([
+            'status' => 'success',
+            'data' => $permisos
+        ]);
+    }
 
-            return $resultado->rowCount() > 0;
-        } catch (\Exception $e) {
-            error_log("Error en eliminarPermisoUsuario: " . $e->getMessage());
-            return false;
+    /**
+     * API: Obtiene los permisos de un rol
+     */
+    public function getRolePermissions(Request $request)
+    {
+        $rolId = $request->param('id');
+        $permisos = $this->permissionModel->obtenerPermisosPorRol($rolId);
+
+        return Response::json([
+            'status' => 'success',
+            'data' => $permisos
+        ]);
+    }
+
+    /**
+     * API: Asigna permisos a un rol
+     */
+    public function assignPermissions(Request $request)
+    {
+        $rolId = $request->param('id');
+        $datos = $request->json();
+
+        if (!isset($datos['permisos']) || !is_array($datos['permisos'])) {
+            return Response::json([
+                'status' => 'error',
+                'mensaje' => 'Formato de datos inválido'
+            ], 400);
+        }
+
+        $permisoIds = $datos['permisos'];
+
+        // Verificar que el rol existe
+        $rol = $this->roleModel->obtenerRolPorId($rolId);
+        if (!$rol) {
+            return Response::json([
+                'status' => 'error',
+                'mensaje' => 'Rol no encontrado'
+            ], 404);
+        }
+
+        // Asignar permisos
+        $resultado = $this->permissionModel->asignarPermisosARol($rolId, $permisoIds);
+
+        if ($resultado) {
+            return Response::json([
+                'status' => 'success',
+                'mensaje' => 'Permisos asignados correctamente'
+            ]);
+        } else {
+            return Response::json([
+                'status' => 'error',
+                'mensaje' => 'Error al asignar permisos'
+            ], 500);
         }
     }
 }

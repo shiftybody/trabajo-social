@@ -53,7 +53,7 @@ class UserController
 
   public function store(Request $request)
   {
-    
+
     $avatar = $request->FILES('avatar');
     $datos = $request->POST();
 
@@ -276,6 +276,117 @@ class UserController
       return Response::json([
         'status' => 'error',
         'mensaje' => 'Error al obtener los usuarios: ' . $e->getMessage()
+      ]);
+    }
+  }
+
+  public function update(Request $request)
+  {
+    $id = $request->param('id');
+    $datos = $request->post();
+
+    // Validar que el usuario existe
+    $usuario = $this->userModel->obtenerUsuarioPorId($id);
+    if (!$usuario) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Usuario no encontrado'
+      ], 404);
+    }
+
+    // Definir reglas de validación
+    $validar = [
+      'nombre' => [
+        'min' => 2,
+        'max' => 50,
+        'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',
+        'sanitizar' => true
+      ],
+      'apellidoPaterno' => [
+        'min' => 2,
+        'max' => 50,
+        'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',
+        'sanitizar' => true
+      ],
+      'apellidoMaterno' => [
+        'min' => 2,
+        'max' => 50,
+        'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',
+        'sanitizar' => true
+      ],
+      'telefono' => [
+        'formato' => '^\d{10}$',
+        'sanitizar' => true
+      ],
+      'correo' => [
+        'formato' => 'email',
+        'sanitizar' => true
+      ],
+      'username' => [
+        'min' => 5,
+        'max' => 20,
+        'formato' => 'alfanumerico',
+        'sanitizar' => true
+      ],
+      'estado',
+      'rol' => [
+        'formato' => 'entero'
+      ],
+    ];
+
+    // si change_password es 0 no validar el password, si es 1 validar el password
+    if ($datos['change_password'] == 1) {
+      $validar['password'] = [
+        'formato' => '(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}'
+      ];
+      $validar['password2'] = [
+        'requerido' => true
+      ];
+    }
+
+    // Validar los datos
+    $resultado = $this->userModel->validarDatos($datos, $validar);
+
+    // Verificar errores de validación
+    if (!empty($resultado['errores'])) {
+      return Response::json([
+        'status' => 'error',
+        'errores' => $resultado['errores']
+      ]);
+    }
+
+    // Verificar si se está actualizando el correo y si ya existe
+    if (isset($resultado['datos']['correo']) && $resultado['datos']['correo'] !== $usuario->usuario_email) {
+      if ($this->userModel->localizarCorreo($resultado['datos']['correo'])) {
+        return Response::json([
+          'status' => 'error',
+          'errores' => ['correo' => 'Este correo ya está registrado']
+        ]);
+      }
+    }
+
+    // Verificar si se está actualizando el nombre de usuario y si ya existe
+    if (isset($resultado['datos']['username']) && $resultado['datos']['username'] !== $usuario->usuario_usuario) {
+      if ($this->userModel->localizarUsername($resultado['datos']['username'])) {
+        return Response::json([
+          'status' => 'error',
+          'errores' => ['username' => 'Este nombre de usuario ya está registrado']
+        ]);
+      }
+    }
+
+    // Actualizar el usuario
+    $actualizar = $this->userModel->actualizarUsuario($id, $resultado['datos']);
+
+    if ($actualizar) {
+      return Response::json([
+        'status' => 'success',
+        'mensaje' => 'Usuario actualizado correctamente'
+      ]);
+    } else {
+      return Response::json([
+        'status' => 'error',
+        'errores' => ['general' => 'Error al actualizar el usuario']
       ]);
     }
   }

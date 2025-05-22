@@ -44,10 +44,10 @@ class Auth
   private static $publicRoutes = [
     '/login',
     '/logout',
-    '/errors/404',
-    '/errors/403',
-    '/errors/401',
-    '/errors/500'
+    '/error/404',
+    '/error/403',
+    '/error/401',
+    '/error/500'
   ];
 
   /**
@@ -375,12 +375,6 @@ class Auth
       self::$permissions[$permission->permiso_slug] = true;
     }
 
-    // Obtener permisos específicos del usuario
-    $userPermissions = self::$permissionModel->obtenerPermisosUsuario(self::id());
-    foreach ($userPermissions as $permission) {
-      // Los permisos específicos del usuario sobreescriben los del rol
-      self::$permissions[$permission->permiso_slug] = (bool)$permission->concedido;
-    }
   }
 
   /**

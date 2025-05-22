@@ -355,7 +355,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             <span class="return-btn-content">Regresar</span>
       </a>
     </div>
-    <?= var_dump($usuario) ?>
+    <!-- <?= var_dump($usuario) ?> -->
     <div class="form-wrapper">
       <div class="form-information">
         <h1 class="form-title">
@@ -363,7 +363,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         </h1>
         <p class="form-helper">Ingrese los datos del usuario que desea modificar</p>
       </div>
-      <form class="form-container form-ajax" novalidate action="<?= APP_URL ?>api/users/update/<?= $usuario->usuario_id ?>" method="POST" enctype="multipart/form-data">
+      <form class="form-container form-ajax" novalidate action="<?= APP_URL ?>api/users/<?= $usuario->usuario_id ?>" method="POST" enctype="multipart/form-data">
         <div class="left-side">
           <div class="general-information">
 
@@ -496,9 +496,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
   <script src="<?= APP_URL ?>public/js/ajax.js"></script>
   <script>
-    // Guardamos el rol actual del usuario en una variable JavaScript
+
     const rolActual = "<?= $usuario->usuario_rol ?>";
-    console.log(rolActual);
     const estadoActual = "<?= $usuario->usuario_estado ?>";
 
     // Cargar los roles disponibles

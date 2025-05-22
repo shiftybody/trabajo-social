@@ -86,13 +86,12 @@ $router->group(['middleware' => 'Auth'], function ($router) {
   $router->group(['middleware' => 'Permission:users.view'], function ($router) {
     // 
     $router->get('/users', 'UserController@indexView')->name('users.index');
-    // $router->get('/users/create', 'UserController@createView')->name('users.create'); // Se mueve de aquí
     $router->get('/users/edit/:id', 'UserController@editView')->name('users.update');
   });
 
   // Crear usuario (vista y acción)
   $router->group(['middleware' => 'Permission:users.create'], function ($router) {
-    $router->get('/users/create', 'UserController@createView')->name('users.create'); // Se añade aquí
+    $router->get('/users/create', 'UserController@createView')->name('users.create');
     $router->post('/users', 'UserController@store')->name('users.store');
   });
 

@@ -43,6 +43,8 @@ class RoleMiddleware
             if ($request->expectsJson()) {
                 return Response::json(['error' => 'Acceso denegado'], 403);
             }
+            error_log('Acceso denegado: No tienes los roles requeridos.');
+            error_log('Role requerido' .  $this->roles);
             return Response::redirect(APP_URL . 'error/403');
         }
 

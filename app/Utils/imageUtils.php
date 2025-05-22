@@ -23,6 +23,8 @@ class ImageUtils
 
     // Obtener información de la imagen
     $info = getimagesize($rutaOriginal);
+
+
     if ($info === false) {
       return false;
     }

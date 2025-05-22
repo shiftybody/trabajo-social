@@ -1,6 +1,6 @@
 (function () {
-  const DEFAULT_CHECK_INTERVAL = 5000;
-  const REMEMBERED_CHECK_INTERVAL = 5000;
+  const DEFAULT_CHECK_INTERVAL = 30000; // 30 segundos
+  const REMEMBERED_CHECK_INTERVAL = 600000; // 10 minutos
 
   const BASE_APP_URL = typeof APP_URL !== "undefined" && APP_URL ? APP_URL : "";
 
@@ -144,7 +144,7 @@
       } else {
         logoutPath = "/" + logoutPath;
       }
-      
+
       finalLogoutUrl = BASE_APP_URL + logoutPath;
       if (expiredParam) {
         finalLogoutUrl += "?" + expiredParam;
@@ -365,7 +365,7 @@
 
     if (inactivityModal && inactivityStayLoggedInBtn && inactivityLogoutBtn) {
       inactivityStayLoggedInBtn.addEventListener("click", refreshSession);
-      inactivityLogoutBtn.addEventListener("click", function() {
+      inactivityLogoutBtn.addEventListener("click", function () {
         forceLogout(false); // Pasar false porque es un logout manual
       });
     } else if (inactivityModal) {
