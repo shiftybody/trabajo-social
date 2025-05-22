@@ -315,8 +315,8 @@ class mainModel
         $valor = $this->sanitizarEntrada($valor);
       }
 
-      // Verificar si el campo es requerido
-      if (isset($regla['requerido']) && $regla['requerido'] === true && empty($valor)) {
+      // Validar si es obligatorio
+      if (isset($regla['requerido']) && $regla['requerido'] === true && ($valor === null || $valor === '')) {
         $resultado['errores'][$campo] = "El campo $campo es requerido";
         continue;
       }

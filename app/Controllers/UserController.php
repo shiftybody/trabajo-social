@@ -51,11 +51,27 @@ class UserController
     return Response::html($contenido);
   }
 
+  public function getAllUsers(Request $request)
+  {
+    try {
+      $usuarios = $this->userModel->obtenerTodosUsuarios();
+      return Response::json([
+        'status' => 'success',
+        'data' => $usuarios
+      ]);
+    } catch (Exception $e) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Error al obtener los usuarios: ' . $e->getMessage()
+      ]);
+    }
+  }
+
   public function store(Request $request)
   {
 
     $avatar = $request->FILES('avatar');
-    $datos = $request->POST();
+    $datos = $request->PUT();
 
     $validar = [
       'nombre' => [
@@ -264,26 +280,14 @@ class UserController
     }
   }
 
-  public function getAllUsers(Request $request)
-  {
-    try {
-      $usuarios = $this->userModel->obtenerTodosUsuarios();
-      return Response::json([
-        'status' => 'success',
-        'data' => $usuarios
-      ]);
-    } catch (Exception $e) {
-      return Response::json([
-        'status' => 'error',
-        'mensaje' => 'Error al obtener los usuarios: ' . $e->getMessage()
-      ]);
-    }
-  }
 
   public function update(Request $request)
   {
     $id = $request->param('id');
-    $datos = $request->post();
+    $avatar = $request->FILES('avatar');
+    $datos = $request->put();
+
+    error_log(print_r($datos, true));
 
     // Validar que el usuario existe
     $usuario = $this->userModel->obtenerUsuarioPorId($id);
@@ -328,7 +332,9 @@ class UserController
         'formato' => 'alfanumerico',
         'sanitizar' => true
       ],
-      'estado',
+      'estado' => [
+        'requerido' => true,
+      ],
       'rol' => [
         'formato' => 'entero'
       ],

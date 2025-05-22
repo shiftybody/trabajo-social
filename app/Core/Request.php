@@ -132,53 +132,96 @@ class Request
    * @param mixed $default Valor por defecto si la clave no existe
    * @return mixed Valor del POST o array completo
    */
+
+
   public function post($key = null, $default = null)
   {
     if ($key === null) {
       return $_POST;
     }
 
-    return isset($postData[$key]) ? $postData[$key] : $default;
+    return isset($_POST[$key]) ? $_POST[$key] : $default;
   }
 
-  /**
-   * Obtiene datos enviados por PUT
-   * 
-   * @param string|null $key Clave específica a obtener (opcional)
-   * @param mixed $default Valor por defecto si la clave no existe
-   * @return mixed Valor del PUT o array completo
-   */
   public function put($key = null, $default = null)
   {
-    // PHP no procesa automáticamente los datos PUT como lo hace con POST
-    // Debemos leerlos del flujo de entrada php://input
-    $putData = [];
+    static $putData = null;
 
-    // Verificar si es un método PUT
-    if ($this->getMethod() === 'PUT') {
-      // Leer los datos del cuerpo de la petición
-      $inputData = file_get_contents('php://input');
+    if ($putData === null) {
+      $putData = array();
 
-      // Verificar el tipo de contenido
-      $contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
+      $method = $_SERVER['REQUEST_METHOD'];
+      if ($method === 'PUT' || $method === 'PATCH') {
 
-      // Si es JSON, decodificarlo
-      if (strpos($contentType, 'application/json') !== false) {
-        $putData = json_decode($inputData, true) ?: [];
-      }
-      // Si es form-data, parsearlo como query string
-      else if (strpos($contentType, 'application/x-www-form-urlencoded') !== false) {
-        parse_str($inputData, $putData);
+        $rawInput = file_get_contents('php://input');
+
+        if (!empty($rawInput)) {
+          $contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
+
+          if (strpos($contentType, 'application/json') !== false) {
+            // JSON
+            $putData = json_decode($rawInput, true);
+            if ($putData === null) {
+              $putData = array();
+            }
+          } elseif (strpos($contentType, 'multipart/form-data') !== false) {
+            // MULTIPART - parsear solo campos de texto, ignorar archivos
+            $putData = $this->parseMultipartFields($rawInput, $contentType);
+          } else {
+            // Form data tradicional
+            parse_str($rawInput, $putData);
+          }
+        }
       }
     }
 
-    // Si no se especifica clave, devolver todos los datos
     if ($key === null) {
       return $putData;
     }
 
-    // Devolver el valor específico o el valor por defecto
     return isset($putData[$key]) ? $putData[$key] : $default;
+  }
+
+  private function parseMultipartFields($rawInput, $contentType)
+  {
+    $data = array();
+
+    // Extraer boundary
+    preg_match('/boundary=(.*)$/', $contentType, $matches);
+    if (!isset($matches[1])) {
+      return $data;
+    }
+
+    $boundary = '--' . $matches[1];
+    $parts = explode($boundary, $rawInput);
+
+    foreach ($parts as $part) {
+      // Compatibilidad PHP 5.4: asignar a variable antes de usar empty()
+      $trimmedPart = trim($part);
+      if (empty($trimmedPart) || $part == '--') {
+        continue;
+      }
+
+      if (strpos($part, "\r\n\r\n") !== false) {
+        list($headers, $content) = explode("\r\n\r\n", $part, 2);
+      } else {
+        continue;
+      }
+
+      // IGNORAR archivos - solo procesar campos de texto
+      if (strpos($headers, 'filename=') !== false) {
+        continue; // Saltar archivos
+      }
+
+      // Solo procesar campos normales
+      if (preg_match('/name="([^"]*)"/', $headers, $nameMatch)) {
+        $fieldName = $nameMatch[1];
+        $content = rtrim($content, "\r\n");
+        $data[$fieldName] = $content;
+      }
+    }
+
+    return $data;
   }
 
   /**
