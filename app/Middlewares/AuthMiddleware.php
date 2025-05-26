@@ -15,12 +15,7 @@ class AuthMiddleware
     {
         // Inicializar Auth si no está inicializado
         Auth::init();
-
-        // Verificar si la ruta es pública
-        if (Auth::isPublicRoute($request->getUri())) {
-            return $next($request);
-        }
-
+        
         // Verificar autenticación
         if (!Auth::check()) {
             if ($request->expectsJson()) {

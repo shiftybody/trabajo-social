@@ -5,12 +5,6 @@ use App\Core\Response;
 
 $router = new Router();
 
-// Establecer vistas de error personalizadas
-$router->setErrorView('404', APP_ROOT . 'app/Views/errors/404.php');
-$router->setErrorView('403', APP_ROOT . 'app/Views/errors/403.php');
-$router->setErrorView('401', APP_ROOT . 'app/Views/errors/401.php');
-$router->setErrorView('500', APP_ROOT . 'app/Views/errors/500.php');
-
 // Rutas públicas - CORREGIDO: usar LoginController en lugar de AuthController
 $router->get('/login', function () {
   try {
@@ -43,48 +37,13 @@ $router->get('/login', function () {
 $router->post('/login', 'LoginController@login');
 $router->get('/logout', 'LoginController@logout');
 
-// Rutas de error
-$router->get('/error/404', function () {
-  http_response_code(404);
-  ob_start();
-  include APP_ROOT . 'app/Views/errors/404.php';
-  $content = ob_get_clean();
-  return Response::html($content, 404);
-});
-
-$router->get('/error/403', function () {
-  http_response_code(403);
-  ob_start();
-  include APP_ROOT . 'app/Views/errors/403.php';
-  $content = ob_get_clean();
-  return Response::html($content, 403);
-});
-
-$router->get('/error/401', function () {
-  http_response_code(401);
-  ob_start();
-  include APP_ROOT . 'app/Views/errors/401.php';
-  $content = ob_get_clean();
-  return Response::html($content, 401);
-});
-
-$router->get('/error/500', function () {
-  http_response_code(500);
-  ob_start();
-  include APP_ROOT . 'app/Views/errors/500.php';
-  $content = ob_get_clean();
-  return Response::html($content, 500);
-});
-
 // Rutas protegidas (requieren autenticación)
 $router->group(['middleware' => 'Auth'], function ($router) {
 
-  // home
   $router->get('/home', 'homeController@index')->name('home');
 
   // Usuarios (requiere permiso específico para ver el listado y editar)
   $router->group(['middleware' => 'Permission:users.view'], function ($router) {
-    // 
     $router->get('/users', 'UserController@indexView')->name('users.index');
     $router->get('/users/edit/:id', 'UserController@editView')->name('users.update');
   });
@@ -113,9 +72,42 @@ $router->group(['middleware' => 'Auth'], function ($router) {
   $router->get('/profile', 'UserController@profile')->name('profile');
   $router->post('/profile/update', 'UserController@updateProfile')->name('profile.update');
   $router->post('/profile/password', 'UserController@updatePassword')->name('profile.password');
+
+  // Rutas de error
+  $router->get('/error/404', function () {
+    http_response_code(404);
+    ob_start();
+    include APP_ROOT . 'app/Views/errors/404.php';
+    $content = ob_get_clean();
+    return Response::html($content, 404);
+  });
+
+  $router->get('/error/403', function () {
+    http_response_code(403);
+    ob_start();
+    include APP_ROOT . 'app/Views/errors/403.php';
+    $content = ob_get_clean();
+    return Response::html($content, 403);
+  });
+
+  $router->get('/error/401', function () {
+    http_response_code(401);
+    ob_start();
+    include APP_ROOT . 'app/Views/errors/401.php';
+    $content = ob_get_clean();
+    return Response::html($content, 401);
+  });
+
+  $router->get('/error/500', function () {
+    http_response_code(500);
+    ob_start();
+    include APP_ROOT . 'app/Views/errors/500.php';
+    $content = ob_get_clean();
+    return Response::html($content, 500);
+  });
 });
 
-// Ruta por defecto (opcional)
+// Ruta por defecto
 $router->get('/', function () {
   return Response::redirect(APP_URL . 'home');
 });

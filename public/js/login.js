@@ -1,6 +1,5 @@
 const formulario = document.getElementById("login-form");
-const errorMsg = document.getElementById("error-msg");
-const authError = document.getElementById("auth-error");
+const errorMsg = document.getElementById("message-container");
 
 // Limpiar la URL del parámetro expired_session al cargar la página
 document.addEventListener("DOMContentLoaded", function () {
@@ -10,19 +9,86 @@ document.addEventListener("DOMContentLoaded", function () {
     url.searchParams.delete("expired_session");
     window.history.replaceState({}, document.title, url.pathname + url.search);
   }
+
+  // Inicializar funcionalidad de mostrar/ocultar contraseña
+  initPasswordToggle();
 });
+
+// Función para inicializar el toggle de contraseña
+function initPasswordToggle() {
+  const passwordInput = document.getElementById("password");
+  const toggleButton = document.getElementById("password-toggle");
+
+  if (passwordInput && toggleButton) {
+    // Función para mostrar/ocultar el botón según el contenido
+    function toggleButtonVisibility() {
+      if (passwordInput.value.trim() === "") {
+        toggleButton.style.display = "none";
+      } else {
+        toggleButton.style.display = "flex";
+      }
+    }
+
+    // Inicializar la visibilidad del botón
+    toggleButtonVisibility();
+
+    // Escuchar cambios en el input
+    passwordInput.addEventListener("input", toggleButtonVisibility);
+    passwordInput.addEventListener("paste", function () {
+      // Usar setTimeout para esperar a que se procese el paste
+      setTimeout(toggleButtonVisibility, 0);
+    });
+
+    toggleButton.addEventListener("click", function () {
+      const isPassword = passwordInput.type === "password";
+
+      // Cambiar el tipo del input
+      passwordInput.type = isPassword ? "text" : "password";
+
+      // Cambiar el icono
+      const eyeIcon = toggleButton.querySelector(".eye-icon");
+      const eyeOffIcon = toggleButton.querySelector(".eye-off-icon");
+
+      if (isPassword) {
+        eyeIcon.style.display = "none";
+        eyeOffIcon.style.display = "block";
+      } else {
+        eyeIcon.style.display = "block";
+        eyeOffIcon.style.display = "none";
+      }
+    });
+  }
+}
+
+// Función para mostrar mensaje de error en el contenedor principal
+function showMainError(message, className = "error-message") {
+  // Limpiar cualquier mensaje anterior
+  clearMainError();
+
+  // Crear nuevo mensaje
+  const errorP = document.createElement("p");
+  errorP.className = className;
+  errorP.textContent = message;
+
+  // Añadir al contenedor y mostrarlo
+  errorMsg.appendChild(errorP);
+  errorMsg.classList.add("visible");
+}
+
+// Función para limpiar el mensaje de error principal
+function clearMainError() {
+  const existingError = errorMsg.querySelector("p");
+  if (existingError) {
+    existingError.remove();
+  }
+  errorMsg.classList.remove("visible");
+}
 
 // Limpiar el mensaje de sesión expirada cuando el usuario comience a interactuar
 function clearExpiredSessionMessage() {
   const sessionMsg = errorMsg.querySelector(".expired-session-message");
   if (sessionMsg) {
-    sessionMsg.remove();
-
-    // Si no hay otros errores, ocultar el contenedor
-    const authErrorText = authError ? authError.textContent.trim() : "";
-    if (!authErrorText) {
-      errorMsg.classList.remove("visible");
-    }
+    clearMainError();
   }
 }
 
@@ -44,50 +110,57 @@ formulario.addEventListener("submit", async function (e) {
   // Limpiar los mensajes de error previos de validación
   document
     .querySelectorAll(".error-message:not(.expired-session-message)")
-    .forEach((errorMsg) => errorMsg.remove());
+    .forEach((errorMsgElement) => errorMsgElement.remove());
 
   document
     .querySelectorAll(".error-input")
     .forEach((errorInput) => errorInput.classList.remove("error-input"));
 
-  // Limpiar el mensaje de error de autenticación
-  if (authError) {
-    authError.textContent = "";
-    authError.classList.remove("error-message");
-  }
-
-  // Conservar solo el mensaje de sesión expirada si existe
-  const sessionMsg = errorMsg.querySelector(".expired-session-message");
-  if (sessionMsg) {
-    // Limpia cualquier otro contenido que no sea el mensaje de sesión expirada
-    Array.from(errorMsg.childNodes).forEach((node) => {
-      if (
-        node !== sessionMsg &&
-        node.nodeType === Node.ELEMENT_NODE &&
-        !node.classList.contains("expired-session-message") &&
-        node.id !== "auth-error"
-      ) {
-        errorMsg.removeChild(node);
-      }
-    });
+  // Limpiar el mensaje principal si no es de sesión expirada
+  const mainErrorMsg = errorMsg.querySelector("p");
+  if (
+    mainErrorMsg &&
+    !mainErrorMsg.classList.contains("expired-session-message")
+  ) {
+    clearMainError();
   }
 
   // Para cada campo del formulario
   data.forEach((value, key) => {
     const input = formulario.querySelector(`[name="${key}"]`);
 
+    // Solo validar inputs que existen
+    if (!input) {
+      return;
+    }
+
     // Validar campos obligatorios
     // Si el campo es un string vacío y no es el campo avatar
     if (typeof value === "string" && value.trim() === "") {
-      let label = input.parentElement.querySelector("label").textContent;
-      showError(input, `El campo ${label.toLowerCase()} no puede estar vacío`);
-      isValid = false;
+      // Buscar el label - primero en el parent directo, luego en el grandparent
+      let label = input.parentElement.querySelector("label");
+      if (!label) {
+        // Si no se encuentra en el parent, buscar en el grandparent (caso del password)
+        label = input.parentElement.parentElement.querySelector("label");
+      }
+
+      // Verificar que existe un label
+      if (label) {
+        showError(
+          input,
+          `El campo ${label.textContent.toLowerCase()} no puede estar vacío`
+        );
+        isValid = false;
+      }
       return; // Salir de la validación de este campo
     }
   });
 
   // si no es valido, no hacer la peticion
-  if (!isValid) return;
+  if (!isValid) {
+    errorMsg.classList.add("visible"); // Asegurarse de que el contenedor de errores sea visible si hay errores de validación
+    return;
+  }
 
   const submitBtn = this.querySelector('button[type="submit"]');
 
@@ -110,18 +183,8 @@ formulario.addEventListener("submit", async function (e) {
         window.location.href = result.redirect;
       }
     } else if (result.status === "error") {
-      // Mostrar el contenedor de errores
-      errorMsg.classList.add("visible");
-
-      // Limpiar cualquier mensaje de autenticación anterior
-      if (authError) {
-        // Asegurarse de que esté vacío antes de añadir el nuevo error
-        authError.textContent = "";
-
-        // Mostrar el mensaje de error de autenticación
-        authError.textContent = result.message || "Ha ocurrido un error";
-        authError.classList.add("error-message");
-      }
+      // Mostrar mensaje de error de autenticación
+      showMainError(result.message || "Ha ocurrido un error");
 
       // Agregar estilo de error a los inputs
       const inputs = formulario.querySelectorAll(
@@ -139,12 +202,7 @@ formulario.addEventListener("submit", async function (e) {
     }
   } catch (error) {
     // Mostrar error genérico
-    errorMsg.classList.add("visible");
-    if (authError) {
-      authError.textContent =
-        "Error al enviar el formulario. Inténtalo de nuevo.";
-      authError.classList.add("error-message");
-    }
+    showMainError("Error al enviar el formulario. Inténtalo de nuevo.");
 
     // Restaurar el botón
     if (submitBtn) {
@@ -174,15 +232,12 @@ formulario
       }
 
       // Ocultar error de autenticación
-      if (authError) {
-        authError.textContent = "";
-        authError.classList.remove("error-message");
-
-        // Si no hay más mensajes, ocultar todo el contenedor
-        const sessionMsg = errorMsg.querySelector(".expired-session-message");
-        if (!sessionMsg) {
-          errorMsg.classList.remove("visible");
-        }
+      const mainErrorMsg = errorMsg.querySelector("p");
+      if (
+        mainErrorMsg &&
+        !mainErrorMsg.classList.contains("expired-session-message")
+      ) {
+        clearMainError();
       }
     });
   });

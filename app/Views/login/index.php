@@ -96,6 +96,48 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
     align-self: stretch
   }
 
+  /* Estilos para el contenedor de contraseña con icono */
+  .password-input-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .password-input-container input {
+    width: 100%;
+    padding-right: 2rem;
+    /* Espacio para el icono */
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: none;
+    /* Inicialmente oculto */
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-500, #677283);
+    transition: color 0.2s ease;
+  }
+
+  .password-toggle:hover {
+    color: var(--gray-700, #374151);
+  }
+
+  .password-toggle svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .eye-off-icon {
+    display: none;
+  }
+
   div#remember-check {
     display: flex;
     flex-direction: row-reverse;
@@ -108,11 +150,20 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
     cursor: pointer;
   }
 
-  input[type="checkbox"] {
-    accent-color: #2f2f31;
-    width: 1.2em;
-    height: 1.2em;
-    cursor: pointer;
+  /* Estilo para el contenedor de mensajes de error */
+  #message-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    color: var(--red-600);
+    font-family: var(--font-family);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-large);
+  }
+
+  #message-container.visible {
+    display: flex;
   }
 
 
@@ -143,44 +194,6 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
       margin-right: 5%;
     }
   }
-
-  .expired-session-message {
-    color: var(--red-600);
-    font-family: var(--font-family);
-    font-size: var(--font-size-small);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-large);
-  }
-
-  /* Estilo para el contenedor de mensajes de error */
-  #error-msg {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    border-radius: var(--rounded-md);
-  }
-
-  #error-msg.visible {
-    display: flex;
-  }
-
-  /* Estilo para mensajes de error */
-  .error-message {
-    color: var(--red-600);
-    font-family: var(--font-family);
-    font-size: var(--font-size-small);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-large);
-    width: 100%;
-  }
-
-  .expired-session-message {
-    color: var(--red-600);
-    font-family: var(--font-family);
-    font-size: var(--font-size-small);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-large);
-  }
 </style>
 
 <header>
@@ -200,10 +213,8 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
       </div>
 
       <!-- Contenedor de mensajes de error -->
-      <div id="error-msg" <?= $expired_message ? 'class="visible"' : '' ?>>
+      <div id="message-container" <?= $expired_message ? 'class="visible"' : '' ?>>
         <?= $expired_message ?>
-        <!-- Los mensajes de error de autenticación se añadirán aquí -->
-        <div id="auth-error"></div>
       </div>
 
       <div id="login-inputs">
@@ -214,7 +225,22 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
         <!-- el patron puede ser cualquiera -->
         <div id="password-input">
           <label for="password">Contraseña</label>
-          <input type="password" name="password" id="password" placeholder="•••••••••••">
+          <div class="password-input-container">
+            <input type="password" name="password" id="password" placeholder="•••••••••••">
+            <button type="button" class="password-toggle" id="password-toggle">
+              <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+              </svg>
+              <svg class="eye-off-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" />
+                <path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87" />
+                <path d="M3 3l18 18" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 

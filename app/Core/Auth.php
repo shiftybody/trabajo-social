@@ -167,9 +167,7 @@ class Auth
     }
   }
 
-  /**
-   * Verifica si la sesión ha expirado
-   */
+
   private static function isExpired()
   {
     if (!isset($_SESSION[APP_SESSION_NAME]['ultima_actividad'])) {
@@ -374,7 +372,6 @@ class Auth
     foreach ($rolePermissions as $permission) {
       self::$permissions[$permission->permiso_slug] = true;
     }
-
   }
 
   /**
@@ -399,26 +396,39 @@ class Auth
       self::$userModel = new userModel();
     }
 
-    $user = self::$userModel->autenticarUsuario($identifier, $password);
+    $authResult = self::$userModel->autenticarUsuario($identifier, $password);
+    // transform object to json
+    // error_log(json_encode($authResult)); // Modificado para loguear el array completo
 
-    if (!$user) {
-      error_log("Login fallido para: " . $identifier);
-      return false;
+    if (isset($authResult['status'])) {
+        switch ($authResult['status']) {
+            case 'success':
+                $user = $authResult['user'];
+                self::createSession($user, $remember);
+                if ($remember) {
+                    self::createRememberCookie($user);
+                }
+                self::$userModel->actualizarUltimoAcceso($user->usuario_id);
+                error_log("Login exitoso para: " . $identifier);
+                return true; // Autenticación exitosa
+            case 'inactive':
+                error_log("Intento de login de usuario inactivo: " . $identifier);
+                return 'inactive'; // Estado específico para usuario inactivo
+            case 'failed':
+                error_log("Login fallido (usuario no encontrado o contraseña incorrecta) para: " . $identifier);
+                return false; // Fallo de autenticación (usuario/contraseña)
+            case 'error':
+                error_log("Error en Auth::attempt llamando a autenticarUsuario: " . (isset($authResult['message']) ? $authResult['message'] : 'Error desconocido'));
+                return false; // Error general
+            default:
+                error_log("Resultado inesperado de autenticarUsuario para: " . $identifier);
+                return false; // Estado desconocido
+        }
+    } else {
+        // Manejo de un formato de respuesta inesperado (si $authResult no es un array con 'status')
+        error_log("Formato de respuesta inesperado de autenticarUsuario para: " . $identifier . " - Respuesta: " . json_encode($authResult));
+        return false;
     }
-
-    // Crear sesión, usando el valor de $remember
-    self::createSession($user, $remember);
-
-    // Crear cookie si se solicita
-    if ($remember) {
-      self::createRememberCookie($user);
-    }
-
-    // Actualizar último acceso
-    self::$userModel->actualizarUltimoAcceso($user->usuario_id);
-
-    error_log("Login exitoso para: " . $identifier);
-    return true;
   }
 
   /**

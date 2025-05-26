@@ -8,7 +8,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     padding-top: 2rem;
     flex-direction: column;
     align-items: center;
-    gap: 1rem
+    gap: 1rem;
   }
 
   .content {
@@ -49,7 +49,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   .form-layout {
     display: flex;
     padding: var(--0, 0px);
-    flex-direction: column;
+    flex-direction: column; 
     align-items: flex-start;
     gap: var(--4, 16px);
     align-self: stretch;
@@ -59,13 +59,11 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     display: flex;
     color: var(--gray-900, var(--gray-900, #0C192A));
     color: var(--gray-900, var(--gray-900, color(display-p3 0.0667 0.098 0.1569)));
-    /* leading-none/text-xl/font-bold */
     font-size: 20px;
     font-style: normal;
     font-weight: 700;
     line-height: 20px;
     align-self: stretch;
-    /* 100% */
   }
 
   .form-helper {
@@ -363,7 +361,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         </h1>
         <p class="form-helper">Ingrese los datos del usuario que desea modificar</p>
       </div>
-      <form class="form-container form-ajax" novalidate action="<?= APP_URL ?>api/users/<?= $usuario->usuario_id ?>" method="PUT" enctype="multipart/form-data">
+      <form class="form-container form-ajax" novalidate action="<?= APP_URL ?>api/users/<?= $usuario->usuario_id ?>" method="POST" enctype="multipart/form-data">
+
         <div class="left-side">
           <div class="general-information">
 
@@ -477,7 +476,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             <div class="profile-picture" style="background-image: url('<?= $avatar_url ?>')">
             </div>
 
-            <input type="file" name="foto" id="foto" accept="image/png, image/jpeg, image/gif" style="display: none;">
+            <input type="file" name="avatar" id="foto" accept="image/png, image/jpeg, image/gif" style="display: none;">
 
             <button type="button" id="upload_photo_btn" class="btn-upload-avatar" onclick="document.getElementById('foto').click()">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">

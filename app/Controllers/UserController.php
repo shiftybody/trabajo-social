@@ -71,7 +71,10 @@ class UserController
   {
 
     $avatar = $request->FILES('avatar');
-    $datos = $request->PUT();
+    $datos = $request->POST();
+
+    error_log(print_r($datos, true));
+    error_log(print_r($avatar, true));
 
     $validar = [
       'nombre' => [
@@ -245,7 +248,7 @@ class UserController
         try {
           // Asegurarse de que la clase ImageUtils está disponible
           if (!class_exists('\App\Utils\ImageUtils')) {
-            require_once APP_ROOT . 'Utils/ImageUtils.php';
+            require_once APP_ROOT . 'app/Utils/ImageUtils.php';
           }
 
           // Crear miniatura
@@ -256,7 +259,14 @@ class UserController
           );
         } catch (\Exception $e) {
           error_log("Error al crear miniatura: " . $e->getMessage());
-          // Continuar aunque falle la miniatura, al menos tenemos la original
+          // Si hay un error al crear la miniatura, eliminar la imagen original también
+          if (file_exists($rutaOriginal)) {
+            unlink($rutaOriginal);
+          }
+          return Response::json([
+            'status' => 'error',
+            'errores' => ['avatar' => 'Error al procesar la imagen (miniatura): ' . $e->getMessage()]
+          ]);
         }
       }
 
@@ -285,9 +295,12 @@ class UserController
   {
     $id = $request->param('id');
     $avatar = $request->FILES('avatar');
-    $datos = $request->put();
+    $datos = $request->POST();
 
+    // imprimir los datos
     error_log(print_r($datos, true));
+    // imprimir si se subio o no el avatar
+    error_log(print_r($avatar, true));
 
     // Validar que el usuario existe
     $usuario = $this->userModel->obtenerUsuarioPorId($id);
@@ -361,6 +374,112 @@ class UserController
       ]);
     }
 
+    // --- Manejo del Avatar --- //
+    $nombreArchivo = $usuario->usuario_avatar; // Mantener avatar actual por defecto
+    $archivoSubido = false;
+
+    if ($avatar && isset($avatar['tmp_name']) && !empty($avatar['tmp_name']) && file_exists($avatar['tmp_name'])) {
+      $archivoSubido = true;
+
+      $validacionArchivo = $this->userModel->validarArchivo($avatar, [
+        'tipos' => ['image/jpeg', 'image/png', 'image/gif'],
+        'tamano_max' => 5 * 1024 * 1024, // 5MB
+        'extensiones' => ['jpg', 'jpeg', 'png', 'gif']
+      ]);
+
+      if (!$validacionArchivo['valido']) {
+        return Response::json([
+          'status' => 'error',
+          'errores' => ['avatar' => $validacionArchivo['mensaje']]
+        ]);
+      }
+    }
+
+    if ($archivoSubido) {
+      $baseDir = APP_ROOT . 'public/photos';
+      $originalDir = $baseDir . '/original';
+      $thumbnailDir = $baseDir . '/thumbnail';
+
+      // Crear directorios si no existen
+      foreach ([$baseDir, $originalDir, $thumbnailDir] as $dir) {
+        if (!file_exists($dir)) {
+          mkdir($dir, 0777, true);
+        }
+      }
+
+      $nombreBase = str_ireplace(" ", "_", isset($resultado['datos']['nombre']) ? $resultado['datos']['nombre'] : 'user');
+      $nombreBase = $nombreBase . "_" . uniqid();
+
+      $extension = "";
+      $mimeType = mime_content_type($avatar['tmp_name']);
+      switch ($mimeType) {
+        case "image/jpg":
+        case "image/jpeg":
+          $extension = ".jpg";
+          break;
+        case "image/png":
+          $extension = ".png";
+          break;
+        case "image/gif":
+          $extension = ".gif";
+          break;
+        default:
+          return Response::json([
+            'status' => 'error',
+            'errores' => ['avatar' => 'Formato de imagen no soportado: ' . $mimeType]
+          ]);
+      }
+
+      $nombreArchivoNuevo = $nombreBase . $extension;
+      $rutaOriginalNueva = $originalDir . '/' . $nombreArchivoNuevo;
+      $rutaThumbnailNueva = $thumbnailDir . '/' . $nombreArchivoNuevo;
+
+      if (!move_uploaded_file($avatar['tmp_name'], $rutaOriginalNueva)) {
+        return Response::json([
+          'status' => 'error',
+          'errores' => ['avatar' => 'Error al guardar la nueva imagen']
+        ]);
+      }
+
+      if (file_exists($rutaOriginalNueva)) {
+        try {
+          if (!class_exists('\App\Utils\ImageUtils')) {
+            require_once APP_ROOT . 'app/Utils/ImageUtils.php';
+          }
+          \App\Utils\ImageUtils::createThumbnail(
+            $rutaOriginalNueva,
+            $rutaThumbnailNueva,
+            200
+          );
+        } catch (\Exception $e) {
+          error_log("Error al crear miniatura para actualización: " . $e->getMessage());
+          if (file_exists($rutaOriginalNueva)) {
+            unlink($rutaOriginalNueva); // Eliminar la nueva original si falla la miniatura
+          }
+          return Response::json([
+            'status' => 'error',
+            'errores' => ['avatar' => 'Error al procesar la nueva imagen (miniatura): ' . $e->getMessage()]
+          ]);
+        }
+      }
+
+      // Si se subió una nueva imagen y se procesó correctamente, eliminar la anterior (si no es default)
+      if ($usuario->usuario_avatar && $usuario->usuario_avatar !== 'default.jpg') {
+        $rutaOriginalAntigua = $originalDir . '/' . $usuario->usuario_avatar;
+        $rutaThumbnailAntigua = $thumbnailDir . '/' . $usuario->usuario_avatar;
+        if (file_exists($rutaOriginalAntigua)) {
+          unlink($rutaOriginalAntigua);
+        }
+        if (file_exists($rutaThumbnailAntigua)) {
+          unlink($rutaThumbnailAntigua);
+        }
+      }
+      $nombreArchivo = $nombreArchivoNuevo; // Actualizar al nuevo nombre de archivo
+    }
+
+    $resultado['datos']['avatar'] = $nombreArchivo; // Asignar el avatar (nuevo o existente)
+
+
     // Verificar si se está actualizando el correo y si ya existe
     if (isset($resultado['datos']['correo']) && $resultado['datos']['correo'] !== $usuario->usuario_email) {
       if ($this->userModel->localizarCorreo($resultado['datos']['correo'])) {
@@ -380,6 +499,24 @@ class UserController
         ]);
       }
     }
+
+    // Si se cambió la contraseña, hashearla y eliminar password2
+    if ($datos['change_password'] == 1) {
+      if ($resultado['datos']['password'] !== $datos['password2']) {
+        return Response::json([
+          'status' => 'error',
+          'errores' => ['password2' => 'Las contraseñas no coinciden']
+        ]);
+      }
+      // No es necesario hashear aquí si el modelo se encarga de ello al detectar el campo password
+      // $resultado['datos']['password'] = password_hash($resultado['datos']['password'], PASSWORD_DEFAULT);
+      unset($resultado['datos']['password2']);
+    } else {
+      // Si no se cambia la contraseña, eliminar los campos para no actualizarlos
+      unset($resultado['datos']['password']);
+      unset($resultado['datos']['password2']);
+    }
+    unset($resultado['datos']['change_password']); // Eliminar el campo auxiliar
 
     // Actualizar el usuario
     $actualizar = $this->userModel->actualizarUsuario($id, $resultado['datos']);

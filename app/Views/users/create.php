@@ -155,7 +155,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
 
     .return-btn:hover {
-        /* TODO: mejorar el comportamiento on hover */
         color: rgb(42, 42, 42);
     }
 

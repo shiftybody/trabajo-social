@@ -33,11 +33,11 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   });
 
   $router->group(array('middleware' => 'Permission:users.edit'), function ($router) {
-    $router->put('/users/:id', 'UserController@update');
+    $router->post('/users/:id', 'UserController@update');
   });
 
   $router->group(array('middleware' => 'Permission:users.delete'), function ($router) {
-    $router->delete('/users/:id', 'ApiController@deleteUser');
+    $router->delete('/users/:id', 'UserController@deleteUser');
   });
 
   // Roles

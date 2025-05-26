@@ -16,7 +16,6 @@ class SessionController
     return Response::json([
       'isActive' => $status['isActive'],
       'timeRemaining' => $status['timeRemaining'],
-      // 'sessionTotalDuration' => $status['sessionTotalDuration'], // Eliminado
       'warningThreshold' => 30, // Umbral de advertencia (puede ser configurado por el cliente o aquí)
       'logoutUrl' => APP_URL . 'logout',
       'refreshUrl' => APP_URL . 'api/session/refresh',

@@ -209,7 +209,7 @@ class userModel extends mainModel
     {
         try {
             $query = "SELECT u.*, r.rol_descripcion 
-                     FROM usuario u
+                     FROM usuario u 
                      JOIN rol r ON u.usuario_rol = r.rol_id 
                      WHERE u.usuario_usuario = :username";
 
@@ -276,29 +276,31 @@ class userModel extends mainModel
 
             // Determinar si es email o nombre de usuario
             $usuario = null;
-            $tipo_usuario = null;
             if (filter_var($identificador, FILTER_VALIDATE_EMAIL)) {
-                $tipo_usuario = "email";
                 $usuario = $this->obtenerUsuarioPorEmail($identificador);
             } else {
-                $tipo_usuario = "username";
                 $usuario = $this->obtenerUsuarioPorUsername($identificador);
             }
 
-            // Si no encontramos el usuario o está inactivo
-            if (!$usuario || $usuario->usuario_estado != 1) {
-                return false;
+            // Si no encontramos el usuario
+            if (!$usuario) {
+                return ['status' => 'failed']; // Usuario no encontrado
+            }
+
+            // Si el usuario está inactivo
+            if ($usuario->usuario_estado != 1) {
+                return ['status' => 'inactive']; // Usuario inactivo
             }
 
             // Verificar contraseña con la función del mainModel
             if ($this->validarContraseña($password, $usuario->usuario_password_hash)) {
-                return $usuario;
+                return ['status' => 'success', 'user' => $usuario]; // Autenticación exitosa
             }
 
-            return false;
+            return ['status' => 'failed']; // Contraseña incorrecta
         } catch (\Exception $e) {
             error_log("Error en autenticarUsuario: " . $e->getMessage());
-            return false;
+            return ['status' => 'error', 'message' => $e->getMessage()]; // Error general
         }
     }
 

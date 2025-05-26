@@ -46,16 +46,6 @@ class Router
    */
   private $defaultMethod = 'index';
 
-  /**
-   * Vistas de error personalizadas
-   * @var array
-   */
-  private $errorViews = array(
-    '404' => null,
-    '403' => null,
-    '401' => null,
-    '500' => null
-  );
 
   /**
    * Registra una ruta GET
@@ -222,21 +212,6 @@ class Router
     return $this;
   }
 
-  /**
-   * Establece una vista de error personalizada
-   * 
-   * @param string $code Código de error (404, 403, 401, 500)
-   * @param string $view Ruta a la vista de error
-   * @return Router Instancia actual para encadenamiento
-   */
-  public function setErrorView($code, $view)
-  {
-    if (isset($this->errorViews[$code])) {
-      $this->errorViews[$code] = $view;
-    }
-
-    return $this;
-  }
 
   /**
    * Establece el controlador por defecto

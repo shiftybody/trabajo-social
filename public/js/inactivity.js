@@ -1,190 +1,247 @@
 (function () {
-  const DEFAULT_CHECK_INTERVAL = 30000; // 30 segundos
+  const DEFAULT_CHECK_INTERVAL = 5000; // 5 segundos
   const REMEMBERED_CHECK_INTERVAL = 600000; // 10 minutos
-
   const BASE_APP_URL = typeof APP_URL !== "undefined" && APP_URL ? APP_URL : "";
 
-  let sessionCheckIntervalId = null;
-  let inactivityModal = null;
-  let inactivityMessage = null;
-  let inactivityCountdownDisplay = null;
-  let inactivityStayLoggedInBtn = null;
-  let inactivityLogoutBtn = null;
-  let modalCountdownIntervalId = null;
+  // Estado de la aplicación
+  let state = {
+    sessionCheckIntervalId: null,
+    modalCountdownIntervalId: null,
+    isRememberedSession: false,
+    currentCheckInterval: DEFAULT_CHECK_INTERVAL,
+    isLoggingOut: false,
+    isModalActive: false, // Nueva bandera para controlar el estado del modal
+    pendingStatusRequest: null, // Para manejar las peticiones pendientes
+    serverConfig: {
+      logoutUrl: "",
+      refreshUrl: "",
+      warningThreshold: 30,
+    },
+  };
 
-  let isRememberedSession = false;
-  let currentCheckInterval = DEFAULT_CHECK_INTERVAL;
+  // Referencias DOM
+  let dom = {
+    modal: null,
+    message: null,
+    countdown: null,
+    stayLoggedBtn: null,
+    logoutBtn: null,
+    closeBtn: null,
+  };
 
-  // URLs del servidor
-  let serverLogoutUrl = "";
-  let serverRefreshUrl = "";
-  let serverWarningThreshold = 30; // Segundos, se actualizará desde el servidor
+  function initializeDOMElements() {
+    dom.modal = document.getElementById("inactivityWarningModal");
 
-  function getDOMReferences() {
-    let inactivityModalCloseBtn = document.getElementById(
-      "inactivityModalCloseBtn"
-    );
-
-    // ... y luego, donde configuras los event listeners:
-    if (inactivityModalCloseBtn) {
-      inactivityModalCloseBtn.addEventListener("click", function () {
-        hideModal();
-        refreshSession();
-      });
+    if (!dom.modal) {
+      console.warn("Modal de inactividad no encontrado");
+      return false;
     }
 
-    inactivityModal = document.getElementById("inactivityWarningModal");
-    if (inactivityModal) {
-      inactivityMessage = document.getElementById("inactivityMessage");
-      inactivityCountdownDisplay = document.getElementById(
-        "inactivityCountdown"
-      );
-      inactivityStayLoggedInBtn = document.getElementById(
-        "inactivityStayLoggedInBtn"
-      );
-      inactivityLogoutBtn = document.getElementById("inactivityLogoutBtn");
+    dom.message = document.getElementById("inactivityMessage");
+    dom.countdown = document.getElementById("inactivityCountdown");
+    dom.stayLoggedBtn = document.getElementById("inactivityStayLoggedInBtn");
+    dom.logoutBtn = document.getElementById("inactivityLogoutBtn");
+    dom.closeBtn = document.getElementById("inactivityModalCloseBtn");
 
-      // Event listener para clic fuera del modal (en el overlay)
-      inactivityModal.addEventListener("click", function (event) {
-        if (event.target === inactivityModal) {
-          refreshSession();
-        }
-      });
+    return true;
+  }
 
-      if (
-        !inactivityMessage ||
-        !inactivityCountdownDisplay ||
-        !inactivityStayLoggedInBtn ||
-        !inactivityLogoutBtn
-      ) {
-        console.warn(
-          "Inactivity Modal: Faltan algunos elementos hijos (mensaje, contador, botones). La funcionalidad del modal puede estar limitada."
-        );
+  function setupEventListeners() {
+    if (!dom.modal) return;
+
+    // Event listeners del modal
+    if (dom.stayLoggedBtn) {
+      dom.stayLoggedBtn.addEventListener("click", handleStayLoggedIn);
+    }
+
+    if (dom.logoutBtn) {
+      dom.logoutBtn.addEventListener("click", () => performLogout(false));
+    }
+
+    if (dom.closeBtn) {
+      dom.closeBtn.addEventListener("click", handleStayLoggedIn);
+    }
+
+    // Click fuera del modal
+    dom.modal.addEventListener("click", (event) => {
+      if (event.target === dom.modal) {
+        handleStayLoggedIn();
       }
-    } else {
-      console.warn(
-        'Modal de Inactividad con ID "inactivityWarningModal" no encontrado. Las advertencias de inactividad no se mostrarán visualmente.'
-      );
+    });
+
+    // Prevenir que los clicks dentro del modal-content detengan el countdown
+    const modalContent = document.querySelector(".modal-content");
+    if (modalContent) {
+      modalContent.addEventListener("click", (event) => {
+        // Detener la propagación para que no se active handleUserActivity
+        event.stopPropagation();
+      });
     }
+
+    // Actividad del usuario
+    window.addEventListener("click", handleUserActivity);
+
+    // Cleanup al cerrar o cambiar de página
+    window.addEventListener("beforeunload", cleanup);
+    window.addEventListener("pagehide", cleanup);
+    window.addEventListener("unload", cleanup);
+  }
+
+  function handleUserActivity(event) {
+    if (state.isLoggingOut) return;
+
+    if (isLogoutElement(event.target)) {
+      state.isLoggingOut = true;
+      cleanup();
+      return;
+    }
+
+    // No refrescar si el modal está activo
+    if (state.isModalActive) {
+      return;
+    }
+
+    // Si el modal no está visible, refrescar normalmente
+    refreshSession();
+  }
+
+  function isLogoutElement(element) {
+    if (!element) return false;
+
+    // Verificar el elemento actual y sus padres
+    let current = element;
+    while (current && current !== document.body) {
+      // Verificar href
+      if (current.href && current.href.includes("logout")) return true;
+
+      // Verificar clases e IDs
+      if (
+        current.classList.contains("logout-btn") ||
+        current.id === "logout-btn"
+      )
+        return true;
+
+      // Verificar texto
+      const text = current.textContent?.toLowerCase() || "";
+      if (
+        text.includes("cerrar sesión") ||
+        text.includes("logout") ||
+        text.includes("salir")
+      ) {
+        return true;
+      }
+
+      // Verificar onclick
+      if (current.onclick && current.onclick.toString().includes("logout"))
+        return true;
+
+      current = current.parentElement;
+    }
+
+    return false;
   }
 
   function showModal() {
-    if (inactivityModal) {
-      inactivityModal.style.display = "flex"; // Cambiado de "block" a "flex" para el centrado
-    }
+    if (!dom.modal || state.isRememberedSession) return;
+    dom.modal.style.display = "flex";
+    state.isModalActive = true;
   }
 
   function hideModal() {
-    if (inactivityModal) {
-      inactivityModal.style.display = "none";
-      if (modalCountdownIntervalId) {
-        clearInterval(modalCountdownIntervalId);
-        modalCountdownIntervalId = null;
-      }
-      if (inactivityCountdownDisplay)
-        inactivityCountdownDisplay.textContent = "";
+    if (!dom.modal) return;
+
+    dom.modal.style.display = "none";
+    state.isModalActive = false;
+
+    if (state.modalCountdownIntervalId) {
+      clearInterval(state.modalCountdownIntervalId);
+      state.modalCountdownIntervalId = null;
+    }
+
+    if (dom.countdown) {
+      dom.countdown.textContent = "";
     }
   }
 
-  function adjustCheckInterval(isRemembered, newInterval) {
-    // Si isRemembered cambió o se proporcionó un intervalo explícito, ajustar el intervalo
-    if (isRemembered !== isRememberedSession || newInterval) {
-      isRememberedSession = isRemembered;
+  function adjustCheckInterval(isRemembered) {
+    if (isRemembered === state.isRememberedSession) return false;
 
-      // Usar el intervalo proporcionado explícitamente o seleccionar basado en el estado de recordado
-      let interval =
-        newInterval ||
-        (isRemembered ? REMEMBERED_CHECK_INTERVAL : DEFAULT_CHECK_INTERVAL);
+    state.isRememberedSession = isRemembered;
+    const newInterval = isRemembered
+      ? REMEMBERED_CHECK_INTERVAL
+      : DEFAULT_CHECK_INTERVAL;
 
-      // Solo cambiar el intervalo si es diferente al actual
-      if (interval !== currentCheckInterval) {
-        currentCheckInterval = interval;
+    if (newInterval === state.currentCheckInterval) return false;
 
-        // Reiniciar el intervalo con la nueva frecuencia
-        if (sessionCheckIntervalId) {
-          clearInterval(sessionCheckIntervalId);
-        }
+    state.currentCheckInterval = newInterval;
 
-        sessionCheckIntervalId = setInterval(
-          checkSessionStatus,
-          currentCheckInterval
-        );
-
-        return true; // El intervalo se ajustó
-      }
+    // Reiniciar el intervalo
+    if (state.sessionCheckIntervalId) {
+      clearInterval(state.sessionCheckIntervalId);
     }
 
-    return false; // No se necesitó ajuste
+    state.sessionCheckIntervalId = setInterval(
+      checkSessionStatus,
+      state.currentCheckInterval
+    );
+    return true;
   }
 
-  function forceLogout(isExpired = false) {
-    if (sessionCheckIntervalId) clearInterval(sessionCheckIntervalId);
-    if (modalCountdownIntervalId) clearInterval(modalCountdownIntervalId);
+  function buildLogoutUrl(isExpired = false) {
+    let url = state.serverConfig.logoutUrl;
 
-    let finalLogoutUrl = "";
+    if (!url) {
+      if (!BASE_APP_URL) return null;
+      url = BASE_APP_URL + (BASE_APP_URL.endsWith("/") ? "" : "/") + "logout";
+    }
 
-    // Construir la URL de logout con el parámetro expired=1 solo si la sesión expiró
-    const expiredParam = isExpired ? "expired=1" : "";
+    if (isExpired) {
+      const separator = url.includes("?") ? "&" : "?";
+      url += separator + "expired=1";
+    }
 
-    if (serverLogoutUrl) {
-      if (expiredParam) {
-        if (serverLogoutUrl.includes("?")) {
-          finalLogoutUrl = serverLogoutUrl + "&" + expiredParam;
-        } else {
-          finalLogoutUrl = serverLogoutUrl + "?" + expiredParam;
-        }
-      } else {
-        finalLogoutUrl = serverLogoutUrl;
-      }
-    } else if (BASE_APP_URL) {
-      // Asegurarse de que BASE_APP_URL termine con / o la URL de logout sea correcta
-      let logoutPath = "logout";
-      if (BASE_APP_URL.endsWith("/")) {
-        logoutPath = logoutPath;
-      } else {
-        logoutPath = "/" + logoutPath;
-      }
+    return url;
+  }
 
-      finalLogoutUrl = BASE_APP_URL + logoutPath;
-      if (expiredParam) {
-        finalLogoutUrl += "?" + expiredParam;
-      }
-    } else {
-      console.error(
-        "URL de logout no disponible. No se puede cerrar sesión automáticamente."
-      );
+  function performLogout(isExpired = false) {
+    cleanup();
+
+    const logoutUrl = buildLogoutUrl(isExpired);
+    if (!logoutUrl) {
       alert(
         "Tu sesión ha expirado. Por favor, cierra esta ventana y vuelve a iniciar sesión."
       );
       return;
     }
 
-    console.log("Forzando logout a: " + finalLogoutUrl);
-    window.location.href = finalLogoutUrl;
+    console.log("Redirigiendo a logout:", logoutUrl);
+    window.location.href = logoutUrl;
+  }
+
+  function buildRefreshUrl() {
+    if (state.serverConfig.refreshUrl) {
+      return state.serverConfig.refreshUrl;
+    }
+
+    if (BASE_APP_URL) {
+      return (
+        BASE_APP_URL +
+        (BASE_APP_URL.endsWith("/") ? "" : "/") +
+        "api/session/refresh"
+      );
+    }
+
+    return null;
   }
 
   function refreshSession() {
-    if (!serverRefreshUrl && BASE_APP_URL) {
-      // Asegurar que serverRefreshUrl se use si está disponible
-      // Si serverRefreshUrl no está seteado pero BASE_APP_URL sí, construirlo.
-      // Esto es un fallback, idealmente serverRefreshUrl viene del status.
-      serverRefreshUrl = BASE_APP_URL + "api/session/refresh";
-      console.warn(
-        "serverRefreshUrl no estaba definido, usando fallback: " +
-          serverRefreshUrl
-      );
-    } else if (!serverRefreshUrl && !BASE_APP_URL) {
-      console.error(
-        "URL de refresco de sesión no disponible y APP_URL tampoco. No se puede refrescar."
-      );
-      // Considerar si forzar logout aquí es apropiado si el modal está visible
-      if (inactivityModal && inactivityModal.style.display !== "none") {
-        // forceLogout(); // Descomentar si se desea cerrar sesión en este caso extremo
-      }
+    const refreshUrl = buildRefreshUrl();
+    if (!refreshUrl) {
+      console.error("URL de refresco no disponible");
       return;
     }
 
-    fetch(serverRefreshUrl, {
+    fetch(refreshUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -200,210 +257,205 @@
       .then((data) => {
         if (data.success) {
           if (data.isRememberedSession !== undefined) {
-            adjustCheckInterval(data.isRememberedSession); // Se pasa solo isRememberedSession
+            adjustCheckInterval(data.isRememberedSession);
           }
-
           hideModal();
-          checkSessionStatus(); // Re-verificar inmediatamente
+          checkSessionStatus();
         } else {
-          console.error(
-            "Fallo al refrescar sesión en el servidor:",
-            data.message
-          );
-          forceLogout();
+          console.error("Fallo al refrescar sesión:", data.message);
+          performLogout();
         }
       })
       .catch((error) => {
-        console.error("Error en la petición de refresco de sesión:", error);
-        forceLogout();
+        console.error("Error en refresco de sesión:", error);
+        performLogout();
       });
   }
 
-  function showInactivityWarning(timeRemaining) {
-    if (!inactivityModal || !inactivityMessage || !inactivityCountdownDisplay) {
-      console.warn(
-        "Elementos del modal no encontrados, no se puede mostrar la advertencia de inactividad."
-      );
-      return;
+  function handleStayLoggedIn() {
+    hideModal();
+    refreshSession();
+  }
+
+  function startCountdown(timeRemaining) {
+    if (!dom.countdown || !dom.message) return;
+
+    let countdown = Math.max(0, Math.floor(timeRemaining));
+
+    dom.message.textContent = "Tu sesión expirará en";
+
+    const updateCountdown = () => {
+      dom.countdown.innerHTML = `<span class="countdown-number">${countdown}</span>`;
+
+      if (countdown <= 0) {
+        clearInterval(state.modalCountdownIntervalId);
+        state.modalCountdownIntervalId = null;
+        performLogout(true);
+        return;
+      }
+
+      countdown--;
+    };
+
+    if (state.modalCountdownIntervalId) {
+      clearInterval(state.modalCountdownIntervalId);
     }
 
-    // No mostrar advertencia para sesiones recordadas
-    if (isRememberedSession) {
+    updateCountdown();
+    state.modalCountdownIntervalId = setInterval(updateCountdown, 1000);
+  }
+
+  function showInactivityWarning(timeRemaining) {
+    if (state.isRememberedSession) {
       hideModal();
       return;
     }
 
     showModal();
-    let countdown = Math.max(0, Math.floor(timeRemaining));
-
-    if (inactivityMessage) {
-      inactivityMessage.textContent = `Tu sesión expirará en`;
-    }
-
-    function updateCountdown() {
-      if (inactivityCountdownDisplay) {
-        // Modificado para usar innerHTML y la clase para el número
-        inactivityCountdownDisplay.innerHTML = `<span class="countdown-number">${countdown}</span>`;
-      }
-      if (countdown <= 0) {
-        clearInterval(modalCountdownIntervalId);
-        modalCountdownIntervalId = null;
-        forceLogout(true); // Pasar true porque la sesión expiró
-      }
-      countdown--;
-    }
-
-    if (modalCountdownIntervalId) clearInterval(modalCountdownIntervalId);
-    updateCountdown(); // Llamar una vez inmediatamente para mostrar el valor inicial
-    modalCountdownIntervalId = setInterval(updateCountdown, 1000);
+    startCountdown(timeRemaining);
   }
 
   function checkSessionStatus() {
-    // Si es una sesión recordada y el modal está abierto, ocultarlo
+    // Si el modal está activo, no interrumpir
+    if (state.isModalActive) {
+      return;
+    }
+
+    // Cancelar petición pendiente si existe
+    if (state.pendingStatusRequest) {
+      state.pendingStatusRequest.abort();
+    }
+
+    // Ocultar modal si es sesión recordada
     if (
-      isRememberedSession &&
-      inactivityModal &&
-      inactivityModal.style.display !== "none"
+      state.isRememberedSession &&
+      dom.modal &&
+      dom.modal.style.display !== "none"
     ) {
       hideModal();
     }
 
-    if (!BASE_APP_URL && (!serverLogoutUrl || !serverRefreshUrl)) {
-      console.error(
-        "APP_URL no está configurada y no se han obtenido URLs del servidor. Deteniendo verificaciones de inactividad."
-      );
-      if (sessionCheckIntervalId) clearInterval(sessionCheckIntervalId);
-      return;
-    }
+    const statusUrl =
+      BASE_APP_URL +
+      (BASE_APP_URL.endsWith("/") ? "" : "/") +
+      "api/session/status";
 
-    const statusUrl = BASE_APP_URL + "api/session/status";
+    // Crear un nuevo AbortController para esta petición
+    const abortController = new AbortController();
+    state.pendingStatusRequest = abortController;
 
     fetch(statusUrl, {
       method: "GET",
       headers: {
         "X-Requested-With": "XMLHttpRequest",
       },
+      signal: abortController.signal,
     })
       .then((response) => {
+        // Limpiar la referencia a la petición pendiente
+        if (state.pendingStatusRequest === abortController) {
+          state.pendingStatusRequest = null;
+        }
+
         if (response.status === 401) {
-          forceLogout(true); // Pasar true porque la sesión expiró (401 Unauthorized)
-          return Promise.reject(new Error("Logged out (401)"));
+          performLogout(true);
+          return Promise.reject(new Error("Session expired (401)"));
         }
+
         if (!response.ok) {
-          throw new Error(
-            `Error HTTP al verificar estado de sesión: ${response.status}`
-          );
+          throw new Error(`Error HTTP: ${response.status}`);
         }
+
         return response.json();
       })
       .then((data) => {
-        if (!data) {
-          return;
-        }
+        if (!data) return;
 
-        // Actualizar URLs y parámetros del servidor
-        serverLogoutUrl = data.logoutUrl;
-        serverRefreshUrl = data.refreshUrl;
-        serverWarningThreshold = data.warningThreshold || 30;
+        // Actualizar configuración del servidor
+        state.serverConfig.logoutUrl =
+          data.logoutUrl || state.serverConfig.logoutUrl;
+        state.serverConfig.refreshUrl =
+          data.refreshUrl || state.serverConfig.refreshUrl;
+        state.serverConfig.warningThreshold = data.warningThreshold || 30;
 
-        // Si la sesión no está activa, forzar cierre
+        // Verificar si la sesión está activa
         if (!data.isActive) {
           hideModal();
-          forceLogout(true); // Pasar true porque la sesión expiró
-          if (sessionCheckIntervalId) clearInterval(sessionCheckIntervalId);
+          performLogout(true);
           return;
         }
 
-        // Comprobar si el estado de "recordado" ha cambiado
-        const newRememberedState =
-          data.isRememberedSession === true ||
-          data.isRememberedSession === "true" ||
-          data.isRememberedSession === 1 ||
-          data.isRememberedSession === "1";
+        // Verificar cambio en estado de recordado
+        const isRemembered = Boolean(data.isRememberedSession);
+        adjustCheckInterval(isRemembered);
 
-        if (newRememberedState !== isRememberedSession) {
-          adjustCheckInterval(newRememberedState);
-
-          if (
-            !newRememberedState &&
-            data.timeRemaining <= serverWarningThreshold
-          ) {
-            showInactivityWarning(data.timeRemaining);
-            return;
-          }
-        }
-
-        // Para sesiones recordadas, nunca mostrar modal y retornar temprano
-        if (newRememberedState) {
+        // Para sesiones recordadas, no mostrar advertencias
+        if (isRemembered) {
           hideModal();
           return;
         }
 
-        // Proceder solo para sesiones NO recordadas con verificación de tiempo
-
-        if (data.timeRemaining <= serverWarningThreshold) {
+        // Solo mostrar advertencia si el modal no está activo
+        if (
+          data.timeRemaining <= state.serverConfig.warningThreshold &&
+          !state.isModalActive
+        ) {
           showInactivityWarning(data.timeRemaining);
-        } else {
+        } else if (data.timeRemaining > state.serverConfig.warningThreshold) {
           hideModal();
         }
       })
       .catch((error) => {
-        if (error.message && !error.message.startsWith("Logged out")) {
-          console.error("Error al obtener estado de la sesión:", error);
+        // Ignorar errores de peticiones abortadas
+        if (error.name === "AbortError") {
+          return;
+        }
+
+        if (!error.message.includes("Session expired")) {
+          console.error("Error al verificar sesión:", error);
         }
       });
+  }
+
+  function cleanup() {
+    // Cancelar cualquier petición pendiente
+    if (state.pendingStatusRequest) {
+      state.pendingStatusRequest.abort();
+      state.pendingStatusRequest = null;
+    }
+
+    if (state.sessionCheckIntervalId) {
+      clearInterval(state.sessionCheckIntervalId);
+      state.sessionCheckIntervalId = null;
+    }
+
+    if (state.modalCountdownIntervalId) {
+      clearInterval(state.modalCountdownIntervalId);
+      state.modalCountdownIntervalId = null;
+    }
   }
 
   function init() {
-    if (typeof APP_URL === "undefined" || !APP_URL) {
-      console.warn(
-        "Variable global APP_URL no está definida. El script de inactividad podría no funcionar correctamente."
-      );
+    if (!BASE_APP_URL) {
+      console.warn("APP_URL no está definida. Funcionalidad limitada.");
     }
 
-    getDOMReferences(); // getDOMReferences ahora también añade el listener de clic exterior
-
-    if (inactivityModal && inactivityStayLoggedInBtn && inactivityLogoutBtn) {
-      inactivityStayLoggedInBtn.addEventListener("click", refreshSession);
-      inactivityLogoutBtn.addEventListener("click", function () {
-        forceLogout(false); // Pasar false porque es un logout manual
-      });
-    } else if (inactivityModal) {
-      console.warn(
-        "Modal de inactividad encontrado, pero faltan botones. Las acciones del modal no funcionarán."
-      );
+    if (!initializeDOMElements()) {
+      console.warn("No se pudieron inicializar los elementos DOM");
+      return;
     }
 
-    // Ejecutar la primera verificación de estado para inicializar
+    setupEventListeners();
     checkSessionStatus();
 
-    // El intervalo inicial se configurará en la primera verificación basado en data.isRememberedSession
-    // Pero establecer uno predeterminado por ahora
-    sessionCheckIntervalId = setInterval(
+    // Iniciar verificaciones periódicas
+    state.sessionCheckIntervalId = setInterval(
       checkSessionStatus,
       DEFAULT_CHECK_INTERVAL
     );
-
-    // Eventos de actividad del usuario para refrescar la sesión
-    const activityEvents = ["click"];
-    // obtener el elemento con clase modal-content
-    const modalContent = document.querySelector(".modal-content");
-
-    activityEvents.forEach((eventName) => {
-      window.addEventListener(eventName, () => {
-        // si lo que se esta dando click no es el modal, refrescar la sesión
-        if (!modalContent.contains(event.target)) {
-          refreshSession();
-        }
-      });
-    });
-
-    window.addEventListener("beforeunload", () => {
-      if (sessionCheckIntervalId) clearInterval(sessionCheckIntervalId);
-      if (modalCountdownIntervalId) clearInterval(modalCountdownIntervalId);
-    });
   }
 
+  // Inicializar cuando el DOM esté listo
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {

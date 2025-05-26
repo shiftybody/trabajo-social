@@ -16,19 +16,12 @@ class LoginController // Modificado: ya no extiende userModel
    */
   public function login()
   {
-    // Verificar que APP_URL esté definida
-    if (!defined('APP_URL')) {
-      error_log('ERROR: APP_URL no está definida en login()');
-      http_response_code(500);
-      echo json_encode(array('status' => 'error', 'message' => 'Error de configuración del servidor'));
-      exit;
-    }
 
     $usuario = isset($_POST['username']) ? $_POST['username'] : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
     $remember = isset($_POST['remember']) ? true : false;
 
-    // Validar datos de entrada
+    // Si no se proporcionan usuario o contraseña, devolver un error
     if (empty($usuario) || empty($password)) {
       http_response_code(400);
       echo json_encode(array('status' => 'error', 'message' => 'Usuario y contraseña son requeridos'));
@@ -36,26 +29,30 @@ class LoginController // Modificado: ya no extiende userModel
     }
 
     // Autenticar usuario usando Auth::attempt
-    if (!Auth::attempt($usuario, $password, $remember)) {
-      error_log("Login fallido para usuario: $usuario");
-      http_response_code(401);
-      echo json_encode(array('status' => 'error', 'message' => 'El usuario o contraseña son incorrectos'));
-      exit;
+    $authStatus = Auth::attempt($usuario, $password, $remember);
+
+    if ($authStatus === true) {
+        // Login exitoso
+        error_log("Login exitoso para usuario: $usuario");
+
+        // Crear URL de redirección
+        $redirectUrl = rtrim(APP_URL, '/') . '/home';
+        error_log("Redirigiendo a: $redirectUrl");
+
+        echo json_encode(array(
+            'status' => 'success',
+            'message' => 'Login exitoso',
+            'redirect' => $redirectUrl
+        ));
+    } elseif ($authStatus === 'inactive') {
+        error_log("Login fallido para usuario (inactivo): $usuario");
+        http_response_code(401); // O podría ser 403 Forbidden si se prefiere
+        echo json_encode(array('status' => 'error', 'message' => 'Cuenta deshabilitada permanentemente. Contacte al administrador.'));
+    } else { // $authStatus === false (fallo de credenciales o error)
+        error_log("Login fallido para usuario (credenciales/error): $usuario");
+        http_response_code(401);
+        echo json_encode(array('status' => 'error', 'message' => 'El usuario o contraseña son incorrectos.'));
     }
-
-    // Login exitoso
-    error_log("Login exitoso para usuario: $usuario");
-
-    // Crear URL de redirección
-    $redirectUrl = rtrim(APP_URL, '/') . '/home';
-    error_log("Redirigiendo a: $redirectUrl");
-
-    echo json_encode(array(
-      'status' => 'success',
-      'message' => 'Login exitoso',
-      'redirect' => $redirectUrl
-    ));
-
     exit;
   }
 
