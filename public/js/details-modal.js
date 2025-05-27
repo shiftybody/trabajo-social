@@ -33,8 +33,10 @@ class UserDetailsModal {
               </svg>
             </button>
           </div>
-          <div class="user-details-modal-body" id="userDetailsModalBody">
-            <!-- El contenido se carga dinámicamente -->
+          <div class="user-details-modal-scroll-container">
+            <div class="user-details-modal-body" id="userDetailsModalBody">
+              <!-- El contenido se carga dinámicamente -->
+            </div>
           </div>
         </div>
       </div>
@@ -177,8 +179,8 @@ class UserDetailsModal {
           </div>
         </div>
       </div>
-
-      <!-- Grid de detalles -->
+  
+      <!-- Flex de detalles -->
       <div class="user-details-grid">
         <!-- Información personal -->
         <div class="user-detail-section">
@@ -194,11 +196,11 @@ class UserDetailsModal {
             <span class="user-detail-value">${user.nombre}</span>
           </div>
           <div class="user-detail-item">
-            <span class="user-detail-label">Apellido P.:</span>
+            <span class="user-detail-label">Apellido Paterno:</span>
             <span class="user-detail-value">${user.apellido_paterno}</span>
           </div>
           <div class="user-detail-item">
-            <span class="user-detail-label">Apellido M.:</span>
+            <span class="user-detail-label">Apellido Materno:</span>
             <span class="user-detail-value">${
               user.apellido_materno || "No especificado"
             }</span>
@@ -208,7 +210,7 @@ class UserDetailsModal {
             <span class="user-detail-value">${user.telefono}</span>
           </div>
         </div>
-
+  
         <!-- Información de cuenta -->
         <div class="user-detail-section">
           <h4>
@@ -240,7 +242,7 @@ class UserDetailsModal {
             </span>
           </div>
         </div>
-
+  
         <!-- Información del sistema -->
         <div class="user-detail-section">
           <h4>
@@ -270,7 +272,6 @@ class UserDetailsModal {
       </div>
     `;
   }
-
   getAvatarUrl(avatar) {
     if (!avatar || avatar === "default.jpg") {
       return `${APP_URL}public/photos/default.jpg`;
