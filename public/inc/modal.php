@@ -109,8 +109,7 @@
     border-radius: var(--rounded-lg, 8px);
     border: 1px solid var(--gray-200, #E5E7EB);
     border: 1px solid var(--gray-200, color(display-p3 0.898 0.9059 0.9216));
-    background: var(--white, #FFF);
-    background: var(--white, color(display-p3 1 1 1));
+    background: var(--white);
   }
 
   .btn-modal-secondary:hover {

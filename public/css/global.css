@@ -11,13 +11,15 @@
   --line-height-large: 150%;
 
   /* Common colors */
-  --gray-900: color(display-p3 0.0667 0.098 0.1569);
-  --gray-300: color(display-p3 0.8196 0.8353 0.8588);
-  --gray-50: color(display-p3 0.9765 0.9804 0.9843);
-  --red-600: color(display-p3 0.8784 0.1412 0.1412);
-  --red-500: color(display-p3 0.9412 0.3216 0.3216);
-  --red-50: color(display-p3 0.9922 0.949 0.949);
-  --white: color(display-p3 1 1 1);
+  --gray-900: #111927;
+  --gray-700: #374151;
+  --gray-500: #677283;
+  --gray-300: #d1d5db;
+  --gray-50: #f9fafb;
+  --red-600: #e02424;
+  --red-500: #f05252;
+  --red-50: #fef2f2;
+  --white: #fff;
   --black: #000;
 
   /* Common spacings and radii */
@@ -49,6 +51,7 @@ h1.form-title {
 
 p {
   display: flex;
+  justify-content: center;
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-large);
@@ -175,6 +178,14 @@ button[type="button"]:hover {
   background-color: #ececec;
 }
 
+.expired-session-message {
+  color: var(--red-600);
+  font-family: var(--font-family);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-large);
+}
+
 .error-message {
   color: var(--red-600);
   font-family: var(--font-family);
@@ -182,6 +193,7 @@ button[type="button"]:hover {
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-large);
 }
+
 
 .error-input {
   border-radius: var(--rounded-lg) !important;
@@ -205,7 +217,6 @@ input[type="password"].error-input {
 .error-input::placeholder{
   color: #ee5b62
 }
-
 
 
 input:-webkit-autofill {

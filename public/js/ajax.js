@@ -149,21 +149,14 @@ formularios.forEach((formulario) => {
         // Si no es redirección, entonces procesamos el JSON
         return response.json().then((responseData) => {
           if (responseData.status === "success") {
-            // Mostrar mensaje de éxito
-            // TODO: llamar a un modal para mostrar el mensaje de éxito
             alert(responseData.mensaje || "Operación completada con éxito");
-            // TODO: decidir si ocurrira o no esta redireccion
-            // Opcional: redireccionar si se quiere volver a la lista
-            window.location.href = window.location.href.replace("/create", "");
           } else if (responseData.status === "error") {
-            // Mostrar errores en formulario
             if (responseData.errores) {
               Object.entries(responseData.errores).forEach(([key, message]) => {
                 const input = formulario.querySelector(`[name="${key}"]`);
                 if (input) {
                   showError(input, message);
                 } else if (key === "general") {
-                  // TODO: llamar a un modal para mostrar el error general
                   alert(message);
                 }
               });

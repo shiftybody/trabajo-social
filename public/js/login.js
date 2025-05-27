@@ -92,6 +92,19 @@ function clearExpiredSessionMessage() {
   }
 }
 
+// Función auxiliar para manejar los estilos de error del input de password
+function togglePasswordErrorStyle(input, hasError) {
+  const toggleButton = document.getElementById("password-toggle");
+
+  if (input.id === "password" && toggleButton) {
+    if (hasError) {
+      toggleButton.classList.add("error-toggle");
+    } else {
+      toggleButton.classList.remove("error-toggle");
+    }
+  }
+}
+
 formulario.addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -112,9 +125,11 @@ formulario.addEventListener("submit", async function (e) {
     .querySelectorAll(".error-message:not(.expired-session-message)")
     .forEach((errorMsgElement) => errorMsgElement.remove());
 
-  document
-    .querySelectorAll(".error-input")
-    .forEach((errorInput) => errorInput.classList.remove("error-input"));
+  document.querySelectorAll(".error-input").forEach((errorInput) => {
+    errorInput.classList.remove("error-input");
+    // Limpiar estilo del toggle de password si aplica
+    togglePasswordErrorStyle(errorInput, false);
+  });
 
   // Limpiar el mensaje principal si no es de sesión expirada
   const mainErrorMsg = errorMsg.querySelector("p");
@@ -192,6 +207,8 @@ formulario.addEventListener("submit", async function (e) {
       );
       inputs.forEach((input) => {
         input.classList.add("error-input");
+        // Aplicar estilo de error al toggle de password si aplica
+        togglePasswordErrorStyle(input, true);
       });
 
       // Restaurar el botón
@@ -226,6 +243,9 @@ formulario
       if (this.classList.contains("error-input")) {
         this.classList.remove("error-input");
 
+        // Limpiar estilo del toggle de password si aplica
+        togglePasswordErrorStyle(this, false);
+
         // Eliminar mensaje de error específico para este campo
         const error = this.parentElement.querySelector(".error-message");
         if (error) error.remove();
@@ -258,6 +278,9 @@ function showError(input, message) {
   error.textContent = message;
   input.parentElement.appendChild(error);
   input.classList.add("error-input");
+
+  // Aplicar estilo de error al toggle de password si aplica
+  togglePasswordErrorStyle(input, true);
 
   // Mostrar el contenedor de errores
   errorMsg.classList.add("visible");

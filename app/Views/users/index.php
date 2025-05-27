@@ -140,8 +140,7 @@
     background: #18181B;
     background: color(display-p3 0.0941 0.0941 0.1059);
 
-    color: var(--white, #FFF);
-    color: var(--white, color(display-p3 1 1 1));
+    color: var(--white);
 
     font-size: 14px;
     font-style: normal;

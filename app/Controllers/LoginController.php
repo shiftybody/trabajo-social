@@ -32,26 +32,26 @@ class LoginController // Modificado: ya no extiende userModel
     $authStatus = Auth::attempt($usuario, $password, $remember);
 
     if ($authStatus === true) {
-        // Login exitoso
-        error_log("Login exitoso para usuario: $usuario");
+      // Login exitoso
+      error_log("Login exitoso para usuario: $usuario");
 
-        // Crear URL de redirección
-        $redirectUrl = rtrim(APP_URL, '/') . '/home';
-        error_log("Redirigiendo a: $redirectUrl");
+      // Crear URL de redirección
+      $redirectUrl = rtrim(APP_URL, '/') . '/home';
+      error_log("Redirigiendo a: $redirectUrl");
 
-        echo json_encode(array(
-            'status' => 'success',
-            'message' => 'Login exitoso',
-            'redirect' => $redirectUrl
-        ));
+      echo json_encode(array(
+        'status' => 'success',
+        'message' => 'Login exitoso',
+        'redirect' => $redirectUrl
+      ));
     } elseif ($authStatus === 'inactive') {
-        error_log("Login fallido para usuario (inactivo): $usuario");
-        http_response_code(401); // O podría ser 403 Forbidden si se prefiere
-        echo json_encode(array('status' => 'error', 'message' => 'Cuenta deshabilitada permanentemente. Contacte al administrador.'));
+      error_log("Login fallido para usuario (inactivo): $usuario");
+      http_response_code(401); // O podría ser 403 Forbidden si se prefiere
+      echo json_encode(array('status' => 'error', 'message' => 'Cuenta deshabilitada. Contacte al administrador.'));
     } else { // $authStatus === false (fallo de credenciales o error)
-        error_log("Login fallido para usuario (credenciales/error): $usuario");
-        http_response_code(401);
-        echo json_encode(array('status' => 'error', 'message' => 'El usuario o contraseña son incorrectos.'));
+      error_log("Login fallido para usuario (credenciales/error): $usuario");
+      http_response_code(401);
+      echo json_encode(array('status' => 'error', 'message' => 'El usuario o contraseña son incorrectos.'));
     }
     exit;
   }

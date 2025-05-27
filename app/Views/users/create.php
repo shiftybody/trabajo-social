@@ -43,8 +43,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
     .form-helper {
         align-self: stretch;
-        color: var(--gray-500, var(--gray-500, #677283));
-        color: var(--gray-500, var(--gray-500, color(display-p3 0.4196 0.4471 0.502)));
+        color: var(--gray-500);
         font-style: normal;
         font-weight: 400;
         line-height: 12px;
