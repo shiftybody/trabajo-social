@@ -297,11 +297,6 @@ class UserController
     $avatar = $request->FILES('avatar');
     $datos = $request->POST();
 
-    // imprimir los datos
-    error_log(print_r($datos, true));
-    // imprimir si se subio o no el avatar
-    error_log(print_r($avatar, true));
-
     // Validar que el usuario existe
     $usuario = $this->userModel->obtenerUsuarioPorId($id);
     if (!$usuario) {
@@ -561,6 +556,60 @@ class UserController
         'status' => 'error',
         'mensaje' => 'Error al eliminar el usuario'
       ]);
+    }
+  }
+
+  public function getUserById(Request $request)
+  {
+    try {
+      $id = $request->param('id');
+
+      if (!$id || !is_numeric($id)) {
+        return Response::json([
+          'status' => 'error',
+          'mensaje' => 'ID de usuario inválido'
+        ], 400);
+      }
+
+      $usuario = $this->userModel->obtenerUsuarioPorId($id);
+
+      if (!$usuario) {
+        return Response::json([
+          'status' => 'error',
+          'mensaje' => 'Usuario no encontrado'
+        ], 404);
+      }
+
+      // Formatear los datos del usuario para mostrar
+      $usuarioDetalle = [
+        'id' => $usuario->usuario_id,
+        'nombre_completo' => trim($usuario->usuario_nombre . ' ' . $usuario->usuario_apellido_paterno . ' ' . $usuario->usuario_apellido_materno),
+        'nombre' => $usuario->usuario_nombre,
+        'apellido_paterno' => $usuario->usuario_apellido_paterno,
+        'apellido_materno' => $usuario->usuario_apellido_materno,
+        'usuario' => $usuario->usuario_usuario,
+        'email' => $usuario->usuario_email,
+        'telefono' => $usuario->usuario_telefono ?: 'No especificado',
+        'rol' => $usuario->rol_descripcion,
+        'rol_id' => $usuario->usuario_rol,
+        'estado' => $usuario->usuario_estado == 1 ? 'Activo' : 'Inactivo',
+        'estado_id' => $usuario->usuario_estado,
+        'avatar' => $usuario->usuario_avatar,
+        'fecha_creacion' => $usuario->usuario_fecha_creacion ? date('d/m/Y H:i', strtotime($usuario->usuario_fecha_creacion)) : 'No disponible',
+        'ultima_modificacion' => $usuario->usuario_ultima_modificacion ? date('d/m/Y H:i', strtotime($usuario->usuario_ultima_modificacion)) : 'No disponible',
+        'ultimo_acceso' => $usuario->usuario_ultimo_acceso ? date('d/m/Y H:i', strtotime($usuario->usuario_ultimo_acceso)) : 'Nunca'
+      ];
+
+      return Response::json([
+        'status' => 'success',
+        'data' => $usuarioDetalle
+      ]);
+    } catch (Exception $e) {
+      error_log("Error en getUserById: " . $e->getMessage());
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Error interno del servidor'
+      ], 500);
     }
   }
 }

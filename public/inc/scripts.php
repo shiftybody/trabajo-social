@@ -7,3 +7,4 @@
 <script src="<?= APP_URL . "public/js/navbar.js" ?>"></script>
 <script src=" <?= APP_URL . 'public/js/inactivity.js' ?>"></script>
 <script src="<?= APP_URL . 'public/js/dialog.js' ?>"></script>
+<script src="<?= APP_URL . 'public/js/details-modal.js' ?>"></script>

@@ -243,12 +243,10 @@
 
   .user-info #user-name {
     color: var(--gray-900, var(--gray-900, #0C192A));
-    /* text-lg/font-semibold */
     font-size: 16px;
     font-style: normal;
     font-weight: 600;
     line-height: 1.25;
-    /* 27px */
   }
 
   .user-info #user-role {
@@ -267,11 +265,10 @@
     height: 100%;
     -webkit-backdrop-filter: blur(5px);
     backdrop-filter: blur(5px);
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: rgba(0, 0, 0, 0.1);
     z-index: 999;
     opacity: 0;
     visibility: hidden;
-    /* Transición para cerrar (fade-out) */
     transition: opacity 0.2s ease, visibility 0s 0.2s;
   }
 

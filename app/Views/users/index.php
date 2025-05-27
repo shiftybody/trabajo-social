@@ -798,12 +798,25 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   }
 
-  // Funciones de ejemplo para las acciones del menú
-  function verDetalles(usuario_id) {
-    console.log(`Ver detalles del usuario ${usuario_id}`);
-    // Implementa tu lógica aquí
+  // Función global para mostrar detalles (llamada desde el HTML)
+  function verDetalles(userId) {
+    // Cerrar todos los menús de opciones que puedan estar abiertos
     cerrarTodosLosMenus();
+    try {
+      userDetailsModal = new UserDetailsModal();
+      userDetailsModal.show(userId);
+    } catch (error) {
+      console.error('Error al inicializar el modal:', error);
+
+      // Si hay CustomDialog disponible, mostrar error amigable
+      if (typeof CustomDialog !== 'undefined') {
+        CustomDialog.error('Error', 'No se pudo abrir la ventana de detalles del usuario.');
+      } else {
+        alert('No se pudo abrir la ventana de detalles del usuario.');
+      }
+    }
   }
+
 
   function cambiarEstado(usuario_id) {
     console.log(`Cambiar estado del usuario ${usuario_id}`);

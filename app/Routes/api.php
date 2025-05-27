@@ -21,7 +21,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
 
   $router->group(array('middleware' => 'Permission:users.view'), function ($router) {
     $router->get('/users', 'UserController@getAllUsers');
-    $router->get('/users/:id', 'ApiController@getUserById');
+    $router->get('/users/:id', 'UserController@getUserById');
   });
 
   $router->group(array('middleware' => 'Permission:users.create'), function ($router) {

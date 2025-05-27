@@ -200,7 +200,6 @@ class Auth
 
       // Opcional: Log mejorado para depuración
       $sessionTypeDetail = (isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true) ? " (remembered session)" : " (standard session)";
-      error_log("Session activity refreshed for user ID: " . self::id() . $sessionTypeDetail);
 
       return true;
     }
@@ -401,33 +400,33 @@ class Auth
     // error_log(json_encode($authResult)); // Modificado para loguear el array completo
 
     if (isset($authResult['status'])) {
-        switch ($authResult['status']) {
-            case 'success':
-                $user = $authResult['user'];
-                self::createSession($user, $remember);
-                if ($remember) {
-                    self::createRememberCookie($user);
-                }
-                self::$userModel->actualizarUltimoAcceso($user->usuario_id);
-                error_log("Login exitoso para: " . $identifier);
-                return true; // Autenticación exitosa
-            case 'inactive':
-                error_log("Intento de login de usuario inactivo: " . $identifier);
-                return 'inactive'; // Estado específico para usuario inactivo
-            case 'failed':
-                error_log("Login fallido (usuario no encontrado o contraseña incorrecta) para: " . $identifier);
-                return false; // Fallo de autenticación (usuario/contraseña)
-            case 'error':
-                error_log("Error en Auth::attempt llamando a autenticarUsuario: " . (isset($authResult['message']) ? $authResult['message'] : 'Error desconocido'));
-                return false; // Error general
-            default:
-                error_log("Resultado inesperado de autenticarUsuario para: " . $identifier);
-                return false; // Estado desconocido
-        }
+      switch ($authResult['status']) {
+        case 'success':
+          $user = $authResult['user'];
+          self::createSession($user, $remember);
+          if ($remember) {
+            self::createRememberCookie($user);
+          }
+          self::$userModel->actualizarUltimoAcceso($user->usuario_id);
+          error_log("Login exitoso para: " . $identifier);
+          return true; // Autenticación exitosa
+        case 'inactive':
+          error_log("Intento de login de usuario inactivo: " . $identifier);
+          return 'inactive'; // Estado específico para usuario inactivo
+        case 'failed':
+          error_log("Login fallido (usuario no encontrado o contraseña incorrecta) para: " . $identifier);
+          return false; // Fallo de autenticación (usuario/contraseña)
+        case 'error':
+          error_log("Error en Auth::attempt llamando a autenticarUsuario: " . (isset($authResult['message']) ? $authResult['message'] : 'Error desconocido'));
+          return false; // Error general
+        default:
+          error_log("Resultado inesperado de autenticarUsuario para: " . $identifier);
+          return false; // Estado desconocido
+      }
     } else {
-        // Manejo de un formato de respuesta inesperado (si $authResult no es un array con 'status')
-        error_log("Formato de respuesta inesperado de autenticarUsuario para: " . $identifier . " - Respuesta: " . json_encode($authResult));
-        return false;
+      // Manejo de un formato de respuesta inesperado (si $authResult no es un array con 'status')
+      error_log("Formato de respuesta inesperado de autenticarUsuario para: " . $identifier . " - Respuesta: " . json_encode($authResult));
+      return false;
     }
   }
 
