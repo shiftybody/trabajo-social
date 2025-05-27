@@ -495,7 +495,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
   <script src="<?= APP_URL ?>public/js/ajax.js"></script>
   <script>
-    
     const rolActual = "<?= $usuario->usuario_rol ?>";
     const estadoActual = "<?= $usuario->usuario_estado ?>";
 
@@ -544,58 +543,10 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       })
       .catch(error => console.error('Error al cargar los roles:', error));
 
-    // Funcionalidad para mostrar/ocultar sección de contraseña
-    document.getElementById('toggle_password_section').addEventListener('click', function() {
-      const passwordSection = document.getElementById('password_section');
-      const changePasswordField = document.getElementById('change_password');
+    // SCRIPT CORREGIDO: Funcionalidad para mostrar/ocultar sección de contraseña
+    document.getElementById('toggle_password_section').addEventListener('click', async function(e) {
+      e.preventDefault(); // Prevenir comportamiento por defecto del enlace
 
-      if (passwordSection.style.display === 'none' || passwordSection.style.display === '') {
-        passwordSection.style.display = 'flex';
-        changePasswordField.value = '1';
-        this.textContent = 'Cancelar cambio de contraseña';
-      } else {
-        passwordSection.style.display = 'none';
-        changePasswordField.value = '0';
-        // Limpiamos los campos de contraseña
-        document.getElementById('password').value = '';
-        document.getElementById('password2').value = '';
-        this.textContent = 'Cambiar contraseña';
-      }
-    });
-
-    // Validación para contraseñas coincidentes
-    document.querySelector('form').addEventListener('submit', function(e) {
-      const changePassword = document.getElementById('change_password').value;
-
-      if (changePassword === '1') {
-        const password = document.getElementById('password').value;
-        const password2 = document.getElementById('password2').value;
-
-        if (password !== password2) {
-          e.preventDefault();
-          alert('Las contraseñas no coinciden. Por favor, verifique.');
-          return false;
-        }
-      }
-    });
-
-    // Manejo de la carga de imagen de perfil
-    document.getElementById('foto').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          document.querySelector('.profile-picture').style.backgroundImage = `url(${event.target.result})`;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    // Agregar esto al final de edit.php, después del script existente
-
-    // Función mejorada para manejar el toggle de contraseña
-    document.getElementById('toggle_password_section').addEventListener('click', async function() {
       const passwordSection = document.getElementById('password_section');
       const changePasswordField = document.getElementById('change_password');
 
@@ -640,7 +591,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       }
     });
 
-    // Validación mejorada para contraseñas coincidentes (simplificada)
+    // Validación mejorada para contraseñas coincidentes
     document.querySelector('form').addEventListener('submit', function(e) {
       const changePassword = document.getElementById('change_password').value;
 
@@ -703,7 +654,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     // Función para confirmar navegación si hay cambios sin guardar
     let formChanged = false;
     const form = document.querySelector('form');
-    const originalFormData = new FormData(form);
 
     // Detectar cambios en el formulario
     form.addEventListener('input', function() {
@@ -724,8 +674,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
     // Limpiar la marca de cambios al enviar el formulario exitosamente
     form.addEventListener('submit', function() {
-      // Se limpiará automáticamente si el envío es exitoso
-      // ya que el ajax.js manejará la respuesta
       formChanged = false;
     });
   </script>
