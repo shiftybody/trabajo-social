@@ -1,12 +1,17 @@
 const formulario = document.getElementById("login-form");
 const errorMsg = document.getElementById("message-container");
 
-// Limpiar la URL del parámetro expired_session al cargar la página
+// Limpiar la URL de parámetros de estado al cargar la página
 document.addEventListener("DOMContentLoaded", function () {
   const url = new URL(window.location);
-  if (url.searchParams.has("expired_session")) {
-    // Eliminar el parámetro de la URL sin recargar la página
+  const hasParams =
+    url.searchParams.has("expired_session") ||
+    url.searchParams.has("account_disabled");
+
+  if (hasParams) {
+    // Eliminar los parámetros de la URL sin recargar la página
     url.searchParams.delete("expired_session");
+    url.searchParams.delete("account_disabled");
     window.history.replaceState({}, document.title, url.pathname + url.search);
   }
 
@@ -84,11 +89,16 @@ function clearMainError() {
   errorMsg.classList.remove("visible");
 }
 
-// Limpiar el mensaje de sesión expirada cuando el usuario comience a interactuar
-function clearExpiredSessionMessage() {
-  const sessionMsg = errorMsg.querySelector(".expired-session-message");
-  if (sessionMsg) {
-    clearMainError();
+// Limpiar mensajes de estado cuando el usuario comience a interactuar
+function clearStatusMessages() {
+  const statusMessages = errorMsg.querySelectorAll(
+    ".expired-session-message, .account-disabled-message"
+  );
+  if (statusMessages.length > 0) {
+    statusMessages.forEach((msg) => msg.remove());
+    if (!errorMsg.querySelector("p")) {
+      errorMsg.classList.remove("visible");
+    }
   }
 }
 
@@ -111,18 +121,14 @@ formulario.addEventListener("submit", async function (e) {
   let isValid = true;
   const data = new FormData(this);
 
-  // imprimir los valores del formulario
-  // Display the key/value pairs
-  for (var pair of data.entries()) {
-    console.log(pair[0] + ", " + pair[1]);
-  }
-
   const action = this.getAttribute("action");
   const method = this.getAttribute("method") || "POST";
 
   // Limpiar los mensajes de error previos de validación
   document
-    .querySelectorAll(".error-message:not(.expired-session-message)")
+    .querySelectorAll(
+      ".error-message:not(.expired-session-message):not(.account-disabled-message)"
+    )
     .forEach((errorMsgElement) => errorMsgElement.remove());
 
   document.querySelectorAll(".error-input").forEach((errorInput) => {
@@ -131,11 +137,12 @@ formulario.addEventListener("submit", async function (e) {
     togglePasswordErrorStyle(errorInput, false);
   });
 
-  // Limpiar el mensaje principal si no es de sesión expirada
+  // Limpiar el mensaje principal si no es de estado (sesión expirada o cuenta deshabilitada)
   const mainErrorMsg = errorMsg.querySelector("p");
   if (
     mainErrorMsg &&
-    !mainErrorMsg.classList.contains("expired-session-message")
+    !mainErrorMsg.classList.contains("expired-session-message") &&
+    !mainErrorMsg.classList.contains("account-disabled-message")
   ) {
     clearMainError();
   }
@@ -236,8 +243,8 @@ formulario
     input.addEventListener("input", function (e) {
       e.preventDefault();
 
-      // Limpiar mensaje de sesión expirada la primera vez que el usuario escriba
-      clearExpiredSessionMessage();
+      // Limpiar mensajes de estado la primera vez que el usuario escriba
+      clearStatusMessages();
 
       // Eliminar clase de error del input actual
       if (this.classList.contains("error-input")) {
@@ -255,19 +262,20 @@ formulario
       const mainErrorMsg = errorMsg.querySelector("p");
       if (
         mainErrorMsg &&
-        !mainErrorMsg.classList.contains("expired-session-message")
+        !mainErrorMsg.classList.contains("expired-session-message") &&
+        !mainErrorMsg.classList.contains("account-disabled-message")
       ) {
         clearMainError();
       }
     });
   });
 
-// También limpiar el mensaje de sesión expirada al hacer click en cualquier input
-formulario
+// También limpiar los mensajes de estado al hacer click en cualquier input
+formularios
   .querySelectorAll("input[type='text'], input[type='password']")
   .forEach((input) => {
     input.addEventListener("focus", function (e) {
-      clearExpiredSessionMessage();
+      clearStatusMessages();
     });
   });
 

@@ -1,6 +1,18 @@
-<?php $expired_message = '';
+<?php
+// Manejo de mensajes de estado
+$status_message = '';
+$message_class = '';
+
+// Mensaje de sesión expirada
 if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
-  $expired_message = '<p class="expired-session-message">Tu sesión ha expirado. Por favor, inicia sesión de nuevo.</p>';
+  $status_message = 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';
+  $message_class = 'expired-session-message';
+}
+
+// Mensaje de cuenta deshabilitada
+if (isset($_GET['account_disabled']) && $_GET['account_disabled'] == '1') {
+  $status_message = 'Tu cuenta ha sido deshabilitada. Contacta al administrador para más información.';
+  $message_class = 'account-disabled-message';
 }
 ?>
 
@@ -12,6 +24,20 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
   <link rel="stylesheet" href="<?= APP_URL ?>public/css/base.css">
   <link rel="stylesheet" href="<?= APP_URL ?>public/css/global.css">
   <link rel="stylesheet" href="<?= APP_URL ?>public/css/login.css">
+  <style>
+    .account-disabled-message {
+      color: var(--red-600);
+      font-family: var(--font-family);
+      font-size: var(--font-size-small);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--line-height-large);
+      background-color: #fef2f2;
+      border: 1px solid #f87171;
+      border-radius: 6px;
+      padding: 12px;
+      margin: 8px 0;
+    }
+  </style>
 </head>
 
 <header>
@@ -30,8 +56,10 @@ if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
         <p>Ingresa tu usuario & contraseña para acceder a tu cuenta</p>
       </div>
 
-      <div id="message-container" <?= $expired_message ? 'class="visible"' : '' ?>>
-        <?= $expired_message ?>
+      <div id="message-container" <?= $status_message ? 'class="visible"' : '' ?>>
+        <?php if ($status_message): ?>
+          <p class="<?= $message_class ?>"><?= htmlspecialchars($status_message) ?></p>
+        <?php endif; ?>
       </div>
 
       <div id="login-inputs">
