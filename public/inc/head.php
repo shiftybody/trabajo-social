@@ -4,5 +4,5 @@
 <link rel="icon" href="<?= APP_URL ?>public/images/favicon.ico" type="image/x-icon">
 <link rel="stylesheet" href="<?= APP_URL ?>public/css/base.css">
 <link rel="stylesheet" href="<?= APP_URL ?>public/css/global.css">
-<link rel="preload" href="<?= APP_URL . 'public/css/datatables.min.css' ?>" as="style">
 <link rel="stylesheet" href="<?= APP_URL . 'public/css/datatables.min.css' ?>">
+<link rel="stylesheet" href="<?= APP_URL ?>public/css/dialog.css">

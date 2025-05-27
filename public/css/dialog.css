@@ -31,8 +31,8 @@ body {
   position: fixed;
   inset: 0;
   background: var(--bg-overlay);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,8 +71,8 @@ body {
 
 /* Iconos como puntos de color sutiles */
 .dialog-icon {
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   margin-bottom: 16px;
   display: block;
@@ -84,8 +84,8 @@ body {
 .dialog-icon.info { background: var(--info); }
 .dialog-icon.question { 
   background: var(--text-tertiary);
-  width: 6px;
-  height: 6px;
+  width: 0.5rem;
+  height: 0.5rem;
 }
 
 /* Tipografía limpia */
@@ -135,7 +135,7 @@ body {
 .dialog-buttons {
   display: flex;
   gap: 12px;
-  margin-top: 32px;
+  margin-top: 1.5rem;
   padding: 0;
   background: transparent;
   border: none;

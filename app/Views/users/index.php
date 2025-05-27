@@ -491,6 +491,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   </div>
 </div>
 <script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
+<script src="<?= APP_URL ?>public/js/dialog.js"></script>
 <script>
   let table = new DataTable('#users-table', {
     fixedColumns: {
@@ -559,7 +560,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
               `<button type="button" class="editar" onClick="actualizar(${item.usuario_id})">
                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-pencil"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
               </button>
-              <button type="button" class="remover" onClick="remover(${item.usuario_id})">
+              <button type="button" class="remover" onClick="remover(${item.usuario_id}, '${(item.usuario_nombre + ' ' + item.usuario_apellido_paterno + ' ' + item.usuario_apellido_materno).replace(/'/g, "\\'")}')">
                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
               </button>
               <button type="button" class="opciones" onClick="mostrarOpciones(${item.usuario_id})">
@@ -601,17 +602,17 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   // Función para aplicar el filtro global o por columna
   function applyFilter() {
     let searchValue = matchingInput.value.trim();
-  let columnIndex = filterColumn.value;
+    let columnIndex = filterColumn.value;
 
-  if (columnIndex == 0) {
-    // Filtro global
-    table.columns().search(''); // ✅ Limpia todos los filtros de columna
-    table.search(searchValue, false, true).draw();
-  } else {
-    // Filtro por columna
-    table.search(''); // ✅ Limpia filtro global
-    table.columns().search(''); // Limpia filtros de columnas
-    table.column(columnIndex).search(searchValue, false, true).draw();
+    if (columnIndex == 0) {
+      // Filtro global
+      table.columns().search('');
+      table.search(searchValue, false, true).draw();
+    } else {
+      // Filtro por columna
+      table.search('');
+      table.columns().search('');
+      table.column(columnIndex).search(searchValue, false, true).draw();
     }
   }
 
@@ -642,29 +643,41 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   let legacyInput = document.querySelector('.dt-layout-row');
   legacyInput.style.display = 'none';
 
-  function remover(usuario_id) {
-    const params = new URLSearchParams({
-      "modulo_usuario": "remover",
-      "usuario_id": usuario_id
-    });
+  async function remover(usuario_id, nombreUsuario) {
+    const confirmacion = await CustomDialog.confirm(
+      'Confirmar Eliminación',
+      `¿Está seguro de que desea eliminar a ${nombreUsuario}?`,
+      'Eliminar',
+      'Cancelar'
+    );
 
-    fetch("<?= APP_URL; ?>app/ajax/usuarioAjax.php", {
-        method: "POST",
-        body: params
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        table.clear();
-        loadData();
-      })
-      .catch(error => console.error(error));
+    if (confirmacion) {
+      try {
+        const response = await fetch(`<?= APP_URL; ?>api/users/${usuario_id}`, {
+          method: "DELETE"
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.status === 'success') {
+          CustomDialog.success('Operación exitosa', data.message || 'Usuario eliminado correctamente');
+          table.clear().draw();
+          loadData();
+        } else {
+          CustomDialog.error('Error', data.message || data.message || 'No se pudo eliminar el usuario.');
+        }
+      } catch (error) {
+        console.error('Error en la petición fetch:', error);
+        CustomDialog.error('Error de Red', 'Ocurrió un problema al intentar conectar con el servidor.');
+      }
+    }
   }
 
   function actualizar(usuario_id) {
     window.location.href = `<?= APP_URL ?>users/edit/${usuario_id}`;
   }
-  // Función para mostrar y posicionar el menú desplegable
+
+
   function mostrarOpciones(usuario_id) {
     // Prevenir comportamiento por defecto
     event.preventDefault();
