@@ -128,8 +128,8 @@
 }
 
 .user-status-badge.active {
-  background: #dcfce7;
-  color: #166534;
+  background: #dcf6fc;
+  color: #164c65;
 }
 
 .user-status-badge.inactive {
@@ -144,7 +144,7 @@
 }
 
 .status-dot.active {
-  background: #10b981;
+  background: #007bff;
 }
 
 .status-dot.inactive {
