@@ -38,7 +38,7 @@ formularios.forEach((formulario) => {
   });
 
   // escuchar el evento submit validar los campos del formulario y enviar los datos
-  formulario.addEventListener("submit", function (e) {
+  formulario.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     let isValid = true;
@@ -131,45 +131,96 @@ formularios.forEach((formulario) => {
 
     if (!isValid) return;
 
+    // Deshabilitar botón de envío y mostrar estado de carga
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn ? submitBtn.textContent : "";
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Procesando...";
+    }
+
     let method = this.getAttribute("method");
     let action = this.getAttribute("action");
 
-    fetch(action, {
-      method: method,
-      body: data,
-      credentials: "same-origin",
-    })
-      .then((response) => {
-        // Primero comprobar si es una respuesta de redirección
-        if (response.redirected) {
-          window.location.href = response.url;
-          return;
-        }
-
-        // Si no es redirección, entonces procesamos el JSON
-        return response.json().then((responseData) => {
-          if (responseData.status === "success") {
-            alert(responseData.mensaje || "Operación completada con éxito");
-          } else if (responseData.status === "error") {
-            if (responseData.errores) {
-              Object.entries(responseData.errores).forEach(([key, message]) => {
-                const input = formulario.querySelector(`[name="${key}"]`);
-                if (input) {
-                  showError(input, message);
-                } else if (key === "general") {
-                  alert(message);
-                }
-              });
-            }
-          }
-        });
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        alert(
-          "Ocurrió un error al procesar la solicitud. Por favor, inténtalo de nuevo."
-        );
+    try {
+      const response = await fetch(action, {
+        method: method,
+        body: data,
+        credentials: "same-origin",
       });
+
+      // Primero comprobar si es una respuesta de redirección
+      if (response.redirected) {
+        window.location.href = response.url;
+        return;
+      }
+
+      // Si no es redirección, entonces procesamos el JSON
+      const responseData = await response.json();
+
+      if (responseData.status === "success") {
+        if (!isEditForm) {
+          // Para formulario de crear: mostrar éxito y redirigir
+          await CustomDialog.success(
+            "Usuario Creado",
+            responseData.mensaje || "El usuario se creó correctamente"
+          );
+          // Redirigir inmediatamente después del modal
+          window.location.href = `${APP_URL}users`;
+        } else {
+          // Para formulario de editar: mostrar éxito y redirigir (igual que crear)
+          await CustomDialog.success(
+            "Usuario Actualizado",
+            responseData.mensaje || "El usuario se actualizó correctamente"
+          );
+          // Redirigir inmediatamente después del modal
+          window.location.href = `${APP_URL}users`;
+        }
+      } else if (responseData.status === "error") {
+        if (responseData.errores) {
+          let hasGeneralError = false;
+
+          Object.entries(responseData.errores).forEach(([key, message]) => {
+            const input = formulario.querySelector(`[name="${key}"]`);
+            if (input) {
+              showError(input, message);
+            } else if (key === "general") {
+              hasGeneralError = true;
+              CustomDialog.error("Error", message);
+            }
+          });
+
+          // Si no hay errores generales, mostrar el primer error específico
+          if (
+            !hasGeneralError &&
+            Object.keys(responseData.errores).length > 0
+          ) {
+            const firstError = Object.values(responseData.errores)[0];
+            CustomDialog.error("Error de Validación", firstError);
+          }
+        } else {
+          // Error sin detalles específicos
+          CustomDialog.error(
+            "Error",
+            responseData.mensaje ||
+              responseData.message ||
+              "Ocurrió un error al procesar la solicitud"
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      CustomDialog.error(
+        "Error de Conexión",
+        "Ocurrió un error al procesar la solicitud. Por favor, inténtalo de nuevo."
+      );
+    } finally {
+      // Restaurar botón de envío
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    }
   });
 });
 
@@ -242,22 +293,51 @@ function clearError(input) {
 }
 
 // Manejar el evento reset para limpiar todos los errores y restaurar la imagen por defecto
-document
-  .querySelector('button[type="reset"]')
-  .addEventListener("click", function () {
-    // Restaurar imagen por defecto
-    document.querySelector(
-      ".user-avatar"
-    ).style.backgroundImage = `url(../public/photos/default.jpg)`;
+document.addEventListener("DOMContentLoaded", function () {
+  const resetButton = document.querySelector('button[type="reset"]');
 
-    // Limpiar todos los mensajes de error
-    const errorInputs = document.querySelectorAll(".error-input");
-    errorInputs.forEach((input) => {
-      clearError(input);
-    });
+  if (resetButton) {
+    resetButton.addEventListener("click", async function (e) {
+      e.preventDefault();
 
-    // Asegurar que todos los helpers estén visibles
-    document.querySelectorAll(".helper").forEach((helper) => {
-      helper.style.display = "";
+      // Confirmar reset con CustomDialog
+      const shouldReset = await CustomDialog.confirm(
+        "Limpiar Formulario",
+        "¿Está seguro de que desea limpiar todos los campos del formulario?",
+        "Sí, limpiar",
+        "Cancelar"
+      );
+
+      if (shouldReset) {
+        const form = this.closest("form");
+        if (form) {
+          form.reset();
+        }
+
+        // Restaurar imagen por defecto
+        const userAvatar = document.querySelector(".user-avatar");
+        if (userAvatar) {
+          userAvatar.style.backgroundImage = `url(${APP_URL}public/photos/default.jpg)`;
+        }
+
+        // Limpiar todos los mensajes de error
+        const errorInputs = document.querySelectorAll(".error-input");
+        errorInputs.forEach((input) => {
+          clearError(input);
+        });
+
+        // Asegurar que todos los helpers estén visibles
+        document.querySelectorAll(".helper").forEach((helper) => {
+          helper.style.display = "";
+        });
+
+        // Mostrar confirmación
+        CustomDialog.toast(
+          "Formulario limpiado correctamente",
+          "success",
+          2000
+        );
+      }
     });
-  });
+  }
+});

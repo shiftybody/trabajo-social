@@ -138,13 +138,14 @@ body {
   gap: 12px;
   margin-top: 1.5rem;
   padding: 0;
+  height: 3rem;
   background: transparent;
   border: none;
   justify-content: flex-end;
 }
 
 .dialog-btn {
-  padding: 8px 16px;
+  padding: 0.5rem 1.1rem;
   border: none;
   border-radius: 6px;
   font-size: 14px;
@@ -183,6 +184,7 @@ body {
 
 /* Variantes de botones */
 .dialog-btn-primary {
+  padding: 0rem 1.5rem;
   background: var(--text);
   color: var(--bg);
 }

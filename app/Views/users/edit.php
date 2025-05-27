@@ -32,7 +32,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   }
 
   input::file-selector-button {
-    background-color: #14171d;
+    background-color: rgb(27, 31, 40);
     background-position-x: 0%;
     background-size: 100%;
     border: 0;
@@ -49,7 +49,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   .form-layout {
     display: flex;
     padding: var(--0, 0px);
-    flex-direction: column; 
+    flex-direction: column;
     align-items: flex-start;
     gap: var(--4, 16px);
     align-self: stretch;
@@ -495,6 +495,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
   <script src="<?= APP_URL ?>public/js/ajax.js"></script>
   <script>
+    
     const rolActual = "<?= $usuario->usuario_rol ?>";
     const estadoActual = "<?= $usuario->usuario_estado ?>";
 
@@ -589,5 +590,142 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         };
         reader.readAsDataURL(file);
       }
+    });
+
+    // Agregar esto al final de edit.php, después del script existente
+
+    // Función mejorada para manejar el toggle de contraseña
+    document.getElementById('toggle_password_section').addEventListener('click', async function() {
+      const passwordSection = document.getElementById('password_section');
+      const changePasswordField = document.getElementById('change_password');
+
+      if (passwordSection.style.display === 'none' || passwordSection.style.display === '') {
+        // Confirmar cambio de contraseña
+        const shouldChangePassword = await CustomDialog.confirm(
+          'Cambiar Contraseña',
+          '¿Está seguro de que desea cambiar la contraseña de este usuario?',
+          'Sí, cambiar',
+          'Cancelar'
+        );
+
+        if (shouldChangePassword) {
+          passwordSection.style.display = 'flex';
+          changePasswordField.value = '1';
+          this.textContent = 'Cancelar cambio de contraseña';
+
+          // Focus en el primer campo de contraseña
+          setTimeout(() => {
+            document.getElementById('password').focus();
+          }, 100);
+
+          CustomDialog.toast('Ahora puede ingresar la nueva contraseña', 'info', 3000);
+        }
+      } else {
+        passwordSection.style.display = 'none';
+        changePasswordField.value = '0';
+        // Limpiamos los campos de contraseña
+        document.getElementById('password').value = '';
+        document.getElementById('password2').value = '';
+        // Limpiar errores de contraseña si existen
+        ['password', 'password2'].forEach(fieldName => {
+          const field = document.getElementById(fieldName);
+          if (field && field.classList.contains('error-input')) {
+            const errorMsg = field.parentElement.querySelector('.error-message');
+            if (errorMsg) errorMsg.remove();
+            field.classList.remove('error-input');
+          }
+        });
+        this.textContent = 'Cambiar contraseña';
+        CustomDialog.toast('Cambio de contraseña cancelado', 'info', 2000);
+      }
+    });
+
+    // Validación mejorada para contraseñas coincidentes (simplificada)
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const changePassword = document.getElementById('change_password').value;
+
+      if (changePassword === '1') {
+        const password = document.getElementById('password').value;
+        const password2 = document.getElementById('password2').value;
+
+        if (password !== password2) {
+          e.preventDefault();
+
+          // Marcar campos con error (el CustomDialog se maneja en ajax.js)
+          ['password', 'password2'].forEach(fieldName => {
+            const field = document.getElementById(fieldName);
+            if (field) {
+              field.classList.add('error-input');
+            }
+          });
+
+          return false;
+        }
+      }
+    });
+
+    // Mejorar el manejo de la carga de imagen de perfil
+    document.getElementById('foto').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+
+      if (file) {
+        // Validar tamaño del archivo (5MB máximo)
+        const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+        if (file.size > maxSize) {
+          CustomDialog.error(
+            'Archivo muy grande',
+            'La imagen no puede ser mayor a 5MB. Por favor, seleccione una imagen más pequeña.'
+          );
+          this.value = ''; // Limpiar el input
+          return;
+        }
+
+        // Validar tipo de archivo
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+          CustomDialog.error(
+            'Formato no válido',
+            'Solo se permiten archivos de imagen (JPG, PNG, GIF).'
+          );
+          this.value = ''; // Limpiar el input
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          document.querySelector('.profile-picture').style.backgroundImage = `url(${event.target.result})`;
+          CustomDialog.toast('Imagen cargada correctamente', 'success', 2000);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Función para confirmar navegación si hay cambios sin guardar
+    let formChanged = false;
+    const form = document.querySelector('form');
+    const originalFormData = new FormData(form);
+
+    // Detectar cambios en el formulario
+    form.addEventListener('input', function() {
+      formChanged = true;
+    });
+
+    form.addEventListener('change', function() {
+      formChanged = true;
+    });
+
+    // Advertir al usuario si intenta salir con cambios sin guardar
+    window.addEventListener('beforeunload', function(e) {
+      if (formChanged) {
+        e.preventDefault();
+        e.returnValue = '¿Está seguro de que desea salir? Los cambios no guardados se perderán.';
+      }
+    });
+
+    // Limpiar la marca de cambios al enviar el formulario exitosamente
+    form.addEventListener('submit', function() {
+      // Se limpiará automáticamente si el envío es exitoso
+      // ya que el ajax.js manejará la respuesta
+      formChanged = false;
     });
   </script>

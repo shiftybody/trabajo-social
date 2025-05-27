@@ -20,12 +20,9 @@
     gap: var(--2, .5rem);
     flex-shrink: 0;
     border-radius: var(--rounded-lg, 8px);
-    border: 1px solid var(--gray-300, #CFD5DD);
-    border: 1px solid var(--gray-300, color(display-p3 0.8196 0.8353 0.8588));
+    border: 1px solid var(--gray-300);
     background: #ECECEC;
-    background: color(display-p3 0.9255 0.9255 0.9255);
-    color: var(--gray-600, #465566);
-    color: var(--gray-600, color(display-p3 0.2941 0.3333 0.3882));
+    color: var(--gray-600);
     font-size: 14px;
     font-style: normal;
     font-weight: 600;
@@ -319,7 +316,7 @@
 
   .editar:hover svg {
     transform: translateY(-1px) scale(1.05);
-    stroke: #ffc107;
+    stroke: #007bff;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
   }
 
@@ -819,4 +816,37 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     // Implementa tu lógica aquí
     cerrarTodosLosMenus();
   }
+
+  // Verificar si hay un mensaje de éxito pendiente después de redirección
+  document.addEventListener('DOMContentLoaded', function() {
+    // Verificar si hay un mensaje de éxito de actualización de usuario
+    const updateSuccess = sessionStorage.getItem('userUpdateSuccess');
+
+    if (updateSuccess) {
+      try {
+        const successData = JSON.parse(updateSuccess);
+
+        // Verificar que el mensaje no sea muy antiguo (máximo 10 segundos)
+        const now = Date.now();
+        const messageAge = now - successData.timestamp;
+
+        if (messageAge < 10000) { // 10 segundos
+          // Esperar a que la página se cargue completamente antes de mostrar el modal
+          setTimeout(async () => {
+            await CustomDialog.success(
+              'Usuario Actualizado',
+              successData.message
+            );
+          }, 500); // Pequeño delay para asegurar que todo esté cargado
+        }
+
+        // Limpiar el mensaje del sessionStorage
+        sessionStorage.removeItem('userUpdateSuccess');
+
+      } catch (error) {
+        console.error('Error al procesar mensaje de éxito:', error);
+        sessionStorage.removeItem('userUpdateSuccess');
+      }
+    }
+  });
 </script>
