@@ -9,20 +9,16 @@ use App\Core\Router;
 // Crear instancia del router
 $router = new Router();
 
-// Rutas API públicas
 $router->post('/auth/login', 'LoginController@login');
 $router->post('/session/ping', 'SessionController@ping');
 
-// Rutas API protegidas (requieren autenticación)
 $router->group(array('middleware' => 'Auth'), function ($router) {
   $router->post('/auth/logout', 'LoginController@logout');
 
-  // Verificar estado de sesión
   $router->get('/session/status', 'SessionController@status');
-  // Ruta para refrescar la sesión
   $router->post('/session/refresh', 'SessionController@refresh');
 
-  // Usuarios
+
   $router->group(array('middleware' => 'Permission:users.view'), function ($router) {
     $router->get('/users', 'UserController@getAllUsers');
     $router->get('/users/:id', 'ApiController@getUserById');
@@ -37,7 +33,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   });
 
   $router->group(array('middleware' => 'Permission:users.delete'), function ($router) {
-    $router->delete('/users/:id', 'UserController@deleteUser');
+    $router->delete('/users/:id', 'UserController@delete');
   });
 
   // Roles

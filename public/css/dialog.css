@@ -1,0 +1,344 @@
+:root {
+  --text: #000;
+  --text-secondary: #666;
+  --text-tertiary: #999;
+  --bg: #fff;
+  --bg-overlay: rgba(255, 255, 255, 0.8);
+  --border: rgba(0, 0, 0, 0.08);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --danger: #ff3b30;
+  --success: #34c759;
+  --warning: #ff9500;
+  --info: #007aff;
+}
+
+/* Reset y fuente base */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Overlay minimalista con blur */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.dialog-overlay.show {
+  opacity: 1;
+}
+
+/* Container ultra-minimalista */
+.dialog-container {
+  background: var(--bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  max-width: 400px;
+  width: calc(100% - 32px);
+  padding: 32px;
+  transform: scale(0.95) translateY(10px);
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.dialog-overlay.show .dialog-container {
+  transform: scale(1) translateY(0);
+}
+
+/* Sin header separado, todo fluye */
+.dialog-header {
+  margin-bottom: 16px;
+  padding: 0;
+  border: none;
+}
+
+/* Iconos como puntos de color sutiles */
+.dialog-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.dialog-icon.success { background: var(--success); }
+.dialog-icon.error { background: var(--danger); }
+.dialog-icon.warning { background: var(--warning); }
+.dialog-icon.info { background: var(--info); }
+.dialog-icon.question { 
+  background: var(--text-tertiary);
+  width: 6px;
+  height: 6px;
+}
+
+/* Tipografía limpia */
+.dialog-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 8px 0;
+  letter-spacing: -0.01em;
+}
+
+.dialog-message {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* Input minimalista */
+.dialog-input {
+  margin: 16px 0 0 0;
+  padding: 0;
+}
+
+.dialog-input input {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text);
+  background: transparent;
+  transition: border-color 200ms;
+  outline: none;
+}
+
+.dialog-input input:focus {
+  border-bottom-color: var(--text);
+}
+
+.dialog-input input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Botones minimalistas */
+.dialog-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  justify-content: flex-end;
+}
+
+.dialog-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms;
+  background: transparent;
+  color: var(--text-secondary);
+  position: relative;
+  min-width: auto;
+}
+
+.dialog-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: var(--text);
+  opacity: 0;
+  transition: opacity 150ms;
+  z-index: -1;
+}
+
+.dialog-btn:hover::after {
+  opacity: 0.06;
+}
+
+.dialog-btn:active {
+  transform: scale(0.98);
+}
+
+.dialog-btn:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* Variantes de botones */
+.dialog-btn-primary {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.dialog-btn-primary::after {
+  display: none;
+}
+
+.dialog-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.dialog-btn-danger {
+  color: var(--danger);
+}
+
+.dialog-btn-danger::after {
+  background: var(--danger);
+}
+
+.dialog-btn-success {
+  color: var(--success);
+}
+
+.dialog-btn-success::after {
+  background: var(--success);
+}
+
+/* Toast ultra-minimalista */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 24px;
+  padding: 12px 20px;
+  margin-bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-icon {
+  display: none;
+}
+
+.toast-message {
+  color: inherit;
+  font-size: inherit;
+  line-height: 1;
+}
+
+.toast-close {
+  display: none;
+}
+
+/* Colores para diferentes tipos de toast */
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+.toast.warning { background: var(--warning); }
+.toast.info { background: var(--info); }
+
+/* Loading minimalista */
+.dialog-loading {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--text);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .dialog-container {
+      padding: 24px;
+      max-width: calc(100% - 16px);
+  }
+  
+  .dialog-buttons {
+      margin-top: 24px;
+  }
+
+  .toast-container {
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      transform: none;
+  }
+
+  .toast {
+      width: 100%;
+      justify-content: center;
+  }
+}
+
+/* Demo page minimalista */
+.demo-container {
+  padding: 48px 24px;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.demo-container h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.demo-container h2 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  margin: 48px 0 16px;
+}
+
+.demo-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+/* Transición suave para el cierre */
+@keyframes fadeOut {
+  to {
+      opacity: 0;
+      transform: scale(0.96);
+  }
+}

@@ -51,21 +51,6 @@ class UserController
     return Response::html($contenido);
   }
 
-  public function getAllUsers(Request $request)
-  {
-    try {
-      $usuarios = $this->userModel->obtenerTodosUsuarios();
-      return Response::json([
-        'status' => 'success',
-        'data' => $usuarios
-      ]);
-    } catch (Exception $e) {
-      return Response::json([
-        'status' => 'error',
-        'mensaje' => 'Error al obtener los usuarios: ' . $e->getMessage()
-      ]);
-    }
-  }
 
   public function store(Request $request)
   {
@@ -290,6 +275,21 @@ class UserController
     }
   }
 
+  public function getAllUsers(Request $request)
+  {
+    try {
+      $usuarios = $this->userModel->obtenerTodosUsuarios();
+      return Response::json([
+        'status' => 'success',
+        'data' => $usuarios
+      ]);
+    } catch (Exception $e) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Error al obtener los usuarios: ' . $e->getMessage()
+      ]);
+    }
+  }
 
   public function update(Request $request)
   {
@@ -530,6 +530,36 @@ class UserController
       return Response::json([
         'status' => 'error',
         'errores' => ['general' => 'Error al actualizar el usuario']
+      ]);
+    }
+  }
+
+  public function delete(Request $request)
+  {
+
+    $id = $request->param('id');
+
+    // Verificar que el usuario exista
+    $usuario = $this->userModel->obtenerUsuarioPorId($id);
+    if (!$usuario) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Usuario no encontrado'
+      ], 404);
+    }
+
+    // Eliminar el usuario
+    $eliminar = $this->userModel->eliminarUsuario($id);
+
+    if ($eliminar) {
+      return Response::json([
+        'status' => 'success',
+        'mensaje' => 'Usuario eliminado correctamente'
+      ]);
+    } else {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Error al eliminar el usuario'
       ]);
     }
   }
