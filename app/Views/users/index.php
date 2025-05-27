@@ -491,7 +491,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   </div>
 </div>
 <script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
-<script src="<?= APP_URL ?>public/js/dialog.js"></script>
+<?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script>
   let table = new DataTable('#users-table', {
     fixedColumns: {

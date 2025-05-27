@@ -418,7 +418,7 @@
     </div>
   </div>
   <div id="sidebar-options">
-    <a href="<?= APP_URL . "userUpdates" . $_SESSION['id'] . "/"; ?>">
+    <a href="<?= APP_URL . "userUpdates" . $_SESSION['id'] . "/"; ?>"> <!-- TODO: COLOCAR RUTA CORRECTA -->
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user-square-rounded">
         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
         <path d="M12 13a3 3 0 1 0 0 -6a3 3 0 0 0 0 6z" />
@@ -428,7 +428,7 @@
       Mi Perfil
     </a>
     <hr>
-    <a href="<?= APP_URL; ?>logout" id="btn_exit">
+    <a id="btn_exit" onclick="logout()">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-logout">
         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
         <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
@@ -440,8 +440,6 @@
   </div>
 </div>
 </div>
-
-<script src="<?= APP_URL . "public/js/navbar.js" ?>"></script>
 <?php require_once APP_ROOT . 'public/inc/scripts.php'; ?>
 <script>
   // cuando se presione un tag img con clase logo
@@ -451,8 +449,30 @@
       window.location.href = "<?= APP_URL ?>home";
     });
   });
+
+  async function logout() {
+
+    sidebarAvatar.classList.remove("open");
+    contentBlur.classList.remove("active");
+
+    const confirmacion = await CustomDialog.confirm(
+      'Cerrar Sesión',
+      `¿Está seguro de que deseas cerrar sesión?`,
+      'Cerrar Sesión',
+      'Cancelar'
+    );
+
+    if (confirmacion) {
+      try {
+        window.location.href = "<?= APP_URL ?>logout";
+      } catch (error) {
+        console.error('Error en la petición fetch:', error);
+        CustomDialog.error('Error de Red', 'Ocurrió un problema al intentar conectar con el servidor.');
+      }
+    }
+  }
 </script>
 
 <?php
-include 'modal.php'
+require_once 'modal.php'
 ?>
