@@ -22,6 +22,8 @@
   --white: #fff;
   --black: #000;
 
+  --sombra: rgba(0, 0, 0, 0.2);
+
   /* Common spacings and radii */
   --spacing-small: 0.625rem;
   --spacing-medium: 0.75rem;

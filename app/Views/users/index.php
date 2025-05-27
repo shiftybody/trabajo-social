@@ -330,7 +330,7 @@
 
   .remover:hover svg {
     transform: translateY(-1px) rotate(-5deg);
-    stroke: #dc3545;
+    stroke: var(--red-600);
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
   }
 
@@ -342,7 +342,7 @@
 
   .opciones:hover svg {
     transform: translateY(-1px);
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(0 1px 1px var(--sombra));
     stroke: #14171d;
   }
 

@@ -133,14 +133,17 @@
 
   function showModal() {
     if (!dom.modal || state.isRememberedSession) return;
-    dom.modal.style.display = "flex";
+
+    // Usar las nuevas clases CSS
+    dom.modal.classList.add("show");
     state.isModalActive = true;
   }
 
   function hideModal() {
     if (!dom.modal) return;
 
-    dom.modal.style.display = "none";
+    // Usar las nuevas clases CSS
+    dom.modal.classList.remove("show");
     state.isModalActive = false;
 
     if (state.modalCountdownIntervalId) {
@@ -150,7 +153,42 @@
 
     if (dom.countdown) {
       dom.countdown.textContent = "";
+      // Limpiar la clase de urgencia
+      dom.countdown.classList.remove("countdown-urgent");
     }
+  }
+
+  function startCountdown(timeRemaining) {
+    if (!dom.countdown || !dom.message) return;
+
+    let countdown = Math.max(0, Math.floor(timeRemaining));
+    dom.message.textContent = "Tu sesión expirará en";
+
+    const updateCountdown = () => {
+      dom.countdown.textContent = countdown;
+
+      // Añadir animación de urgencia cuando quedan 10 segundos o menos
+      if (countdown <= 10) {
+        dom.countdown.classList.add("countdown-urgent");
+      } else {
+        dom.countdown.classList.remove("countdown-urgent");
+      }
+
+      if (countdown <= 0) {
+        clearInterval(state.modalCountdownIntervalId);
+        state.modalCountdownIntervalId = null;
+        performLogout(true);
+        return;
+      }
+      countdown--;
+    };
+
+    if (state.modalCountdownIntervalId) {
+      clearInterval(state.modalCountdownIntervalId);
+    }
+
+    updateCountdown();
+    state.modalCountdownIntervalId = setInterval(updateCountdown, 1000);
   }
 
   function adjustCheckInterval(isRemembered) {
@@ -234,6 +272,7 @@
             adjustCheckInterval(data.isRememberedSession);
           }
           hideModal();
+          // IMPORTANTE: Verificar inmediatamente el estado después de refrescar
           checkSessionStatus();
         } else {
           performLogout();
@@ -248,32 +287,6 @@
   function handleStayLoggedIn() {
     hideModal();
     refreshSession();
-  }
-
-  function startCountdown(timeRemaining) {
-    if (!dom.countdown || !dom.message) return;
-
-    let countdown = Math.max(0, Math.floor(timeRemaining));
-    dom.message.textContent = "Tu sesión expirará en";
-
-    const updateCountdown = () => {
-      dom.countdown.innerHTML = `<span class="countdown-number">${countdown}</span>`;
-
-      if (countdown <= 0) {
-        clearInterval(state.modalCountdownIntervalId);
-        state.modalCountdownIntervalId = null;
-        performLogout(true);
-        return;
-      }
-      countdown--;
-    };
-
-    if (state.modalCountdownIntervalId) {
-      clearInterval(state.modalCountdownIntervalId);
-    }
-
-    updateCountdown();
-    state.modalCountdownIntervalId = setInterval(updateCountdown, 1000);
   }
 
   function checkSessionStatus() {
