@@ -244,24 +244,6 @@ class userModel extends mainModel
     }
 
     /**
-     * Verifica si un nombre de usuario ya existe
-     * 
-     * @param string $username Nombre de usuario
-     * @return bool True si existe, false en caso contrario
-     */
-    public function localizarUsuario($username)
-    {
-        try {
-            $query = "SELECT COUNT(*) FROM usuario WHERE usuario_usuario = :username";
-            $resultado = $this->ejecutarConsulta($query, [':username' => $username]);
-            return $resultado->fetchColumn() > 0;
-        } catch (\Exception $e) {
-            error_log("Error en localizarUsuario: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
      * Autentica a un usuario con sus credenciales
      * 
      * @param string $identificador Nombre de usuario o correo electrónico
@@ -353,21 +335,21 @@ class userModel extends mainModel
         }
     }
 
-    //obtener todos los usuarios
-    public function obtenerUsuarios()
+    /**
+     * Comprobar si es el unico usuario administrador
+     *
+     * @param int $id ID del usuario
+     * @return bool True si es el unico usuario administrador, false en caso contrario
+     */
+    public function esUltimoAdministrador($id)
     {
         try {
-            $query = "SELECT u.usuario_id, u.usuario_nombre, u.usuario_apellido_paterno, 
-                     u.usuario_apellido_materno, u.usuario_usuario, u.usuario_email, 
-                     r.rol_descripcion, u.usuario_estado 
-                     FROM usuario u 
-                     JOIN rol r ON u.usuario_rol = r.rol_id";
-
-            $resultado = $this->ejecutarConsulta($query);
-            return $resultado->fetchAll(PDO::FETCH_OBJ);
+            $query = "SELECT COUNT(*) FROM usuario WHERE usuario_rol = 1 AND usuario_id != :id";
+            $resultado = $this->ejecutarConsulta($query, [':id' => $id]);
+            return $resultado->fetchColumn() == 0;
         } catch (\Exception $e) {
-            error_log("Error en obtenerUsuarios: " . $e->getMessage());
-            return [];
+            error_log("Error en esUltimoAdministrador: " . $e->getMessage());
+            return false;
         }
     }
 }

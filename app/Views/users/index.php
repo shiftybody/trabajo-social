@@ -660,11 +660,11 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         const data = await response.json();
 
         if (response.ok && data.status === 'success') {
-          CustomDialog.success('Operación exitosa', data.message || 'Usuario eliminado correctamente');
+          CustomDialog.success('Operación exitosa', data.mensaje || 'Usuario eliminado correctamente');
           table.clear().draw();
           loadData();
         } else {
-          CustomDialog.error('Error', data.message || data.message || 'No se pudo eliminar el usuario.');
+          CustomDialog.error('Error', data.mensaje || data.mensaje || 'No se pudo eliminar el usuario.');
         }
       } catch (error) {
         console.error('Error en la petición fetch:', error);

@@ -552,6 +552,14 @@ class UserController
       ], 404);
     }
 
+    // verificar que no sea el ultimo usuario administrador
+    if ($this->userModel->esUltimoAdministrador($id)) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'No se puede eliminar el último usuario administrador'
+      ]);
+    }
+
     // Eliminar el usuario
     $eliminar = $this->userModel->eliminarUsuario($id);
 
@@ -675,7 +683,7 @@ class UserController
     if ($actualizar) {
       return Response::json([
         'status' => 'success',
-        'mensaje' => 'Contraseña reseteada correctamente'
+        'mensaje' => 'Contraseña reseteada correctamente. Efectos aplicados en el siguiente inicio de sesión.'
       ]);
     } else {
       return Response::json([
