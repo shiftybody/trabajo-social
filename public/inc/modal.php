@@ -4,7 +4,7 @@
     --text-secondary: #666;
     --text-tertiary: #999;
     --bg: #fff;
-    --bg-overlay: rgba(255, 255, 255, 0.8);
+    --bg-overlay: rgba(0, 0, 0, 0.5);
     --border: rgba(0, 0, 0, 0.08);
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);

@@ -30,6 +30,8 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
 
   $router->group(array('middleware' => 'Permission:users.edit'), function ($router) {
     $router->post('/users/:id', 'UserController@update');
+    $router->post('/users/:id/reset-password', 'UserController@resetPassword');
+    $router->post('/users/:id/status', 'UserController@changeStatus');
   });
 
   $router->group(array('middleware' => 'Permission:users.delete'), function ($router) {

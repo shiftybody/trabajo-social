@@ -6,6 +6,7 @@ class UserDetailsModal {
     this.modal = null;
     this.isOpen = false;
     this.currentUserId = null;
+    this.modalMouseDownTarget = null;
     this.init();
   }
 
@@ -47,18 +48,34 @@ class UserDetailsModal {
   }
 
   bindEvents() {
+    // Guardar referencia a la instancia en el modal
+    if (this.modal) {
+      this.modal.__modalInstance = this;
+    }
+
     // Cerrar modal con botón X
     document.addEventListener("click", (e) => {
-      if (e.target.id === "closeUserDetailsModal") {
+      if (e.target.closest("#closeUserDetailsModal")) {
         this.close();
       }
     });
 
-    // Cerrar modal haciendo clic fuera
-    document.addEventListener("click", (e) => {
-      if (e.target.id === "userDetailsModal") {
+    // Cerrar modal haciendo clic fuera (mejorado)
+    this.modal.addEventListener("mousedown", (e) => {
+      // Solo guardar el target si el mousedown fue en el modal mismo (overlay)
+      if (e.target === this.modal) {
+        this.modalMouseDownTarget = e.target;
+      }
+    });
+
+    this.modal.addEventListener("mouseup", (e) => {
+      // Solo cerrar si:
+      // - El mousedown fue en el overlay
+      // - El mouseup también fue en el overlay
+      if (this.modalMouseDownTarget === this.modal && e.target === this.modal) {
         this.close();
       }
+      this.modalMouseDownTarget = null;
     });
 
     // Cerrar modal con tecla ESC
@@ -97,25 +114,27 @@ class UserDetailsModal {
 
     this.isOpen = false;
     this.currentUserId = null;
+    this.modalMouseDownTarget = null;
 
     // Ocultar modal
     this.modal.classList.remove("show");
     document.body.style.overflow = "";
 
-    // Limpiar contenido después de la animación
-    setTimeout(() => {
-      const body = document.getElementById("userDetailsModalBody");
-      if (body) body.innerHTML = "";
-    }, 300);
+    // Limpiar el contenido del modal
+    const body = document.getElementById("userDetailsModalBody");
+    if (body) {
+      body.innerHTML = "";
+    }
   }
 
   async fetchUserDetails(userId) {
-    const response = await fetch(`${APP_URL}api/users/${userId}`, {
+    const response = await fetch(`${APP_URL}/api/users/${userId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
       },
+      credentials: "same-origin",
     });
 
     if (!response.ok) {
@@ -152,8 +171,17 @@ class UserDetailsModal {
         </svg>
         <h3>Error al cargar</h3>
         <p>${message}</p>
+        <button type="button" class="btn-retry" onclick="userDetailsModal.retry()">
+          Reintentar
+        </button>
       </div>
     `;
+  }
+
+  retry() {
+    if (this.currentUserId) {
+      this.show(this.currentUserId);
+    }
   }
 
   showUserDetails(user) {
@@ -163,7 +191,7 @@ class UserDetailsModal {
     // Determinar el estado del usuario
     const isActive = user.estado_id == 1;
     const statusClass = isActive ? "active" : "inactive";
-    const statusText = user.estado;
+    const statusText = user.estado || (isActive ? "Activo" : "Inactivo");
 
     const body = document.getElementById("userDetailsModalBody");
     body.innerHTML = `
@@ -171,11 +199,11 @@ class UserDetailsModal {
       <div class="user-profile-section">
         <div class="user-avatar-large" style="background-image: url('${avatarUrl}')"></div>
         <div class="user-profile-info">
-          <h3>${user.nombre_completo}</h3>
-          <p class="user-username">@${user.usuario}</p>
+          <h3>${this.escapeHtml(user.nombre_completo)}</h3>
+          <p class="user-username">@${this.escapeHtml(user.usuario)}</p>
           <div class="user-status-badge ${statusClass}">
             <span class="status-dot ${statusClass}"></span>
-            ${statusText}
+            ${this.escapeHtml(statusText)}
           </div>
         </div>
       </div>
@@ -193,21 +221,27 @@ class UserDetailsModal {
           </h4>
           <div class="user-detail-item">
             <span class="user-detail-label">Nombre:</span>
-            <span class="user-detail-value">${user.nombre}</span>
+            <span class="user-detail-value">${this.escapeHtml(
+              user.nombre
+            )}</span>
           </div>
           <div class="user-detail-item">
             <span class="user-detail-label">Apellido Paterno:</span>
-            <span class="user-detail-value">${user.apellido_paterno}</span>
+            <span class="user-detail-value">${this.escapeHtml(
+              user.apellido_paterno
+            )}</span>
           </div>
           <div class="user-detail-item">
             <span class="user-detail-label">Apellido Materno:</span>
-            <span class="user-detail-value">${
+            <span class="user-detail-value">${this.escapeHtml(
               user.apellido_materno || "No especificado"
-            }</span>
+            )}</span>
           </div>
           <div class="user-detail-item">
             <span class="user-detail-label">Teléfono:</span>
-            <span class="user-detail-value">${user.telefono}</span>
+            <span class="user-detail-value">${this.escapeHtml(
+              user.telefono
+            )}</span>
           </div>
         </div>
   
@@ -222,22 +256,26 @@ class UserDetailsModal {
           </h4>
           <div class="user-detail-item">
             <span class="user-detail-label">Usuario:</span>
-            <span class="user-detail-value">${user.usuario}</span>
+            <span class="user-detail-value">${this.escapeHtml(
+              user.usuario
+            )}</span>
           </div>
           <div class="user-detail-item">
             <span class="user-detail-label">Email:</span>
-            <span class="user-detail-value">${user.email}</span>
+            <span class="user-detail-value">${this.escapeHtml(
+              user.email
+            )}</span>
           </div>
           <div class="user-detail-item">
             <span class="user-detail-label">Rol:</span>
-            <span class="user-detail-value">${user.rol}</span>
+            <span class="user-detail-value">${this.escapeHtml(user.rol)}</span>
           </div>
           <div class="user-detail-item">
             <span class="user-detail-label">Estado:</span>
             <span class="user-detail-value">
               <span class="user-status-badge ${statusClass}">
                 <span class="status-dot ${statusClass}"></span>
-                ${statusText}
+                ${this.escapeHtml(statusText)}
               </span>
             </span>
           </div>
@@ -258,27 +296,67 @@ class UserDetailsModal {
           </div>
           <div class="user-detail-item">
             <span class="user-detail-label">Creado:</span>
-            <span class="user-detail-value">${user.fecha_creacion}</span>
+            <span class="user-detail-value">${this.formatDate(
+              user.fecha_creacion
+            )}</span>
           </div>
           <div class="user-detail-item">
             <span class="user-detail-label">Modificado:</span>
-            <span class="user-detail-value">${user.ultima_modificacion}</span>
+            <span class="user-detail-value">${this.formatDate(
+              user.ultima_modificacion
+            )}</span>
           </div>
           <div class="user-detail-item">
             <span class="user-detail-label">Último acceso:</span>
-            <span class="user-detail-value">${user.ultimo_acceso}</span>
+            <span class="user-detail-value">${this.formatDate(
+              user.ultimo_acceso
+            )}</span>
           </div>
         </div>
       </div>
     `;
   }
+
   getAvatarUrl(avatar) {
     if (!avatar || avatar === "default.jpg") {
-      return `${APP_URL}public/photos/default.jpg`;
+      return `${APP_URL}/public/photos/default.jpg`;
     }
 
     // Verificar si existe la imagen en thumbnail, si no usar original
-    return `${APP_URL}public/photos/thumbnail/${avatar}`;
+    return `${APP_URL}/public/photos/thumbnail/${avatar}`;
+  }
+
+  escapeHtml(text) {
+    if (!text) return "";
+    const map = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    };
+    return text.toString().replace(/[&<>"']/g, (m) => map[m]);
+  }
+
+  formatDate(dateString) {
+    if (!dateString) return "No disponible";
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      };
+
+      return date.toLocaleDateString("es-MX", options);
+    } catch (error) {
+      return dateString;
+    }
   }
 }
 
@@ -292,7 +370,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Función global para mostrar detalles (llamada desde el HTML)
 function verDetalles(userId) {
-  cerrarTodosLosMenus();
+  if (typeof cerrarTodosLosMenus === "function") {
+    cerrarTodosLosMenus();
+  }
 
   if (userDetailsModal) {
     userDetailsModal.show(userId);

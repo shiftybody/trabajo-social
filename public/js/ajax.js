@@ -1,5 +1,3 @@
-const formularios = document.querySelectorAll(".form-ajax");
-
 const PATTERN_MSG = {
   "[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}":
     "El campo solo puede contener letras y espacios",
@@ -10,34 +8,60 @@ const PATTERN_MSG = {
     "El correo o nombre de usuario no es válido",
 };
 
-// Para cada input de tipo file en la pagina con la clase .input-file
-document.querySelectorAll(".input-file").forEach((input) => {
-  input.addEventListener("change", function () {
-    const file = this.files[0];
-    const reader = new FileReader();
+// Mostrar mensaje de error
+function showError(input, message) {
+  // Eliminar mensajes de error previos si existen
+  clearError(input);
 
-    reader.onload = function () {
-      document.querySelector(
-        ".user-avatar"
-      ).style.backgroundImage = `url(${reader.result})`;
-    };
-    reader.readAsDataURL(file);
-  });
-});
+  const error = document.createElement("p");
+  error.classList.add("error-message");
+  error.textContent = message;
 
-// Para cada formulario en la pagina con la clase .form-api
-formularios.forEach((formulario) => {
-  //escuchar el evento reset y limpiar los mensajes de error, estilos y valores de los inputs
+  // Si es un input de tipo file, buscar y ocultar el helper
+  if (input.type === "file") {
+    const helper = input.parentElement.querySelector(".helper");
+    if (helper) {
+      helper.style.display = "none";
+    }
+  }
+
+  input.parentElement.appendChild(error);
+  input.classList.add("error-input");
+}
+
+// Función para limpiar errores
+function clearError(input) {
+  // Eliminar mensaje de error si existe
+  const errorMessage = input.parentElement.querySelector(".error-message");
+  if (errorMessage) {
+    errorMessage.remove();
+  }
+
+  // Quitar clase de error del input
+  input.classList.remove("error-input");
+
+  // Si es un input de tipo file, mostrar el helper nuevamente
+  if (input.type === "file") {
+    const helper = input.parentElement.querySelector(".helper");
+    if (helper) {
+      helper.style.display = "";
+    }
+  }
+}
+
+// Función principal para adjuntar manejadores a formularios AJAX
+function attachAjaxFormHandlers(formulario) {
+  // Escuchar el evento reset y limpiar los mensajes de error
   formulario.addEventListener("reset", function (e) {
-    document
+    formulario
       .querySelectorAll(".error-message")
       .forEach((errorMsg) => errorMsg.remove());
-    document
+    formulario
       .querySelectorAll(".error-input")
       .forEach((errorInput) => errorInput.classList.remove("error-input"));
   });
 
-  // escuchar el evento submit validar los campos del formulario y enviar los datos
+  // Escuchar el evento submit validar los campos del formulario y enviar los datos
   formulario.addEventListener("submit", async function (e) {
     e.preventDefault();
 
@@ -50,11 +74,17 @@ formularios.forEach((formulario) => {
       ? document.getElementById("change_password")?.value === "1"
       : false;
 
+    // Verificar si es el formulario de reset de contraseña
+    const isResetPasswordForm = this.id === "resetPasswordForm";
+
+    // Si es el formulario de edición y no se ha activado el cambio de contraseña
+    const isChangeStatusForm = this.id === "changeStatusForm";
+
     // Limpiar los mensajes de error previos
-    document
+    formulario
       .querySelectorAll(".error-message")
       .forEach((errorMsg) => errorMsg.remove());
-    document
+    formulario
       .querySelectorAll(".error-input")
       .forEach((errorInput) => errorInput.classList.remove("error-input"));
 
@@ -66,7 +96,6 @@ formularios.forEach((formulario) => {
       if (!input || input.type === "hidden") return;
 
       // Validar campos obligatorios
-      // Si el campo es un string vacío y no es el campo avatar
       if (
         typeof value === "string" &&
         value.trim() === "" &&
@@ -93,10 +122,10 @@ formularios.forEach((formulario) => {
           );
         }
         isValid = false;
-        return; // Salir de la validación de este campo
+        return;
       }
 
-      // si el input es de tipo email y no es un string vacio
+      // Si el input es de tipo email y no es un string vacio
       if (input.type === "email" && value.trim() !== "") {
         // Validar formato de email
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -115,7 +144,7 @@ formularios.forEach((formulario) => {
         if (key === "password2" && value !== data.get("password")) {
           showError(input, "Las contraseñas no coinciden");
           isValid = false;
-          return; // Salir de la validación de este campo
+          return;
         }
 
         // Validar si el campo cumple con el patrón de validación
@@ -159,47 +188,102 @@ formularios.forEach((formulario) => {
       const responseData = await response.json();
 
       if (responseData.status === "success") {
-        if (!isEditForm) {
+        // Manejo específico para reset de contraseña
+        if (isResetPasswordForm) {
+          // Cerrar el modal ANTES de mostrar el dialog
+          const modal = document.getElementById("resetPasswordModal");
+          if (modal && modal.__modalInstance) {
+            modal.__modalInstance.close();
+          }
+
+          // Esperar un poco para que el modal se cierre completamente
+          setTimeout(async () => {
+            await CustomDialog.success(
+              "Contraseña Actualizada",
+              responseData.mensaje || "La contraseña se actualizó correctamente"
+            );
+
+            // Opcional: recargar la página o actualizar la tabla después de cerrar el dialog
+            // location.reload();
+          }, 100);
+        } else if (isChangeStatusForm) {
+          // Cerrar modal y mostrar mensaje correcto
+          const modal = document.getElementById("changeStatusModal");
+          if (modal && modal.__modalInstance) {
+            await modal.__modalInstance.close();
+          }
+
+          await CustomDialog.success(
+            "Estado Actualizado", // ← Título correcto
+            responseData.mensaje ||
+              "El estado del usuario se actualizó correctamente"
+          );
+
+          // Actualizar tabla
+          if (typeof loadData === "function" && typeof table !== "undefined") {
+            table.clear().draw();
+            loadData();
+          }
+        } else if (!isEditForm) {
           // Para formulario de crear: mostrar éxito y redirigir
           await CustomDialog.success(
             "Usuario Creado",
             responseData.mensaje || "El usuario se creó correctamente"
           );
-          // Redirigir inmediatamente después del modal
-          window.location.href = `${APP_URL}users`;
+          window.location.href = `${APP_URL}/users`;
         } else {
-          // Para formulario de editar: mostrar éxito y redirigir (igual que crear)
+          // Para formulario de editar: mostrar éxito y redirigir
           await CustomDialog.success(
             "Usuario Actualizado",
             responseData.mensaje || "El usuario se actualizó correctamente"
           );
-          // Redirigir inmediatamente después del modal
-          window.location.href = `${APP_URL}users`;
+          window.location.href = `${APP_URL}/users`;
         }
       } else if (responseData.status === "error") {
         if (responseData.errores) {
-          let hasGeneralError = false;
+          let hasFieldErrors = false;
+          let generalErrors = [];
 
+          // Procesar errores del backend
           Object.entries(responseData.errores).forEach(([key, message]) => {
             const input = formulario.querySelector(`[name="${key}"]`);
+
             if (input) {
+              // Error específico de campo - mostrar solo en el input
               showError(input, message);
-            } else if (key === "general") {
-              hasGeneralError = true;
-              CustomDialog.error("Error", message);
+              hasFieldErrors = true;
+            } else if (
+              key === "general" ||
+              key === "sistema" ||
+              key === "server"
+            ) {
+              // Errores generales del sistema - mostrar en dialog
+              generalErrors.push(message);
+            } else {
+              // Campo no encontrado, podría ser un error general
+              console.warn(
+                `Campo '${key}' no encontrado en el formulario:`,
+                message
+              );
+              generalErrors.push(`${key}: ${message}`);
             }
           });
 
-          // Si no hay errores generales, mostrar el primer error específico
-          if (
-            !hasGeneralError &&
-            Object.keys(responseData.errores).length > 0
-          ) {
-            const firstError = Object.values(responseData.errores)[0];
-            CustomDialog.error("Error de Validación", firstError);
+          // Mostrar errores generales solo si los hay
+          if (generalErrors.length > 0) {
+            CustomDialog.error("Error del Sistema", generalErrors.join("\n"));
+          }
+
+          // Si solo hay errores de campo, mostrar un toast discreto (opcional)
+          if (hasFieldErrors && generalErrors.length === 0) {
+            CustomDialog.toast(
+              "Por favor, corrige los errores marcados en el formulario",
+              "error",
+              3000
+            );
           }
         } else {
-          // Error sin detalles específicos
+          // Error sin detalles específicos - siempre mostrar en dialog
           CustomDialog.error(
             "Error",
             responseData.mensaje ||
@@ -222,10 +306,8 @@ formularios.forEach((formulario) => {
       }
     }
   });
-});
 
-//Eliminar estilo de error al escribir en el input
-formularios.forEach((formulario) => {
+  // Eliminar estilo de error al escribir en el input
   formulario.addEventListener("input", function (e) {
     const input = e.target;
     if (input.classList.contains("error-input")) {
@@ -236,66 +318,46 @@ formularios.forEach((formulario) => {
       }
     }
   });
-});
-
-// Si es un select tambien eliminar el estilo de error al hacer click
-document.querySelectorAll("select").forEach((select) => {
-  select.addEventListener("click", function (e) {
-    if (this.classList.contains("error-input")) {
-      this.classList.remove("error-input");
-      const errorMsg = this.parentElement.querySelector(".error-message");
-      if (errorMsg) {
-        errorMsg.remove();
-      }
-    }
-  });
-});
-
-// Mostrar mensaje de error
-function showError(input, message) {
-  // Eliminar mensajes de error previos si existen
-  clearError(input);
-
-  const error = document.createElement("p");
-  error.classList.add("error-message");
-  error.textContent = message;
-
-  // Si es un input de tipo file, buscar y ocultar el helper
-  if (input.type === "file") {
-    const helper = input.parentElement.querySelector(".helper");
-    if (helper) {
-      helper.style.display = "none";
-    }
-  }
-
-  input.parentElement.appendChild(error);
-  input.classList.add("error-input");
 }
 
-// Función para limpiar errores
-function clearError(input) {
-  // Eliminar mensaje de error si existe
-  const errorMessage = input.parentElement.querySelector(".error-message");
-  if (errorMessage) {
-    errorMessage.remove();
-  }
-
-  // Quitar clase de error del input
-  input.classList.remove("error-input");
-
-  // Si es un input de tipo file, mostrar el helper nuevamente
-  if (input.type === "file") {
-    const helper = input.parentElement.querySelector(".helper");
-    if (helper) {
-      helper.style.display = "";
-    }
-  }
-}
-
-// Manejar el evento reset para limpiar todos los errores y restaurar la imagen por defecto
+// Inicializar formularios existentes
 document.addEventListener("DOMContentLoaded", function () {
-  const resetButton = document.querySelector('button[type="reset"]');
+  // Adjuntar manejadores a todos los formularios con clase .form-ajax
+  const formularios = document.querySelectorAll(".form-ajax");
+  formularios.forEach((formulario) => {
+    attachAjaxFormHandlers(formulario);
+  });
 
+  // Para cada input de tipo file en la pagina con la clase .input-file
+  document.querySelectorAll(".input-file").forEach((input) => {
+    input.addEventListener("change", function () {
+      const file = this.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function () {
+        document.querySelector(
+          ".user-avatar"
+        ).style.backgroundImage = `url(${reader.result})`;
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // Si es un select tambien eliminar el estilo de error al hacer click
+  document.querySelectorAll("select").forEach((select) => {
+    select.addEventListener("click", function (e) {
+      if (this.classList.contains("error-input")) {
+        this.classList.remove("error-input");
+        const errorMsg = this.parentElement.querySelector(".error-message");
+        if (errorMsg) {
+          errorMsg.remove();
+        }
+      }
+    });
+  });
+
+  // Manejar el evento reset para limpiar todos los errores y restaurar la imagen por defecto
+  const resetButton = document.querySelector('button[type="reset"]');
   if (resetButton) {
     resetButton.addEventListener("click", async function (e) {
       e.preventDefault();
@@ -317,7 +379,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Restaurar imagen por defecto
         const userAvatar = document.querySelector(".user-avatar");
         if (userAvatar) {
-          userAvatar.style.backgroundImage = `url(${APP_URL}public/photos/default.jpg)`;
+          userAvatar.style.backgroundImage = `url(${APP_URL}/public/photos/default.jpg)`;
         }
 
         // Limpiar todos los mensajes de error
@@ -341,3 +403,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
+// Exponer funciones globalmente para uso externo
+window.attachAjaxFormHandlers = attachAjaxFormHandlers;
+window.showError = showError;
+window.clearError = clearError;

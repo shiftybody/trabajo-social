@@ -3,7 +3,7 @@
   --text-secondary: #666;
   --text-tertiary: #999;
   --bg: #fff;
-  --bg-overlay: rgba(255, 255, 255, 0.8);
+  --bg-overlay: rgba(0, 0, 0, 0.5);
   --border: rgba(0, 0, 0, 0.08);
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
@@ -19,7 +19,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 14px;
@@ -78,11 +79,19 @@ body {
   display: block;
 }
 
-.dialog-icon.success { background: var(--success); }
-.dialog-icon.error { background: var(--danger); }
-.dialog-icon.warning { background: var(--warning); }
-.dialog-icon.info { background: var(--info); }
-.dialog-icon.question { 
+.dialog-icon.success {
+  background: var(--success);
+}
+.dialog-icon.error {
+  background: var(--danger);
+}
+.dialog-icon.warning {
+  background: var(--warning);
+}
+.dialog-icon.info {
+  background: var(--info);
+}
+.dialog-icon.question {
   background: var(--text-tertiary);
   width: 0.5rem;
   height: 0.5rem;
@@ -159,7 +168,7 @@ body {
 }
 
 .dialog-btn::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 6px;
@@ -261,10 +270,18 @@ body {
 }
 
 /* Colores para diferentes tipos de toast */
-.toast.success { background: var(--success); }
-.toast.error { background: var(--danger); }
-.toast.warning { background: var(--warning); }
-.toast.info { background: var(--info); }
+.toast.success {
+  background: var(--success);
+}
+.toast.error {
+  background: var(--danger);
+}
+.toast.warning {
+  background: var(--warning);
+}
+.toast.info {
+  background: var(--info);
+}
 
 /* Loading minimalista */
 .dialog-loading {
@@ -279,30 +296,32 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive */
 @media (max-width: 640px) {
   .dialog-container {
-      padding: 24px;
-      max-width: calc(100% - 16px);
+    padding: 24px;
+    max-width: calc(100% - 16px);
   }
-  
+
   .dialog-buttons {
-      margin-top: 24px;
+    margin-top: 24px;
   }
 
   .toast-container {
-      bottom: 16px;
-      left: 16px;
-      right: 16px;
-      transform: none;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    transform: none;
   }
 
   .toast {
-      width: 100%;
-      justify-content: center;
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -341,7 +360,7 @@ body {
 /* Transición suave para el cierre */
 @keyframes fadeOut {
   to {
-      opacity: 0;
-      transform: scale(0.96);
+    opacity: 0;
+    transform: scale(0.96);
   }
 }

@@ -369,6 +369,15 @@ class UserController
       ]);
     }
 
+
+    // evitar desactivar el usuario a si mismo    
+    if (isset($_SESSION[APP_SESSION_NAME]['id']) && $_SESSION[APP_SESSION_NAME]['id'] == $id && $resultado['datos']['estado'] == 0) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'No puedes desactivar tu propia cuenta'
+      ]);
+    }
+
     // --- Manejo del Avatar --- //
     $nombreArchivo = $usuario->usuario_avatar; // Mantener avatar actual por defecto
     $archivoSubido = false;
@@ -610,6 +619,146 @@ class UserController
         'status' => 'error',
         'mensaje' => 'Error interno del servidor'
       ], 500);
+    }
+  }
+
+  public function resetPassword(Request $request)
+  {
+    $id = $request->param('id');
+    $datos = $request->POST();
+    // imprimir $datos para debuga
+    error_log(print_r($datos, true));
+
+    // Validar que el usuario existe
+    $usuario = $this->userModel->obtenerUsuarioPorId($id);
+    if (!$usuario) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Usuario no encontrado'
+      ], 404);
+    }
+
+    // Validar datos de entrada
+    $validar = [
+      'password' => [
+        'requerido' => true,
+        'formato' => '(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}'
+      ],
+      'password2' => [
+        'requerido' => true
+      ]
+    ];
+
+    $resultado = $this->userModel->validarDatos($datos, $validar);
+
+    // Verificar errores de validación
+    if (!empty($resultado['errores'])) {
+      return Response::json([
+        'status' => 'error',
+        'errores' => $resultado['errores']
+      ]);
+    }
+
+    // Verificar que las contraseñas coincidan
+    if ($resultado['datos']['password'] !== $datos['password2']) {
+      return Response::json([
+        'status' => 'error',
+        'errores' => ['password2' => 'Las contraseñas no coinciden']
+      ]);
+    }
+
+    // Actualizar solo la contraseña
+    $actualizar = $this->userModel->actualizarUsuario($id, [
+      'password' => $resultado['datos']['password']
+    ]);
+
+    if ($actualizar) {
+      return Response::json([
+        'status' => 'success',
+        'mensaje' => 'Contraseña reseteada correctamente'
+      ]);
+    } else {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Error al resetear la contraseña'
+      ]);
+    }
+  }
+
+  public function changeStatus(Request $request)
+  {
+    $id = $request->param('id');
+    $datos = $request->POST();
+
+    // Log para debugging
+    error_log("Cambio de estado - ID: " . $id . " - Datos: " . print_r($datos, true));
+
+    // Validar que el usuario existe
+    $usuario = $this->userModel->obtenerUsuarioPorId($id);
+    if (!$usuario) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Usuario no encontrado'
+      ], 404);
+    }
+
+    // Validar que se envió el nuevo estado
+    if (!isset($datos['estado'])) {
+      return Response::json([
+        'status' => 'error',
+        'errores' => ['estado' => 'El nuevo estado es requerido']
+      ]);
+    }
+
+    $nuevoEstado = $datos['estado'];
+
+    // Validar que el nuevo estado sea válido (0 o 1)
+    if (!in_array($nuevoEstado, ['0', '1', 0, 1])) {
+      return Response::json([
+        'status' => 'error',
+        'errores' => ['estado' => 'El estado debe ser 0 (inactivo) o 1 (activo)']
+      ]);
+    }
+
+    // Convertir a entero para consistencia
+    $nuevoEstado = (int)$nuevoEstado;
+    $estadoActual = (int)$usuario->usuario_estado;
+
+    // Verificar si realmente hay un cambio
+    if ($estadoActual === $nuevoEstado) {
+      $estadoTexto = $nuevoEstado === 1 ? 'activo' : 'inactivo';
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => "El usuario ya se encuentra en estado {$estadoTexto}"
+      ]);
+    }
+
+    // Prevenir desactivar al propio usuario (medida de seguridad)
+    if (isset($_SESSION[APP_SESSION_NAME]['id']) && $_SESSION[APP_SESSION_NAME]['id'] == $id && $nuevoEstado === 0) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'No puedes desactivar tu propia cuenta'
+      ]);
+    }
+
+    // Actualizar el estado del usuario
+    $actualizar = $this->userModel->actualizarUsuario($id, [
+      'estado' => $nuevoEstado
+    ]);
+
+    if ($actualizar) {
+      $estadoTexto = $nuevoEstado === 1 ? 'activado' : 'desactivado';
+      $nombreCompleto = trim($usuario->usuario_nombre . ' ' . $usuario->usuario_apellido_paterno . ' ' . $usuario->usuario_apellido_materno);
+
+      return Response::json([
+        'status' => 'success',
+        'mensaje' => "El usuario {$nombreCompleto} ha sido {$estadoTexto} correctamente"
+      ]);
+    } else {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Error al cambiar el estado del usuario'
+      ]);
     }
   }
 }

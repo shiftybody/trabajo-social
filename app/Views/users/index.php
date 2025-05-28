@@ -423,13 +423,17 @@
     border-bottom: 0px solid #111;
   }
 
-  /* lamda */
-
   div.dt-layout-table {
     overflow: hidden;
     background-color: #fff;
     border-radius: var(--rounded-lg, 8px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  @media (max-width: 1080px) {
+    .container {
+      padding: 2rem 2rem;
+    }
   }
 </style>
 <?php
@@ -439,7 +443,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 <div class="container">
   <div class="right_content">
     <div class="tools">
-
       <form class="filter_form" id="filter_form">
         <div class="input-container">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon icon icon-tabler icons-tabler-outline icon-tabler-search">
@@ -819,15 +822,37 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
 
   function cambiarEstado(usuario_id) {
-    console.log(`Cambiar estado del usuario ${usuario_id}`);
-    // Implementa tu lógica aquí
     cerrarTodosLosMenus();
+
+    try {
+
+      const changeStatusModal = new ChangeStatusModal();
+      changeStatusModal.show(usuario_id);
+
+    } catch (error) {
+      console.error('Error al inicializar el modal de cambio de estado:', error);
+
+      // Si CustomDialog fue definido, mostrar error en dialog
+      if (typeof CustomDialog !== 'undefined') {
+        CustomDialog.error('Error', 'No se pudo abrir la ventana de cambio de estado.');
+      } else {
+        alert('No se pudo abrir la ventana de cambio de estado.');
+      }
+
+    }
   }
 
-  function resetearPassword(usuario_id) {
-    console.log(`Resetear contraseña del usuario ${usuario_id}`);
-    // Implementa tu lógica aquí
+  function resetearPassword(userId) {
     cerrarTodosLosMenus();
+
+    try {
+      resetPasswordModal = new ResetPasswordModal(userId);
+      resetPasswordModal.show(userId);
+
+    } catch (error) {
+      console.error('Error al inicializar el modal:', error);
+
+    }
   }
 
   // Verificar si hay un mensaje de éxito pendiente después de redirección

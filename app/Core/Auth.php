@@ -447,6 +447,7 @@ class Auth
       'avatar' => $user->usuario_avatar,
       'rol' => $user->usuario_rol,
       'rol_descripcion' => $user->rol_descripcion,
+      'estado_id' => $user->usuario_estado,
       'ultima_actividad' => time(),
       'is_remembered' => $isRemembered,
     ];

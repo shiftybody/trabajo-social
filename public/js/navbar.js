@@ -19,6 +19,13 @@ function isSidebarOpen() {
   );
 }
 
+// Función para cerrar todos los sidebars
+function closeAllSidebars() {
+  sidebar.classList.remove("open");
+  sidebarAvatar.classList.remove("open");
+  contentBlur.classList.remove("active");
+}
+
 // Evento para abrir el sidebar izquierdo
 menuButton.addEventListener("click", function (event) {
   event.stopPropagation(); // Evita que el click se propague al documento
@@ -65,11 +72,18 @@ document.addEventListener("click", function (event) {
 
   // Si el click fue fuera de ambos sidebars y sus respectivos botones de apertura
   if (!clickedInsideLeftSidebarOrButton && !clickedInsideRightSidebarOrButton) {
-    sidebar.classList.remove("open");
-    sidebarAvatar.classList.remove("open");
-    if (contentBlur.classList.contains("active")) {
-      // Solo quitar si estaba activo
-      contentBlur.classList.remove("active");
-    }
+    closeAllSidebars();
   }
+});
+
+// NUEVO: Detectar tecla ESC para cerrar sidebars
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Escape" && isSidebarOpen()) {
+    closeAllSidebars();
+  }
+});
+
+// NUEVO: Cerrar sidebars al hacer click en el contentBlur
+contentBlur.addEventListener("click", function () {
+  closeAllSidebars();
 });

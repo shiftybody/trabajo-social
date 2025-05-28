@@ -265,7 +265,7 @@
     height: 100%;
     -webkit-backdrop-filter: blur(5px);
     backdrop-filter: blur(5px);
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.2);
     z-index: 999;
     opacity: 0;
     visibility: hidden;
