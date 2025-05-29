@@ -36,15 +36,52 @@ function clearError(input) {
   }
 }
 
-// ==================== MANEJADORES ESPECÍFICOS DE FORMULARIOS ====================
+// ==================== UTILIDAD PARA CERRAR MODALES ====================
+async function closeCurrentModal() {
+  // Buscar el modal actualmente abierto
+  const openModal = document.querySelector(".base-modal.show");
+
+  if (openModal && openModal.__modalInstance) {
+    const modalInstance = openModal.__modalInstance;
+
+    // Cerrar el modal y esperar a que termine la transición
+    return new Promise((resolve) => {
+      // Si ya está cerrado, resolver inmediatamente
+      if (!modalInstance.isOpen) {
+        resolve();
+        return;
+      }
+
+      // Configurar callback temporal para cuando se cierre
+      const originalOnHide = modalInstance.config.onHide;
+      modalInstance.config.onHide = function (modal) {
+        // Llamar al callback original si existe
+        if (originalOnHide) {
+          originalOnHide(modal);
+        }
+
+        // Restaurar el callback original
+        modalInstance.config.onHide = originalOnHide;
+
+        // Resolver la promesa
+        resolve();
+      };
+
+      // Cerrar el modal
+      modalInstance.hide();
+    });
+  }
+
+  return Promise.resolve();
+}
+
+// ==================== MANEJADORES ESPECÍFICOS DE FORMULARIOS (CORREGIDOS) ====================
 const FormHandlers = {
   // Manejo para reset de contraseña
   resetPasswordForm: {
     async onSuccess(responseData) {
-      const modal = document.getElementById("resetPasswordModal");
-      if (modal && modal.__modalInstance) {
-        await modal.__modalInstance.close();
-      }
+      // Cerrar modal actual
+      await closeCurrentModal();
 
       await CustomDialog.success(
         "Contraseña Actualizada",
@@ -56,10 +93,8 @@ const FormHandlers = {
   // Manejo para cambio de estado
   changeStatusForm: {
     async onSuccess(responseData) {
-      const modal = document.getElementById("changeStatusModal");
-      if (modal && modal.__modalInstance) {
-        await modal.__modalInstance.close();
-      }
+      // Cerrar modal actual
+      await closeCurrentModal();
 
       await CustomDialog.success(
         "Estado Actualizado",
@@ -67,6 +102,7 @@ const FormHandlers = {
           "El estado del usuario se actualizó correctamente"
       );
 
+      // Recargar datos de la tabla si existe
       if (typeof loadData === "function" && typeof table !== "undefined") {
         table.clear().draw();
         loadData();
@@ -77,6 +113,9 @@ const FormHandlers = {
   // Manejo para formularios de creación
   createForm: {
     async onSuccess(responseData) {
+      // Cerrar modal actual
+      await closeCurrentModal();
+
       await CustomDialog.success(
         "Usuario Creado",
         responseData.mensaje || "El usuario se creó correctamente"
@@ -226,6 +265,9 @@ function handleErrorResponse(form, responseData) {
     });
 
     if (generalErrors.length > 0) {
+      // cerrar modal actual
+      closeCurrentModal();
+
       CustomDialog.error("Error del Sistema", generalErrors.join("\n"));
     }
 
@@ -237,6 +279,9 @@ function handleErrorResponse(form, responseData) {
       );
     }
   } else {
+    // cerrar modal actual
+    closeCurrentModal();
+
     CustomDialog.error(
       "Error",
       responseData.mensaje ||
@@ -295,7 +340,8 @@ function attachAjaxFormHandlers(formulario) {
         handleErrorResponse(this, responseData);
       }
     } catch (error) {
-      console.error("Error:", error);
+      // cerrar modal actual
+      closeCurrentModal();
       CustomDialog.error(
         "Error de Conexión",
         "Ocurrió un error al procesar la solicitud. Por favor, inténtalo de nuevo."

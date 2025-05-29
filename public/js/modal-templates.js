@@ -73,7 +73,7 @@ const MODAL_TEMPLATES = {
       </div>
     </div>
  
-    <form novalidate class="base-modal-form form-ajax" method="POST">
+    <form novalidate id="changeStatusForm" class="base-modal-form form-ajax" method="POST">
       <input type="hidden" name="estado" value="{{newStatusValue}}">
       
       <div class="base-modal-actions">

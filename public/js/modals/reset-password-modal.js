@@ -42,6 +42,5 @@ function resetearPassword(userId) {
     },
   });
 
-  // Mostrar el modal
   resetModal.show();
 }
