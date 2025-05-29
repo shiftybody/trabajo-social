@@ -5,8 +5,13 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
+    environment:
+      - TZ=America/Mexico_City
+      - APP_TIMEZONE=America/Mexico_City
     volumes:
       - .:/var/www/html
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     ports:
       - "80:80"
     networks:
@@ -17,8 +22,8 @@ services:
     image: vsamov/mysql-5.1.73
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
     volumes:
       - db_data:/var/lib/mysql
     ports:
@@ -34,4 +39,3 @@ networks:
   trabajo-social:
     name: trabajo-social
     driver: bridge
-
