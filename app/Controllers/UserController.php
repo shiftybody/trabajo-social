@@ -51,6 +51,75 @@ class UserController
     return Response::html($contenido);
   }
 
+  public function getAllUsers(Request $request)
+  {
+    try {
+      $usuarios = $this->userModel->obtenerTodosUsuarios();
+      return Response::json([
+        'status' => 'success',
+        'data' => $usuarios
+      ]);
+    } catch (Exception $e) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Error al obtener los usuarios: ' . $e->getMessage()
+      ]);
+    }
+  }
+
+  public function getUserById(Request $request)
+  {
+    try {
+      $id = $request->param('id');
+
+      if (!$id || !is_numeric($id)) {
+        return Response::json([
+          'status' => 'error',
+          'mensaje' => 'ID de usuario inválido'
+        ], 400);
+      }
+
+      $usuario = $this->userModel->obtenerUsuarioPorId($id);
+
+      if (!$usuario) {
+        return Response::json([
+          'status' => 'error',
+          'mensaje' => 'Usuario no encontrado'
+        ], 404);
+      }
+
+      // Formatear los datos del usuario para mostrar
+      $usuarioDetalle = [
+        'id' => $usuario->usuario_id,
+        'nombre_completo' => trim($usuario->usuario_nombre . ' ' . $usuario->usuario_apellido_paterno . ' ' . $usuario->usuario_apellido_materno),
+        'nombre' => $usuario->usuario_nombre,
+        'apellido_paterno' => $usuario->usuario_apellido_paterno,
+        'apellido_materno' => $usuario->usuario_apellido_materno,
+        'usuario' => $usuario->usuario_usuario,
+        'email' => $usuario->usuario_email,
+        'telefono' => $usuario->usuario_telefono ?: 'No especificado',
+        'rol' => $usuario->rol_descripcion,
+        'rol_id' => $usuario->usuario_rol,
+        'estado' => $usuario->usuario_estado == 1 ? 'Activo' : 'Inactivo',
+        'estado_id' => $usuario->usuario_estado,
+        'avatar' => $usuario->usuario_avatar,
+        'fecha_creacion' => $usuario->usuario_fecha_creacion ? date('d/m/Y H:i', strtotime($usuario->usuario_fecha_creacion)) : 'No disponible',
+        'ultima_modificacion' => $usuario->usuario_ultima_modificacion ? date('d/m/Y H:i', strtotime($usuario->usuario_ultima_modificacion)) : 'No disponible',
+        'ultimo_acceso' => $usuario->usuario_ultimo_acceso ? date('d/m/Y H:i', strtotime($usuario->usuario_ultimo_acceso)) : 'Nunca'
+      ];
+
+      return Response::json([
+        'status' => 'success',
+        'data' => $usuarioDetalle
+      ]);
+    } catch (Exception $e) {
+      error_log("Error en getUserById: " . $e->getMessage());
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Error interno del servidor'
+      ], 500);
+    }
+  }
 
   public function store(Request $request)
   {
@@ -271,22 +340,6 @@ class UserController
       return Response::json([
         'status' => 'error',
         'errores' => ['general' => 'Error al registrar el usuario']
-      ]);
-    }
-  }
-
-  public function getAllUsers(Request $request)
-  {
-    try {
-      $usuarios = $this->userModel->obtenerTodosUsuarios();
-      return Response::json([
-        'status' => 'success',
-        'data' => $usuarios
-      ]);
-    } catch (Exception $e) {
-      return Response::json([
-        'status' => 'error',
-        'mensaje' => 'Error al obtener los usuarios: ' . $e->getMessage()
       ]);
     }
   }
@@ -538,98 +591,6 @@ class UserController
     }
   }
 
-  public function delete(Request $request)
-  {
-
-    $id = $request->param('id');
-
-    // Verificar que el usuario exista
-    $usuario = $this->userModel->obtenerUsuarioPorId($id);
-    if (!$usuario) {
-      return Response::json([
-        'status' => 'error',
-        'mensaje' => 'Usuario no encontrado'
-      ], 404);
-    }
-
-    // verificar que no sea el ultimo usuario administrador
-    if ($this->userModel->esUltimoAdministrador($id)) {
-      return Response::json([
-        'status' => 'error',
-        'mensaje' => 'No se puede eliminar el último usuario administrador'
-      ]);
-    }
-
-    // Eliminar el usuario
-    $eliminar = $this->userModel->eliminarUsuario($id);
-
-    if ($eliminar) {
-      return Response::json([
-        'status' => 'success',
-        'mensaje' => 'Usuario eliminado correctamente'
-      ]);
-    } else {
-      return Response::json([
-        'status' => 'error',
-        'mensaje' => 'Error al eliminar el usuario'
-      ]);
-    }
-  }
-
-  public function getUserById(Request $request)
-  {
-    try {
-      $id = $request->param('id');
-
-      if (!$id || !is_numeric($id)) {
-        return Response::json([
-          'status' => 'error',
-          'mensaje' => 'ID de usuario inválido'
-        ], 400);
-      }
-
-      $usuario = $this->userModel->obtenerUsuarioPorId($id);
-
-      if (!$usuario) {
-        return Response::json([
-          'status' => 'error',
-          'mensaje' => 'Usuario no encontrado'
-        ], 404);
-      }
-
-      // Formatear los datos del usuario para mostrar
-      $usuarioDetalle = [
-        'id' => $usuario->usuario_id,
-        'nombre_completo' => trim($usuario->usuario_nombre . ' ' . $usuario->usuario_apellido_paterno . ' ' . $usuario->usuario_apellido_materno),
-        'nombre' => $usuario->usuario_nombre,
-        'apellido_paterno' => $usuario->usuario_apellido_paterno,
-        'apellido_materno' => $usuario->usuario_apellido_materno,
-        'usuario' => $usuario->usuario_usuario,
-        'email' => $usuario->usuario_email,
-        'telefono' => $usuario->usuario_telefono ?: 'No especificado',
-        'rol' => $usuario->rol_descripcion,
-        'rol_id' => $usuario->usuario_rol,
-        'estado' => $usuario->usuario_estado == 1 ? 'Activo' : 'Inactivo',
-        'estado_id' => $usuario->usuario_estado,
-        'avatar' => $usuario->usuario_avatar,
-        'fecha_creacion' => $usuario->usuario_fecha_creacion ? date('d/m/Y H:i', strtotime($usuario->usuario_fecha_creacion)) : 'No disponible',
-        'ultima_modificacion' => $usuario->usuario_ultima_modificacion ? date('d/m/Y H:i', strtotime($usuario->usuario_ultima_modificacion)) : 'No disponible',
-        'ultimo_acceso' => $usuario->usuario_ultimo_acceso ? date('d/m/Y H:i', strtotime($usuario->usuario_ultimo_acceso)) : 'Nunca'
-      ];
-
-      return Response::json([
-        'status' => 'success',
-        'data' => $usuarioDetalle
-      ]);
-    } catch (Exception $e) {
-      error_log("Error en getUserById: " . $e->getMessage());
-      return Response::json([
-        'status' => 'error',
-        'mensaje' => 'Error interno del servidor'
-      ], 500);
-    }
-  }
-
   public function resetPassword(Request $request)
   {
     $id = $request->param('id');
@@ -766,6 +727,44 @@ class UserController
       return Response::json([
         'status' => 'error',
         'mensaje' => 'Error al cambiar el estado del usuario'
+      ]);
+    }
+  }
+
+  public function delete(Request $request)
+  {
+
+    $id = $request->param('id');
+
+    // Verificar que el usuario exista
+    $usuario = $this->userModel->obtenerUsuarioPorId($id);
+    if (!$usuario) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Usuario no encontrado'
+      ], 404);
+    }
+
+    // verificar que no sea el ultimo usuario administrador
+    if ($this->userModel->esUltimoAdministrador($id)) {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'No se puede eliminar el último usuario administrador'
+      ]);
+    }
+
+    // Eliminar el usuario
+    $eliminar = $this->userModel->eliminarUsuario($id);
+
+    if ($eliminar) {
+      return Response::json([
+        'status' => 'success',
+        'mensaje' => 'Usuario eliminado correctamente'
+      ]);
+    } else {
+      return Response::json([
+        'status' => 'error',
+        'mensaje' => 'Error al eliminar el usuario'
       ]);
     }
   }

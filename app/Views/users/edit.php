@@ -516,32 +516,33 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           }
 
           select.appendChild(option);
-        });
 
-        const estadoSelect = document.getElementById("estado");
-        const estados = [{
-            id: 1,
-            descripcion: "Activo"
-          },
-          {
-            id: 0,
-            descripcion: "Inactivo"
-          }
-        ];
-        estados.forEach(estado => {
-          const option = document.createElement("option");
-          option.value = estado.id;
-          option.textContent = estado.descripcion;
-
-          // Comparamos el valor del estado con el estado actual del usuario
-          if (estado.id == estadoActual) {
-            option.selected = true; // Marcamos esta opción como seleccionada
-          }
-
-          estadoSelect.appendChild(option);
         });
       })
       .catch(error => console.error('Error al cargar los roles:', error));
+
+    const estadoSelect = document.getElementById("estado");
+    const estados = [{
+        id: 1,
+        descripcion: "Activo"
+      },
+      {
+        id: 0,
+        descripcion: "Inactivo"
+      }
+    ];
+    estados.forEach(estado => {
+      const option = document.createElement("option");
+      option.value = estado.id;
+      option.textContent = estado.descripcion;
+
+      // Comparamos el valor del estado con el estado actual del usuario
+      if (estado.id == estadoActual) {
+        option.selected = true; // Marcamos esta opción como seleccionada
+      }
+
+      estadoSelect.appendChild(option);
+    });
 
     // SCRIPT CORREGIDO: Funcionalidad para mostrar/ocultar sección de contraseña
     document.getElementById('toggle_password_section').addEventListener('click', async function(e) {

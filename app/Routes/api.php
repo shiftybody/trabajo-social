@@ -6,49 +6,47 @@
 
 use App\Core\Router;
 
-// Crear instancia del router
 $router = new Router();
 
+// Rutas públicas
 $router->post('/auth/login', 'LoginController@login');
-$router->post('/session/ping', 'SessionController@ping');
 
+// Rutas protegidas (requieren autenticación)
 $router->group(array('middleware' => 'Auth'), function ($router) {
+
+  // LOGOUT Y SESSION
   $router->post('/auth/logout', 'LoginController@logout');
-
-  $router->get('/session/status', 'SessionController@status');
   $router->post('/session/refresh', 'SessionController@refresh');
+  $router->get('/session/status', 'SessionController@status');
 
+  // USERS
 
-  $router->group(array('middleware' => 'Permission:users.view'), function ($router) {
+  $router->group(array('middleware' => 'Permission:users.manage|users.view'), function ($router) {
     $router->get('/users', 'UserController@getAllUsers');
-    $router->get('/users/:id', 'UserController@getUserById');
   });
 
-  $router->group(array('middleware' => 'Permission:users.create'), function ($router) {
+  $router->group(array('middleware' => 'Permission:users.manage|users.create'), function ($router) {
     $router->post('/users', 'UserController@store');
   });
 
-  $router->group(array('middleware' => 'Permission:users.edit'), function ($router) {
+  $router->group(array('middleware' => 'Permission:users.manage|users.edit|roles.view'), function ($router) {
+    $router->get('/roles', 'RoleController@getAllRoles');
+    $router->get('/users/:id', 'UserController@getUserById');
+  });
+
+  $router->group(array('middleware' => 'Permission:users.manage|users.edit'), function ($router) {
     $router->post('/users/:id', 'UserController@update');
     $router->post('/users/:id/reset-password', 'UserController@resetPassword');
     $router->post('/users/:id/status', 'UserController@changeStatus');
   });
 
-  $router->group(array('middleware' => 'Permission:users.delete'), function ($router) {
+
+  $router->group(array('middleware' => 'Permission:users.manage|users.delete'), function ($router) {
     $router->delete('/users/:id', 'UserController@delete');
   });
 
-  // Roles
-  $router->group(array('middleware' => 'Permission:roles.view'), function ($router) {
-    $router->get('/roles', 'RoleController@getAllRoles');
-    $router->get('/roles/:id', 'ApiController@getRoleById');
-  });
+  // ROLES
 
-  $router->group(array('middleware' => 'Permission:roles.edit'), function ($router) {
-    $router->post('/roles', 'ApiController@createRole');
-    $router->put('/roles/:id', 'ApiController@updateRole');
-    $router->delete('/roles/:id', 'ApiController@deleteRole');
-  });
 
   // Permisos (solo para administradores)
   $router->group(array('middleware' => 'Role:1'), function ($router) {

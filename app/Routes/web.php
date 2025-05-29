@@ -5,7 +5,7 @@ use App\Core\Response;
 
 $router = new Router();
 
-// Rutas públicas - CORREGIDO: usar LoginController en lugar de AuthController
+
 $router->get('/login', function () {
   try {
     // Si ya hay sesión activa, redirigir al home
@@ -33,45 +33,48 @@ $router->get('/login', function () {
   }
 });
 
-// CORREGIDO: usar LoginController
 $router->post('/login', 'LoginController@login');
 $router->get('/logout', 'LoginController@logout');
 
 // Rutas protegidas (requieren autenticación)
 $router->group(['middleware' => 'Auth'], function ($router) {
 
+  // HOME
   $router->get('/home', 'homeController@index')->name('home');
 
-  // Usuarios (requiere permiso específico para ver el listado y editar)
-  $router->group(['middleware' => 'Permission:users.view'], function ($router) {
+  // USERS
+
+  // Acceso a las vistas de usuario con el permiso users.view
+  $router->group(['middleware' => 'Permission:users.manage|users.view'], function ($router) {
     $router->get('/users', 'UserController@indexView')->name('users.index');
-    $router->get('/users/edit/:id', 'UserController@editView')->name('users.update');
   });
 
-  // Crear usuario (vista y acción)
-  $router->group(['middleware' => 'Permission:users.create'], function ($router) {
+  // Acceso a la vista de editar usuario con el permiso users.edit
+  $router->group(['middleware' => 'Permission:users.manage|users.edit'], function ($router) {
+    $router->get('/users/edit/:id', 'UserController@editView')->name('users.edit');
+  });
+
+  // Acceso a la vista de crear usuario con el permiso users.create
+  $router->group(['middleware' => 'Permission:users.manage|users.create'], function ($router) {
     $router->get('/users/create', 'UserController@createView')->name('users.create');
-    $router->post('/users', 'UserController@store')->name('users.store');
   });
 
-  // Roles (requiere permiso específico)
-  $router->group(['middleware' => 'Permission:roles.view'], function ($router) {
-    $router->get('/roles', 'RoleController@index')->name('roles.index');
-    $router->get('/roles/edit/:id', 'RoleController@edit')->name('roles.edit');
-    $router->get('/roles/create', 'RoleController@create')->name('roles.create');
+  // ROLES
+  $router->group(['middleware' => 'Permission:roles.manage'], function ($router) {
+    $router->get('/roles', 'RoleController@indexView')->name('roles.index');
+    $router->get('/roles/edit/:id', 'RoleController@editView')->name('roles.edit');
+    $router->get('/roles/create', 'RoleController@createView')->name('roles.create');
   });
 
-  // Permisos (solo accesible para administradores)
-  $router->group(['middleware' => 'Role:1'], function ($router) {
-    $router->get('/permissions', 'PermissionController@index')->name('permissions.index');
-    $router->get('/permissions/assign/:role_id', 'PermissionController@assignForm')->name('permissions.assign');
-    $router->post('/permissions/assign/:role_id', 'PermissionController@assignSave')->name('permissions.assign.save');
-  });
+  // // Permisos (solo accesible para administradores)
+  // $router->group(['middleware' => 'Role:1'], function ($router) {
+  //   $router->get('/permissions', 'PermissionController@index')->name('permissions.index');
+  //   $router->get('/permissions/assign/:role_id', 'PermissionController@assignForm')->name('permissions.assign');
+  //   $router->post('/permissions/assign/:role_id', 'PermissionController@assignSave')->name('permissions.assign.save');
+  // });
 
   // Perfil de usuario (accesible para todos los usuarios autenticados)
   $router->get('/profile', 'UserController@profile')->name('profile');
-  $router->post('/profile/update', 'UserController@updateProfile')->name('profile.update');
-  $router->post('/profile/password', 'UserController@updatePassword')->name('profile.password');
 
   // Rutas de error
   $router->get('/error/404', function () {
