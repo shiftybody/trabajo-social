@@ -16,13 +16,6 @@ const MODAL_TEMPLATES = {
 
   // Template específico para reset de contraseña
   resetPassword: `
-    <div class="reset-password-info">
-      <p>Se restablecerá la contraseña para el usuario:</p>
-      <div class="user-info-display">
-        <strong class="reset-user-name">{{userName}}</strong>
-      </div>
-    </div>
-    
     <form novalidate id="resetPasswordForm" class="base-modal-form form-ajax" method="POST">
       <div class="password-fields">
         <div class="input-field">
@@ -31,7 +24,6 @@ const MODAL_TEMPLATES = {
                  class="input-reset" placeholder="Nueva contraseña"
                  pattern="(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" 
                  maxlength="20" required>
-          <small class="password-hint">Mínimo 8 caracteres, incluir mayúscula, minúscula, número y símbolo</small>
         </div>
         
         <div class="input-field">
@@ -79,13 +71,6 @@ const MODAL_TEMPLATES = {
         <label class="status-label">Nuevo estado:</label>
         <span class="status-badge {{newStatusClass}}">{{newStatus}}</span>
       </div>
-    </div>
- 
-    <div class="status-warning">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-      </svg>
-      <p>{{warningMessage}}</p>
     </div>
  
     <form novalidate class="base-modal-form form-ajax" method="POST">
@@ -332,11 +317,6 @@ const TEMPLATE_HELPERS = {
     const newStatus = currentStatus === "activo" ? "inactivo" : "activo";
     const newStatusValue = currentStatus === "activo" ? "0" : "1";
 
-    const warningMessage =
-      newStatus === "inactivo"
-        ? "El usuario no podrá acceder al sistema hasta que su estado sea reactivado."
-        : "El usuario podrá acceder nuevamente al sistema con sus credenciales actuales.";
-
     const submitText =
       newStatus === "activo" ? "Activar Usuario" : "Desactivar Usuario";
 
@@ -349,7 +329,6 @@ const TEMPLATE_HELPERS = {
       newStatus,
       newStatusClass: newStatus,
       newStatusValue,
-      warningMessage,
       submitText,
     };
   },

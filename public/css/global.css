@@ -1,9 +1,9 @@
 :root {
   /* Common typography styles */
-  --font-family: 'Inter', console;
+  --font-family: "Inter", console;
   --font-size-small: 14px;
   --font-size-large: 24px;
-  --font-weight-thin: 300; 
+  --font-weight-thin: 300;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-bold: 700;
@@ -29,9 +29,77 @@
   --spacing-medium: 0.75rem;
   --spacing-large: 1rem;
   --rounded-lg: 0.5rem;
+
+  /* dialog styles */
+  --text: #000;
+  --text-secondary: #666;
+  --text-tertiary: #999;
+  --bg: #fff;
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+  --border: rgba(0, 0, 0, 0.08);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --danger: #ff3b30;
+  --success: #34c759;
+  --warning: #ff9500;
+  --info: #007aff;
+
+  /* modal styles */
+  /* Colores */
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --modal-bg: #ffffff;
+  --modal-border: #e5e7eb;
+  --modal-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Texto */
+  --modal-text-primary: #111827;
+  --modal-text-secondary: #6b7280;
+  --modal-text-muted: #9ca3af;
+
+  /* Estados */
+  --modal-success: #2563eb;
+  --modal-success-bg: #2563eb;
+  --modal-error: #ef4444;
+  --modal-error-bg: #fef2f2;
+  --modal-warning: #f59e0b;
+  --modal-warning-bg: #fffbeb;
+  --modal-info: #3b82f6;
+  --modal-info-bg: #eff6ff;
+
+  /* Botones */
+  --btn-primary: #3b82f6;
+  --btn-primary-hover: #2563eb;
+  --btn-secondary: #f3f4f6;
+  --btn-secondary-hover: #e5e7eb;
+  --btn-cancel: #6b7280;
+  --btn-danger: #ef4444;
+  --btn-danger-hover: #dc2626;
+
+  /* Estados de usuario */
+  --status-active: #2563eb;
+  --status-active-bg: #e3e9f6;
+  --status-inactive: #ef4444;
+  --status-inactive-bg: #fef2f2;
+
+  /* Espaciado */
+  --modal-padding: 1.75rem;
+  --modal-margin: 14px;
+  --modal-gap: 16px;
+  --modal-border-radius: 12px;
+
+  /* Tamaños */
+  --modal-width-small: 400px;
+  --modal-width-medium: 500px;
+  --modal-width-large: 700px;
+  --modal-width-xlarge: 900px;
+
+  /* Transiciones */
+  --modal-transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  --modal-transition-fast: all 150ms ease;
 }
 
-hr{
+hr {
   height: 2px;
   width: auto;
   background-color: #ececec;
@@ -44,7 +112,7 @@ h1 {
   font-size: var(--font-size-large);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-large);
-  letter-spacing: -0.24px;  
+  letter-spacing: -0.24px;
 }
 
 h1.form-title {
@@ -97,9 +165,9 @@ input[type="file"] {
   width: 35.5rem;
   height: 3rem;
   border: 1px solid #ccc;
-  border-radius: .5rem;
+  border-radius: 0.5rem;
   display: inline-block;
-  line-height: .5rem;
+  line-height: 0.5rem;
   background-color: #f9fafb;
 }
 
@@ -111,7 +179,7 @@ input::file-selector-button {
   height: 3rem;
   border-radius: 0;
   color: #fff;
-  padding: .8rem 1.25rem;
+  padding: 0.8rem 1.25rem;
   margin-right: 1rem;
 }
 
@@ -138,7 +206,7 @@ button[type="reset"] {
 }
 
 button[type="submit"] {
-  background: #2F2F31;
+  background: #2f2f31;
   color: var(--white);
 }
 
@@ -169,13 +237,13 @@ button[type="button"]:hover {
 .closebtn {
   background: none !important;
   border: none !important;
-  transition: all .25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* rotate the .closebtn */
 .closebtn:hover {
   transform: rotate(45deg);
-  color: #1F2329;
+  color: #1f2329;
   background-color: #ececec;
 }
 
@@ -194,7 +262,6 @@ button[type="button"]:hover {
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-large);
 }
-
 
 .error-input {
   border-radius: var(--rounded-lg) !important;
@@ -215,10 +282,9 @@ input[type="password"].error-input {
   color: #ee5b62;
 }
 
-.error-input::placeholder{
-  color: #ee5b62
+.error-input::placeholder {
+  color: #ee5b62;
 }
-
 
 input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 30px #f9fafb inset !important;
@@ -238,50 +304,26 @@ input.error-input:-webkit-autofill:focus {
   justify-content: center;
 }
 
-
 .dark-button {
-  background-color: #1a1a1a;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px 20px;
-  font-size: 16px;
+  background-color: #111;
+  color: #fff;
+  border: 1px solid transparent;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
   font-weight: 500;
+  border-radius: 6px;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .dark-button:hover {
-  background-color: #252525;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transform: translateY(0px);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: #1c1c1c;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 .dark-button:active {
-  transform: translateY(0px);
+  transform: scale(0.98);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-/* Para añadir un efecto de brillo en los bordes */
-.dark-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  transition: 0.5s;
-}
-
-.dark-button:hover::before {
-  left: 100%;
 }

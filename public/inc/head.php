@@ -6,5 +6,4 @@
 <link rel="stylesheet" href="<?= APP_URL ?>public/css/global.css">
 <link rel="stylesheet" href="<?= APP_URL . 'public/css/datatables.min.css' ?>">
 <link rel="stylesheet" href="<?= APP_URL ?>public/css/dialog.css">
-<link rel="stylesheet" href="<?= APP_URL ?>public/css/details-modal.css">
-<link rel="stylesheet" href="<?= APP_URL ?>public/css/reset-password-modal.css">
+<link rel="stylesheet" href="<?= APP_URL ?>public/css/modal.css"> 

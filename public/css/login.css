@@ -1,6 +1,6 @@
 body {
   overflow: hidden;
-  background-color: #F7F7F7;
+  background-color: #f7f7f7;
 }
 
 header {
@@ -51,7 +51,8 @@ main #section-container #login-form {
   border-radius: var(--rounded-lg);
   padding: 2rem;
   gap: 1.25rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.05);
 }
 
 main #section-container #logotipo {
@@ -76,18 +77,18 @@ main #section-container #login-form #login-inputs #username-input,
   align-items: flex-start;
   gap: var(--2, 8px);
   align-self: stretch;
-  position:relative;
+  position: relative;
 }
 
 button[type="button"] {
-    justify-content: center;
-    align-items: center;
-    height: 3rem;
-    width: 3rem;
-    border-radius: var(--rounded-lg);
-    background-color: #f2f2f2;
-    padding: 0.5rem;
-    color: #465566;
+  justify-content: center;
+  align-items: center;
+  height: 3rem;
+  width: 3rem;
+  border-radius: var(--rounded-lg);
+  background-color: #f2f2f2;
+  padding: 0.5rem;
+  color: #465566;
 }
 
 .password-toggle {

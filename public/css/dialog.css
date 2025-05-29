@@ -13,20 +13,6 @@
   --info: #007aff;
 }
 
-/* Reset y fuente base */
-* {
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
 /* Overlay minimalista con blur */
 .dialog-overlay {
   position: fixed;
@@ -63,19 +49,13 @@ body {
   transform: scale(1) translateY(0);
 }
 
-/* Sin header separado, todo fluye */
-.dialog-header {
-  margin-bottom: 16px;
-  padding: 0;
-  border: none;
-}
-
 /* Iconos como puntos de color sutiles */
 .dialog-icon {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
-  margin-bottom: 16px;
+  margin-top: 5px;
+  margin-bottom: 12px;
   display: block;
 }
 
@@ -99,7 +79,7 @@ body {
 
 /* Tipografía limpia */
 .dialog-title {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--text);
   margin: 0 0 8px 0;
@@ -150,7 +130,8 @@ body {
   height: 3rem;
   background: transparent;
   border: none;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  flex-direction: row-reverse;
 }
 
 .dialog-btn {
@@ -355,6 +336,70 @@ body {
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 16px;
+}
+
+/* Agregar estos estilos a tu dialog.css existente */
+
+/* Header con flexbox para alinear contenido */
+.dialog-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.dialog-title-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Botón de cerrar */
+.dialog-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  color: var(--text-tertiary);
+  transition: all 150ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.dialog-close-btn:hover {
+  color: var(--text-secondary);
+}
+
+.dialog-close-btn:active {
+  transform: scale(0.95);
+}
+
+.dialog-close-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Ajustar el margen del header cuando hay botón de cerrar */
+.dialog-header {
+  padding: 0;
+  border: none;
+}
+
+/* Responsive para botón de cerrar */
+@media (max-width: 640px) {
+  .dialog-close-btn {
+    width: 28px;
+    height: 28px;
+    margin-left: 12px;
+  }
+
+  .dialog-close-btn svg {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 /* Transición suave para el cierre */

@@ -253,12 +253,12 @@
 
   td.activo {
     color: #007bff;
-    font-weight: bold;
+    font-weight: 600;
   }
 
   td.inactivo {
     color: #dc3545;
-    font-weight: bold;
+    font-weight: 600;
   }
 
   .select-container {
@@ -428,6 +428,7 @@
     background-color: #fff;
     border-radius: var(--rounded-lg, 8px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--gray-300);
   }
 
   @media (max-width: 1080px) {
@@ -435,6 +436,18 @@
       padding: 2rem 2rem;
     }
   }
+
+  div.dt-container.dt-empty-footer .dt-scroll-body {
+    border-bottom: none !important;
+  }
+
+  /* solucionar problema de que no se cierra el modal antes de lanzar el dialog */
+
+  /* no actualizar usuario si los cambios son iguales al anterior es decir no se mandan cambios */
+
+  /* Estandarizar los estilos de los botones de limpiar [reset] cancelar y los buttons type submit tienen que ser iguales que los de los dialog*/
+
+  
 </style>
 <?php
 require_once APP_ROOT . 'public/inc/head.php';
@@ -519,10 +532,10 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     },
     drawCallback: () => {
       document.querySelectorAll('td').forEach(td => {
-        if (td.textContent === 'inactivo') {
+        if (td.textContent === 'Inactivo') {
           td.classList.add('inactivo');
         }
-        if (td.textContent === 'activo') {
+        if (td.textContent === 'Activo') {
           td.classList.add('activo');
         }
       });
@@ -555,7 +568,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
               `${item.usuario_nombre} ${item.usuario_apellido_paterno} ${item.usuario_apellido_materno}`,
               item.usuario_usuario,
               item.usuario_email,
-              item.usuario_estado === "1" ? 'activo' : 'inactivo',
+              item.usuario_estado === "1" ? 'Activo' : 'Inactivo',
               item.rol_descripcion,
               `<button type="button" class="editar" onClick="actualizar(${item.usuario_id})">
                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-pencil"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
@@ -801,59 +814,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   }
 
-  // Función global para mostrar detalles (llamada desde el HTML)
-  function verDetalles(userId) {
-    // Cerrar todos los menús de opciones que puedan estar abiertos
-    cerrarTodosLosMenus();
-    try {
-      userDetailsModal = new UserDetailsModal();
-      userDetailsModal.show(userId);
-    } catch (error) {
-      console.error('Error al inicializar el modal:', error);
 
-      // Si hay CustomDialog disponible, mostrar error amigable
-      if (typeof CustomDialog !== 'undefined') {
-        CustomDialog.error('Error', 'No se pudo abrir la ventana de detalles del usuario.');
-      } else {
-        alert('No se pudo abrir la ventana de detalles del usuario.');
-      }
-    }
-  }
-
-
-  function cambiarEstado(usuario_id) {
-    cerrarTodosLosMenus();
-
-    try {
-
-      const changeStatusModal = new ChangeStatusModal();
-      changeStatusModal.show(usuario_id);
-
-    } catch (error) {
-      console.error('Error al inicializar el modal de cambio de estado:', error);
-
-      // Si CustomDialog fue definido, mostrar error en dialog
-      if (typeof CustomDialog !== 'undefined') {
-        CustomDialog.error('Error', 'No se pudo abrir la ventana de cambio de estado.');
-      } else {
-        alert('No se pudo abrir la ventana de cambio de estado.');
-      }
-
-    }
-  }
-
-  function resetearPassword(userId) {
-    cerrarTodosLosMenus();
-
-    try {
-      resetPasswordModal = new ResetPasswordModal(userId);
-      resetPasswordModal.show(userId);
-
-    } catch (error) {
-      console.error('Error al inicializar el modal:', error);
-
-    }
-  }
 
   // Verificar si hay un mensaje de éxito pendiente después de redirección
   document.addEventListener('DOMContentLoaded', function() {
@@ -887,4 +848,96 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       }
     }
   });
+
+  function resetearPassword(userId) {
+    cerrarTodosLosMenus();
+
+    const resetModal = createModal('resetPassword', {
+      title: 'Resetear Contraseña',
+      size: 'medium',
+      endpoint: `${APP_URL}/api/users/${userId}/reset-password`,
+      data: {
+        userName: 'Cargando...'
+      },
+      onShow: async (modal) => {
+        modal.showLoading('Cargando información del usuario...');
+
+        try {
+          const response = await fetch(`${APP_URL}/api/users/${userId}`);
+          const userData = await response.json();
+
+          if (userData.status === 'success') {
+            modal.updateContent({
+              userName: `${userData.data.usuario_nombre} ${userData.data.usuario_apellido_paterno}`
+            });
+          } else {
+            modal.showError('No se pudieron cargar los datos del usuario');
+          }
+        } catch (error) {
+          modal.showError('Error al conectar con el servidor');
+        }
+      }
+    });
+
+    resetModal.show();
+  }
+
+  // Change Status Modal
+  function cambiarEstado(usuario_id) {
+    cerrarTodosLosMenus();
+
+    const statusModal = createModal('changeStatus', {
+      title: 'Cambiar Estado de Usuario',
+      size: 'medium',
+      endpoint: `${APP_URL}/api/users/${usuario_id}/status`,
+      onShow: async (modal) => {
+        modal.showLoading('Cargando información del usuario...');
+
+        try {
+          const response = await fetch(`${APP_URL}/api/users/${usuario_id}`);
+          const userData = await response.json();
+
+          if (userData.status === 'success') {
+            const templateData = TEMPLATE_HELPERS.processChangeStatusData(userData.data);
+            modal.updateContent(templateData);
+          } else {
+            modal.showError('No se pudieron cargar los datos del usuario');
+          }
+        } catch (error) {
+          modal.showError('Error al conectar con el servidor');
+        }
+      }
+    });
+
+    statusModal.show();
+  }
+
+  // User Details Modal
+  function verDetalles(userId) {
+    cerrarTodosLosMenus();
+
+    const detailsModal = createModal('userDetails', {
+      title: 'Detalles del Usuario',
+      size: 'large',
+      onShow: async (modal) => {
+        modal.showLoading('Cargando información del usuario...');
+
+        try {
+          const response = await fetch(`${APP_URL}/api/users/${userId}`);
+          const userData = await response.json();
+
+          if (userData.status === 'success') {
+            const templateData = TEMPLATE_HELPERS.processUserDetailsData(userData.data);
+            modal.updateContent(templateData);
+          } else {
+            modal.showError('No se pudo cargar la información del usuario');
+          }
+        } catch (error) {
+          modal.showError('Error al conectar con el servidor');
+        }
+      }
+    });
+
+    detailsModal.show();
+  }
 </script>

@@ -1,11 +1,12 @@
 <style>
   header#app-header {
-    box-shadow: 0px 1px 3px 0px color(display-p3 0 0 0 / 0.10), 0px 1px 2px -1px color(display-p3 0 0 0 / 0.10);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
     position: relative;
     top: 0;
     width: 100%;
     height: 4.1rem;
     background: #F2F2F2;
+    border-bottom: 1px solid var(--gray-300);
   }
 
   header #container {
@@ -289,11 +290,11 @@
   <section id="container">
     <div id="left-side">
       <button type="button" id="left-menu">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-deep">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-menu-2">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M4 6h16" />
-          <path d="M7 12h13" />
-          <path d="M10 18h10" />
+          <path d="M4 6l16 0" />
+          <path d="M4 12l16 0" />
+          <path d="M4 18l16 0" />
         </svg>
       </button>
       <div id="info-container">
@@ -471,5 +472,5 @@
 </script>
 
 <?php
-require_once 'modal.php'
+require_once 'inactivity-modal.php'
 ?>

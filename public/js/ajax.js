@@ -3,7 +3,7 @@ const PATTERN_MSG = {
     "El campo solo puede contener letras y espacios",
   "[0-9]{10}": "El campo debe contener diez digitos",
   "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}":
-    "Como mínimo una minúscula, mayuscula, número y caracter especial",
+    "Mínimo 8 caracteres, una minúscula, mayuscula, número y caracter especial",
   "^((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}|[a-zA-Z0-9._@!#$%^&*+\\-]{3,70})$":
     "El correo o nombre de usuario no es válido",
 };

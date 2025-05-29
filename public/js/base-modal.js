@@ -50,7 +50,7 @@ class BaseModal {
             ${
               this.config.closable
                 ? `
-              <button type="button" class="base-modal-close" data-action="close">
+              <button class="base-modal-close" data-action="close">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M18 6L6 18"></path>
                   <path d="M6 6l12 12"></path>
@@ -205,7 +205,15 @@ class BaseModal {
     }
 
     this.isOpen = true;
-    this.modal.classList.add("show");
+
+    // Asegúrate de que esté visible (evita display: none en CSS)
+    this.modal.style.display = "flex"; // Por si acaso
+
+    // Forzar un reflow antes de añadir clase .show
+    requestAnimationFrame(() => {
+      this.modal.classList.add("show");
+    });
+
     document.body.style.overflow = "hidden";
 
     // Callback onShow
@@ -221,9 +229,19 @@ class BaseModal {
 
     this.isOpen = false;
     this.modal.classList.remove("show");
+
+    // Esperar fin de transición para ocultar del todo
+    const handleTransitionEnd = (e) => {
+      if (e.propertyName === "opacity") {
+        this.modal.style.display = "none";
+        this.modal.removeEventListener("transitionend", handleTransitionEnd);
+      }
+    };
+
+    this.modal.addEventListener("transitionend", handleTransitionEnd);
+
     document.body.style.overflow = "";
 
-    // Callback onHide
     if (this.config.onHide) {
       this.config.onHide(this);
     }
