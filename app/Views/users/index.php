@@ -390,11 +390,6 @@
     margin-right: 8px;
   }
 
-  #users-table_wrapper {
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-  }
-
   thead:nth-child(2) {
     visibility: collapse;
   }
@@ -441,13 +436,139 @@
     border-bottom: none !important;
   }
 
-  /* solucionar problema de que no se cierra el modal antes de lanzar el dialog */
+  /* Loading container para la tabla */
+  .table-loading-container {
+    position: relative;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--modal-bg, #ffffff);
+    border-radius: var(--modal-border-radius, 12px);
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+
+  .table-loading-container.show {
+    opacity: 1;
+  }
+
+  /* Loading spinner similar al de modales */
+  .table-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+  }
+
+  .table-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--modal-border, #e5e7eb);
+    border-top: 3px solid var(--btn-primary, #3b82f6);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .table-loading p {
+    color: var(--modal-text-secondary, #6b7280);
+    font-size: 16px;
+    margin: 0;
+  }
+
+  #users-table_wrapper {
+    opacity: 0;
+    transform: translateY(10px);
+    /* Mantenemos el ligero deslizamiento hacia arriba */
+    transition: opacity 300ms cubic-bezier(0.215, 0.610, 0.355, 1),
+      transform 300ms cubic-bezier(0.215, 0.610, 0.355, 1);
+  }
+
+  #users-table_wrapper.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Estado de error */
+  .table-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+  }
+
+  .table-error svg {
+    width: 48px;
+    height: 48px;
+    color: var(--modal-error, #ef4444);
+  }
+
+  .table-error h3 {
+    color: var(--modal-text-primary, #111827);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .table-error p {
+    color: var(--modal-text-secondary, #6b7280);
+    font-size: 14px;
+    margin: 0;
+    text-align: center;
+  }
+
+  .btn-reload {
+    margin-top: 16px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 150ms ease;
+    border: none;
+    background: var(--btn-primary, #3b82f6);
+    color: white;
+  }
+
+  .btn-reload:hover {
+    background: var(--btn-primary-hover, #2563eb);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  }
+
+  /* Contenedor de la tabla con loading */
+  .table-container {
+    position: relative;
+    min-height: 400px;
+  }
+
+  /* Ocultar tabla mientras carga */
+  .table-container.loading table {
+    display: none;
+  }
+
+  /* Ocultar solo el primer elemento .dt-layout-row */
+  .dt-layout-row:first-of-type {
+    display: none !important;
+  }
 
   /* no actualizar usuario si los cambios son iguales al anterior es decir no se mandan cambios */
 
   /* Estandarizar los estilos de los botones de limpiar [reset] cancelar y los buttons type submit tienen que ser iguales que los de los dialog*/
-
-  
 </style>
 <?php
 require_once APP_ROOT . 'public/inc/head.php';
@@ -488,111 +609,271 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       <?php endif; ?>
     </div>
 
-    <table id="users-table" class="hover nowrap cell-borders">
-      <thead style="display: none;">
-        <tr>
-          <th class="dt-head-center">NO</th>
-          <th>NOMBRE COMPLETO</th>
-          <th>NOMBRE DE USUARIO</th>
-          <th>CORREO</th>
-          <th class="dt-head-center">ESTADO</th>
-          <th class="dt-head-center">ROL</th>
-          <th>ACCIONES</th>
-        </tr>
-      </thead>
-    </table>
+    <div class="table-container" id="table-container">
+      <!-- Loading inicial -->
+      <div class="table-loading-container" id="table-loading">
+        <div class="table-loading">
+          <div class="table-spinner"></div>
+          <p>Cargando usuarios...</p>
+        </div>
+      </div>
+
+      <!-- Tabla (oculta inicialmente) -->
+      <table id="users-table" class="hover nowrap cell-borders" style="display: none;">
+        <thead>
+          <tr>
+            <th class="dt-head-center">NO</th>
+            <th>NOMBRE COMPLETO</th>
+            <th>NOMBRE DE USUARIO</th>
+            <th>CORREO</th>
+            <th class="dt-head-center">ESTADO</th>
+            <th class="dt-head-center">ROL</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
   </div>
 </div>
 <script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
 <?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script>
-  let table = new DataTable('#users-table', {
-    fixedColumns: {
-      end: 1
-    },
-    scrollX: true,
-    columnDefs: [{
-      targets: [0, 4, 5],
-      className: 'dt-body-center'
-    }],
-    layout: {
-      topStart: null,
-      buttomStart: null,
-      buttomEnd: null
-    },
-    language: {
-      "zeroRecords": "No se encontraron registros",
-      "emptyTable": "Aún no hay registros crea uno nuevo aquí",
-      "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
-      "infoEmpty": "Mostrando 0 a 0 de 0 registros",
-      "infoFiltered": "(filtrado de _MAX_ registros totales)",
-    },
-    initComplete: () => {
-      loadData();
-    },
-    drawCallback: () => {
-      document.querySelectorAll('td').forEach(td => {
-        if (td.textContent === 'Inactivo') {
-          td.classList.add('inactivo');
-        }
-        if (td.textContent === 'Activo') {
-          td.classList.add('activo');
-        }
-      });
+  // Variables globales
+  let table;
+  let isFirstLoad = true;
+
+  // Función para mostrar loading
+  function showTableLoading(message = 'Cargando usuarios...') {
+    const container = document.getElementById('table-container');
+    const loadingContainer = document.getElementById('table-loading');
+
+    if (!loadingContainer) {
+      // Crear loading si no existe
+      const loadingHTML = `
+        <div class="table-loading-container" id="table-loading">
+          <div class="table-loading">
+            <div class="table-spinner"></div>
+            <p>${message}</p>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('afterbegin', loadingHTML);
+    } else {
+      // Actualizar mensaje si ya existe
+      const messageEl = loadingContainer.querySelector('p');
+      if (messageEl) messageEl.textContent = message;
+      loadingContainer.style.display = 'flex';
     }
+
+    // Animar entrada del loading
+    setTimeout(() => {
+      const loading = document.getElementById('table-loading');
+      if (loading) loading.classList.add('show');
+    }, 10);
+
+    // Ocultar tabla y wrapper
+    const tableWrapper = document.getElementById('users-table_wrapper');
+    if (tableWrapper) {
+      tableWrapper.classList.remove('show');
+      tableWrapper.style.display = 'none';
+    }
+
+    container.classList.add('loading');
+  }
+
+  // Función para ocultar loading
+  function hideTableLoading() {
+    const container = document.getElementById('table-container');
+    const loadingContainer = document.getElementById('table-loading');
+    const tableWrapper = document.getElementById('users-table_wrapper');
+
+    // Duración de la animación de fade-out del loader (debe coincidir con la transición CSS)
+    // En tu CSS, .table-loading-container tiene "transition: opacity 300ms ease;"
+    const loaderFadeOutDuration = 300;
+
+    // Por defecto, un pequeño retraso para la animación de la tabla si no hay loader activo.
+    let delayForTableAnimationStart = 10;
+
+    if (loadingContainer) {
+      // Verificamos si el loader está visible o en proceso de mostrarse/ocultarse.
+      // Usamos getComputedStyle para obtener el valor de 'display' real.
+      const isActiveLoader = window.getComputedStyle(loadingContainer).display !== 'none';
+
+      if (isActiveLoader) {
+        loadingContainer.classList.remove('show'); // Inicia la animación de fade-out del loader
+
+        // Después de que la animación de fade-out del loader termine, se establece display: none
+        setTimeout(() => {
+          loadingContainer.style.display = 'none';
+        }, loaderFadeOutDuration);
+
+        // La animación de la tabla debe esperar a que el loader termine su fade-out.
+        delayForTableAnimationStart = loaderFadeOutDuration;
+      } else {
+        // Si el loader existe pero no estaba activo (ej. display: none ya),
+        // solo nos aseguramos de que esté oculto y usamos el retraso mínimo para la tabla.
+        loadingContainer.style.display = 'none';
+      }
+    }
+
+    container.classList.remove('loading');
+
+    if (tableWrapper) {
+      // Hacemos visible el contenedor de la tabla para que DataTables pueda ajustar columnas
+      // y para que esté listo para la animación (inicialmente opacity: 0 por CSS).
+      tableWrapper.style.display = '';
+      if (table) {
+        table.columns.adjust();
+      }
+
+      // Iniciar la animación de aparición de la tabla DESPUÉS del delay calculado.
+      setTimeout(() => {
+        tableWrapper.classList.add('show');
+      }, delayForTableAnimationStart);
+    }
+  }
+
+  // Función para mostrar error
+  function showTableError(message = 'Error al cargar los datos') {
+    const container = document.getElementById('table-container');
+    const loadingContainer = document.getElementById('table-loading');
+
+    if (loadingContainer) {
+      loadingContainer.innerHTML = `
+        <div class="table-error">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+          <h3>Error</h3>
+          <p>${message}</p>
+          <button type="button" class="btn-reload" onclick="loadData()">Reintentar</button>
+        </div>
+      `;
+      loadingContainer.style.display = 'flex';
+      loadingContainer.classList.add('show');
+    }
+  }
+
+  // Inicializar DataTable
+  document.addEventListener('DOMContentLoaded', () => {
+    // Mostrar loading inicial
+    showTableLoading('Inicializando tabla...');
+
+    // Mostrar la tabla para que DataTables pueda inicializarse
+    document.getElementById('users-table').style.display = '';
+
+    table = new DataTable('#users-table', {
+      fixedColumns: {
+        end: 1
+      },
+      scrollX: true,
+      columnDefs: [{
+        targets: [0, 4, 5],
+        className: 'dt-body-center'
+      }],
+      layout: {
+        topStart: null,
+        buttomStart: null,
+        buttomEnd: null
+      },
+      language: {
+        "zeroRecords": "No se encontraron registros",
+        "emptyTable": "Aún no hay registros, crea uno nuevo aquí",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "infoEmpty": "Mostrando 0 a 0 de 0 registros",
+        "infoFiltered": "(filtrado de _MAX_ registros totales)",
+        "processing": '<div class="table-spinner"></div>Procesando...'
+      },
+      initComplete: function() {
+        // Cargar datos después de inicializar
+        loadData();
+      },
+      drawCallback: function() {
+        // Aplicar clases de estado
+        document.querySelectorAll('td').forEach(td => {
+          if (td.textContent === 'Inactivo') {
+            td.classList.add('inactivo');
+          }
+          if (td.textContent === 'Activo') {
+            td.classList.add('activo');
+          }
+        });
+      }
+    });
   });
 
-  function loadData() {
-    // Mostrar el thead al iniciar la carga de datos
-    const thead = document.querySelector('thead');
-    if (thead) {
-      thead.style.display = '';
-    }
+  // Función mejorada para cargar datos
+  async function loadData() {
+    try {
+      // Mostrar loading
+      if (!isFirstLoad) {
+        showTableLoading('Actualizando usuarios...');
+      } else {
+        showTableLoading('Cargando usuarios...');
+      }
 
-    let incremental = 1;
-    fetch('<?= APP_URL ?>api/users', {
+
+      const response = await fetch('<?= APP_URL ?>api/users', {
         method: 'GET',
         headers: new Headers(),
         mode: 'cors',
         cache: 'no-cache',
-      })
-      .then(response => response.json())
-      .then(response => {
-        console.log(response);
-
-        if (response.status === "success" && response.data) {
-
-          response.data.forEach(item => {
-            table.row.add([
-              incremental++,
-              `${item.usuario_nombre} ${item.usuario_apellido_paterno} ${item.usuario_apellido_materno}`,
-              item.usuario_usuario,
-              item.usuario_email,
-              item.usuario_estado === "1" ? 'Activo' : 'Inactivo',
-              item.rol_descripcion,
-              `<button type="button" class="editar" onClick="actualizar(${item.usuario_id})">
-                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-pencil"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
-              </button>
-              <button type="button" class="remover" onClick="remover(${item.usuario_id}, '${(item.usuario_nombre + ' ' + item.usuario_apellido_paterno + ' ' + item.usuario_apellido_materno).replace(/'/g, "\\'")}')">
-                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-              </button>
-              <button type="button" class="opciones" onClick="mostrarOpciones(${item.usuario_id})">
-                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-dots-vertical"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>
-              </button>`
-            ]);
-          });
-          table.draw();
-          table.columns.adjust();
-          document.getElementById('users-table_wrapper').style.opacity = '1';
-        } else {
-          console.error("Error al cargar los datos o no hay datos disponibles");
-          document.getElementById('users-table_wrapper').style.opacity = '1';
-        }
-      })
-      .catch(error => {
-        console.error("Error al obtener datos:", error);
-        document.getElementById('users-table_wrapper').style.opacity = '1';
       });
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      if (data.status === "success" && data.data) {
+        // Limpiar tabla
+        table.clear();
+
+        // Agregar datos
+        let incremental = 1;
+        data.data.forEach(item => {
+          table.row.add([
+            incremental++,
+            `${item.usuario_nombre} ${item.usuario_apellido_paterno} ${item.usuario_apellido_materno}`,
+            item.usuario_usuario,
+            item.usuario_email,
+            item.usuario_estado === "1" ? 'Activo' : 'Inactivo',
+            item.rol_descripcion,
+            `<button type="button" class="editar" onClick="actualizar(${item.usuario_id})">
+              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-pencil"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
+            </button>
+            <button type="button" class="remover" onClick="remover(${item.usuario_id}, '${(item.usuario_nombre + ' ' + item.usuario_apellido_paterno + ' ' + item.usuario_apellido_materno).replace(/'/g, "\\'")}')">
+              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+            </button>
+            <button type="button" class="opciones" onClick="mostrarOpciones(${item.usuario_id})">
+              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-dots-vertical"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>
+            </button>`
+          ]);
+        });
+
+        // Dibujar tabla y ajustar columnas
+        table.draw();
+
+        hideTableLoading();
+
+        // Marcar que ya no es la primera carga
+        isFirstLoad = false;
+
+      } else {
+        throw new Error("No se encontraron datos");
+      }
+
+    } catch (error) {
+      console.error("Error al cargar datos:", error);
+      showTableError('No se pudieron cargar los usuarios. Por favor, inténtalo de nuevo.');
+
+      // Mostrar toast de error
+      CustomDialog.toast('Error al cargar los datos', 'error', 3000);
+    }
   }
 
   let matchingInput = document.getElementById('matchingInput');
@@ -665,6 +946,10 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     );
 
     if (confirmacion) {
+
+
+      showTableLoading('Eliminando usuario...');
+
       try {
         const response = await fetch(`<?= APP_URL; ?>api/users/${usuario_id}`, {
           method: "DELETE"
@@ -673,14 +958,22 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         const data = await response.json();
 
         if (response.ok && data.status === 'success') {
-          CustomDialog.success('Operación exitosa', data.mensaje || 'Usuario eliminado correctamente');
-          table.clear().draw();
-          loadData();
+          await CustomDialog.success('Operación exitosa', data.mensaje || 'Usuario eliminado correctamente');
+
+          // Recargar datos con loading mejorado
+          await loadData();
         } else {
-          CustomDialog.error('Error', data.mensaje || data.mensaje || 'No se pudo eliminar el usuario.');
+          // Ocultar loading
+          hideTableLoading();
+
+          CustomDialog.error('Error', data.mensaje || 'No se pudo eliminar el usuario.');
         }
       } catch (error) {
         console.error('Error en la petición fetch:', error);
+
+        // Ocultar loading
+        hideTableLoading();
+
         CustomDialog.error('Error de Red', 'Ocurrió un problema al intentar conectar con el servidor.');
       }
     }
