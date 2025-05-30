@@ -544,30 +544,6 @@ class Auth
   }
 
   /**
-   * Middleware de roles
-   */
-  public static function roleMiddleware($roles)
-  {
-    return function ($request, $next) use ($roles) {
-      if (!self::check()) {
-        if ($request->expectsJson()) {
-          return Response::json(['error' => 'No autenticado'], 401);
-        }
-        return Response::redirect(APP_URL . 'login');
-      }
-
-      if (!self::hasRole($roles)) {
-        if ($request->expectsJson()) {
-          return Response::json(['error' => 'Acceso denegado'], 403);
-        }
-        return Response::redirect(APP_URL . 'error/403');
-      }
-
-      return $next($request);
-    };
-  }
-
-  /**
    * Middleware de permisos
    */
   public static function permissionMiddleware($permission)

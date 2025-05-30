@@ -23,8 +23,6 @@ class PermissionMiddleware
 
     public function handle(Request $request, callable $next)
     {
-        // Inicializar Auth si no está inicializado
-        Auth::init();
 
         // Verificar autenticación
         if (!Auth::check()) {
@@ -47,8 +45,8 @@ class PermissionMiddleware
                 if ($request->expectsJson()) {
                     return Response::json(['error' => 'Permiso denegado'], 403);
                 }
-                error_log('Permiso denegado para el usuario: ' . Auth::user()->id_usuario); // Asegúrate de que Auth::user()->usuario_id sea el correcto
-                error_log('Permisos requeridos (cualquiera de): ' . implode(', ', $this->permissions));
+                error_log('Permiso denegado para el usuario: ' . Auth::user()->usuario_id);
+                error_log('Permisos requeridos: ' . implode(', ', $this->permissions));
 
                 return Response::redirect(APP_URL . 'error/403');
             }

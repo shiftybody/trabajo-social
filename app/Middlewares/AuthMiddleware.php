@@ -25,9 +25,6 @@ class AuthMiddleware
      */
     public function handle(Request $request, callable $next)
     {
-        // Inicializar Auth si no está inicializado
-        Auth::init();
-
         // Verificar autenticación básica
         if (!Auth::check()) {
             return $this->handleUnauthenticated($request);

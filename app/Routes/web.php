@@ -43,46 +43,27 @@ $router->group(['middleware' => 'Auth'], function ($router) {
   $router->get('/home', 'homeController@index')->name('home');
 
   // USERS
-
-  // Acceso a las vistas de usuario con el permiso users.view
   $router->group(['middleware' => 'Permission:users.manage|users.view'], function ($router) {
     $router->get('/users', 'UserController@indexView')->name('users.index');
   });
 
-  // Acceso a la vista de editar usuario con el permiso users.edit
   $router->group(['middleware' => 'Permission:users.manage|users.edit'], function ($router) {
     $router->get('/users/edit/:id', 'UserController@editView')->name('users.edit');
   });
 
-  // Acceso a la vista de crear usuario con el permiso users.create
   $router->group(['middleware' => 'Permission:users.manage|users.create'], function ($router) {
     $router->get('/users/create', 'UserController@createView')->name('users.create');
   });
 
-  // ROLES
-  $router->group(['middleware' => 'Permission:roles.manage'], function ($router) {
-    $router->get('/roles', 'RoleController@indexView')->name('roles.index');
-    $router->get('/roles/edit/:id', 'RoleController@editView')->name('roles.edit');
-    $router->get('/roles/create', 'RoleController@createView')->name('roles.create');
-  });
-
-  // // Permisos (solo accesible para administradores)
-  // $router->group(['middleware' => 'Role:1'], function ($router) {
-  //   $router->get('/permissions', 'PermissionController@index')->name('permissions.index');
-  //   $router->get('/permissions/assign/:role_id', 'PermissionController@assignForm')->name('permissions.assign');
-  //   $router->post('/permissions/assign/:role_id', 'PermissionController@assignSave')->name('permissions.assign.save');
-  // });
-
-  // Perfil de usuario (accesible para todos los usuarios autenticados)
   $router->get('/profile', 'UserController@profile')->name('profile');
 
-  // Rutas de error
-  $router->get('/error/404', function () {
-    http_response_code(404);
+  //ERRORS
+  $router->get('/error/401', function () {
+    http_response_code(401);
     ob_start();
-    include APP_ROOT . 'app/Views/errors/404.php';
+    include APP_ROOT . 'app/Views/errors/401.php';
     $content = ob_get_clean();
-    return Response::html($content, 404);
+    return Response::html($content, 401);
   });
 
   $router->get('/error/403', function () {
@@ -93,12 +74,12 @@ $router->group(['middleware' => 'Auth'], function ($router) {
     return Response::html($content, 403);
   });
 
-  $router->get('/error/401', function () {
-    http_response_code(401);
+  $router->get('/error/404', function () {
+    http_response_code(404);
     ob_start();
-    include APP_ROOT . 'app/Views/errors/401.php';
+    include APP_ROOT . 'app/Views/errors/404.php';
     $content = ob_get_clean();
-    return Response::html($content, 401);
+    return Response::html($content, 404);
   });
 
   $router->get('/error/500', function () {

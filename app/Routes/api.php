@@ -20,7 +20,6 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   $router->get('/session/status', 'SessionController@status');
 
   // USERS
-
   $router->group(array('middleware' => 'Permission:users.manage|users.view'), function ($router) {
     $router->get('/users', 'UserController@getAllUsers');
   });
@@ -40,25 +39,11 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
     $router->post('/users/:id/status', 'UserController@changeStatus');
   });
 
-
   $router->group(array('middleware' => 'Permission:users.manage|users.delete'), function ($router) {
     $router->delete('/users/:id', 'UserController@delete');
   });
 
-  // ROLES
-
-
-  // Permisos (solo para administradores)
-  $router->group(array('middleware' => 'Role:1'), function ($router) {
-    $router->get('/permissions', 'ApiController@getAllPermissions');
-    $router->post('/roles/:id/permissions', 'ApiController@assignPermissions');
-    $router->post('/users/:id/permissions', 'ApiController@assignUserPermissions');
-  });
-
-  // Perfil de usuario
   $router->get('/profile', 'ApiController@getProfile');
-  $router->put('/profile', 'ApiController@updateProfile');
-  $router->put('/profile/password', 'ApiController@updatePassword');
 });
 
 return $router;
