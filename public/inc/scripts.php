@@ -12,3 +12,5 @@
 
 <script src="<?= APP_URL . 'public/js/base-modal.js' ?>"></script>
 <script src="<?= APP_URL . 'public/js/modal-templates.js' ?>"></script>
+
+<script src="<?= APP_URL . 'public/js/roles.js' ?>"></script>

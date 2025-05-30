@@ -57,6 +57,21 @@ $router->group(['middleware' => 'Auth'], function ($router) {
 
   $router->get('/profile', 'UserController@profile')->name('profile');
 
+  // ROLES
+
+  // ROLES - Requiere permisos de gestión de roles
+  $router->group(['middleware' => 'Permission:roles.view'], function ($router) {
+    $router->get('/roles', 'RoleController@indexView')->name('roles.index');
+  });
+
+  $router->group(['middleware' => 'Permission:roles.create'], function ($router) {
+    $router->get('/roles/create', 'RoleController@createView')->name('roles.create');
+  });
+
+  $router->group(['middleware' => 'Permission:roles.edit'], function ($router) {
+    $router->get('/roles/edit/:id', 'RoleController@editView')->name('roles.edit');
+  });
+
   //ERRORS
   $router->get('/error/401', function () {
     http_response_code(401);

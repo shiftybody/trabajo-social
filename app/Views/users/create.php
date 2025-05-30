@@ -297,15 +297,18 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             }
             return response.json();
         })
-        .then(data => {
+        .then(responseData => { // Cambiado de 'data' a 'responseData' para claridad
             const select = document.getElementById("rol");
 
-            if (!data || data.length === 0) {
+            // Acceder a la propiedad 'data' del objeto de respuesta
+            const roles = responseData.data;
+
+            if (!roles || roles.length === 0) {
                 console.warn('No se encontraron roles disponibles');
                 return;
             }
 
-            data.forEach(rol => {
+            roles.forEach(rol => {
                 const option = document.createElement("option");
                 option.value = rol.rol_id;
                 option.textContent = rol.rol_descripcion;

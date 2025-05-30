@@ -214,4 +214,22 @@ class roleModel extends mainModel
       return [];
     }
   }
+
+  /**
+   * Verifica si existe un rol con la descripción dada
+   * 
+   * @param string $descripcion Descripción del rol
+   * @return bool True si existe, false en caso contrario
+   */
+  public function existeRolPorDescripcion($descripcion)
+  {
+    try {
+      $query = "SELECT COUNT(*) FROM rol WHERE rol_descripcion = :descripcion";
+      $resultado = $this->ejecutarConsulta($query, [':descripcion' => $descripcion]);
+      return $resultado->fetchColumn() > 0;
+    } catch (\Exception $e) {
+      error_log("Error en existeRolPorDescripcion: " . $e->getMessage());
+      return false;
+    }
+  }
 }

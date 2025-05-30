@@ -169,6 +169,116 @@ const MODAL_TEMPLATES = {
       {{retryButton}}
     </div>
   `,
+  // Template para crear rol
+  createRole: `
+    <form novalidate id="createRoleForm" class="base-modal-form form-ajax" method="POST">
+      <div class="input-field">
+        <label for="roleName" class="field-label">Nombre del Rol</label>
+        <input type="text" name="descripcion" id="roleName" 
+               class="input-reset" placeholder="Ingrese el nombre del rol"
+               maxlength="50" required>
+      </div>
+      
+      <div class="permissions-section">
+        <h4 class="permissions-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+          Permisos del Rol
+        </h4>
+        <div class="permissions-grid">
+          {{permissionsHTML}}
+        </div>
+      </div>
+      
+      <div class="base-modal-actions">
+        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">Crear Rol</button>
+      </div>
+    </form>
+  `,
+
+  // Template para editar rol
+  editRole: `
+    <form novalidate id="editRoleForm" class="base-modal-form form-ajax" method="POST">
+      <div class="role-info-section">
+        <div class="input-field">
+          <label for="editRoleName" class="field-label">Nombre del Rol</label>
+          <input type="text" name="descripcion" id="editRoleName" 
+                 class="input-reset" placeholder="Ingrese el nombre del rol"
+                 value="{{roleName}}" maxlength="50" required>
+        </div>
+        
+        <div class="role-stats">
+          <div class="stat-item">
+            <span class="stat-label">Usuarios asignados:</span>
+            <span class="stat-value">{{usuariosCount}}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="permissions-section">
+        <h4 class="permissions-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+          Permisos del Rol
+        </h4>
+        <div class="permissions-grid">
+          {{permissionsHTML}}
+        </div>
+      </div>
+      
+      <div class="base-modal-actions">
+        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar Cambios</button>
+      </div>
+    </form>
+  `,
+
+  // Template para detalles de rol
+  roleDetails: `
+    <div class="role-profile-section">
+      <div class="role-icon-large">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
+        </svg>
+      </div>
+      <div class="role-profile-info">
+        <h3>{{roleName}}</h3>
+        <p class="role-description">Rol del sistema</p>
+        <div class="role-status-badge active">
+          <span class="status-dot active"></span>
+          Activo
+        </div>
+      </div>
+    </div>
+ 
+    <div class="role-details-grid">
+      <div class="role-detail-section">
+        <h4>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          Información del Rol
+        </h4>
+        {{roleDetails}}
+      </div>
+ 
+      <div class="role-detail-section">
+        <h4>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+          Permisos Asignados
+        </h4>
+        <div class="permissions-list">
+          {{permissionsList}}
+        </div>
+      </div>
+    </div>
+  `,
 };
 
 /**
@@ -331,6 +441,133 @@ const TEMPLATE_HELPERS = {
       newStatusValue,
       submitText,
     };
+  },
+
+  // Procesa datos para crear rol
+  processCreateRoleData: (permissions) => {
+    return {
+      permissionsHTML: TEMPLATE_HELPERS.generatePermissionsGrid(
+        permissions,
+        []
+      ),
+    };
+  },
+
+  // Procesa datos para editar rol
+  processEditRoleData: (role, allPermissions, rolePermissions) => {
+    const assignedPermissionIds = rolePermissions.map((p) => p.permiso_id);
+
+    return {
+      roleName: role.rol_descripcion,
+      usuariosCount: role.usuarios_count || 0,
+      permissionsHTML: TEMPLATE_HELPERS.generatePermissionsGrid(
+        allPermissions,
+        assignedPermissionIds
+      ),
+    };
+  },
+
+  // Procesa datos para detalles de rol
+  processRoleDetailsData: (role) => {
+    return {
+      roleName: role.rol_descripcion,
+      roleDetails: [
+        ["ID del Rol", `#${role.rol_id}`],
+        ["Nombre", role.rol_descripcion],
+        ["Usuarios Asignados", role.usuarios_count || 0],
+        ["Estado", "Activo"],
+        ["Fecha de Creación", role.rol_fecha_creacion || "No disponible"],
+        [
+          "Última Modificación",
+          role.rol_ultima_modificacion || "No disponible",
+        ],
+      ]
+        .map(([label, value]) =>
+          TEMPLATE_GENERATORS.generateUserDetailItem(label, value)
+        )
+        .join(""),
+      permissionsList:
+        role.usuarios_asignados && role.usuarios_asignados.length > 0
+          ? role.usuarios_asignados
+              .map(
+                (usuario) =>
+                  `<div class="permission-item">${usuario.usuario_nombre} ${usuario.usuario_apellido_paterno}</div>`
+              )
+              .join("")
+          : '<div class="no-permissions">No hay usuarios asignados</div>',
+    };
+  },
+
+  // Genera grid de permisos
+  generatePermissionsGrid: (permissions, assignedIds) => {
+    if (!permissions || permissions.length === 0) {
+      return '<div class="no-permissions">No hay permisos disponibles</div>';
+    }
+
+    // Agrupar permisos por categoría (usando el prefijo del slug)
+    const groupedPermissions = {};
+
+    permissions.forEach((permission) => {
+      const category = permission.permiso_slug.split(".")[0] || "otros";
+      const categoryName = TEMPLATE_HELPERS.getCategoryDisplayName(category);
+
+      if (!groupedPermissions[categoryName]) {
+        groupedPermissions[categoryName] = [];
+      }
+      groupedPermissions[categoryName].push(permission);
+    });
+
+    let html = "";
+
+    Object.keys(groupedPermissions).forEach((categoryName) => {
+      html += `
+        <div class="permission-category">
+          <h5 class="category-title">${categoryName.toUpperCase()}</h5>
+          <div class="category-permissions">
+      `;
+
+      groupedPermissions[categoryName].forEach((permission) => {
+        const isChecked = assignedIds.includes(permission.permiso_id);
+        html += `
+          <div class="permission-item">
+            <label class="permission-label">
+              <input type="checkbox" name="permisos[]" value="${
+                permission.permiso_id
+              }" 
+                     ${isChecked ? "checked" : ""} class="permission-checkbox">
+              <span class="permission-name">${permission.permiso_nombre}</span>
+              <span class="permission-description">${
+                permission.permiso_descripcion || ""
+              }</span>
+            </label>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+    });
+
+    return html;
+  },
+
+  // Obtiene nombre de categoría para mostrar
+  getCategoryDisplayName: (category) => {
+    const categoryNames = {
+      users: "Usuarios",
+      roles: "Roles",
+      permissions: "Permisos",
+      reports: "Reportes",
+      settings: "Configuración",
+      system: "Sistema",
+    };
+
+    return (
+      categoryNames[category] ||
+      category.charAt(0).toUpperCase() + category.slice(1)
+    );
   },
 
   // Genera campos de formulario desde configuración

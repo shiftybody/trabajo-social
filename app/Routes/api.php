@@ -44,6 +44,31 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   });
 
   $router->get('/profile', 'ApiController@getProfile');
+
+  // ROLES
+  $router->group(['middleware' => 'Permission:roles.view'], function ($router) {
+    // $router->get('/roles', 'RoleController@getAllRoles');
+    $router->get('/roles/:id', 'RoleController@getRoleById');
+  });
+
+  $router->group(['middleware' => 'Permission:roles.create'], function ($router) {
+    $router->post('/roles', 'RoleController@store');
+  });
+
+  $router->group(['middleware' => 'Permission:roles.edit'], function ($router) {
+    $router->post('/roles/:id', 'RoleController@update');
+    $router->get('/roles/:id/permissions', 'RoleController@getRolePermissions');
+    $router->post('/roles/:id/permissions', 'RoleController@updateRolePermissions');
+  });
+
+  $router->group(['middleware' => 'Permission:roles.delete'], function ($router) {
+    $router->delete('/roles/:id', 'RoleController@delete');
+  });
+
+  // PERMISOS (para cargar en formularios)
+  $router->group(['middleware' => 'Permission:roles.edit|roles.create'], function ($router) {
+    $router->get('/permissions', 'PermissionController@getAllPermissions');
+  });
 });
 
 return $router;

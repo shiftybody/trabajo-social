@@ -119,12 +119,14 @@ button[type="button"] {
 }
 
 .password-toggle.error-toggle {
-  background-color: var(--red-50) !important; /* Rojo de error */
+  background-color: var(--red-50) !important;
+  /* Rojo de error */
   border-color: var(--red-50) !important;
 }
 
 .password-toggle.error-toggle:hover {
-  background-color: var(--red-50) !important; /* Rojo más oscuro en hover */
+  background-color: var(--red-50) !important;
+  /* Rojo más oscuro en hover */
 }
 
 .eye-off-icon {
