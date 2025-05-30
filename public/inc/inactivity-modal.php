@@ -116,6 +116,8 @@
     color: var(--text-secondary);
     margin: 0 0 24px 0;
     font-weight: 400;
+    justify-content: center;
+    ;
   }
 
   /* Botones del modal */
