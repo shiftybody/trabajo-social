@@ -27,7 +27,7 @@ class PermissionMiddleware
         // Verificar autenticación
         if (!Auth::check()) {
             if ($request->expectsJson()) {
-                return Response::json(['error' => 'No autenticado'], 401);
+                return Response::json(['status' => 'error'], 401);
             }
             return Response::redirect(APP_URL . 'login');
         }
@@ -42,17 +42,14 @@ class PermissionMiddleware
             }
 
             if (!$hasAnyPermission) {
-                error_log('Permiso denegado para el usuario: ' . Auth::user()->usuario_id);
-                error_log('Permisos requeridos: ' . implode(', ', $this->permissions));
 
                 if ($request->expectsJson()) {
-                    return Response::json(['error' => 'Permiso denegado'], 403);
+                    return Response::json(['status' => 'error', 'message' => 'Tu usuario no tiene los permisos requeridos'], 403);
                 }
                 return Response::redirect(APP_URL . 'error/403');
             }
         }
 
-        // Continuar con el siguiente middleware o controlador
         return $next($request);
     }
 }

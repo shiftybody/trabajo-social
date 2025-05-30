@@ -195,16 +195,14 @@ class Auth
   public static function refreshSessionActivity()
   {
     if (self::check() && isset($_SESSION[APP_SESSION_NAME]['id'])) {
-      // Actualizar siempre la última actividad si la sesión está activa
-      $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
 
-      // Opcional: Log mejorado para depuración
-      $sessionTypeDetail = (isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true) ? " (remembered session)" : " (standard session)";
+      $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
 
       return true;
     }
-    // Mantener este log puede ser útil para depurar por qué no se refrescó una sesión
+
     error_log("Attempted to refresh session activity, but no active session or user ID found in session.");
+
     return false;
   }
 
@@ -226,21 +224,15 @@ class Auth
 
     $isRemembered = isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true;
 
-    // Verificar si la cookie recordarme sigue existiendo para sesiones marcadas como recordadas
     if ($isRemembered && !isset($_COOKIE[APP_SESSION_NAME])) {
-      // La cookie ha desaparecido, pero la sesión sigue marcada como recordada
-      // Actualizar el estado y calcular el tiempo restante como una sesión normal
       $isRemembered = false;
       $_SESSION[APP_SESSION_NAME]['is_remembered'] = false;
       $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time(); // Reiniciar el contador
       error_log("getSessionStatus: cookie 'recordarme' no encontrada para sesión recordada. Actualizando estado.");
     }
 
-    // Calcular el tiempo de expiración basado en la última actividad
     $expirationTimestamp = $_SESSION[APP_SESSION_NAME]['ultima_actividad'] + SESSION_EXPIRATION_TIMOUT;
 
-    // Para sesiones recordadas, establecer un tiempo restante constante alto
-    // o calcular el tiempo restante real para sesiones normales
     $timeRemaining = $isRemembered
       ? SESSION_EXPIRATION_TIMOUT // Valor constante alto para sesiones recordadas
       : max(0, $expirationTimestamp - time());
@@ -502,68 +494,5 @@ class Auth
     if (session_status() === PHP_SESSION_ACTIVE) {
       session_destroy();
     }
-  }
-
-  /**
-   * Verifica si una ruta es pública
-   */
-  public static function isPublicRoute($uri)
-  {
-    return in_array($uri, self::$publicRoutes);
-  }
-
-  /**
-   * Agrega una ruta pública
-   */
-  public static function addPublicRoute($route)
-  {
-    if (!in_array($route, self::$publicRoutes)) {
-      self::$publicRoutes[] = $route;
-    }
-  }
-
-  /**
-   * Middleware de autenticación
-   */
-  public static function middleware($request, $next)
-  {
-    // Verificar si la ruta es pública
-    if (self::isPublicRoute($request->getUri())) {
-      return $next($request);
-    }
-
-    // Verificar autenticación
-    if (!self::check()) {
-      if ($request->expectsJson()) {
-        return Response::json(['error' => 'No autenticado'], 401);
-      }
-      return Response::redirect(APP_URL . 'login');
-    }
-
-    return $next($request);
-  }
-
-  /**
-   * Middleware de permisos
-   */
-  public static function permissionMiddleware($permission)
-  {
-    return function ($request, $next) use ($permission) {
-      if (!self::check()) {
-        if ($request->expectsJson()) {
-          return Response::json(['error' => 'No autenticado'], 401);
-        }
-        return Response::redirect(APP_URL . 'login');
-      }
-
-      if (!self::can($permission)) {
-        if ($request->expectsJson()) {
-          return Response::json(['error' => 'Permiso denegado'], 403);
-        }
-        return Response::redirect(APP_URL . 'error/403');
-      }
-
-      return $next($request);
-    };
   }
 }

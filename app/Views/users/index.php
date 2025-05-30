@@ -870,7 +870,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       console.error("Error al cargar datos:", error);
       showTableError('No se pudieron cargar los usuarios. Por favor, inténtalo de nuevo.');
 
-      // Mostrar toast de error
       CustomDialog.toast('Error al cargar los datos', 'error', 3000);
     }
   }
@@ -962,6 +961,12 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           await CustomDialog.success('Operación exitosa', data.message || 'Usuario eliminado correctamente');
 
           // Recargar datos con loading mejorado
+          await loadData();
+        }
+
+        if (response.ok && data.status === 'error') {
+          await CustomDialog.error('Error', data.message || 'No se pudo eliminar el usuario.');
+
           await loadData();
         } else {
           // Ocultar loading
