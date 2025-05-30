@@ -101,7 +101,7 @@ class userModel extends mainModel
             // Si no hay campos para actualizar (ej. solo se envió un password vacío), no continuar
             if (empty($camposActualizar)) {
                 // Opcionalmente, puedes retornar true si consideras que no hacer nada es un "éxito"
-                // o false/un mensaje si esperabas alguna actualización.
+                // o false/un message si esperabas alguna actualización.
                 // Por ahora, si no hay cambios efectivos, no se añade la fecha de modificación y podría no ejecutar la consulta.
                 // Considera el caso en que $datos solo trae un password vacío.
                 // Si $camposActualizar está vacío, la llamada a actualizarDatos podría fallar o no hacer nada.

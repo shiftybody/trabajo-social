@@ -62,7 +62,7 @@ class UserController
     } catch (Exception $e) {
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'Error al obtener los usuarios: ' . $e->getMessage()
+        'message' => 'Error al obtener los usuarios: ' . $e->getMessage()
       ]);
     }
   }
@@ -75,7 +75,7 @@ class UserController
       if (!$id || !is_numeric($id)) {
         return Response::json([
           'status' => 'error',
-          'mensaje' => 'ID de usuario inválido'
+          'message' => 'ID de usuario inválido'
         ], 400);
       }
 
@@ -84,7 +84,7 @@ class UserController
       if (!$usuario) {
         return Response::json([
           'status' => 'error',
-          'mensaje' => 'Usuario no encontrado'
+          'message' => 'Usuario no encontrado'
         ], 404);
       }
 
@@ -116,7 +116,7 @@ class UserController
       error_log("Error en getUserById: " . $e->getMessage());
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'Error interno del servidor'
+        'message' => 'Error interno del servidor'
       ], 500);
     }
   }
@@ -236,7 +236,7 @@ class UserController
       if (!$validacionArchivo['valido']) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['avatar' => $validacionArchivo['mensaje']]
+          'errores' => ['avatar' => $validacionArchivo['message']]
         ]);
       }
     }
@@ -334,7 +334,7 @@ class UserController
     if ($registrarUsuario) {
       return Response::json([
         'status' => 'success',
-        'mensaje' => 'Usuario registrado correctamente'
+        'message' => 'Usuario registrado correctamente'
       ]);
     } else {
       return Response::json([
@@ -355,7 +355,7 @@ class UserController
     if (!$usuario) {
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'Usuario no encontrado'
+        'message' => 'Usuario no encontrado'
       ], 404);
     }
 
@@ -427,7 +427,7 @@ class UserController
     if (isset($_SESSION[APP_SESSION_NAME]['id']) && $_SESSION[APP_SESSION_NAME]['id'] == $id && $resultado['datos']['estado'] == 0) {
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'No puedes desactivar tu propia cuenta'
+        'message' => 'No puedes desactivar tu propia cuenta'
       ]);
     }
 
@@ -447,7 +447,7 @@ class UserController
       if (!$validacionArchivo['valido']) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['avatar' => $validacionArchivo['mensaje']]
+          'errores' => ['avatar' => $validacionArchivo['message']]
         ]);
       }
     }
@@ -581,7 +581,7 @@ class UserController
     if ($actualizar) {
       return Response::json([
         'status' => 'success',
-        'mensaje' => 'Usuario actualizado correctamente'
+        'message' => 'Usuario actualizado correctamente'
       ]);
     } else {
       return Response::json([
@@ -603,7 +603,7 @@ class UserController
     if (!$usuario) {
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'Usuario no encontrado'
+        'message' => 'Usuario no encontrado'
       ], 404);
     }
 
@@ -644,12 +644,12 @@ class UserController
     if ($actualizar) {
       return Response::json([
         'status' => 'success',
-        'mensaje' => 'Contraseña reseteada correctamente. Efectos aplicados en el siguiente inicio de sesión.'
+        'message' => 'Contraseña reseteada correctamente. Efectos aplicados en el siguiente inicio de sesión.'
       ]);
     } else {
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'Error al resetear la contraseña'
+        'message' => 'Error al resetear la contraseña'
       ]);
     }
   }
@@ -667,7 +667,7 @@ class UserController
     if (!$usuario) {
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'Usuario no encontrado'
+        'message' => 'Usuario no encontrado'
       ], 404);
     }
 
@@ -698,7 +698,7 @@ class UserController
       $estadoTexto = $nuevoEstado === 1 ? 'activo' : 'inactivo';
       return Response::json([
         'status' => 'error',
-        'mensaje' => "El usuario ya se encuentra en estado {$estadoTexto}"
+        'message' => "El usuario ya se encuentra en estado {$estadoTexto}"
       ]);
     }
 
@@ -706,7 +706,7 @@ class UserController
     if (isset($_SESSION[APP_SESSION_NAME]['id']) && $_SESSION[APP_SESSION_NAME]['id'] == $id && $nuevoEstado === 0) {
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'No puedes desactivar tu propia cuenta'
+        'message' => 'No puedes desactivar tu propia cuenta'
       ]);
     }
 
@@ -721,12 +721,12 @@ class UserController
 
       return Response::json([
         'status' => 'success',
-        'mensaje' => "El usuario {$nombreCompleto} ha sido {$estadoTexto} correctamente"
+        'message' => "El usuario {$nombreCompleto} ha sido {$estadoTexto} correctamente"
       ]);
     } else {
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'Error al cambiar el estado del usuario'
+        'message' => 'Error al cambiar el estado del usuario'
       ]);
     }
   }
@@ -741,7 +741,7 @@ class UserController
     if (!$usuario) {
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'Usuario no encontrado'
+        'message' => 'Usuario no encontrado'
       ], 404);
     }
 
@@ -749,7 +749,7 @@ class UserController
     if ($this->userModel->esUltimoAdministrador($id)) {
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'No se puede eliminar el último usuario administrador'
+        'message' => 'No se puede eliminar el último usuario administrador'
       ]);
     }
 
@@ -759,12 +759,12 @@ class UserController
     if ($eliminar) {
       return Response::json([
         'status' => 'success',
-        'mensaje' => 'Usuario eliminado correctamente'
+        'message' => 'Usuario eliminado correctamente'
       ]);
     } else {
       return Response::json([
         'status' => 'error',
-        'mensaje' => 'Error al eliminar el usuario'
+        'message' => 'Error al eliminar el usuario'
       ]);
     }
   }

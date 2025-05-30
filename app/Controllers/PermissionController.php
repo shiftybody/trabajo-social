@@ -99,22 +99,22 @@ class PermissionController
             if ($resultado) {
                 return Response::json([
                     'status' => 'success',
-                    'mensaje' => 'Permisos asignados correctamente'
+                    'message' => 'Permisos asignados correctamente'
                 ]);
             } else {
                 return Response::json([
                     'status' => 'error',
-                    'mensaje' => 'Error al asignar permisos'
+                    'message' => 'Error al asignar permisos'
                 ]);
             }
         }
 
         // Si no es una petición AJAX, redirigir
         if ($resultado) {
-            // Redirigir con mensaje de éxito
+            // Redirigir con message de éxito
             return Response::redirect(APP_URL . 'roles');
         } else {
-            // Redirigir con mensaje de error
+            // Redirigir con message de error
             return Response::redirect(APP_URL . 'permissions/assign/' . $rolId);
         }
     }
@@ -156,7 +156,7 @@ class PermissionController
         if (!isset($datos['permisos']) || !is_array($datos['permisos'])) {
             return Response::json([
                 'status' => 'error',
-                'mensaje' => 'Formato de datos inválido'
+                'message' => 'Formato de datos inválido'
             ], 400);
         }
 
@@ -167,7 +167,7 @@ class PermissionController
         if (!$rol) {
             return Response::json([
                 'status' => 'error',
-                'mensaje' => 'Rol no encontrado'
+                'message' => 'Rol no encontrado'
             ], 404);
         }
 
@@ -177,12 +177,12 @@ class PermissionController
         if ($resultado) {
             return Response::json([
                 'status' => 'success',
-                'mensaje' => 'Permisos asignados correctamente'
+                'message' => 'Permisos asignados correctamente'
             ]);
         } else {
             return Response::json([
                 'status' => 'error',
-                'mensaje' => 'Error al asignar permisos'
+                'message' => 'Error al asignar permisos'
             ], 500);
         }
     }

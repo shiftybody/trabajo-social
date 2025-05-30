@@ -272,7 +272,6 @@
             adjustCheckInterval(data.isRememberedSession);
           }
           hideModal();
-          // IMPORTANTE: Verificar inmediatamente el estado después de refrescar
           checkSessionStatus();
         } else {
           performLogout();
@@ -290,7 +289,6 @@
   }
 
   function checkSessionStatus() {
-    // Cancelar petición pendiente
     if (state.pendingStatusRequest) {
       state.pendingStatusRequest.abort();
     }
@@ -322,24 +320,20 @@
       .then((data) => {
         if (!data) return;
 
-        // Actualizar configuración
         state.serverConfig.logoutUrl =
           data.logoutUrl || state.serverConfig.logoutUrl;
         state.serverConfig.refreshUrl =
           data.refreshUrl || state.serverConfig.refreshUrl;
         state.serverConfig.warningThreshold = data.warningThreshold || 30;
 
-        // Verificar estado de sesión
         if (!data.isActive) {
           hideModal();
           performLogout(true);
           return;
         }
 
-        // Ajustar intervalo si cambió el estado recordado
         adjustCheckInterval(Boolean(data.isRememberedSession));
 
-        // Manejar advertencias para sesiones no recordadas
         if (!state.isRememberedSession) {
           if (
             data.timeRemaining <= state.serverConfig.warningThreshold &&
@@ -401,7 +395,6 @@
     );
   }
 
-  // Inicializar cuando el DOM esté listo
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {

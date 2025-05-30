@@ -659,7 +659,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       `;
       container.insertAdjacentHTML('afterbegin', loadingHTML);
     } else {
-      // Actualizar mensaje si ya existe
+      // Actualizar message si ya existe
       const messageEl = loadingContainer.querySelector('p');
       if (messageEl) messageEl.textContent = message;
       loadingContainer.style.display = 'flex';
@@ -814,7 +814,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         showTableLoading('Cargando usuarios...');
       }
 
-
       const response = await fetch('<?= APP_URL ?>api/users', {
         method: 'GET',
         headers: new Headers(),
@@ -947,18 +946,20 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
     if (confirmacion) {
 
-
       showTableLoading('Eliminando usuario...');
 
       try {
         const response = await fetch(`<?= APP_URL; ?>api/users/${usuario_id}`, {
-          method: "DELETE"
+          method: "DELETE",
+          headers: {
+            'Accept': 'application/json'
+          }
         });
 
         const data = await response.json();
 
         if (response.ok && data.status === 'success') {
-          await CustomDialog.success('Operación exitosa', data.mensaje || 'Usuario eliminado correctamente');
+          await CustomDialog.success('Operación exitosa', data.message || 'Usuario eliminado correctamente');
 
           // Recargar datos con loading mejorado
           await loadData();
@@ -966,7 +967,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           // Ocultar loading
           hideTableLoading();
 
-          CustomDialog.error('Error', data.mensaje || 'No se pudo eliminar el usuario.');
+          CustomDialog.error('Error', data.message || 'No se pudo eliminar el usuario.');
         }
       } catch (error) {
         console.error('Error en la petición fetch:', error);
@@ -1109,16 +1110,16 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
 
 
-  // Verificar si hay un mensaje de éxito pendiente después de redirección
+  // Verificar si hay un message de éxito pendiente después de redirección
   document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si hay un mensaje de éxito de actualización de usuario
+    // Verificar si hay un message de éxito de actualización de usuario
     const updateSuccess = sessionStorage.getItem('userUpdateSuccess');
 
     if (updateSuccess) {
       try {
         const successData = JSON.parse(updateSuccess);
 
-        // Verificar que el mensaje no sea muy antiguo (máximo 10 segundos)
+        // Verificar que el message no sea muy antiguo (máximo 10 segundos)
         const now = Date.now();
         const messageAge = now - successData.timestamp;
 
@@ -1132,11 +1133,11 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           }, 500); // Pequeño delay para asegurar que todo esté cargado
         }
 
-        // Limpiar el mensaje del sessionStorage
+        // Limpiar el message del sessionStorage
         sessionStorage.removeItem('userUpdateSuccess');
 
       } catch (error) {
-        console.error('Error al procesar mensaje de éxito:', error);
+        console.error('Error al procesar message de éxito:', error);
         sessionStorage.removeItem('userUpdateSuccess');
       }
     }

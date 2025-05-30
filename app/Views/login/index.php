@@ -1,5 +1,5 @@
 <?php
-// Manejo de mensajes de estado
+// Manejo de messages de estado
 $status_message = '';
 $message_class = '';
 

@@ -85,7 +85,7 @@ const FormHandlers = {
 
       await CustomDialog.success(
         "Contraseña Actualizada",
-        responseData.mensaje || "La contraseña se actualizó correctamente"
+        responseData.message || "La contraseña se actualizó correctamente"
       );
     },
   },
@@ -98,7 +98,7 @@ const FormHandlers = {
 
       await CustomDialog.success(
         "Estado Actualizado",
-        responseData.mensaje ||
+        responseData.message ||
           "El estado del usuario se actualizó correctamente"
       );
 
@@ -118,7 +118,7 @@ const FormHandlers = {
 
       await CustomDialog.success(
         "Usuario Creado",
-        responseData.mensaje || "El usuario se creó correctamente"
+        responseData.message || "El usuario se creó correctamente"
       );
       window.location.href = `${APP_URL}/users`;
     },
@@ -129,7 +129,7 @@ const FormHandlers = {
     async onSuccess(responseData) {
       await CustomDialog.success(
         "Usuario Actualizado",
-        responseData.mensaje || "El usuario se actualizó correctamente"
+        responseData.message || "El usuario se actualizó correctamente"
       );
       window.location.href = `${APP_URL}/users`;
     },
@@ -240,7 +240,7 @@ async function handleSuccessResponse(form, responseData) {
     );
     await CustomDialog.success(
       "Operación Exitosa",
-      responseData.mensaje || "Operación completada correctamente"
+      responseData.message || "Operación completada correctamente"
     );
   }
 }
@@ -284,7 +284,7 @@ function handleErrorResponse(form, responseData) {
 
     CustomDialog.error(
       "Error",
-      responseData.mensaje ||
+      responseData.message ||
         responseData.message ||
         "Ocurrió un error al procesar la solicitud"
     );
@@ -325,6 +325,9 @@ function attachAjaxFormHandlers(formulario) {
         method: this.getAttribute("method"),
         body: data,
         credentials: "same-origin",
+        headers: { 
+          'Accept': 'application/json'
+        }
       });
 
       if (response.redirected) {

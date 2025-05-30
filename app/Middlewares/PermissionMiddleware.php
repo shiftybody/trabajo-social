@@ -37,17 +37,17 @@ class PermissionMiddleware
             foreach ($this->permissions as $permission) {
                 if (Auth::can($permission)) {
                     $hasAnyPermission = true;
-                    break; // Si tiene al menos uno, ya no necesitamos verificar más
+                    break;
                 }
             }
 
             if (!$hasAnyPermission) {
-                if ($request->expectsJson()) {
-                    return Response::json(['error' => 'Permiso denegado'], 403);
-                }
                 error_log('Permiso denegado para el usuario: ' . Auth::user()->usuario_id);
                 error_log('Permisos requeridos: ' . implode(', ', $this->permissions));
 
+                if ($request->expectsJson()) {
+                    return Response::json(['error' => 'Permiso denegado'], 403);
+                }
                 return Response::redirect(APP_URL . 'error/403');
             }
         }

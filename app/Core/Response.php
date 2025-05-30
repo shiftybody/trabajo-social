@@ -84,7 +84,7 @@ class Response
    * @param int $statusCode Código de estado HTTP
    * @return Response Instancia de respuesta
    */
-  public static function redirect($url, $statusCode = 302)
+  public static function redirect($url, $statusCode = 303)
   {
     return new self('', $statusCode, array('Location' => $url));
   }

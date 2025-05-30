@@ -46,9 +46,9 @@ class LoginController // Modificado: ya no extiende userModel
       ));
     } elseif ($authStatus === 'inactive') {
       error_log("Login fallido para usuario (inactivo): $usuario");
-      http_response_code(401); // O podría ser 403 Forbidden si se prefiere
+      http_response_code(401);
       echo json_encode(array('status' => 'error', 'message' => 'Cuenta deshabilitada. Contacte al administrador.'));
-    } else { // $authStatus === false (fallo de credenciales o error)
+    } else {
       error_log("Login fallido para usuario (credenciales/error): $usuario");
       http_response_code(401);
       echo json_encode(array('status' => 'error', 'message' => 'El usuario o contraseña son incorrectos.'));

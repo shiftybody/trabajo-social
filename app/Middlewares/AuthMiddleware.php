@@ -112,7 +112,7 @@ class AuthMiddleware
             ], 403);
         }
 
-        // Para requests web, redirigir al login con mensaje de cuenta deshabilitada
+        // Para requests web, redirigir al login con message de cuenta deshabilitada
         $loginUrl = APP_URL . 'login?account_disabled=1';
         return Response::redirect($loginUrl);
     }

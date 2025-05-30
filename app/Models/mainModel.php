@@ -460,13 +460,13 @@ class mainModel
    * 
    * @param array $archivo Elemento de $_FILES a validar
    * @param array $opciones Opciones de validación (tipos, tamaño máximo, etc.)
-   * @return array Resultado con estado y mensaje
+   * @return array Resultado con estado y message
    */
   public function validarArchivo($archivo, $opciones = [])
   {
     $resultado = [
       'valido' => false,
-      'mensaje' => '',
+      'message' => '',
       'ruta_temp' => '',
       'nombre_original' => '',
       'extension' => ''
@@ -477,29 +477,29 @@ class mainModel
       switch ($archivo['error']) {
         case UPLOAD_ERR_INI_SIZE:
           $max_size = ini_get('upload_max_filesize');
-          $resultado['mensaje'] = "El archivo excede el tamaño máximo permitido por el servidor ($max_size)";
+          $resultado['message'] = "El archivo excede el tamaño máximo permitido por el servidor ($max_size)";
           break;
         case UPLOAD_ERR_FORM_SIZE:
-          $resultado['mensaje'] = "El archivo excede el tamaño máximo permitido por el formulario";
+          $resultado['message'] = "El archivo excede el tamaño máximo permitido por el formulario";
           break;
         case UPLOAD_ERR_PARTIAL:
-          $resultado['mensaje'] = "El archivo se subió parcialmente. Intente nuevamente";
+          $resultado['message'] = "El archivo se subió parcialmente. Intente nuevamente";
           break;
         case UPLOAD_ERR_NO_FILE:
           // es valido poque no se subio ningun archivo por lo que se usara el valor por defecto
           $resultado['valido'] = true;
           break;
         case UPLOAD_ERR_NO_TMP_DIR:
-          $resultado['mensaje'] = "No se encuentra la carpeta temporal en el servidor";
+          $resultado['message'] = "No se encuentra la carpeta temporal en el servidor";
           break;
         case UPLOAD_ERR_CANT_WRITE:
-          $resultado['mensaje'] = "No se pudo guardar el archivo en el servidor";
+          $resultado['message'] = "No se pudo guardar el archivo en el servidor";
           break;
         case UPLOAD_ERR_EXTENSION:
-          $resultado['mensaje'] = "Una extensión de PHP detuvo la carga del archivo";
+          $resultado['message'] = "Una extensión de PHP detuvo la carga del archivo";
           break;
         default:
-          $resultado['mensaje'] = "Error desconocido al subir el archivo (código: {$archivo['error']})";
+          $resultado['message'] = "Error desconocido al subir el archivo (código: {$archivo['error']})";
       }
       return $resultado;
     }
@@ -512,7 +512,7 @@ class mainModel
 
       if (!in_array($tipo_mime, $opciones['tipos'])) {
         $tipos_permitidos = implode(', ', $opciones['tipos']);
-        $resultado['mensaje'] = "El tipo de archivo no es válido ($tipo_mime). Se esperaba: $tipos_permitidos";
+        $resultado['message'] = "El tipo de archivo no es válido ($tipo_mime). Se esperaba: $tipos_permitidos";
         return $resultado;
       }
     }
@@ -521,7 +521,7 @@ class mainModel
     if (isset($opciones['tamano_max']) && $archivo['size'] > $opciones['tamano_max']) {
       $tamano_mb = round($opciones['tamano_max'] / (1024 * 1024), 2);
       $tamano_actual_mb = round($archivo['size'] / (1024 * 1024), 2);
-      $resultado['mensaje'] = "El archivo excede el tamaño máximo permitido: {$tamano_actual_mb}MB (máximo: {$tamano_mb}MB)";
+      $resultado['message'] = "El archivo excede el tamaño máximo permitido: {$tamano_actual_mb}MB (máximo: {$tamano_mb}MB)";
       return $resultado;
     }
 
@@ -531,7 +531,7 @@ class mainModel
     // Verificar extensiones permitidas
     if (isset($opciones['extensiones']) && !in_array(strtolower($extension), array_map('strtolower', $opciones['extensiones']))) {
       $extensiones_permitidas = implode(', ', $opciones['extensiones']);
-      $resultado['mensaje'] = "La extensión del archivo ($extension) no es válida. Se esperaba: $extensiones_permitidas";
+      $resultado['message'] = "La extensión del archivo ($extension) no es válida. Se esperaba: $extensiones_permitidas";
       return $resultado;
     }
 
