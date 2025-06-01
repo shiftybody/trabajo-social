@@ -20,9 +20,9 @@ try {
   if ($isApiRequest) {
     $uri = '/' . implode('/', array_slice($segments, 1));
     $request->setUri($uri);
-    $router = require_once __DIR__ . '/../app/Routes/api.php';
+    $router = require_once APP_ROOT . 'app/Routes/api.php';
   } else {
-    $router = require_once '../app/Routes/web.php';
+    $router = require_once APP_ROOT . 'app/Routes/web.php';
   }
 
   $response = $router->dispatch($request);
@@ -37,7 +37,7 @@ try {
         'message' => 'Ruta no encontrada'
       ], 404);
     } else {
-      // Para rutas web, verificar autenticación antes de redirigir
+
       if (Auth::check()) {
         $response = Response::redirect(APP_URL . 'error/404');
       } else {

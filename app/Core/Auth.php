@@ -13,79 +13,34 @@ use App\Models\permissionModel;
  */
 class Auth
 {
-  /**
-   * Usuario autenticado actual
-   * @var object|null
-   */
+
   private static $user = null;
-
-  /**
-   * Permisos del usuario cache
-   * @var array|null
-   */
   private static $permissions = null;
-
-  /**
-   * Modelo de usuario
-   * @var userModel
-   */
   private static $userModel = null;
-
-  /**
-   * Modelo de permisos
-   * @var permissionModel
-   */
   private static $permissionModel = null;
 
-  /**
-   * Rutas públicas que no requieren autenticación
-   * @var array
-   */
-  private static $publicRoutes = [
-    '/login',
-    '/logout',
-    '/error/404',
-    '/error/403',
-    '/error/401',
-    '/error/500'
-  ];
-
-  /**
-   * Inicializa el sistema de autenticación
-   */
   public static function init()
   {
     if (session_status() == PHP_SESSION_NONE) {
       session_start();
     }
 
-    // Asegurar que los modelos estén disponibles
     if (!self::$userModel) {
       self::$userModel = new userModel();
     }
-    // AÑADIR ESTA VERIFICACIÓN E INICIALIZACIÓN PARA PERMISSIONMODEL
+
     if (!self::$permissionModel) {
       self::$permissionModel = new permissionModel();
     }
 
-    // Si no hay una sesión activa (self::$user aún no está cargado),
-    // intentar restaurar desde la cookie.
-    // self::check() aquí podría ser prematuro si loadUser aún no se ha ejecutado
-    // con una sesión existente. Es mejor verificar directamente la variable de sesión.
     if (!isset($_SESSION[APP_SESSION_NAME]['id'])) {
-      self::tryRestoreFromCookie();
+      self::restoreSessionFromCookie();
     }
 
-    // Cargar datos del usuario si hay una sesión (ya sea original o restaurada)
-    // y manejar la expiración de la sesión.
     self::loadUser();
   }
 
-  /**
-   * Intenta restaurar la sesión desde la cookie de "recordar sesión"
-   * @return bool True si la sesión fue restaurada, false en caso contrario
-   */
-  private static function tryRestoreFromCookie()
+  private static function restoreSessionFromCookie()
   {
     if (!isset($_COOKIE[APP_SESSION_NAME])) {
       return false;
@@ -108,7 +63,7 @@ class Auth
       self::$userModel = new userModel();
     }
 
-    $user = self::$userModel->obtenerUsuarioPorId($cookieData['id']);
+    $user = self::$userModel->getUserById($cookieData['id']);
 
     if (!$user) {
       setcookie(APP_SESSION_NAME, "", time() - 3600, "/");
@@ -120,34 +75,23 @@ class Auth
       return false;
     }
 
-    // Cookie válida, crear la sesión, indicando que SÍ es una sesión recordada
     self::createSession($user, true);
-    // Opcional: Refrescar la cookie de "recordarme" para extender su duración si se desea.
-    // self::createRememberCookie($user); 
-    error_log("Sesión restaurada desde cookie para usuario ID: " . $user->usuario_id);
     return true;
   }
 
-  /**
-   * Carga los datos del usuario desde la sesión si existe y no ha expirado
-   */
   private static function loadUser()
   {
     if (isset($_SESSION[APP_SESSION_NAME]['id'])) {
-      // Verificar si la sesión ha expirado
       if (self::isExpired()) {
-        // error_log("Auth::loadUser - Session expired for user ID: " . $_SESSION[APP_SESSION_NAME]['id']);
-        self::logout(); // Limpia los datos de la sesión y las variables estáticas
-        return; // No continuar cargando el usuario
+        self::logout();
+        return;
       }
 
-      // Si la sesión es válida y no ha expirado, cargar datos del usuario
-      // Asegurar que el modelo de usuario esté instanciado
       if (!self::$userModel) {
         self::$userModel = new userModel();
       }
 
-      $user = self::$userModel->obtenerUsuarioPorId($_SESSION[APP_SESSION_NAME]['id']);
+      $user = self::$userModel->getUserById($_SESSION[APP_SESSION_NAME]['id']);
 
       if ($user) {
         self::$user = $user;
@@ -388,8 +332,6 @@ class Auth
     }
 
     $authResult = self::$userModel->autenticarUsuario($identifier, $password);
-    // transform object to json
-    // error_log(json_encode($authResult)); // Modificado para loguear el array completo
 
     if (isset($authResult['status'])) {
       switch ($authResult['status']) {
@@ -416,7 +358,6 @@ class Auth
           return false; // Estado desconocido
       }
     } else {
-      // Manejo de un formato de respuesta inesperado (si $authResult no es un array con 'status')
       error_log("Formato de respuesta inesperado de autenticarUsuario para: " . $identifier . " - Respuesta: " . json_encode($authResult));
       return false;
     }

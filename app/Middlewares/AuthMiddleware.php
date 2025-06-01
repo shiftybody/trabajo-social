@@ -6,20 +6,9 @@ use App\Core\Auth;
 use App\Core\Request;
 use App\Core\Response;
 
-/**
- * Middleware de Autenticación Mejorado
- * 
- * Verifica:
- * 1. Que el usuario esté autenticado
- * 2. Que el usuario esté activo (estado = 1)
- * 3. Refresca la actividad de la sesión si todo está correcto (excepto para ciertas rutas)
- */
 class AuthMiddleware
 {
-    /**
-     * Rutas que NO deben refrescar automáticamente la actividad de sesión
-     * @var array
-     */
+
     private $rutasNoRefresh = [
         '/session/status',
         '/session/refresh'
@@ -49,21 +38,14 @@ class AuthMiddleware
 
         // Verificar si el usuario está activo
         if (!$this->isUserActive($user)) {
-            // Registrar intento de acceso de usuario inactivo
-            error_log("Intento de acceso de usuario inactivo: Usuario ID {$user->usuario_id} ({$user->usuario_usuario})");
-
-            // Cerrar sesión del usuario inactivo
             Auth::logout();
-
             return $this->handleInactiveUser($request);
         }
 
-        // Verificar si esta ruta debe refrescar automáticamente la actividad
+
         $uri = $request->getUri();
         $debeRefrescar = !in_array($uri, $this->rutasNoRefresh);
-        error_log("Ruta: {$uri} - Debe refrescar: " . ($debeRefrescar ? 'Sí' : 'No')); // Agrega este log para debuga
 
-        // Solo refrescar actividad si no está en la lista de exclusión
         if ($debeRefrescar) {
             Auth::refreshSessionActivity();
         }

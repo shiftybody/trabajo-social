@@ -169,72 +169,6 @@ const MODAL_TEMPLATES = {
       {{retryButton}}
     </div>
   `,
-  // Template para crear rol
-  createRole: `
-    <form novalidate id="createRoleForm" class="base-modal-form form-ajax" method="POST">
-      <div class="input-field">
-        <label for="roleName" class="field-label">Nombre del Rol</label>
-        <input type="text" name="descripcion" id="roleName" 
-               class="input-reset" placeholder="Ingrese el nombre del rol"
-               maxlength="50" required>
-      </div>
-      
-      <div class="permissions-section">
-        <h4 class="permissions-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-          </svg>
-          Permisos del Rol
-        </h4>
-        <div class="permissions-grid">
-          {{permissionsHTML}}
-        </div>
-      </div>
-      
-      <div class="base-modal-actions">
-        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
-        <button type="submit" class="btn-primary">Crear Rol</button>
-      </div>
-    </form>
-  `,
-
-  // Template para editar rol
-  editRole: `
-    <form novalidate id="editRoleForm" class="base-modal-form form-ajax" method="POST">
-      <div class="role-info-section">
-        <div class="input-field">
-          <label for="editRoleName" class="field-label">Nombre del Rol</label>
-          <input type="text" name="descripcion" id="editRoleName" 
-                 class="input-reset" placeholder="Ingrese el nombre del rol"
-                 value="{{roleName}}" maxlength="50" required>
-        </div>
-        
-        <div class="role-stats">
-          <div class="stat-item">
-            <span class="stat-label">Usuarios asignados:</span>
-            <span class="stat-value">{{usuariosCount}}</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="permissions-section">
-        <h4 class="permissions-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-          </svg>
-          Permisos del Rol
-        </h4>
-        <div class="permissions-grid">
-          {{permissionsHTML}}
-        </div>
-      </div>
-      
-      <div class="base-modal-actions">
-        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
-        <button type="submit" class="btn-primary">Guardar Cambios</button>
-      </div>
-    </form>
-  `,
 
   // Template para detalles de rol
   roleDetails: `
@@ -279,6 +213,33 @@ const MODAL_TEMPLATES = {
       </div>
     </div>
   `,
+  
+  // Template para editar rol
+  createRole: `
+    <form novalidate id="createRoleForm" class="base-modal-form form-ajax" method="POST">
+      <div class="input-field">
+        <label for="roleName" class="field-label">Nombre del Rol</label>
+        <input type="text" name="descripcion" id="roleName" 
+               class="input-reset" placeholder="Ingrese el nombre del rol"
+               maxlength="50" required>
+      </div>
+      
+      <div class="input-field">
+        <label for="baseRole" class="field-label">Rol Base (Opcional)</label>
+        <select name="rol_base" id="baseRole" class="input-reset">
+          <option value="">Sin rol base - Crear vacío</option>
+          {{baseRolesOptions}}
+        </select>
+        <small class="field-help">Si selecciona un rol base, se copiarán sus permisos</small>
+      </div>
+      
+      <div class="base-modal-actions">
+        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">Crear Rol</button>
+      </div>
+    </form>
+  `,
+
 };
 
 /**
@@ -362,6 +323,21 @@ const TEMPLATE_GENERATORS = {
  * Funciones helper para procesar templates complejos
  */
 const TEMPLATE_HELPERS = {
+  processCreateRole: (roles) => {
+    const baseRolesOptions = roles
+      .filter((role) => role.rol_id !== 1) // Excluir admin o según lógica
+      .map(
+        (role) =>
+          `<option value="${role.rol_id}">${role.rol_descripcion}</option>`
+      )
+      .join("");
+
+    return {
+      baseRolesOptions,
+    };
+  },
+
+
   // Procesa datos de usuario para el template de detalles
   processUserDetailsData: (user) => {
     const avatarUrl =
@@ -440,16 +416,6 @@ const TEMPLATE_HELPERS = {
       newStatusClass: newStatus,
       newStatusValue,
       submitText,
-    };
-  },
-
-  // Procesa datos para crear rol
-  processCreateRoleData: (permissions) => {
-    return {
-      permissionsHTML: TEMPLATE_HELPERS.generatePermissionsGrid(
-        permissions,
-        []
-      ),
     };
   },
 

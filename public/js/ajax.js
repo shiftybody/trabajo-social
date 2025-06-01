@@ -283,10 +283,7 @@ function handleErrorResponse(form, responseData) {
     closeCurrentModal();
 
     CustomDialog.error(
-      "Error",
-      responseData.message ||
-        responseData.message ||
-        "Ocurrió un error al procesar la solicitud"
+      "Error", responseData.message || "Ocurrió un error al procesar la solicitud"
     );
   }
 }

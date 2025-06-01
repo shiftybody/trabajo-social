@@ -2,8 +2,10 @@
 
 namespace App\Controllers;
 
-use App\Core\Auth; // Añadido
-use App\Core\Request; // Asegúrate de que esta línea esté presente o añádela
+use App\Core\Auth;
+use App\Core\Request;
+use App\Core\Response;
+use Error;
 
 /**
  * Controlador para autenticación API con sesiones
@@ -11,11 +13,42 @@ use App\Core\Request; // Asegúrate de que esta línea esté presente o añádel
  */
 class LoginController // Modificado: ya no extiende userModel
 {
+
+  /**
+   * Vista de inicio de sesión
+   */
+  public function indexView()
+  {
+
+    // if (isset($_SESSION[APP_SESSION_NAME]) && !empty($_SESSION[APP_SESSION_NAME]['id'])) {
+    //   return Response::redirect(APP_URL . 'home');
+    // }
+
+    // Mensaje de sesión expirada
+    if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
+      $status_message = 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';
+      $message_class = 'expired-session-message';
+    }
+
+    // Mensaje de cuenta deshabilitada
+    if (isset($_GET['account_disabled']) && $_GET['account_disabled'] == '1') {
+      $status_message = 'Tu cuenta ha sido deshabilitada. Contacta al administrador para más información.';
+      $message_class = 'account-disabled-message';
+    }
+
+    ob_start();
+    include APP_ROOT . 'app/Views/login/index.php';
+    $content = ob_get_clean();
+    return Response::html($content);
+  }
+
   /**
    * Inicia sesión del usuario
    */
   public function login()
   {
+
+    error_log("Intento de login recibido");
 
     $usuario = isset($_POST['username']) ? $_POST['username'] : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';

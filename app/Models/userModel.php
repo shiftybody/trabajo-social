@@ -7,20 +7,7 @@ use App\Models\mainModel;
 
 class userModel extends mainModel
 {
-    /**
-     * Registra un nuevo usuario
-     * 
-     * @param string $nombre Nombre del usuario
-     * @param string $apellidoPaterno Apellido paterno
-     * @param string $apellidoMaterno Apellido materno
-     * @param string $telefono Teléfono
-     * @param string $correo Correo electrónico
-     * @param string $username Nombre de usuario
-     * @param string $password Hash de la contraseña
-     * @param string $foto Nombre del archivo de foto
-     * @param int $rol ID del rol
-     * @return bool True si el registro fue exitoso, false en caso contrario
-     */
+
     public function registrarUsuario($data)
     {
         try {
@@ -183,7 +170,7 @@ class userModel extends mainModel
      * @param int $id ID del usuario
      * @return object|false Datos del usuario o false si no existe
      */
-    public function obtenerUsuarioPorId($id)
+    public function getUserById($id)
     {
         try {
             $query = "SELECT u.*, r.rol_descripcion 
@@ -194,7 +181,7 @@ class userModel extends mainModel
             $resultado = $this->ejecutarConsulta($query, [':id' => $id]);
             return $resultado->fetch(PDO::FETCH_OBJ);
         } catch (\Exception $e) {
-            error_log("Error en obtenerUsuarioPorId: " . $e->getMessage());
+            error_log("Error en getUserById: " . $e->getMessage());
             return false;
         }
     }

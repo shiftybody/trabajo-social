@@ -75,6 +75,28 @@ class RoleController
   }
 
   /**
+   * Vista para gestión de permisos de un rol
+   */
+  public function permissionsView(Request $request)
+  {
+    $id = $request->param('id');
+
+    // Verificar que el rol existe
+    $rol = $this->roleModel->obtenerRolPorId($id);
+    if (!$rol) {
+      return Response::redirect(APP_URL . 'error/404');
+    }
+
+    ob_start();
+    $titulo = 'Gestionar Permisos - ' . $rol->rol_descripcion;
+    $rol_id = $id; // Disponible en la vista para JavaScript
+    include APP_ROOT . 'app/Views/roles/permissions.php';
+    $contenido = ob_get_clean();
+
+    return Response::html($contenido);
+  }
+
+  /**
    * API: Obtiene todos los roles con contador de usuarios
    */
   public function getAllRoles(Request $request)
@@ -143,9 +165,6 @@ class RoleController
     }
   }
 
-  /**
-   * API: Crea un nuevo rol
-   */
   public function store(Request $request)
   {
     try {
@@ -158,6 +177,9 @@ class RoleController
           'min' => 2,
           'max' => 50,
           'sanitizar' => true
+        ],
+        'rol_base' => [
+          'formato' => 'entero' // Opcional
         ]
       ];
 
@@ -182,9 +204,16 @@ class RoleController
       $rolId = $this->roleModel->crearRol($resultado['datos']['descripcion']);
 
       if ($rolId) {
-        // Si se enviaron permisos, asignarlos
-        if (isset($datos['permisos']) && is_array($datos['permisos'])) {
-          $this->permissionModel->asignarPermisosARol($rolId, $datos['permisos']);
+        // Si se especificó un rol base, copiar sus permisos
+        if (!empty($resultado['datos']['rol_base'])) {
+          $permisosBase = $this->permissionModel->obtenerPermisosPorRol($resultado['datos']['rol_base']);
+          $permisosIds = array_map(function ($permiso) {
+            return $permiso->permiso_id;
+          }, $permisosBase);
+
+          if (!empty($permisosIds)) {
+            $this->permissionModel->asignarPermisosARol($rolId, $permisosIds);
+          }
         }
 
         return Response::json([

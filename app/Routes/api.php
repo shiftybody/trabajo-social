@@ -8,14 +8,16 @@ use App\Core\Router;
 
 $router = new Router();
 
+error_log("Buscando una ruta coincidente ");
+
 // Rutas públicas
-$router->post('/auth/login', 'LoginController@login');
+$router->post('/login', 'LoginController@login');
 
 // Rutas protegidas (requieren autenticación)
 $router->group(array('middleware' => 'Auth'), function ($router) {
 
   // LOGOUT Y SESSION
-  $router->post('/auth/logout', 'LoginController@logout');
+  $router->post('/logout', 'LoginController@logout');
   $router->post('/session/refresh', 'SessionController@refresh');
   $router->get('/session/status', 'SessionController@status');
 

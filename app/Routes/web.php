@@ -5,39 +5,18 @@ use App\Core\Response;
 
 $router = new Router();
 
-
-$router->get('/login', function () {
-  try {
-    // Si ya hay sesión activa, redirigir al home
-    if (isset($_SESSION[APP_SESSION_NAME]) && !empty($_SESSION[APP_SESSION_NAME]['id'])) {
-      return Response::redirect(APP_URL . 'home');
-    }
-
-    ob_start();
-    $loginViewPath = APP_ROOT . 'app/Views/login/index.php';
-
-    if (!file_exists($loginViewPath)) {
-      throw new Exception("Vista de login no encontrada: " . $loginViewPath);
-    }
-
-    include $loginViewPath;
-    $content = ob_get_clean();
-
-    if (empty($content)) {
-      throw new Exception("La vista de login generó contenido vacío");
-    }
-
-    return Response::html($content);
-  } catch (Exception $e) {
-    return Response::html("<h1>Error al cargar la página de login</h1><p>{$e->getMessage()}</p>");
-  }
-});
-
-$router->post('/login', 'LoginController@login');
-$router->get('/logout', 'LoginController@logout');
-
+// Rutas públicas
+$router->get('/login', 'LoginController@indexView');
 // Rutas protegidas (requieren autenticación)
-$router->group(['middleware' => 'Auth'], function ($router) {
+$router->group(['middleware' => 'Auth'], function ($router) {;
+
+  // Ruta por defecto
+  $router->get('/', function () {
+    return Response::redirect(APP_URL . 'home');
+  });
+
+  // LOGOUT
+  $router->get('/logout', 'LoginController@logout');
 
   // HOME
   $router->get('/home', 'homeController@index')->name('home');
@@ -70,6 +49,7 @@ $router->group(['middleware' => 'Auth'], function ($router) {
 
   $router->group(['middleware' => 'Permission:roles.edit'], function ($router) {
     $router->get('/roles/edit/:id', 'RoleController@editView')->name('roles.edit');
+    $router->get('/roles/:id/permissions', 'RoleController@permissionsView')->name('roles.permissions');
   });
 
   //ERRORS
@@ -104,11 +84,6 @@ $router->group(['middleware' => 'Auth'], function ($router) {
     $content = ob_get_clean();
     return Response::html($content, 500);
   });
-});
-
-// Ruta por defecto
-$router->get('/', function () {
-  return Response::redirect(APP_URL . 'home');
 });
 
 return $router;

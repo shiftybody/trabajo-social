@@ -1,6 +1,10 @@
+<?php
+require_once APP_ROOT . 'public/inc/head.php';
+require_once APP_ROOT . 'public/inc/navbar.php';
+?>
 <style>
   .container {
-    padding: 2.5rem 10rem 0 10rem;
+    padding: 2.5rem 25rem 0 25rem;
   }
 
   .navigation {
@@ -77,6 +81,7 @@
   }
 
   th {
+    padding-left: 1.25rem !important;
     padding-top: 1.2rem !important;
     padding-bottom: 1.2rem !important;
     background-color: #fbfbfb;
@@ -90,6 +95,7 @@
   }
 
   tr {
+    padding-left: 1.25rem !important;
     height: 4rem !important;
     border-bottom: 1px solid #E5E5E5;
   }
@@ -99,6 +105,7 @@
   }
 
   td {
+    padding-left: 1.25rem !important;
     color: var(--gray-900);
     font-size: 14px;
     font-style: normal;
@@ -167,43 +174,124 @@
     stroke: #465566;
   }
 
-  .dropdown-menu {
-    position: absolute;
-    background-color: white;
-    border-radius: var(--rounded-lg);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 160px;
-    z-index: 1000;
-    overflow: hidden;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px);
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  /* REEMPLAZAR estilos de botones con: */
+
+  /* Contenedor de botones de acción */
+  td:not(.dt-empty):last-child {
+    padding: 11px;
   }
 
-  .dropdown-menu.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+  td:not(.dt-empty):last-child .action-buttons {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+    justify-content: center;
   }
 
-  .dropdown-item {
+  /* Estilos base para todos los botones de acción */
+  .editar,
+  .remover,
+  .permisos-btn {
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    background-color: transparent;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    position: relative;
     display: flex;
     align-items: center;
-    padding: 12px 16px;
-    color: #465566;
-    font-size: 14px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    justify-content: center;
   }
 
-  .dropdown-item:hover {
-    background-color: #f8f8f8;
+  .permisos-btn:hover {
+    background-color: #e8f5e8;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
-  .dropdown-item svg {
-    margin-right: 8px;
+  .permisos-btn:hover svg {
+    transform: translateY(-1px) scale(1.05);
+    stroke: #1976d2;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  }
+
+  .remover:hover {
+    background-color: #ffebee;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .remover:hover svg {
+    transform: translateY(-1px) rotate(-5deg);
+    stroke: var(--red-600);
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  }
+
+  /* Transiciones para los SVG */
+  .editar svg,
+  .remover svg,
+  .permisos-btn svg {
+    transition: all 0.25s ease;
+    stroke: #465566;
+  }
+
+  /* Tooltips mejorados para los botones */
+  .action-buttons button[title] {
+    position: relative;
+  }
+
+  .action-buttons button[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 8px;
+    pointer-events: none;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .action-buttons button[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    margin-bottom: 3px;
+    pointer-events: none;
+  }
+
+  /* Responsive para tabla */
+  @media (max-width: 768px) {
+    .action-buttons {
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .action-buttons button {
+      padding: 6px;
+    }
+
+    .action-buttons button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Ocultar tooltips en móvil */
+    .action-buttons button[title]:hover::after,
+    .action-buttons button[title]:hover::before {
+      display: none;
+    }
   }
 
   div.dt-layout-table {
@@ -292,12 +380,6 @@
     }
   }
 </style>
-
-<?php
-require_once APP_ROOT . 'public/inc/head.php';
-require_once APP_ROOT . 'public/inc/navbar.php';
-?>
-
 <div class="container">
   <div class="tools">
     <form class="filter_form" id="filter_form">
@@ -330,24 +412,22 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     <table id="roles-table" class="hover nowrap cell-borders" style="display: none;">
       <thead>
         <tr>
-          <th class="dt-head-center">NO</th>
-          <th>ROL</th>
-          <th class="dt-head-center">USUARIOS</th>
-          <th>ACCIONES</th>
+          <th class="dt-head-left">ROL</th>
+          <th class="dt-head-left">USUARIOS</th>
+          <th class="dt-head-left">ACCIONES</th>
         </tr>
       </thead>
     </table>
   </div>
 </div>
-
-<script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
 <?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
+<script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
 <script>
   // Variables globales
   let table;
   let isFirstLoad = true;
 
-  // Funciones de loading - reutilizadas de users/index.php
+  // Funciones de loading 
   function showTableLoading(message = 'Cargando roles...') {
     const container = document.getElementById('table-container');
     const loadingContainer = document.getElementById('table-loading');
@@ -418,22 +498,43 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   }
 
+  function showTableError(message = 'Error al cargar los datos') {
+    const container = document.getElementById('table-container');
+    const loadingContainer = document.getElementById('table-loading');
+
+    if (loadingContainer) {
+      loadingContainer.innerHTML = `
+        <div class="table-error">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+          <h3>Error</h3>
+          <p>${message}</p>
+          <button type="button" class="btn-reload" onclick="loadData()">Reintentar</button>
+        </div>
+      `;
+      loadingContainer.style.display = 'flex';
+      loadingContainer.classList.add('show');
+    }
+  }
+
   // Inicializar DataTable
   document.addEventListener('DOMContentLoaded', () => {
-    showTableLoading('Inicializando tabla...');
+    showTableLoading('Cargando roles...');
     document.getElementById('roles-table').style.display = '';
 
     table = new DataTable('#roles-table', {
-      scrollX: true,
-      columnDefs: [{
-        targets: [0, 2],
-        className: 'dt-body-center'
-      }],
       layout: {
         topStart: null,
         buttomStart: null,
-        buttomEnd: null
+        buttomEnd: null,
       },
+      columnDefs: [{
+        targets: "_all",
+        className: 'dt-body-left'
+      }],
       language: {
         "zeroRecords": "No se encontraron roles",
         "emptyTable": "Aún no hay roles, crea uno nuevo aquí",
@@ -488,38 +589,32 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         let incremental = 1;
         data.data.forEach(item => {
           table.row.add([
-            incremental++,
             item.rol_descripcion,
             item.usuarios_count || 0,
-            `<?php if (\App\Core\Auth::can('roles.edit')): ?>
-              <button type="button" class="editar" onClick="editarRol(${item.rol_id})">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                  <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
-                  <path d="M13.5 6.5l4 4" />
-                </svg>
-              </button>
-            <?php endif; ?>
-            <?php if (\App\Core\Auth::can('roles.delete')): ?>
-              <button type="button" class="remover" onClick="eliminarRol(${item.rol_id}, '${item.rol_descripcion.replace(/'/g, "\\'")}', ${item.usuarios_count})">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                  <path d="M4 7l16 0" />
-                  <path d="M10 11l0 6" />
-                  <path d="M14 11l0 6" />
-                  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                </svg>
-              </button>
-            <?php endif; ?>
-            <button type="button" class="opciones" onClick="mostrarOpciones(${item.rol_id})">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-                <path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-                <path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-              </svg>
-            </button>`
+            `<div class="action-buttons"> 
+              <?php if (\App\Core\Auth::can('roles.edit')): ?>
+                <button type="button" class="permisos-btn" onClick="gestionarPermisos(${item.rol_id})" title="Gestionar Permisos">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                    <path d="M13.5 6.5l4 4" />
+                  </svg>
+                </button>
+              <?php endif; ?>
+              
+              <?php if (\App\Core\Auth::can('roles.delete')): ?>
+                <button type="button" class="remover" onClick="eliminarRol(${item.rol_id}, '${item.rol_descripcion.replace(/'/g, "\\'")}', ${item.usuarios_count})" title="Eliminar Rol">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M4 7l16 0" />
+                    <path d="M10 11l0 6" />
+                    <path d="M14 11l0 6" />
+                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                  </svg>
+                </button>
+              <?php endif; ?>
+            </div>`
           ]);
         });
 
@@ -538,216 +633,82 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   }
 
-  function showTableError(message = 'Error al cargar los datos') {
-    const container = document.getElementById('table-container');
-    const loadingContainer = document.getElementById('table-loading');
-
-    if (loadingContainer) {
-      loadingContainer.innerHTML = `
-        <div class="table-error">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="15" y1="9" x2="9" y2="15"></line>
-            <line x1="9" y1="9" x2="15" y2="15"></line>
-          </svg>
-          <h3>Error</h3>
-          <p>${message}</p>
-          <button type="button" class="btn-reload" onclick="loadData()">Reintentar</button>
-        </div>
-      `;
-      loadingContainer.style.display = 'flex';
-      loadingContainer.classList.add('show');
-    }
-  }
-
-  // Funciones de acciones
   function crearRol() {
-    const createModal = createModal('createRole', {
-      title: 'Crear Nuevo Rol',
-      size: 'large',
+    cerrarTodosLosMenus();
+
+    const createRolModal = createModal('createRole', {
+      title: "Crear Nuevo Rol",
+      size: 'medium',
       endpoint: `${APP_URL}/api/roles`,
-      onShow: async (modal) => {
-        modal.showLoading('Cargando permisos disponibles...');
+    })
 
-        try {
-          const response = await fetch(`${APP_URL}/api/permissions`);
-          const permissionsData = await response.json();
+    createRolModal.show();
 
-          if (permissionsData.status === 'success') {
-            const templateData = TEMPLATE_HELPERS.processCreateRoleData(permissionsData.data);
-            modal.updateContent(templateData);
-          } else {
-            modal.showError('No se pudieron cargar los permisos');
-          }
-        } catch (error) {
-          modal.showError('Error al conectar con el servidor');
-        }
-      }
-    });
-
-    createModal.show();
   }
 
   function editarRol(rolId) {
-    const editModal = createModal('editRole', {
-      title: 'Editar Rol',
-      size: 'large',
-      endpoint: `${APP_URL}/api/roles/${rolId}`,
-      onShow: async (modal) => {
-        modal.showLoading('Cargando información del rol...');
-
-        try {
-          const [roleResponse, permissionsResponse, rolePermissionsResponse] = await Promise.all([
-            fetch(`${APP_URL}/api/roles/${rolId}`),
-            fetch(`${APP_URL}/api/permissions`),
-            fetch(`${APP_URL}/api/roles/${rolId}/permissions`)
-          ]);
-
-          const roleData = await roleResponse.json();
-          const permissionsData = await permissionsResponse.json();
-          const rolePermissionsData = await rolePermissionsResponse.json();
-
-          if (roleData.status === 'success' && permissionsData.status === 'success') {
-            const templateData = TEMPLATE_HELPERS.processEditRoleData(
-              roleData.data,
-              permissionsData.data,
-              rolePermissionsData.data || []
-            );
-            modal.updateContent(templateData);
-          } else {
-            modal.showError('No se pudieron cargar los datos del rol');
-          }
-        } catch (error) {
-          modal.showError('Error al conectar con el servidor');
-        }
-      }
-    });
-
-    editModal.show();
+    // TODO:
   }
 
   async function eliminarRol(rolId, nombreRol, usuariosCount) {
-    if (usuariosCount > 0) {
-      CustomDialog.error(
-        'No se puede eliminar',
-        `El rol "${nombreRol}" tiene ${usuariosCount} usuario(s) asignado(s). Primero debes reasignar estos usuarios a otro rol.`
-      );
-      return;
-    }
-
-    const confirmacion = await CustomDialog.confirm(
-      'Confirmar Eliminación',
-      `¿Está seguro de que desea eliminar el rol "${nombreRol}"?`,
-      'Eliminar',
-      'Cancelar'
-    );
-
-    if (confirmacion) {
-      showTableLoading('Eliminando rol...');
-
-      try {
-        const response = await fetch(`${APP_URL}/api/roles/${rolId}`, {
-          method: "DELETE",
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.status === 'success') {
-          await CustomDialog.success('Operación exitosa', data.message || 'Rol eliminado correctamente');
-          await loadData();
-        } else {
-          hideTableLoading();
-          CustomDialog.error('Error', data.message || 'No se pudo eliminar el rol.');
-        }
-      } catch (error) {
-        console.error('Error en la petición fetch:', error);
-        hideTableLoading();
-        CustomDialog.error('Error de Red', 'Ocurrió un problema al intentar conectar con el servidor.');
-      }
-    }
+    // TODO:
   }
 
-  function mostrarOpciones(rolId) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    cerrarTodosLosMenus();
-
-    const boton = event.currentTarget;
-    let menu = document.getElementById(`menu-${rolId}`);
-
-    if (!menu) {
-      menu = document.createElement('div');
-      menu.id = `menu-${rolId}`;
-      menu.className = 'dropdown-menu';
-      menu.innerHTML = `
-        <div class="dropdown-item" onclick="gestionarPermisos(${rolId})">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-          </svg>
-          Gestionar permisos
-        </div>
-        <div class="dropdown-item" onclick="verDetallesRol(${rolId})">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <circle cx="12" cy="8" r="1"></circle>
-            <line x1="12" y1="12" x2="12" y2="16"></line>
-          </svg>
-          Ver detalles
-        </div>
-      `;
-      document.body.appendChild(menu);
-    }
-
-    posicionarMenu(boton, menu);
-    menu.classList.add('show');
-
-    setTimeout(() => {
-      document.addEventListener('click', cerrarMenuAlClickearFuera);
-    }, 10);
+  function gestionarPermisos(rolId) {
+    // TODO:
   }
 
+  // Función para posicionar el menú correctamente
   function posicionarMenu(boton, menu) {
     const rect = boton.getBoundingClientRect();
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
+    // Calcular posición inicial (debajo y a la derecha del botón)
     let top = rect.bottom + scrollTop;
     let left = rect.left + scrollLeft;
 
+    // Mostrar temporalmente el menú para obtener sus dimensiones
     menu.style.visibility = 'hidden';
     menu.style.display = 'block';
     menu.style.opacity = '0';
 
+    // Obtener dimensiones del menú
     const menuWidth = menu.offsetWidth;
     const menuHeight = menu.offsetHeight;
+
+    // Obtener dimensiones de la ventana
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
+    // Ajustar posición si el menú se sale por la derecha
     if (left + menuWidth > windowWidth - 20) {
       left = rect.right + scrollLeft - menuWidth;
     }
 
+    // Ajustar posición si el menú se sale por abajo
     if (top + menuHeight > windowHeight + scrollTop - 20) {
       top = rect.top + scrollTop - menuHeight;
     }
 
+    // Aplicar posición
     menu.style.top = `${top}px`;
     menu.style.left = `${left}px`;
+
+    // Restaurar visibilidad
     menu.style.visibility = '';
     menu.style.display = '';
     menu.style.opacity = '';
   }
 
+  // Función para cerrar todos los menús
   function cerrarTodosLosMenus() {
     document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
       menu.classList.remove('show');
     });
   }
 
+  // Función para cerrar el menú cuando se hace clic fuera de él
   function cerrarMenuAlClickearFuera(event) {
     const menus = document.querySelectorAll('.dropdown-menu.show');
     let clickDentroDeMenu = false;
@@ -758,42 +719,42 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       }
     });
 
+    // Si el clic no fue dentro de un menú o en un botón de opciones
     if (!clickDentroDeMenu && !event.target.classList.contains('opciones')) {
       cerrarTodosLosMenus();
       document.removeEventListener('click', cerrarMenuAlClickearFuera);
     }
   }
 
-  function gestionarPermisos(rolId) {
-    cerrarTodosLosMenus();
-    editarRol(rolId); // Reutilizar el modal de edición
-  }
+  document.addEventListener('DOMContentLoaded', function() {
+    // Verificar si hay un message de éxito de actualización de usuario
+    const updateSuccess = sessionStorage.getItem('userUpdateSuccess');
 
-  function verDetallesRol(rolId) {
-    cerrarTodosLosMenus();
+    if (updateSuccess) {
+      try {
+        const successData = JSON.parse(updateSuccess);
 
-    const detailsModal = createModal('roleDetails', {
-      title: 'Detalles del Rol',
-      size: 'large',
-      onShow: async (modal) => {
-        modal.showLoading('Cargando información del rol...');
+        // Verificar que el message no sea muy antiguo (máximo 10 segundos)
+        const now = Date.now();
+        const messageAge = now - successData.timestamp;
 
-        try {
-          const response = await fetch(`${APP_URL}/api/roles/${rolId}`);
-          const roleData = await response.json();
-
-          if (roleData.status === 'success') {
-            const templateData = TEMPLATE_HELPERS.processRoleDetailsData(roleData.data);
-            modal.updateContent(templateData);
-          } else {
-            modal.showError('No se pudo cargar la información del rol');
-          }
-        } catch (error) {
-          modal.showError('Error al conectar con el servidor');
+        if (messageAge < 10000) { // 10 segundos
+          // Esperar a que la página se cargue completamente antes de mostrar el modal
+          setTimeout(async () => {
+            await CustomDialog.success(
+              'Usuario Actualizado',
+              successData.message
+            );
+          }, 500); // Pequeño delay para asegurar que todo esté cargado
         }
-      }
-    });
 
-    detailsModal.show();
-  }
+        // Limpiar el message del sessionStorage
+        sessionStorage.removeItem('userUpdateSuccess');
+
+      } catch (error) {
+        console.error('Error al procesar message de éxito:', error);
+        sessionStorage.removeItem('userUpdateSuccess');
+      }
+    }
+  });
 </script>

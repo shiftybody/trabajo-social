@@ -44,7 +44,7 @@ class UserController
     ob_start();
     $id = $request->param('id');
     $titulo = 'Editar Usuario';
-    $usuario = $this->userModel->obtenerUsuarioPorId($id);
+    $usuario = $this->userModel->getUserById($id);
     include APP_ROOT . 'app/Views/users/edit.php';
     $contenido = ob_get_clean();
 
@@ -79,7 +79,7 @@ class UserController
         ], 400);
       }
 
-      $usuario = $this->userModel->obtenerUsuarioPorId($id);
+      $usuario = $this->userModel->getUserById($id);
 
       if (!$usuario) {
         return Response::json([
@@ -351,7 +351,7 @@ class UserController
     $datos = $request->POST();
 
     // Validar que el usuario existe
-    $usuario = $this->userModel->obtenerUsuarioPorId($id);
+    $usuario = $this->userModel->getUserById($id);
     if (!$usuario) {
       return Response::json([
         'status' => 'error',
@@ -599,7 +599,7 @@ class UserController
     error_log(print_r($datos, true));
 
     // Validar que el usuario existe
-    $usuario = $this->userModel->obtenerUsuarioPorId($id);
+    $usuario = $this->userModel->getUserById($id);
     if (!$usuario) {
       return Response::json([
         'status' => 'error',
@@ -607,7 +607,6 @@ class UserController
       ], 404);
     }
 
-    // Validar datos de entrada
     $validar = [
       'password' => [
         'requerido' => true,
@@ -663,7 +662,7 @@ class UserController
     error_log("Cambio de estado - ID: " . $id . " - Datos: " . print_r($datos, true));
 
     // Validar que el usuario existe
-    $usuario = $this->userModel->obtenerUsuarioPorId($id);
+    $usuario = $this->userModel->getUserById($id);
     if (!$usuario) {
       return Response::json([
         'status' => 'error',
@@ -737,7 +736,7 @@ class UserController
     $id = $request->param('id');
 
     // Verificar que el usuario exista
-    $usuario = $this->userModel->obtenerUsuarioPorId($id);
+    $usuario = $this->userModel->getUserById($id);
     if (!$usuario) {
       return Response::json([
         'status' => 'error',

@@ -565,10 +565,6 @@
   .dt-layout-row:first-of-type {
     display: none !important;
   }
-
-  /* no actualizar usuario si los cambios son iguales al anterior es decir no se mandan cambios */
-
-  /* Estandarizar los estilos de los botones de limpiar [reset] cancelar y los buttons type submit tienen que ser iguales que los de los dialog*/
 </style>
 <?php
 require_once APP_ROOT . 'public/inc/head.php';
@@ -908,32 +904,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   }
 
-  // se agrega el evento de click al boton de limpiar cuando el documento este cargado
-  document.addEventListener('DOMContentLoaded', function() {
-
-    const clearButton = document.querySelector('.clear-button');
-
-    /** cuando se presione el boton de limpiar*/
-    clearButton.addEventListener('click', clearInput);
-
-    function clearInput() {
-      matchingInput.value = '';
-      matchingInput.focus();
-      clearButton.style.display = 'none';
-      applyFilter();
-    }
-
-    matchingInput.addEventListener('input', () => {
-      if (matchingInput.value) {
-        clearButton.style.display = 'inline';
-      } else {
-        clearButton.style.display = 'none';
-      }
-    });
-  });
-
-  let legacyInput = document.querySelector('.dt-layout-row');
-  legacyInput.style.display = 'none';
+  function actualizar(usuario_id) {
+    window.location.href = `<?= APP_URL ?>users/edit/${usuario_id}`;
+  }
 
   async function remover(usuario_id, nombreUsuario) {
     const confirmacion = await CustomDialog.confirm(
@@ -959,19 +932,12 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
         if (response.ok && data.status === 'success') {
           await CustomDialog.success('Operación exitosa', data.message || 'Usuario eliminado correctamente');
-
-          // Recargar datos con loading mejorado
           await loadData();
-        }
-
-        if (response.ok && data.status === 'error') {
-          await CustomDialog.error('Error', data.message || 'No se pudo eliminar el usuario.');
-
-          await loadData();
-        } else {
-          // Ocultar loading
+        } else if (response.ok && data.status === 'error') {
           hideTableLoading();
-
+          await CustomDialog.error('Error', data.message || 'No se pudo eliminar el usuario.');
+        } else {
+          hideTableLoading();
           CustomDialog.error('Error', data.message || 'No se pudo eliminar el usuario.');
         }
       } catch (error) {
@@ -984,11 +950,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       }
     }
   }
-
-  function actualizar(usuario_id) {
-    window.location.href = `<?= APP_URL ?>users/edit/${usuario_id}`;
-  }
-
 
   function mostrarOpciones(usuario_id) {
     // Prevenir comportamiento por defecto
@@ -1114,40 +1075,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   }
 
 
-
-  // Verificar si hay un message de éxito pendiente después de redirección
-  document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si hay un message de éxito de actualización de usuario
-    const updateSuccess = sessionStorage.getItem('userUpdateSuccess');
-
-    if (updateSuccess) {
-      try {
-        const successData = JSON.parse(updateSuccess);
-
-        // Verificar que el message no sea muy antiguo (máximo 10 segundos)
-        const now = Date.now();
-        const messageAge = now - successData.timestamp;
-
-        if (messageAge < 10000) { // 10 segundos
-          // Esperar a que la página se cargue completamente antes de mostrar el modal
-          setTimeout(async () => {
-            await CustomDialog.success(
-              'Usuario Actualizado',
-              successData.message
-            );
-          }, 500); // Pequeño delay para asegurar que todo esté cargado
-        }
-
-        // Limpiar el message del sessionStorage
-        sessionStorage.removeItem('userUpdateSuccess');
-
-      } catch (error) {
-        console.error('Error al procesar message de éxito:', error);
-        sessionStorage.removeItem('userUpdateSuccess');
-      }
-    }
-  });
-
   function resetearPassword(userId) {
     cerrarTodosLosMenus();
 
@@ -1239,4 +1166,63 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
     detailsModal.show();
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Verificar si hay un message de éxito de actualización de usuario
+    const updateSuccess = sessionStorage.getItem('userUpdateSuccess');
+
+    if (updateSuccess) {
+      try {
+        const successData = JSON.parse(updateSuccess);
+
+        // Verificar que el message no sea muy antiguo (máximo 10 segundos)
+        const now = Date.now();
+        const messageAge = now - successData.timestamp;
+
+        if (messageAge < 10000) { // 10 segundos
+          // Esperar a que la página se cargue completamente antes de mostrar el modal
+          setTimeout(async () => {
+            await CustomDialog.success(
+              'Usuario Actualizado',
+              successData.message
+            );
+          }, 500); // Pequeño delay para asegurar que todo esté cargado
+        }
+
+        // Limpiar el message del sessionStorage
+        sessionStorage.removeItem('userUpdateSuccess');
+
+      } catch (error) {
+        console.error('Error al procesar message de éxito:', error);
+        sessionStorage.removeItem('userUpdateSuccess');
+      }
+    }
+  });
+
+  // se agrega el evento de click al boton de limpiar cuando el documento este cargado
+  document.addEventListener('DOMContentLoaded', function() {
+
+    const clearButton = document.querySelector('.clear-button');
+
+    /** cuando se presione el boton de limpiar*/
+    clearButton.addEventListener('click', clearInput);
+
+    function clearInput() {
+      matchingInput.value = '';
+      matchingInput.focus();
+      clearButton.style.display = 'none';
+      applyFilter();
+    }
+
+    matchingInput.addEventListener('input', () => {
+      if (matchingInput.value) {
+        clearButton.style.display = 'inline';
+      } else {
+        clearButton.style.display = 'none';
+      }
+    });
+  });
+
+  let legacyInput = document.querySelector('.dt-layout-row');
+  legacyInput.style.display = 'none';
 </script>

@@ -297,10 +297,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             }
             return response.json();
         })
-        .then(responseData => { // Cambiado de 'data' a 'responseData' para claridad
+        .then(responseData => {
             const select = document.getElementById("rol");
 
-            // Acceder a la propiedad 'data' del objeto de respuesta
             const roles = responseData.data;
 
             if (!roles || roles.length === 0) {

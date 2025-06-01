@@ -1,21 +1,3 @@
-<?php
-// Manejo de messages de estado
-$status_message = '';
-$message_class = '';
-
-// Mensaje de sesión expirada
-if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
-  $status_message = 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';
-  $message_class = 'expired-session-message';
-}
-
-// Mensaje de cuenta deshabilitada
-if (isset($_GET['account_disabled']) && $_GET['account_disabled'] == '1') {
-  $status_message = 'Tu cuenta ha sido deshabilitada. Contacta al administrador para más información.';
-  $message_class = 'account-disabled-message';
-}
-?>
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,7 +31,7 @@ if (isset($_GET['account_disabled']) && $_GET['account_disabled'] == '1') {
   <section id="section-container">
     <img src="<?= APP_URL ?>public/images/logotipo-neurodesarrollo.png" alt="logitipo neurodesarrollo" id="logotipo">
 
-    <form novalidate action="<?= APP_URL ?>login" method="POST" id="login-form" class="ajax-form">
+    <form novalidate action="<?= APP_URL ?>api/login" method="POST" id="login-form" class="ajax-form">
 
       <div id="login-info">
         <h1>Iniciar Sesión</h1>
