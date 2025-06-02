@@ -4,7 +4,7 @@
  * Configuración de sesiones, cookies y otros parámetros de PHP.
  */
 
-define('SESSION_EXPIRATION_TIMOUT', 60 * 5);
+define('SESSION_EXPIRATION_TIMEOUT', 60 * 5);
 define('REMEMBER_COOKIE_DURATION', 60 * 60 * 24 * 30);
 
 ini_set('session.cookie_lifetime', 0);

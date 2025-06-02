@@ -129,7 +129,7 @@ class Auth
       }
     }
 
-    return (time() - $_SESSION[APP_SESSION_NAME]['ultima_actividad']) > SESSION_EXPIRATION_TIMOUT;
+    return (time() - $_SESSION[APP_SESSION_NAME]['ultima_actividad']) > SESSION_EXPIRATION_TIMEOUT;
   }
 
   /**
@@ -161,7 +161,7 @@ class Auth
         'isActive' => false,
         'timeRemaining' => 0,
         'expirationTimestamp' => 0,
-        'sessionTotalDuration' => defined('SESSION_EXPIRATION_TIMOUT') ? SESSION_EXPIRATION_TIMOUT : 0,
+        'sessionTotalDuration' => defined('SESSION_EXPIRATION_TIMEOUT') ? SESSION_EXPIRATION_TIMEOUT : 0,
         'isRememberedSession' => false,
       ];
     }
@@ -175,10 +175,10 @@ class Auth
       error_log("getSessionStatus: cookie 'recordarme' no encontrada para sesión recordada. Actualizando estado.");
     }
 
-    $expirationTimestamp = $_SESSION[APP_SESSION_NAME]['ultima_actividad'] + SESSION_EXPIRATION_TIMOUT;
+    $expirationTimestamp = $_SESSION[APP_SESSION_NAME]['ultima_actividad'] + SESSION_EXPIRATION_TIMEOUT;
 
     $timeRemaining = $isRemembered
-      ? SESSION_EXPIRATION_TIMOUT // Valor constante alto para sesiones recordadas
+      ? SESSION_EXPIRATION_TIMEOUT // Valor constante alto para sesiones recordadas
       : max(0, $expirationTimestamp - time());
 
     // Una sesión recordada siempre está activa mientras exista la cookie
@@ -189,7 +189,7 @@ class Auth
       'isActive' => $isActive,
       'timeRemaining' => $timeRemaining,
       'expirationTimestamp' => $expirationTimestamp,
-      'sessionTotalDuration' => SESSION_EXPIRATION_TIMOUT,
+      'sessionTotalDuration' => SESSION_EXPIRATION_TIMEOUT,
       'isRememberedSession' => $isRemembered,
     ];
   }

@@ -1,6 +1,6 @@
 <script>
   const APP_URL = '<?= rtrim(APP_URL, '/') ?>';
-  const SESSION_EXPIRATION_TIMOUT_SECONDS = <?= SESSION_EXPIRATION_TIMOUT ?>;
+  const SESSION_EXPIRATION_TIMEOUT_SECONDS = <?= SESSION_EXPIRATION_TIMEOUT ?>;
   window.APP_URL = '<?= defined('APP_URL') ? APP_URL : '' ?>';
 </script>
 
