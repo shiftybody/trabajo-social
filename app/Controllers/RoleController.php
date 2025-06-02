@@ -179,7 +179,7 @@ class RoleController
           'sanitizar' => true
         ],
         'rol_base' => [
-          'formato' => 'entero' // Opcional
+          'formato' => 'entero'
         ]
       ];
 
@@ -203,10 +203,20 @@ class RoleController
       // Crear el rol
       $rolId = $this->roleModel->crearRol($resultado['datos']['descripcion']);
 
+      error_log("Rol creado con ID: $rolId");
+
       if ($rolId) {
-        // Si se especificó un rol base, copiar sus permisos
+
+        error_log("intentando asignar permisos base al rol ID: $rolId");
+
         if (!empty($resultado['datos']['rol_base'])) {
+
+          error_log("Rol base especificado: " . $resultado['datos']['rol_base']);
+
           $permisosBase = $this->permissionModel->obtenerPermisosPorRol($resultado['datos']['rol_base']);
+
+          error_log("Permisos base obtenidos: " . count($permisosBase));
+          
           $permisosIds = array_map(function ($permiso) {
             return $permiso->permiso_id;
           }, $permisosBase);

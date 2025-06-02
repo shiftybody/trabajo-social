@@ -25,6 +25,8 @@ class mainModel
   private $user = MYSQL_USER;
   private $pass = MYSQL_ROOT_PASSWORD;
 
+  protected $lastInsertId = 0;
+
   /**
    * Conecta a la base de datos MySQL utilizando PDO.
    * 
@@ -78,6 +80,7 @@ class mainModel
   }
 
 
+
   /**
    * Inserta datos en una tabla de la base de datos.
    * 
@@ -88,6 +91,9 @@ class mainModel
   protected function insertarDatos($tabla, $datos)
   {
     try {
+      // Usar una sola conexión para toda la operación
+      $conexion = $this->conectarBD();
+
       // Arrays para almacenar nombres de campos y marcadores
       $campos = array_keys($datos);
       $marcadores = [];
@@ -104,14 +110,34 @@ class mainModel
       $query = "INSERT INTO $tabla (" . implode(", ", $campos) .
         ") VALUES (" . implode(", ", $marcadores) . ")";
 
-      // Usar la función ejecutarConsulta existente para preparar, bindear y ejecutar
-      $sql = $this->ejecutarConsulta($query, $parametros);
+      // Preparar y ejecutar
+      $sql = $conexion->prepare($query);
+
+      // Asociar parámetros
+      foreach ($parametros as $clave => $valor) {
+        $sql->bindValue($clave, $valor);
+      }
+
+      $sql->execute();
+
+      // Almacenar el lastInsertId para uso posterior
+      $this->lastInsertId = $conexion->lastInsertId();
+
       return $sql;
     } catch (Exception $e) {
-      // Registrar el error en lugar de terminar la ejecución
       error_log("Error en insertarDatos: " . $e->getMessage());
       throw new Exception("Error al guardar datos en la tabla $tabla");
     }
+  }
+
+  /**
+   * Obtiene el ID del último registro insertado
+   * 
+   * @return int ID del último registro insertado
+   */
+  protected function getLastInsertId()
+  {
+    return (int)$this->lastInsertId;
   }
 
   /**

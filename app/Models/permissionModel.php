@@ -12,7 +12,7 @@ use App\Models\mainModel;
  * rol -> rol_permiso -> permiso
  * usuario -> usuario_permiso -> permiso
  */
-class permissionModel extends mainModel 
+class permissionModel extends mainModel
 {
     /**
      * Obtiene todos los permisos
@@ -28,7 +28,7 @@ class permissionModel extends mainModel
                 $query .= " WHERE permiso_estado = 1";
             }
             $query .= " ORDER BY permiso_nombre ASC";
-            
+
             $resultado = $this->ejecutarConsulta($query);
             return $resultado->fetchAll(PDO::FETCH_OBJ);
         } catch (\Exception $e) {
@@ -96,7 +96,7 @@ class permissionModel extends mainModel
             $resultado = $this->insertarDatos("permiso", $datos);
 
             if ($resultado->rowCount() > 0) {
-                return $this->conectarBD()->lastInsertId();
+                return $this->getLastInsertId();
             }
 
             return false;
@@ -117,7 +117,7 @@ class permissionModel extends mainModel
     {
         try {
             $camposActualizar = [];
-            
+
             // Construir array de datos a actualizar
             foreach ($datos as $campo => $valor) {
                 $campoDb = 'permiso_' . $campo;
@@ -127,7 +127,7 @@ class permissionModel extends mainModel
                     "campo_valor" => $valor
                 ];
             }
-            
+
             // Añadir fecha de última modificación
             $camposActualizar[] = [
                 "campo_nombre" => "permiso_ultima_modificacion",
@@ -161,7 +161,7 @@ class permissionModel extends mainModel
             // Primero eliminar las relaciones en rol_permiso
             $query = "DELETE FROM rol_permiso WHERE permiso_id = :permiso_id";
             $this->ejecutarConsulta($query, [':permiso_id' => $permisoId]);
-            
+
             // Luego eliminar el permiso
             $resultado = $this->eliminarRegistro("permiso", "permiso_id", $permisoId);
             return $resultado->rowCount() > 0;
@@ -184,7 +184,7 @@ class permissionModel extends mainModel
                      INNER JOIN rol_permiso rp ON p.permiso_id = rp.permiso_id
                      WHERE rp.rol_id = :rol_id AND p.permiso_estado = 1
                      ORDER BY p.permiso_nombre ASC";
-            
+
             $resultado = $this->ejecutarConsulta($query, [':rol_id' => $rolId]);
             return $resultado->fetchAll(PDO::FETCH_OBJ);
         } catch (\Exception $e) {
@@ -205,30 +205,30 @@ class permissionModel extends mainModel
         try {
             $conexion = $this->conectarBD();
             $conexion->beginTransaction();
-            
+
             // Eliminar permisos actuales
             $query = "DELETE FROM rol_permiso WHERE rol_id = :rol_id";
             $stmt = $conexion->prepare($query);
             $stmt->bindValue(':rol_id', $rolId);
             $stmt->execute();
-            
+
             // Si no hay permisos para asignar, terminar
             if (empty($permisoIds)) {
                 $conexion->commit();
                 return true;
             }
-            
+
             // Insertar nuevos permisos
             $query = "INSERT INTO rol_permiso (rol_id, permiso_id, fecha_creacion) VALUES (:rol_id, :permiso_id, :fecha)";
             $stmt = $conexion->prepare($query);
-            
+
             foreach ($permisoIds as $permisoId) {
                 $stmt->bindValue(':rol_id', $rolId);
                 $stmt->bindValue(':permiso_id', $permisoId);
                 $stmt->bindValue(':fecha', date("Y-m-d H:i:s"));
                 $stmt->execute();
             }
-            
+
             $conexion->commit();
             return true;
         } catch (\Exception $e) {
@@ -253,12 +253,12 @@ class permissionModel extends mainModel
             $query = "SELECT COUNT(*) FROM rol_permiso rp
                      INNER JOIN permiso p ON rp.permiso_id = p.permiso_id
                      WHERE rp.rol_id = :rol_id AND p.permiso_slug = :permiso_slug AND p.permiso_estado = 1";
-            
+
             $resultado = $this->ejecutarConsulta($query, [
                 ':rol_id' => $rolId,
                 ':permiso_slug' => $permisoSlug
             ]);
-            
+
             return $resultado->fetchColumn() > 0;
         } catch (\Exception $e) {
             error_log("Error en rolTienePermiso: " . $e->getMessage());
@@ -279,7 +279,7 @@ class permissionModel extends mainModel
                      INNER JOIN usuario_permiso up ON p.permiso_id = up.permiso_id
                      WHERE up.usuario_id = :usuario_id AND p.permiso_estado = 1
                      ORDER BY p.permiso_nombre ASC";
-            
+
             $resultado = $this->ejecutarConsulta($query, [':usuario_id' => $usuarioId]);
             return $resultado->fetchAll(PDO::FETCH_OBJ);
         } catch (\Exception $e) {

@@ -52,32 +52,16 @@ class roleModel extends mainModel
   {
     try {
       $datos = [
-        [
-          "campo_nombre" => "rol_descripcion",
-          "campo_marcador" => ":descripcion",
-          "campo_valor" => $descripcion
-        ],
-        [
-          "campo_nombre" => "rol_estado",
-          "campo_marcador" => ":estado",
-          "campo_valor" => 1
-        ],
-        [
-          "campo_nombre" => "rol_fecha_creacion",
-          "campo_marcador" => ":fecha_creacion",
-          "campo_valor" => date("Y-m-d H:i:s")
-        ],
-        [
-          "campo_nombre" => "rol_ultima_modificacion",
-          "campo_marcador" => ":ultima_modificacion",
-          "campo_valor" => date("Y-m-d H:i:s")
-        ]
+        'rol_descripcion' => $descripcion,
+        'rol_estado' => 1,
+        'rol_fecha_creacion' => date("Y-m-d H:i:s"),
+        'rol_ultima_modificacion' => date("Y-m-d H:i:s")
       ];
 
       $resultado = $this->insertarDatos("rol", $datos);
 
       if ($resultado->rowCount() > 0) {
-        return $this->conectarBD()->lastInsertId();
+        return $this->getLastInsertId();
       }
 
       return false;

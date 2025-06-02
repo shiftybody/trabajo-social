@@ -180,8 +180,7 @@ function validateForm(form, data) {
         return;
       }
 
-      let label =
-        input.parentElement.querySelector("label")?.textContent || key;
+      let label = input.parentElement.querySelector("label")?.textContent || key;
       if (input.tagName === "SELECT") {
         showError(input, `Selecciona un rol para el usuario`);
       } else {
@@ -283,7 +282,8 @@ function handleErrorResponse(form, responseData) {
     closeCurrentModal();
 
     CustomDialog.error(
-      "Error", responseData.message || "Ocurrió un error al procesar la solicitud"
+      "Error",
+      responseData.message || "Ocurrió un error al procesar la solicitud"
     );
   }
 }
@@ -322,9 +322,9 @@ function attachAjaxFormHandlers(formulario) {
         method: this.getAttribute("method"),
         body: data,
         credentials: "same-origin",
-        headers: { 
-          'Accept': 'application/json'
-        }
+        headers: {
+          Accept: "application/json",
+        },
       });
 
       if (response.redirected) {
@@ -431,7 +431,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// ==================== EXPORTAR FUNCIONES ====================
+// ==================== EXPORTAR FUNCIONES ==================
 window.attachAjaxFormHandlers = attachAjaxFormHandlers;
 window.showError = showError;
 window.clearError = clearError;

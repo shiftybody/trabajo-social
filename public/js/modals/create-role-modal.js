@@ -2,20 +2,21 @@
  * Modal para crear nuevo rol
  */
 function crearRol() {
-  const createModal = createModal("createRole", {
+  const roleModal = createModal("createRole", {
     title: "Crear Nuevo Rol",
     size: "medium",
     endpoint: `${APP_URL}/api/roles`,
     onShow: (modal) => {
       modal.showLoading("Cargando roles base disponibles...");
 
-      fetch({
+      console.log(`Cargando roles base desde: ${APP_URL}/api/roles`);
+
+      fetch( `${APP_URL}/api/roles`, {
         method: "GET",
         headers: {
           Accept: "application/json",
         },
         credentials: "same-origin",
-        url: `${APP_URL}/api/roles`,
       })
         .then((response) => response.json())
         .then((data) => {
@@ -34,7 +35,7 @@ function crearRol() {
     },
   });
 
-  createModal.show();
+  roleModal.show();
 }
 
 window.mostrarModalCrearRol = crearRol;
