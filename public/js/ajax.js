@@ -75,7 +75,7 @@ async function closeCurrentModal() {
   return Promise.resolve();
 }
 
-// ==================== MANEJADORES ESPECÍFICOS DE FORMULARIOS (CORREGIDOS) ====================
+// ==================== MANEJADORES ESPECÍFICOS DE FORMULARIOS ==================
 const FormHandlers = {
   // Manejo para reset de contraseña
   resetPasswordForm: {

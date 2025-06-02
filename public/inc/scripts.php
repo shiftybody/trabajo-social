@@ -19,3 +19,5 @@ foreach ($modalFiles as $file) {
   echo "<script src=\"" . APP_URL . "public/js/modals/{$fileName}\"></script>\n";
 }
 ?>
+
+<!-- TODO: Mejorar la logica para que solo muestre los archivos de modals para los que el usuario tiene permisos -->
