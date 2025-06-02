@@ -495,7 +495,28 @@
 
     if (confirmacion) {
       try {
-        window.location.href = "<?= APP_URL ?>logout";
+        fetch("<?= APP_URL ?>api/logout", {
+            method: "POST",
+            headers: {
+              "Accept": "application/json"
+            },
+            credentials: "same-origin",
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log(data);
+            if (data.status === 'success') {
+              window.location.href = data.redirect;
+            } else {
+              CustomDialog.error('Error', data.message);
+            }
+          });
+
       } catch (error) {
         console.error('Error en la petición fetch:', error);
         CustomDialog.error('Error de Red', 'Ocurrió un problema al intentar conectar con el servidor.');

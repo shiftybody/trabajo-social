@@ -7,6 +7,7 @@ $router = new Router();
 
 // Rutas públicas
 $router->get('/login', 'LoginController@indexView');
+
 // Rutas protegidas (requieren autenticación)
 $router->group(['middleware' => 'Auth'], function ($router) {;
 
@@ -14,9 +15,6 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
   $router->get('/', function () {
     return Response::redirect(APP_URL . 'home');
   });
-
-  // LOGOUT
-  $router->get('/logout', 'LoginController@logout');
 
   // HOME
   $router->get('/home', 'homeController@index')->name('home');

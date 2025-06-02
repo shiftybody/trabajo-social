@@ -214,7 +214,7 @@
     const paths = {
       logout:
         state.serverConfig.logoutUrl ||
-        (BASE_APP_URL ? `${BASE_APP_URL}/logout` : null),
+        (BASE_APP_URL ? `${BASE_APP_URL}/api/logout` : null),
       refresh:
         state.serverConfig.refreshUrl ||
         (BASE_APP_URL ? `${BASE_APP_URL}/api/session/refresh` : null),
@@ -234,19 +234,50 @@
     return url;
   }
 
-  function performLogout(isExpired = false) {
-    cleanup();
+function performLogout(isExpired = false) {
+  cleanup(); // Limpia intervalos y solicitudes pendientes
 
-    const logoutUrl = buildUrl("logout", isExpired);
-    if (!logoutUrl) {
-      alert(
-        "Tu sesión ha expirado. Por favor, cierra esta ventana y vuelve a iniciar sesión."
-      );
-      return;
-    }
+  const apiActionUrl = buildUrl("logout", isExpired);
 
-    window.location.href = logoutUrl;
+  const fallbackLoginUrl = (BASE_APP_URL ? BASE_APP_URL + "/login" : "/login") +
+                           (isExpired ? "?expired_session=1" : "");
+
+  if (!apiActionUrl) {
+    alert(
+      "La URL de logout no está configurada. No se puede cerrar la sesión mediante API."
+    );
+    // Si la URL de la API no está disponible, redirigir a la URL de fallback.
+    window.location.href = fallbackLoginUrl;
+    return;
   }
+  
+  // Realiza la solicitud POST a la API para cerrar sesión
+  fetch(apiActionUrl, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+    },
+    credentials: "same-origin",
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Error en la respuesta del servidor al cerrar sesión`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.status === "success") {
+      // Redirigir a la URL de fallback después de cerrar sesión exitosamente
+      window.location.href = data.redirect;
+    } else {
+    CustomDialog.error('Error', data.message || 'No se pudo cerrar la sesión.');
+    }
+  })
+  .catch(error => {
+        console.error('Error en la petición fetch:', error);
+        CustomDialog.error('Error de Red', 'Ocurrió un problema al intentar conectar con el servidor.');
+  });
+}
 
   function refreshSession() {
     const refreshUrl = buildUrl("refresh");
@@ -257,16 +288,13 @@
 
     fetch(refreshUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-      },
     })
       .then((response) => {
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         return response.json();
       })
       .then((data) => {
+        console.log(data)
         if (data.success) {
           if (data.isRememberedSession !== undefined) {
             adjustCheckInterval(data.isRememberedSession);
@@ -301,7 +329,10 @@
 
     fetch(statusUrl, {
       method: "GET",
-      headers: { "X-Requested-With": "XMLHttpRequest" },
+      headers: {
+        "Accept": "application/json",
+      },
+      credentials: "same-origin",
       signal: abortController.signal,
     })
       .then((response) => {

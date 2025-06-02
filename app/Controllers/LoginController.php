@@ -56,9 +56,10 @@ class LoginController // Modificado: ya no extiende userModel
 
     // Si no se proporcionan usuario o contraseña, devolver un error
     if (empty($usuario) || empty($password)) {
-      http_response_code(400);
-      echo json_encode(array('status' => 'error', 'message' => 'Usuario y contraseña son requeridos'));
-      exit;
+      return Response::json([
+        'status' => 'error',
+        'message' => 'Usuario y contraseña son requeridos'
+      ], 400);
     }
 
     // Autenticar usuario usando Auth::attempt
@@ -68,23 +69,21 @@ class LoginController // Modificado: ya no extiende userModel
       // Login exitoso
       error_log("Login exitoso para usuario: $usuario");
 
-      // Crear URL de redirección
-      $redirectUrl = rtrim(APP_URL, '/') . '/home';
-      error_log("Redirigiendo a: $redirectUrl");
-
-      echo json_encode(array(
+      return Response::json([
         'status' => 'success',
         'message' => 'Login exitoso',
-        'redirect' => $redirectUrl
-      ));
+        'redirect' => APP_URL . 'home'
+      ]);
     } elseif ($authStatus === 'inactive') {
-      error_log("Login fallido para usuario (inactivo): $usuario");
-      http_response_code(401);
-      echo json_encode(array('status' => 'error', 'message' => 'Cuenta deshabilitada. Contacte al administrador.'));
+      return Response::json([
+        'status' => 'error',
+        'message' => 'Tu cuenta ha sido deshabilitada. Contacta al administrador para más información.'
+      ], 401);
     } else {
-      error_log("Login fallido para usuario (credenciales/error): $usuario");
-      http_response_code(401);
-      echo json_encode(array('status' => 'error', 'message' => 'El usuario o contraseña son incorrectos.'));
+      return Response::json([
+        'status' => 'error',
+        'message' => 'El usuario o contraseña son incorrectos.'
+      ], 401);
     }
     exit;
   }
@@ -96,24 +95,10 @@ class LoginController // Modificado: ya no extiende userModel
   {
     Auth::logout();
 
-    $expired = $request->get('expired'); // Obtener el parámetro 'expired' de la URL
-
-    // Verificar que APP_URL esté definida
-    if (!defined('APP_URL')) {
-      error_log('ERROR: APP_URL no está definida en logout()');
-      // Determinar si es una solicitud AJAX para la respuesta de error
-      $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-      if ($isAjax || ($request->isAjax() || $request->expectsJson())) {
-        http_response_code(500);
-        echo json_encode(array('status' => 'error', 'message' => 'Error de configuración del servidor.'));
-      } else {
-        echo "Error de configuración del servidor. Contacte al administrador.";
-      }
-      exit;
-    }
+    $expired = $request->get('expired');
 
     // Construir la URL de login base
-    $loginUrlBase = rtrim(APP_URL, '/') . '/login';
+    $loginUrlBase = APP_URL . 'login';
     $loginUrl = $loginUrlBase;
 
     // Si la sesión expiró, añadir el parámetro correspondiente a la URL
@@ -121,14 +106,15 @@ class LoginController // Modificado: ya no extiende userModel
       $loginUrl .= '?expired_session=1';
     }
 
-    error_log("Cierre de sesión, redirigiendo a: $loginUrl");
-
-    // Determinar si es una solicitud AJAX para la respuesta
-    if ($request->isAjax() || $request->expectsJson()) {
-      echo json_encode(array('status' => 'success', 'message' => 'Logout exitoso', 'redirect' => $loginUrl));
-    } else {
-      header('Location: ' . $loginUrl);
+    if ($request->expectsJson()) {
+      return Response::json([
+        'status' => 'success',
+        'message' => 'Sesión cerrada exitosamente',
+        'redirect' => $loginUrl
+      ]);
     }
+    return Response::redirect($loginUrl);
+
     exit;
   }
 }
