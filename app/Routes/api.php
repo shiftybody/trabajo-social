@@ -49,7 +49,6 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
 
   // ROLES
   $router->group(['middleware' => 'Permission:roles.view'], function ($router) {
-    // $router->get('/roles', 'RoleController@getAllRoles');
     $router->get('/roles/:id', 'RoleController@getRoleById');
   });
 

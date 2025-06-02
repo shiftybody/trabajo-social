@@ -36,3 +36,5 @@ function cambiarEstado(usuario_id) {
 
   statusModal.show();
 }
+
+window.mostrarModalCambiarEstado = cambiarEstado;

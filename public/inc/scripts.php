@@ -12,3 +12,10 @@
 
 <script src="<?= APP_URL . 'public/js/base-modal.js' ?>"></script>
 <script src="<?= APP_URL . 'public/js/modal-templates.js' ?>"></script>
+<?php
+$modalFiles = glob(APP_ROOT . 'public/js/modals/*.js');
+foreach ($modalFiles as $file) {
+  $fileName = basename($file);
+  echo "<script src=\"" . APP_URL . "public/js/modals/{$fileName}\"></script>\n";
+}
+?>

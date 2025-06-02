@@ -2,9 +2,8 @@
  * Función para mostrar detalles de usuario usando el nuevo sistema
  */
 function verDetalles(userId) {
-  if (typeof cerrarTodosLosMenus === "function") {
-    cerrarTodosLosMenus();
-  }
+
+  cerrarTodosLosMenus();
 
   // Crear modal de detalles
   const detailsModal = createModal("userDetails", {
@@ -19,7 +18,6 @@ function verDetalles(userId) {
         const userData = await response.json();
 
         if (userData.status === "success") {
-          // Procesar datos usando el helper
           const templateData = TEMPLATE_HELPERS.processUserDetailsData(
             userData.data
           );
@@ -36,3 +34,5 @@ function verDetalles(userId) {
 
   detailsModal.show();
 }
+
+window.mostrarModalVerDetalles = verDetalles;

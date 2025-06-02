@@ -1,33 +1,40 @@
 /**
- * Modal para crear nuevo rol - Versión simplificada
+ * Modal para crear nuevo rol
  */
 function crearRol() {
   const createModal = createModal("createRole", {
     title: "Crear Nuevo Rol",
-    size: "medium", // Cambiar de 'large' a 'medium' por simplicidad
+    size: "medium",
     endpoint: `${APP_URL}/api/roles`,
-    onShow: async (modal) => {
+    onShow: (modal) => {
       modal.showLoading("Cargando roles base disponibles...");
 
-      try {
-        // Cargar solo los roles existentes para usar como base
-        const response = await fetch(`${APP_URL}/api/roles`);
-        const rolesData = await response.json();
-
-        if (rolesData.status === "success") {
-          const templateData = TEMPLATE_HELPERS.processCreateRole(
-            rolesData.data
-          );
-          modal.updateContent(templateData);
-        } else {
-          modal.showError("No se pudieron cargar los roles disponibles");
-        }
-      } catch (error) {
-        console.error("Error cargando roles:", error);
-        modal.showError("Error al conectar con el servidor");
-      }
+      fetch({
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+        credentials: "same-origin",
+        url: `${APP_URL}/api/roles`,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          if (data.status === "success") {
+            const templateData = TEMPLATE_HELPERS.processCreateRole(data.data);
+            modal.updateContent(templateData);
+          } else {
+            modal.showError("No se pudieron cargar los roles disponibles");
+          }
+        })
+        .catch((error) => {
+          console.error("Error cargando roles:", error);
+          modal.showError("Error al conectar con el servidor");
+        });
     },
   });
 
   createModal.show();
 }
+
+window.mostrarModalCrearRol = crearRol;

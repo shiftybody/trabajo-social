@@ -1,5 +1,8 @@
 <?php
-// Guarda este código en un archivo llamado generate_hash.php
+
+/**
+ * Generador de contraseñas para crear al usuaro administrador desde la base de datos por primera vez ( o si lo borran 🤧)
+ */
 
 $password = 'Administrador@1234'; // Cambia esto por tu contraseña deseada
 

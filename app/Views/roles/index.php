@@ -420,8 +420,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </table>
   </div>
 </div>
-<?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
+<?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script>
   // Variables globales
   let table;
@@ -634,16 +634,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   }
 
   function crearRol() {
-    cerrarTodosLosMenus();
-
-    const createRolModal = createModal('createRole', {
-      title: "Crear Nuevo Rol",
-      size: 'medium',
-      endpoint: `${APP_URL}/api/roles`,
-    })
-
-    createRolModal.show();
-
+    mostrarModalCrearRol();
   }
 
   function editarRol(rolId) {

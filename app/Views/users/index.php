@@ -634,7 +634,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 <script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
 <?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script>
-  // Variables globales
   let table;
   let isFirstLoad = true;
 
@@ -1074,97 +1073,18 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   }
 
-
   function resetearPassword(userId) {
-    cerrarTodosLosMenus();
-
-    const resetModal = createModal('resetPassword', {
-      title: 'Resetear Contraseña',
-      size: 'medium',
-      endpoint: `${APP_URL}/api/users/${userId}/reset-password`,
-      data: {
-        userName: 'Cargando...'
-      },
-      onShow: async (modal) => {
-        modal.showLoading('Cargando información del usuario...');
-
-        try {
-          const response = await fetch(`${APP_URL}/api/users/${userId}`);
-          const userData = await response.json();
-
-          if (userData.status === 'success') {
-            modal.updateContent({
-              userName: `${userData.data.usuario_nombre} ${userData.data.usuario_apellido_paterno}`
-            });
-          } else {
-            modal.showError('No se pudieron cargar los datos del usuario');
-          }
-        } catch (error) {
-          modal.showError('Error al conectar con el servidor');
-        }
-      }
-    });
-
-    resetModal.show();
+    mostrarModalResetearPassword(userId);
   }
 
   // Change Status Modal
   function cambiarEstado(usuario_id) {
-    cerrarTodosLosMenus();
-
-    const statusModal = createModal('changeStatus', {
-      title: 'Cambiar Estado de Usuario',
-      size: 'medium',
-      endpoint: `${APP_URL}/api/users/${usuario_id}/status`,
-      onShow: async (modal) => {
-        modal.showLoading('Cargando información del usuario...');
-
-        try {
-          const response = await fetch(`${APP_URL}/api/users/${usuario_id}`);
-          const userData = await response.json();
-
-          if (userData.status === 'success') {
-            const templateData = TEMPLATE_HELPERS.processChangeStatusData(userData.data);
-            modal.updateContent(templateData);
-          } else {
-            modal.showError('No se pudieron cargar los datos del usuario');
-          }
-        } catch (error) {
-          modal.showError('Error al conectar con el servidor');
-        }
-      }
-    });
-
-    statusModal.show();
+    mostrarModalCambiarEstado(usuario_id);
   }
 
   // User Details Modal
   function verDetalles(userId) {
-    cerrarTodosLosMenus();
-
-    const detailsModal = createModal('userDetails', {
-      title: 'Detalles del Usuario',
-      size: 'large',
-      onShow: async (modal) => {
-        modal.showLoading('Cargando información del usuario...');
-
-        try {
-          const response = await fetch(`${APP_URL}/api/users/${userId}`);
-          const userData = await response.json();
-
-          if (userData.status === 'success') {
-            const templateData = TEMPLATE_HELPERS.processUserDetailsData(userData.data);
-            modal.updateContent(templateData);
-          } else {
-            modal.showError('No se pudo cargar la información del usuario');
-          }
-        } catch (error) {
-          modal.showError('Error al conectar con el servidor');
-        }
-      }
-    });
-
-    detailsModal.show();
+    mostrarModalVerDetalles(userId);
   }
 
   document.addEventListener('DOMContentLoaded', function() {

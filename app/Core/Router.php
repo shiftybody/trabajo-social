@@ -100,22 +100,6 @@ class Router
   }
 
   /**
-   * Registra una ruta para cualquier método HTTP
-   * 
-   * @param string $uri URI de la ruta
-   * @param mixed $controller Controlador a invocar
-   * @return Router Instancia actual para encadenamiento
-   */
-  public function any($uri, $controller)
-  {
-    foreach (array_keys($this->routes) as $method) {
-      $this->addRoute($method, $uri, $controller);
-    }
-
-    return $this;
-  }
-
-  /**
    * Registra rutas para los métodos HTTP especificados
    * 
    * @param array $methods Métodos HTTP
@@ -212,30 +196,6 @@ class Router
     return $this;
   }
 
-
-  /**
-   * Establece el controlador por defecto
-   * 
-   * @param string $controller Nombre del controlador
-   * @return Router Instancia actual para encadenamiento
-   */
-  public function setDefaultController($controller)
-  {
-    $this->defaultController = $controller;
-    return $this;
-  }
-
-  /**
-   * Establece el método por defecto
-   * 
-   * @param string $method Nombre del método
-   * @return Router Instancia actual para encadenamiento
-   */
-  public function setDefaultMethod($method)
-  {
-    $this->defaultMethod = $method;
-    return $this;
-  }
 
   /**
    * Despacha la ruta según la URI y el método HTTP

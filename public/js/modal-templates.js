@@ -325,7 +325,6 @@ const TEMPLATE_GENERATORS = {
 const TEMPLATE_HELPERS = {
   processCreateRole: (roles) => {
     const baseRolesOptions = roles
-      .filter((role) => role.rol_id !== 1) // Excluir admin o según lógica
       .map(
         (role) =>
           `<option value="${role.rol_id}">${role.rol_descripcion}</option>`
@@ -336,7 +335,6 @@ const TEMPLATE_HELPERS = {
       baseRolesOptions,
     };
   },
-
 
   // Procesa datos de usuario para el template de detalles
   processUserDetailsData: (user) => {

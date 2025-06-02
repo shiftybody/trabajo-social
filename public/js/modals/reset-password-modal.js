@@ -2,10 +2,7 @@
  * Función para mostrar modal de reset password usando el nuevo sistema
  */
 function resetearPassword(userId) {
-  // Cerrar menús de opciones si están abiertos
-  if (typeof cerrarTodosLosMenus === "function") {
-    cerrarTodosLosMenus();
-  }
+  cerrarTodosLosMenus();
 
   // Crear el modal usando el sistema BaseModal
   const resetModal = createModal("resetPassword", {
@@ -44,3 +41,5 @@ function resetearPassword(userId) {
 
   resetModal.show();
 }
+
+window.mostrarModalResetearPassword = resetearPassword;
