@@ -4,7 +4,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 ?>
 <style>
   .container {
-    padding: 2.5rem 25rem 0 25rem;
+    padding: 2.5rem calc(23rem + 1vw) 0 calc(23rem + 1vw);
   }
 
   .navigation {
@@ -374,7 +374,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     display: none !important;
   }
 
-  @media (max-width: 1080px) {
+  @media (max-width: 1200px) {
     .container {
       padding: 2rem 2rem;
     }
@@ -571,9 +571,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   // Cargar datos
   async function loadData() {
     try {
-      if (!isFirstLoad) {
-        showTableLoading('Actualizando roles...');
-      }
 
       const response = await fetch('<?= APP_URL ?>api/roles');
 

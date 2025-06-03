@@ -431,6 +431,15 @@ class UserController
       ]);
     }
 
+    // evitar que se cambie de rol si es el ultimo administrador  userModel->esUltimoAdministrador($id)
+    if ($this->userModel->esUltimoAdministrador($id)) {
+      return Response::json([
+        'status' => 'error',
+        'message' => 'No puedes cambiar de rol a un administrador si es el ultimo administrador'
+      ]);
+    }
+
+
     // --- Manejo del Avatar --- //
     $nombreArchivo = $usuario->usuario_avatar; // Mantener avatar actual por defecto
     $archivoSubido = false;

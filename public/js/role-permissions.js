@@ -8,6 +8,7 @@
   let roleId = null;
   let roleName = "";
   let hasChanges = false;
+  let managePermissions = {}; // Mapa de permisos manage por categoría
 
   // Elementos DOM
   const dom = {
@@ -99,6 +100,9 @@
       allPermissions = permissionsData.data;
       dom.totalPermissions.textContent = allPermissions.length;
 
+      // Identificar permisos "manage"
+      identifyManagePermissions();
+
       // Cargar permisos asignados al rol
       const rolePermissionsResponse = await fetch(
         `${APP_URL}/api/roles/${roleId}/permissions`
@@ -125,6 +129,42 @@
       console.error("Error:", error);
       showError("Error al cargar los datos. Por favor, recarga la página.");
     }
+  }
+
+  // Identificar permisos "manage" por categoría
+  function identifyManagePermissions() {
+    managePermissions = {};
+
+    allPermissions.forEach((permission) => {
+      const category = permission.permiso_slug.split(".")[0];
+
+      // Si el slug contiene "manage"
+      if (permission.permiso_slug.includes("manage")) {
+        if (!managePermissions[category]) {
+          managePermissions[category] = [];
+        }
+        managePermissions[category].push(parseInt(permission.permiso_id));
+      }
+    });
+  }
+
+  // Obtener todos los permisos de una categoría
+  function getCategoryPermissions(category) {
+    return allPermissions
+      .filter(
+        (permission) => permission.permiso_slug.split(".")[0] === category
+      )
+      .map((permission) => parseInt(permission.permiso_id));
+  }
+
+  // Verificar si un permiso es "manage"
+  function isManagePermission(permissionId) {
+    for (const category in managePermissions) {
+      if (managePermissions[category].includes(permissionId)) {
+        return category;
+      }
+    }
+    return null;
   }
 
   // Renderizar permisos agrupados por categoría
@@ -203,11 +243,15 @@
 
   // Crear HTML para un permiso
   function createPermissionHTML(permission, isChecked) {
+    const isManage = permission.permiso_slug.includes("manage");
+
     return `
       <div class="permission-item" data-permission-id="${
         permission.permiso_id
       }">
-        <label class="permission-label ${isChecked ? "selected" : ""}">
+        <label class="permission-label ${isChecked ? "selected" : ""} ${
+      isManage ? "manage-permission" : ""
+    }">
           <input type="checkbox" 
                  name="permisos[]" 
                  value="${permission.permiso_id}" 
@@ -216,9 +260,17 @@
                  data-permission-name="${permission.permiso_nombre.toLowerCase()}"
                  data-permission-description="${(
                    permission.permiso_descripcion || ""
-                 ).toLowerCase()}">
+                 ).toLowerCase()}"
+                 data-permission-slug="${permission.permiso_slug}">
           <div class="permission-details">
-            <span class="permission-name">${permission.permiso_nombre}</span>
+            <span class="permission-name">
+              ${permission.permiso_nombre}
+              ${
+                isManage
+                  ? '<span class="manage-badge">GESTIÓN COMPLETA</span>'
+                  : ""
+              }
+            </span>
             ${
               permission.permiso_descripcion
                 ? `<span class="permission-description">${permission.permiso_descripcion}</span>`
@@ -251,6 +303,7 @@
   function handlePermissionChange(checkbox) {
     const permissionId = parseInt(checkbox.value);
     const label = checkbox.closest(".permission-label");
+    const permissionSlug = checkbox.dataset.permissionSlug;
 
     if (checkbox.checked) {
       // Agregar permiso si no existe
@@ -258,6 +311,40 @@
         currentPermissions.push(permissionId);
       }
       label.classList.add("selected");
+
+      // Si es un permiso "manage", seleccionar todos los permisos de la categoría
+      if (permissionSlug && permissionSlug.includes("manage")) {
+        const category = permissionSlug.split(".")[0];
+        const categoryPermissions = getCategoryPermissions(category);
+
+        let addedCount = 0;
+        categoryPermissions.forEach((catPermId) => {
+          if (!currentPermissions.includes(catPermId)) {
+            currentPermissions.push(catPermId);
+            // Actualizar visualmente el checkbox
+            const catCheckbox = dom.permissionsGrid.querySelector(
+              `input[value="${catPermId}"]`
+            );
+            if (catCheckbox && !catCheckbox.checked) {
+              catCheckbox.checked = true;
+              catCheckbox
+                .closest(".permission-label")
+                .classList.add("selected");
+              addedCount++;
+            }
+          }
+        });
+
+        if (addedCount > 0) {
+          CustomDialog.toast(
+            `Se seleccionaron automáticamente ${addedCount} permisos adicionales de ${getCategoryDisplayName(
+              category
+            )}`,
+            "info",
+            3000
+          );
+        }
+      }
     } else {
       // Remover permiso
       const index = currentPermissions.indexOf(permissionId);
@@ -265,6 +352,15 @@
         currentPermissions.splice(index, 1);
       }
       label.classList.remove("selected");
+
+      // Si es un permiso "manage" que se deselecciona, mantener los otros permisos seleccionados
+      if (permissionSlug && permissionSlug.includes("manage")) {
+        CustomDialog.toast(
+          "Los permisos individuales se mantienen seleccionados",
+          "info",
+          2000
+        );
+      }
     }
 
     // Actualizar UI
@@ -463,6 +559,8 @@
           "Permisos Actualizados",
           data.message || "Los permisos del rol se actualizaron correctamente"
         );
+
+        window.location.href = `${APP_URL}/roles`;
       } else {
         throw new Error(data.message || "Error al actualizar permisos");
       }
@@ -523,7 +621,7 @@
     };
   }
 
-  // Agregar estilos CSS para el spinner
+  // Agregar estilos CSS para el spinner y badge de manage
   const style = document.createElement("style");
   style.textContent = `
     .spinner-small {
@@ -553,6 +651,27 @@
       font-size: 16px;
       text-align: center;
       margin: 0;
+    }
+    
+    .manage-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--btn-primary);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 4px;
+      margin-left: 8px;
+      letter-spacing: 0.5px;
+    }
+    
+    .permission-label.manage-permission {
+      background-color: rgba(59, 130, 246, 0.03);
+      border-left: 3px solid var(--btn-primary);
+    }
+    
+    .permission-label.manage-permission:hover {
+      background-color: rgba(59, 130, 246, 0.08);
     }
   `;
   document.head.appendChild(style);
