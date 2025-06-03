@@ -1,7 +1,4 @@
-// public/js/role-permissions.js
-
 (function () {
-  // Variables globales
   let allPermissions = [];
   let currentPermissions = []; // Array de IDs de permisos seleccionados
   let originalPermissions = [];
@@ -48,6 +45,22 @@
       dom.searchInput.addEventListener("input", debounce(handleSearch, 300));
     }
 
+    // Botón clear para el input de búsqueda
+    const clearButton = document.querySelector(".clear-button");
+    if (clearButton) {
+      clearButton.addEventListener("click", clearSearch);
+    }
+
+    // Mostrar/ocultar botón clear basado en el contenido del input
+    if (dom.searchInput) {
+      dom.searchInput.addEventListener("input", () => {
+        const clearBtn = document.querySelector(".clear-button");
+        if (clearBtn) {
+          clearBtn.style.display = dom.searchInput.value ? "inline" : "none";
+        }
+      });
+    }
+
     // Botón guardar
     if (dom.saveButton) {
       dom.saveButton.addEventListener("click", savePermissions);
@@ -68,6 +81,30 @@
           toggleCategory(categoryHeader);
         }
       });
+    }
+
+    // Botones de selección masiva
+    const selectAllBtn = document.getElementById("select-all-visible-btn");
+    if (selectAllBtn) {
+      selectAllBtn.addEventListener("click", selectAllVisiblePermissions);
+    }
+
+    const deselectAllBtn = document.getElementById("deselect-all-btn");
+    if (deselectAllBtn) {
+      deselectAllBtn.addEventListener("click", deselectAllPermissions);
+    }
+  }
+
+  // Limpiar búsqueda
+  function clearSearch() {
+    if (dom.searchInput) {
+      dom.searchInput.value = "";
+      dom.searchInput.focus();
+      const clearBtn = document.querySelector(".clear-button");
+      if (clearBtn) {
+        clearBtn.style.display = "none";
+      }
+      handleSearch(); // Aplicar filtro vacío para mostrar todos
     }
   }
 
@@ -185,6 +222,10 @@
     });
 
     dom.permissionsGrid.innerHTML = html;
+
+    // Colapsar todas las categorías al inicio
+    const headers = dom.permissionsGrid.querySelectorAll('.category-header');
+    headers.forEach(header => toggleCategory(header));
   }
 
   // Agrupar permisos por categoría
@@ -334,16 +375,6 @@
             }
           }
         });
-
-        if (addedCount > 0) {
-          CustomDialog.toast(
-            `Se seleccionaron automáticamente ${addedCount} permisos adicionales de ${getCategoryDisplayName(
-              category
-            )}`,
-            "info",
-            3000
-          );
-        }
       }
     } else {
       // Remover permiso
@@ -353,13 +384,27 @@
       }
       label.classList.remove("selected");
 
-      // Si es un permiso "manage" que se deselecciona, mantener los otros permisos seleccionados
+      // Si es un permiso "manage", deseleccionar todos los permisos de la categoría
       if (permissionSlug && permissionSlug.includes("manage")) {
-        CustomDialog.toast(
-          "Los permisos individuales se mantienen seleccionados",
-          "info",
-          2000
-        );
+        const category = permissionSlug.split(".")[0];
+        const categoryPermissions = getCategoryPermissions(category);
+
+        categoryPermissions.forEach((catPermId) => {
+          const idx = currentPermissions.indexOf(catPermId);
+          if (idx > -1) {
+            currentPermissions.splice(idx, 1);
+          }
+          // Actualizar visualmente el checkbox
+          const catCheckbox = dom.permissionsGrid.querySelector(
+            `input[value="${catPermId}"]`
+          );
+          if (catCheckbox && catCheckbox.checked) {
+            catCheckbox.checked = false;
+            catCheckbox
+              .closest(".permission-label")
+              .classList.remove("selected");
+          }
+        });
       }
     }
 
@@ -454,8 +499,8 @@
     });
   }
 
-  // Seleccionar todos los permisos visibles
-  window.selectAllVisiblePermissions = function () {
+  // Cambiar de window.selectAllVisiblePermissions a una función normal
+  function selectAllVisiblePermissions() {
     const visibleCheckboxes = dom.permissionsGrid.querySelectorAll(
       '.permission-item:not([style*="display: none"]) .permission-checkbox'
     );
@@ -470,7 +515,7 @@
     });
 
     if (addedCount > 0) {
-      CustomDialog.toast(`${addedCount} permisos agregados`, "success", 2000);
+      CustomDialog.toast("Todos los permisos seleccionados", "success", 2000);
     } else {
       CustomDialog.toast(
         "Todos los permisos visibles ya estaban seleccionados",
@@ -478,10 +523,9 @@
         2000
       );
     }
-  };
+  }
 
-  // Deseleccionar todos los permisos
-  window.deselectAllPermissions = function () {
+  function deselectAllPermissions() {
     const checkboxes = dom.permissionsGrid.querySelectorAll(
       ".permission-checkbox:checked"
     );
@@ -497,9 +541,8 @@
     });
 
     CustomDialog.toast("Todos los permisos deseleccionados", "info", 2000);
-  };
+  }
 
-  // Expandir/colapsar categoría
   function toggleCategory(header) {
     const categoryId = header.dataset.categoryId;
     const permissions = document.getElementById(categoryId);
@@ -527,8 +570,6 @@
 
     try {
       dom.saveButton.disabled = true;
-      dom.saveButton.innerHTML =
-        '<span class="spinner-small"></span> Guardando...';
 
       // Preparar datos para enviar
       const formData = new FormData();
@@ -572,18 +613,9 @@
           "No se pudieron guardar los permisos. Por favor, inténtalo de nuevo."
       );
     } finally {
-      dom.saveButton.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-          <polyline points="17,21 17,13 7,13 7,21"></polyline>
-          <polyline points="7,3 7,8 15,8"></polyline>
-        </svg>
-        Guardar Cambios
-      `;
       checkForChanges();
     }
   }
-
   // Mostrar loading
   function showLoading(message) {
     dom.permissionsGrid.innerHTML = `
@@ -620,59 +652,4 @@
       timeout = setTimeout(later, wait);
     };
   }
-
-  // Agregar estilos CSS para el spinner y badge de manage
-  const style = document.createElement("style");
-  style.textContent = `
-    .spinner-small {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid #ffffff;
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    
-    .permissions-error {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 3rem;
-      color: var(--modal-error);
-    }
-    
-    .permissions-error svg {
-      margin-bottom: 1rem;
-    }
-    
-    .permissions-error p {
-      font-size: 16px;
-      text-align: center;
-      margin: 0;
-    }
-    
-    .manage-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      background: var(--btn-primary);
-      color: white;
-      font-size: 10px;
-      font-weight: 600;
-      border-radius: 4px;
-      margin-left: 8px;
-      letter-spacing: 0.5px;
-    }
-    
-    .permission-label.manage-permission {
-      background-color: rgba(59, 130, 246, 0.03);
-      border-left: 3px solid var(--btn-primary);
-    }
-    
-    .permission-label.manage-permission:hover {
-      background-color: rgba(59, 130, 246, 0.08);
-    }
-  `;
-  document.head.appendChild(style);
 })();

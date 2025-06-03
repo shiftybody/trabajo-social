@@ -630,7 +630,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </div>
   </div>
 </div>
-<script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
+<script src="<?= APP_URL ?>public/js/libs/datatables.min.js"></script>
 <?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script>
   let table;
@@ -680,7 +680,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     const loadingContainer = document.getElementById('table-loading');
     const tableWrapper = document.getElementById('users-table_wrapper');
 
-    const loaderFadeOutDuration = 300;
+    const loaderFadeOutDuration = 10;
     let delayForTableAnimationStart = 10;
 
     if (loadingContainer) {

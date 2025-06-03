@@ -420,7 +420,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </table>
   </div>
 </div>
-<script src="<?= APP_URL ?>public/js/datatables.min.js"></script>
+<script src="<?= APP_URL ?>public/js/libs/datatables.min.js"></script>
 <?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script>
   // Variables globales

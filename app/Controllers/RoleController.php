@@ -64,8 +64,8 @@ class RoleController
     }
 
     ob_start();
-    $titulo = 'Gestionar Permisos - ' . $rol->rol_descripcion;
-    $rol_id = $id; // Disponible en la vista para JavaScript
+    $titulo = 'Gestionar Permisos';
+    $rol_id = $id;
     include APP_ROOT . 'app/Views/roles/permissions.php';
     $contenido = ob_get_clean();
 

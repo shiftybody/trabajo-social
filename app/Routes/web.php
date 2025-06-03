@@ -17,7 +17,9 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
   });
 
   // HOME
-  $router->get('/home', 'homeController@index')->name('home');
+  $router->group(['middleware' => 'Permission:home.view'], function ($router) {
+    $router->get('/home', 'homeController@index')->name('home');
+  });
 
   // USERS
   $router->group(['middleware' => 'Permission:users.manage|users.view'], function ($router) {

@@ -805,31 +805,6 @@
   border-bottom: 1px solid var(--modal-border);
 }
 
-.permissions-grid {
-  max-height: 400px;
-  overflow-y: auto;
-  border: 1px solid var(--modal-border);
-  border-radius: 8px;
-  background: #f9fafb;
-}
-
-/* Personalizar scrollbar para grid de permisos */
-.permissions-grid::-webkit-scrollbar {
-  width: 6px;
-}
-
-.permissions-grid::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.permissions-grid::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-.permissions-grid::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
-}
 
 /* Categorías de permisos */
 .permission-category {
@@ -841,14 +816,14 @@
 }
 
 .category-title {
-  background: #f3f4f6;
+  /* background: #f3f4f6; */
   padding: 12px 16px;
   margin: 0;
   font-size: 12px;
   font-weight: 600;
   color: var(--modal-text-secondary);
   letter-spacing: 0.5px;
-  border-bottom: 1px solid var(--modal-border);
+  /* border-bottom: 1px solid var(--modal-border); */
 }
 
 .category-permissions {
@@ -915,8 +890,7 @@
 }
 
 .role-stats {
-  margin-top: 16px;
-  padding: 12px;
+  padding: 1rem;
   background: #f9fafb;
   border-radius: 6px;
   border: 1px solid var(--modal-border);
@@ -1149,20 +1123,6 @@
 
 .category-title:hover {
   background: #e5e7eb;
-}
-
-.category-title::after {
-  content: "";
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 6px solid var(--modal-text-secondary);
-  transition: transform 200ms ease;
 }
 
 .category-title.collapsed::after {

@@ -11,11 +11,13 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   }
 
   .permissions-header {
+    display: flex;
+    justify-content: space-between;
     background: white;
     border-radius: 12px;
     padding: 2rem;
     margin-bottom: 2rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   }
 
   .breadcrumb {
@@ -67,8 +69,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
   .role-stats {
     display: flex;
-    gap: 2rem;
-    margin-top: 1rem;
+    gap: 1rem;
   }
 
   .stat-card {
@@ -98,14 +99,13 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   .permissions-content {
     background: white;
     border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
     overflow: hidden;
   }
 
   .permissions-toolbar {
     padding: 1.5rem 2rem;
     border-bottom: 1px solid #e5e7eb;
-    background: #f8fafc;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -118,34 +118,61 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     gap: 1rem;
   }
 
+  /* Reemplazar la sección existente de search-container */
   .search-container {
     position: relative;
     width: 300px;
+    display: inline-block;
   }
 
   .search-input {
     width: 100%;
-    padding: 8px 12px 8px 36px;
-    border: 1px solid var(--modal-border);
-    border-radius: 6px;
+    padding: 8px 36px 8px 45px !important;
+    /* Ajustado para espacio del ícono y botón clear */
+    border: 1px solid #ccc;
+    border-radius: 8px;
     font-size: 14px;
-    background: white;
+    background: var(--gray-50, #f9fafb);
     transition: border-color 150ms ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
   }
 
-  .search-input:focus {
+  /* .search-input:focus {
     outline: none;
-    border-color: var(--btn-primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
+    border-color: rgb(152, 152, 152);
+    box-shadow: 0 0 0 2px rgba(222, 222, 222, 0.2);
+  } */
 
   .search-icon {
     position: absolute;
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--modal-text-secondary);
+    stroke: #465566;
     pointer-events: none;
+  }
+
+  .clear-button {
+    position: absolute;
+    right: 1rem;
+    top: 46%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 2rem;
+    font-weight: 300;
+    color: #aaa;
+    display: none;
+    line-height: 1;
+    padding: 0;
+    background: none;
+    border: none;
+  }
+
+  .search-container input:focus+.clear-button,
+  .search-container input:not(:placeholder-shown)+.clear-button {
+    display: inline;
   }
 
   .bulk-actions {
@@ -153,7 +180,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     gap: 8px;
   }
 
-  .bulk-btn {
+  button.bulk-btn {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -165,6 +192,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     color: var(--modal-text-secondary);
     cursor: pointer;
     transition: all 150ms ease;
+    width: auto;
   }
 
   .bulk-btn:hover {
@@ -193,11 +221,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     margin-left: 8px;
   }
 
-  .permissions-grid {
-    max-height: 60vh;
-    overflow-y: auto;
-  }
-
   .permission-category {
     border-bottom: 1px solid var(--modal-border);
   }
@@ -218,15 +241,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
   .category-header:hover {
     background: #e5e7eb;
-  }
-
-  .category-title {
-    margin: 0;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--modal-text-secondary);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
   }
 
   .category-toggle {
@@ -299,12 +313,50 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   }
 
   .permissions-actions {
-    padding: 2rem;
-    background: #f8fafc;
-    border-top: 1px solid #e5e7eb;
+    padding: 2rem 0rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .permissions-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--modal-error);
+  }
+
+  .permissions-error svg {
+    margin-bottom: 1rem;
+  }
+
+  .permissions-error p {
+    font-size: 16px;
+    text-align: center;
+    margin: 0;
+  }
+
+  .manage-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--btn-primary);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 15px;
+    margin-left: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .permission-label.manage-permission {
+    background-color: rgba(59, 130, 246, 0.03);
+    border-left: 3px solid var(--btn-primary);
+  }
+
+  .permission-label.manage-permission:hover {
+    background-color: rgba(59, 130, 246, 0.08);
   }
 
   .actions-left {
@@ -342,6 +394,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   .btn-primary {
     padding: 12px 24px;
     background: var(--btn-primary);
+    width: auto !important;
     color: white;
     border: none;
     border-radius: 8px;
@@ -368,9 +421,12 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   }
 
   .changes-indicator {
+    align-items: center;
+    gap: .2rem;
     font-size: 14px;
     color: var(--modal-warning);
     font-weight: 500;
+
   }
 
   .no-permissions {
@@ -443,41 +499,42 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
 <div class="permissions-container">
   <div class="permissions-header">
-    <nav class="breadcrumb">
-      <a href="<?= APP_URL ?>roles">Roles</a>
-      <span class="breadcrumb-separator">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 18l6-6-6-6"></path>
-        </svg>
-      </span>
-      <span>Gestionar Permisos</span>
-    </nav>
-
-    <div class="role-header">
-      <div class="role-info">
-        <h1>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-shield">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
+    <div>
+      <nav class="breadcrumb">
+        <a href="<?= APP_URL ?>roles">Roles</a>
+        <span class="breadcrumb-separator">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18l6-6-6-6"></path>
           </svg>
-          <span id="role-name">Cargando...</span>
-        </h1>
-        <p class="role-description">Gestión de permisos del rol</p>
-
-        <div class="role-stats">
-          <div class="stat-card">
-            <span class="stat-number" id="total-permissions">0</span>
-            <span class="stat-label">Total Permisos</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-number" id="assigned-permissions">0</span>
-            <span class="stat-label">Asignados</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-number" id="users-count">0</span>
-            <span class="stat-label">Usuarios</span>
-          </div>
+        </span>
+        <span>Gestionar Permisos</span>
+      </nav>
+      <div class="role-header">
+        <div class="role-info">
+          <h1>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-shield">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
+            </svg>
+            <span id="role-name">Cargando...</span>
+          </h1>
+          <p class="role-description">Gestión de permisos del rol</p>
         </div>
+      </div>
+    </div>
+
+    <div class="role-stats">
+      <div class="stat-card">
+        <span class="stat-number" id="total-permissions">0</span>
+        <span class="stat-label">Total Permisos</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="assigned-permissions">0</span>
+        <span class="stat-label">Asignados</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="users-count">0</span>
+        <span class="stat-label">Usuarios</span>
       </div>
     </div>
   </div>
@@ -485,12 +542,15 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   <div class="permissions-content">
     <div class="permissions-toolbar">
       <div class="toolbar-left">
+
         <div class="search-container">
-          <input type="text" id="permissions-search" class="search-input" placeholder="Buscar permisos...">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+            <path d="M21 21l-6 -6" />
           </svg>
+          <input type="text" id="permissions-search" class="search-input" placeholder="Buscar permisos">
+          <span class="clear-button">×</span>
         </div>
 
         <div class="bulk-actions">
@@ -544,11 +604,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         Volver
       </a>
 
-      <button type="button" id="save-permissions" class="btn-primary" disabled>
+      <button type="submit" id="save-permissions" class="btn-primary" disabled>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-          <polyline points="17,21 17,13 7,13 7,21"></polyline>
-          <polyline points="7,3 7,8 15,8"></polyline>
+          <path d="M12 5v14m-7-7h14" />
         </svg>
         Guardar Cambios
       </button>
