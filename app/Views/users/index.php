@@ -491,7 +491,6 @@
   #users-table_wrapper {
     opacity: 0;
     transform: translateY(10px);
-    /* Mantenemos el ligero deslizamiento hacia arriba */
     transition: opacity 300ms cubic-bezier(0.215, 0.610, 0.355, 1),
       transform 300ms cubic-bezier(0.215, 0.610, 0.355, 1);
   }
@@ -676,37 +675,24 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     container.classList.add('loading');
   }
 
-  // Función para ocultar loading
   function hideTableLoading() {
     const container = document.getElementById('table-container');
     const loadingContainer = document.getElementById('table-loading');
     const tableWrapper = document.getElementById('users-table_wrapper');
 
-    // Duración de la animación de fade-out del loader (debe coincidir con la transición CSS)
-    // En tu CSS, .table-loading-container tiene "transition: opacity 300ms ease;"
     const loaderFadeOutDuration = 300;
-
-    // Por defecto, un pequeño retraso para la animación de la tabla si no hay loader activo.
     let delayForTableAnimationStart = 10;
 
     if (loadingContainer) {
-      // Verificamos si el loader está visible o en proceso de mostrarse/ocultarse.
-      // Usamos getComputedStyle para obtener el valor de 'display' real.
       const isActiveLoader = window.getComputedStyle(loadingContainer).display !== 'none';
 
       if (isActiveLoader) {
-        loadingContainer.classList.remove('show'); // Inicia la animación de fade-out del loader
-
-        // Después de que la animación de fade-out del loader termine, se establece display: none
+        loadingContainer.classList.remove('show');
         setTimeout(() => {
           loadingContainer.style.display = 'none';
         }, loaderFadeOutDuration);
-
-        // La animación de la tabla debe esperar a que el loader termine su fade-out.
         delayForTableAnimationStart = loaderFadeOutDuration;
       } else {
-        // Si el loader existe pero no estaba activo (ej. display: none ya),
-        // solo nos aseguramos de que esté oculto y usamos el retraso mínimo para la tabla.
         loadingContainer.style.display = 'none';
       }
     }
@@ -714,16 +700,15 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     container.classList.remove('loading');
 
     if (tableWrapper) {
-      // Hacemos visible el contenedor de la tabla para que DataTables pueda ajustar columnas
-      // y para que esté listo para la animación (inicialmente opacity: 0 por CSS).
       tableWrapper.style.display = '';
-      if (table) {
-        table.columns.adjust();
-      }
 
-      // Iniciar la animación de aparición de la tabla DESPUÉS del delay calculado.
       setTimeout(() => {
         tableWrapper.classList.add('show');
+
+        if (table) {
+          table.columns.adjust();
+          table.draw();
+        }
       }, delayForTableAnimationStart);
     }
   }
@@ -781,11 +766,10 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         "infoFiltered": "(filtrado de _MAX_ registros totales)",
         "processing": '<div class="table-spinner"></div>Procesando...'
       },
-      initComplete: function() {
-        // Cargar datos después de inicializar
+      initComplete: () => {
         loadData();
       },
-      drawCallback: function() {
+      drawCallback: () => {
         // Aplicar clases de estado
         document.querySelectorAll('td').forEach(td => {
           if (td.textContent === 'Inactivo') {
@@ -799,15 +783,10 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     });
   });
 
-  // Función mejorada para cargar datos
+
   async function loadData() {
     try {
-      // Mostrar loading
-      if (!isFirstLoad) {
-        showTableLoading('Actualizando usuarios...');
-      } else {
-        showTableLoading('Cargando usuarios...');
-      }
+      showTableLoading('Cargando usuarios...');
 
       const response = await fetch('<?= APP_URL ?>api/users', {
         method: 'GET',
@@ -849,12 +828,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           ]);
         });
 
-        // Dibujar tabla y ajustar columnas
+        hideTableLoading();
         table.draw();
 
-        hideTableLoading();
-
-        // Marcar que ya no es la primera carga
         isFirstLoad = false;
 
       } else {
@@ -941,9 +917,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         }
       } catch (error) {
         console.error('Error en la petición fetch:', error);
-
-        // Ocultar loading
-        hideTableLoading();
 
         CustomDialog.error('Error de Red', 'Ocurrió un problema al intentar conectar con el servidor.');
       }
@@ -1087,44 +1060,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     mostrarModalVerDetalles(userId);
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si hay un message de éxito de actualización de usuario
-    const updateSuccess = sessionStorage.getItem('userUpdateSuccess');
-
-    if (updateSuccess) {
-      try {
-        const successData = JSON.parse(updateSuccess);
-
-        // Verificar que el message no sea muy antiguo (máximo 10 segundos)
-        const now = Date.now();
-        const messageAge = now - successData.timestamp;
-
-        if (messageAge < 10000) { // 10 segundos
-          // Esperar a que la página se cargue completamente antes de mostrar el modal
-          setTimeout(async () => {
-            await CustomDialog.success(
-              'Usuario Actualizado',
-              successData.message
-            );
-          }, 500); // Pequeño delay para asegurar que todo esté cargado
-        }
-
-        // Limpiar el message del sessionStorage
-        sessionStorage.removeItem('userUpdateSuccess');
-
-      } catch (error) {
-        console.error('Error al procesar message de éxito:', error);
-        sessionStorage.removeItem('userUpdateSuccess');
-      }
-    }
-  });
-
-  // se agrega el evento de click al boton de limpiar cuando el documento este cargado
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', () => {
 
     const clearButton = document.querySelector('.clear-button');
-
-    /** cuando se presione el boton de limpiar*/
     clearButton.addEventListener('click', clearInput);
 
     function clearInput() {
@@ -1142,7 +1080,4 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       }
     });
   });
-
-  let legacyInput = document.querySelector('.dt-layout-row');
-  legacyInput.style.display = 'none';
 </script>

@@ -19,10 +19,7 @@ async function eliminarRol(rolId, nombreRol, usuariosCount) {
   );
 
   if (confirmacion) {
-    // Mostrar loading en la tabla
-    if (typeof showTableLoading === "function") {
-      showTableLoading("Eliminando rol...");
-    }
+    showTableLoading("Eliminando rol...");
 
     try {
       const response = await fetch(`${APP_URL}/api/roles/${rolId}`, {
@@ -40,10 +37,7 @@ async function eliminarRol(rolId, nombreRol, usuariosCount) {
           data.message || "Rol eliminado correctamente"
         );
 
-        // Recargar tabla
-        if (typeof loadData === "function") {
           await loadData();
-        }
       } else {
         if (typeof hideTableLoading === "function") {
           hideTableLoading();
@@ -69,4 +63,4 @@ async function eliminarRol(rolId, nombreRol, usuariosCount) {
 }
 
 // Exportar función globalmente
-window.eliminarRol = eliminarRol;
+window.mostrarModalEliminarRol = eliminarRol;

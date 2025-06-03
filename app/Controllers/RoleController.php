@@ -8,21 +8,10 @@ use App\Models\roleModel;
 use App\Models\permissionModel;
 use Exception;
 
-/**
- * Controlador para la gestión de roles
- */
 class RoleController
 {
-  /**
-   * Modelo de roles
-   * @var roleModel
-   */
+ 
   private $roleModel;
-
-  /**
-   * Modelo de permisos
-   * @var permissionModel
-   */
   private $permissionModel;
 
   public function __construct()
@@ -31,9 +20,6 @@ class RoleController
     $this->permissionModel = new permissionModel();
   }
 
-  /**
-   * Vista principal de roles
-   */
   public function indexView(Request $request)
   {
     ob_start();
@@ -43,9 +29,6 @@ class RoleController
     return Response::html($contenido);
   }
 
-  /**
-   * Vista para crear rol
-   */
   public function createView(Request $request)
   {
     ob_start();
@@ -55,9 +38,6 @@ class RoleController
     return Response::html($contenido);
   }
 
-  /**
-   * Vista para editar rol
-   */
   public function editView(Request $request)
   {
     $id = $request->param('id');
@@ -74,14 +54,10 @@ class RoleController
     return Response::html($contenido);
   }
 
-  /**
-   * Vista para gestión de permisos de un rol
-   */
   public function permissionsView(Request $request)
   {
     $id = $request->param('id');
 
-    // Verificar que el rol existe
     $rol = $this->roleModel->obtenerRolPorId($id);
     if (!$rol) {
       return Response::redirect(APP_URL . 'error/404');
@@ -96,15 +72,11 @@ class RoleController
     return Response::html($contenido);
   }
 
-  /**
-   * API: Obtiene todos los roles con contador de usuarios
-   */
-  public function getAllRoles(Request $request)
+  public function getAllRoles()
   {
     try {
       $roles = $this->roleModel->obtenerTodosRoles();
 
-      // Agregar contador de usuarios para cada rol
       foreach ($roles as $rol) {
         $usuarios = $this->roleModel->obtenerUsuariosPorRol($rol->rol_id);
         $rol->usuarios_count = count($usuarios);
@@ -123,9 +95,6 @@ class RoleController
     }
   }
 
-  /**
-   * API: Obtiene un rol por ID
-   */
   public function getRoleById(Request $request)
   {
     try {
@@ -147,7 +116,6 @@ class RoleController
         ], 404);
       }
 
-      // Obtener usuarios asignados al rol
       $usuarios = $this->roleModel->obtenerUsuariosPorRol($id);
       $rol->usuarios_asignados = $usuarios;
       $rol->usuarios_count = count($usuarios);
@@ -178,9 +146,7 @@ class RoleController
           'max' => 50,
           'sanitizar' => true
         ],
-        'rol_base' => [
-          'formato' => 'entero'
-        ]
+        'rol_base' => []
       ];
 
       $resultado = $this->roleModel->validarDatos($datos, $validar);
@@ -192,31 +158,24 @@ class RoleController
         ]);
       }
 
-      // Verificar que el nombre del rol no exista
       if ($this->roleModel->existeRolPorDescripcion($resultado['datos']['descripcion'])) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['descripcion' => 'Ya existe un rol con esta descripción']
+          'errores' => ['descripcion' => 'Ya existe un rol con este nombre']
         ]);
       }
 
-      // Crear el rol
       $rolId = $this->roleModel->crearRol($resultado['datos']['descripcion']);
 
       error_log("Rol creado con ID: $rolId");
+      error_log("rol base : " . $resultado['datos']['rol_base']);
 
       if ($rolId) {
 
-        error_log("intentando asignar permisos base al rol ID: $rolId");
-
         if (!empty($resultado['datos']['rol_base'])) {
-
-          error_log("Rol base especificado: " . $resultado['datos']['rol_base']);
 
           $permisosBase = $this->permissionModel->obtenerPermisosPorRol($resultado['datos']['rol_base']);
 
-          error_log("Permisos base obtenidos: " . count($permisosBase));
-          
           $permisosIds = array_map(function ($permiso) {
             return $permiso->permiso_id;
           }, $permisosBase);
@@ -246,9 +205,6 @@ class RoleController
     }
   }
 
-  /**
-   * API: Actualiza un rol existente
-   */
   public function update(Request $request)
   {
     try {
@@ -288,7 +244,7 @@ class RoleController
         if ($this->roleModel->existeRolPorDescripcion($resultado['datos']['descripcion'])) {
           return Response::json([
             'status' => 'error',
-            'errores' => ['descripcion' => 'Ya existe un rol con esta descripción']
+            'errores' => ['descripcion' => 'Ya existe un rol con este nombre']
           ]);
         }
       }

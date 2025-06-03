@@ -361,7 +361,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         </h1>
         <p class="form-helper">Ingrese los datos del usuario que desea modificar</p>
       </div>
-      <form class="form-container form-ajax" novalidate action="<?= APP_URL ?>api/users/<?= $usuario->usuario_id ?>" method="POST" enctype="multipart/form-data">
+      <form class="form-container form-ajax" id="editUserForm" novalidate action="<?= APP_URL ?>api/users/<?= $usuario->usuario_id ?>" method="POST" enctype="multipart/form-data">
 
         <div class="left-side">
           <div class="general-information">
@@ -504,8 +504,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       })
       .then(response => response.json())
       .then(data => {
+        console.log("Roles disponibles:", data);
         const select = document.getElementById("rol");
-        data.forEach(rol => {
+        data.data.forEach(rol => {
           const option = document.createElement("option");
           option.value = rol.rol_id;
           option.textContent = rol.rol_descripcion;

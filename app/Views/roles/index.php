@@ -637,17 +637,14 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     mostrarModalCrearRol();
   }
 
-  function editarRol(rolId) {
+  function gestionarPermisos(rolId) {
     // TODO:
   }
 
   async function eliminarRol(rolId, nombreRol, usuariosCount) {
-    // TODO:
+    mostrarModalEliminarRol(rolId, nombreRol, usuariosCount);
   }
 
-  function gestionarPermisos(rolId) {
-    // TODO:
-  }
 
   // Función para posicionar el menú correctamente
   function posicionarMenu(boton, menu) {

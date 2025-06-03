@@ -62,15 +62,19 @@
 .dialog-icon.success {
   background: var(--success);
 }
+
 .dialog-icon.error {
   background: var(--danger);
 }
+
 .dialog-icon.warning {
   background: var(--warning);
 }
+
 .dialog-icon.info {
   background: var(--info);
 }
+
 .dialog-icon.question {
   background: var(--text-tertiary);
   width: 0.5rem;
@@ -209,7 +213,7 @@
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 60;
+  z-index: 5000;
   pointer-events: none;
 }
 
@@ -254,12 +258,15 @@
 .toast.success {
   background: var(--success);
 }
+
 .toast.error {
   background: var(--danger);
 }
+
 .toast.warning {
   background: var(--warning);
 }
+
 .toast.info {
   background: var(--info);
 }

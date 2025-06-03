@@ -102,16 +102,26 @@ const FormHandlers = {
           "El estado del usuario se actualizó correctamente"
       );
 
-      // Recargar datos de la tabla si existe
-      if (typeof loadData === "function" && typeof table !== "undefined") {
-        table.clear().draw();
-        loadData();
-      }
+      table.clear().draw();
+      loadData();
+    },
+  },
+
+  createRoleForm: {
+    async onSuccess(responseData) {
+      // Cerrar modal actual
+      await closeCurrentModal();
+
+      await CustomDialog.success(
+        "Rol Creado",
+        responseData.message || "El rol se creó correctamente"
+      );
+      window.location.href = `${APP_URL}/roles`;
     },
   },
 
   // Manejo para formularios de creación
-  createForm: {
+  createUserForm: {
     async onSuccess(responseData) {
       // Cerrar modal actual
       await closeCurrentModal();
@@ -127,6 +137,8 @@ const FormHandlers = {
   // Manejo para formularios de edición
   editForm: {
     async onSuccess(responseData) {
+      await closeCurrentModal();
+
       await CustomDialog.success(
         "Usuario Actualizado",
         responseData.message || "El usuario se actualizó correctamente"
@@ -138,15 +150,11 @@ const FormHandlers = {
 
 // ==================== IDENTIFICACIÓN DE TIPO DE FORMULARIO ====================
 function getFormType(form) {
-  // Identificar por ID específico primero
   if (form.id === "resetPasswordForm") return "resetPasswordForm";
   if (form.id === "changeStatusForm") return "changeStatusForm";
-
-  // Identificar por contexto
-  if (window.location.href.includes("/edit/")) return "editForm";
-
-  // Por defecto, formulario de creación
-  return "createForm";
+  if (form.id === "createRoleForm") return "createRoleForm";
+  if (form.id === "editUserForm") return "editForm";
+  if (form.id === "createUserForm") return "createUserForm";
 }
 
 // ==================== VALIDACIÓN DE FORMULARIOS ====================
@@ -170,6 +178,9 @@ function validateForm(form, data) {
     const input = form.querySelector(`[name="${key}"]`);
     if (!input || input.type === "hidden") return;
 
+    // OMITIR validación de campos vacíos para createRoleForm
+    if (formType === "createRoleForm") return;
+
     // Validar campos obligatorios
     if (typeof value === "string" && value.trim() === "" && key !== "avatar") {
       if (
@@ -180,7 +191,8 @@ function validateForm(form, data) {
         return;
       }
 
-      let label = input.parentElement.querySelector("label")?.textContent || key;
+      let label =
+        input.parentElement.querySelector("label")?.textContent || key;
       if (input.tagName === "SELECT") {
         showError(input, `Selecciona un rol para el usuario`);
       } else {

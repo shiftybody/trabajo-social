@@ -37,8 +37,7 @@ menuButton.addEventListener("click", function (event) {
 // Evento para cerrar el sidebar izquierdo con su botón de cierre
 closeButton.addEventListener("click", function (event) {
   event.stopPropagation(); // Evitar propagación
-  sidebar.classList.remove("open"); // Cierra el menú
-  // Solo quita el blur si no hay otro sidebar abierto
+  sidebar.classList.remove("open");
   if (!isSidebarOpen()) {
     contentBlur.classList.remove("active");
   }

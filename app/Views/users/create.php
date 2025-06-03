@@ -189,7 +189,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
                 <p class="form-helper">Ingrese los datos del usuario que desea crear</p>
             </div>
 
-            <form novalidate action="<?= APP_URL ?>api/users" method="POST" class="form-content form-ajax" enctype="multipart/form-data">
+            <form novalidate action="<?= APP_URL ?>api/users" method="POST" class="form-content form-ajax" id="createUserForm" enctype="multipart/form-data">
 
                 <!-- Avatar -->
                 <div class="upload-avatar">
