@@ -68,7 +68,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
 
   // PERMISOS (para cargar en formularios)
   $router->group(['middleware' => 'Permission:roles.edit|roles.create'], function ($router) {
-    $router->get('/permissions', 'PermissionController@getAllPermissions');
+    $router->get('/permissions', 'RoleController@getAllPermissions');
   });
 });
 

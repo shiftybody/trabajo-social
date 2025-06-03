@@ -637,9 +637,11 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     mostrarModalCrearRol();
   }
 
+
   function gestionarPermisos(rolId) {
-    // TODO:
+    window.location.href = `${APP_URL}/roles/${rolId}/permissions`;
   }
+
 
   async function eliminarRol(rolId, nombreRol, usuariosCount) {
     mostrarModalEliminarRol(rolId, nombreRol, usuariosCount);

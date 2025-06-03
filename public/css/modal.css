@@ -1306,7 +1306,7 @@
 }
 
 .opciones[title]:hover::before {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 100%;
   left: 50%;
@@ -1325,4 +1325,53 @@
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* Estilos para errores en permisos */
+.permissions-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+}
+
+.permissions-error svg {
+  width: 48px;
+  height: 48px;
+  color: var(--modal-error, #ef4444);
+}
+
+.permissions-error h3 {
+  color: var(--modal-text-primary, #111827);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.permissions-error p {
+  color: var(--modal-text-secondary, #6b7280);
+  font-size: 14px;
+  margin: 0;
+  text-align: center;
+}
+
+.btn-reload {
+  margin-top: 16px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+  border: none;
+  background: var(--btn-primary, #3b82f6);
+  color: white;
+}
+
+.btn-reload:hover {
+  background: var(--btn-primary-hover, #2563eb);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }

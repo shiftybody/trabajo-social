@@ -10,7 +10,7 @@ use Exception;
 
 class RoleController
 {
- 
+
   private $roleModel;
   private $permissionModel;
 
@@ -93,6 +93,15 @@ class RoleController
         'message' => 'Error al obtener los roles'
       ], 500);
     }
+  }
+
+  public function getAllPermissions(Request $request)
+  {
+    $permisos = $this->permissionModel->obtenerTodosPermisos();
+    return Response::json([
+      'status' => 'success',
+      'data' => $permisos
+    ]);
   }
 
   public function getRoleById(Request $request)

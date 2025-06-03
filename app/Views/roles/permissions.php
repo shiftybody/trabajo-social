@@ -442,7 +442,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 </style>
 
 <div class="permissions-container">
-  <!-- Header con información del rol -->
   <div class="permissions-header">
     <nav class="breadcrumb">
       <a href="<?= APP_URL ?>roles">Roles</a>
@@ -457,8 +456,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     <div class="role-header">
       <div class="role-info">
         <h1>
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-shield">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
           </svg>
           <span id="role-name">Cargando...</span>
         </h1>
@@ -482,9 +482,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </div>
   </div>
 
-  <!-- Contenido principal de permisos -->
   <div class="permissions-content">
-    <!-- Toolbar con búsqueda y acciones -->
     <div class="permissions-toolbar">
       <div class="toolbar-left">
         <div class="search-container">
@@ -496,14 +494,14 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         </div>
 
         <div class="bulk-actions">
-          <button type="button" class="bulk-btn" onclick="selectAllVisiblePermissions()">
+          <button type="button" class="bulk-btn" id="select-all-visible-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9,11 12,14 22,4"></polyline>
               <path d="M21,12v7a2,2 0 0,1 -2,2H5a2,2 0 0,1 -2,-2V5a2,2 0 0,1 2,-2h11"></path>
             </svg>
             Seleccionar visibles
           </button>
-          <button type="button" class="bulk-btn" onclick="deselectAllPermissions()">
+          <button type="button" class="bulk-btn" id="deselect-all-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             </svg>
@@ -517,7 +515,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       </div>
     </div>
 
-    <!-- Grid de permisos -->
     <div class="permissions-grid" id="permissions-grid">
       <div class="permissions-loading">
         <div class="permissions-spinner"></div>
@@ -526,7 +523,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </div>
   </div>
 
-  <!-- Acciones finales -->
   <div class="permissions-actions">
     <div class="actions-left">
       <span class="changes-indicator" id="changes-indicator" style="display: none;">

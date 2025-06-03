@@ -18,6 +18,29 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     gap: var(--8, 24px);
   }
 
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--modal-text-secondary);
+  }
+
+  .breadcrumb a {
+    color: var(--btn-primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .breadcrumb a:hover {
+    color: var(--btn-primary-hover);
+    text-decoration: underline;
+  }
+
+  .breadcrumb-separator {
+    color: var(--modal-text-muted);
+  }
+
   .form-container {
     display: flex;
     gap: 3rem;
@@ -347,11 +370,15 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 <main class="container">
   <div class="content">
     <div class="navigation-header">
-      <a href="<?= APP_URL ?>users" class="return-btn">
-        <span class="return-btn-symbol">
-          < </span>
-            <span class="return-btn-content">Regresar</span>
-      </a>
+      <nav class="breadcrumb">
+        <a href="<?= APP_URL ?>users">Usuarios</a>
+        <span class="breadcrumb-separator">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18l6-6-6-6"></path>
+          </svg>
+        </span>
+        <span>Editar Usuario</span>
+      </nav>
     </div>
     <!-- <?= var_dump($usuario) ?> -->
     <div class="form-wrapper">
