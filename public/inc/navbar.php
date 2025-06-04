@@ -299,6 +299,244 @@ $finalAvatarUrl = (file_exists($avatarPath) && !empty($avatarFilename))
     width: 1.25rem;
     height: auto;
   }
+
+  .search-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0s 0.2s;
+  }
+
+  .search-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.2s ease, visibility 0s 0s;
+  }
+
+  .instant-search-container {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%) scale(0.95);
+    max-width: 600px;
+    width: 90%;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .instant-search-container.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) scale(1);
+  }
+
+  .instant-search-modal {
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+
+  /* Contenedor del input con el mismo estilo que index.php */
+  .instant-search-modal .input-container {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .instant-search-modal .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    stroke: #465566;
+    pointer-events: none;
+  }
+
+  .instant-search-input {
+    width: 100%;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--rounded-lg);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 125%;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    transition: all 0.2s ease;
+  }
+
+  .instant-search-input:focus {
+    outline: none;
+    border-color: var(--gray-500);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .instant-search-input::placeholder {
+    color: var(--gray-500);
+  }
+
+  /* Botón clear con el mismo estilo */
+  .instant-search-modal .clear-button {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 2rem;
+    font-weight: 300;
+    color: #aaa;
+    display: none;
+    line-height: 1;
+    transition: color 0.2s ease;
+  }
+
+  .instant-search-modal .clear-button:hover {
+    color: #666;
+  }
+
+  /* Mostrar el botón clear cuando hay texto */
+  .instant-search-input:not(:placeholder-shown)+.clear-button {
+    display: inline;
+  }
+
+  /* Lista de resultados */
+  .search-results-list {
+    overflow-y: auto;
+    max-height: calc(70vh - 100px);
+    margin: 0 -1.5rem;
+    padding: 0;
+  }
+
+  .search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--gray-700);
+    text-decoration: none;
+    transition: all 0.15s ease;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--gray-300);
+  }
+
+  .search-result-item:last-child {
+    border-bottom: none;
+  }
+
+  .search-result-item:hover {
+    background: #f8f9fa;
+    color: var(--gray-900);
+  }
+
+  .search-result-item:focus {
+    outline: none;
+    background: #f3f4f6;
+    box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.2);
+  }
+
+  .search-result-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--gray-500);
+  }
+
+  .search-result-item:hover .search-result-icon {
+    color: var(--gray-700);
+  }
+
+  .search-result-text {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .search-result-text strong {
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+
+  .search-result-section {
+    padding: 0.5rem 0;
+  }
+
+  .search-result-section:first-child {
+    padding-top: 0;
+  }
+
+  .search-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    padding: 0.5rem 1.5rem;
+    letter-spacing: 0.5px;
+    background: #f9fafb;
+    margin: 0.5rem 0;
+  }
+
+  .search-result-section:first-child .search-section-title:first-child {
+    margin-top: 0;
+  }
+
+  .no-results {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--gray-500);
+    font-size: 14px;
+  }
+
+  .search-result-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #e3f2fd;
+    color: #1976d2;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .instant-search-container {
+      width: 95%;
+      top: 5%;
+    }
+
+    .instant-search-modal {
+      padding: 1rem;
+    }
+
+    .search-results-list {
+      max-height: calc(80vh - 80px);
+      margin: 0 -1rem;
+    }
+
+    .search-result-item,
+    .search-section-title {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
 </style>
 
 <!-- header navbar -->
@@ -321,7 +559,7 @@ $finalAvatarUrl = (file_exists($avatarPath) && !empty($avatarFilename))
     <div id="right-side">
       <div id="search-container">
         <?php if (Auth::can('search.view')): ?>
-          <input type="text" class="search" placeholder="Escribe / para navegar">
+          <input type="text" id="mainSearchInput" class="search" placeholder="Escribe / para navegar">
         <?php endif; ?>
         <?php if (Auth::can('notifications.view')): ?>
           <button type="button" id="uwu">
@@ -528,6 +766,25 @@ $finalAvatarUrl = (file_exists($avatarPath) && !empty($avatarFilename))
     </a>
   </div>
 </div>
+</div>
+<div id="searchBackdrop" class="search-backdrop"></div>
+<!-- Modal de búsqueda instantánea -->
+
+<div id="instantSearchContainer" class="instant-search-container">
+  <div class="instant-search-modal">
+    <div class="input-container">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon icon icon-tabler icons-tabler-outline icon-tabler-search">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+        <path d="M21 21l-6 -6" />
+      </svg>
+      <input type="text" id="modalSearchInput" class="instant-search-input" placeholder="Buscar" autofocus>
+      <span class="clear-button" id="clearInstantSearch">×</span>
+    </div>
+    <div id="searchResultsList" class="search-results-list">
+      <!-- Los resultados se insertarán aquí dinámicamente -->
+    </div>
+  </div>
 </div>
 <?php require_once APP_ROOT . 'public/inc/scripts.php'; ?>
 <script>
