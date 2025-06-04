@@ -326,12 +326,18 @@
   // Obtener nombre de categoría para mostrar
   function getCategoryDisplayName(category) {
     const categoryNames = {
+      home: "Inicio",
       users: "Usuarios",
       roles: "Roles",
       permissions: "Permisos",
       reports: "Reportes",
+      search: "Buscar",
+      notification: "Notificaciones",
+      patients: "Pacientes",
+      donations: "Donaciones",
+      stats: "Estadísticas",
       settings: "Configuración",
-      system: "Sistema",
+      profile: "Perfil"
     };
 
     return (

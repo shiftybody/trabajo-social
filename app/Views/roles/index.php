@@ -1,6 +1,8 @@
 <?php
 require_once APP_ROOT . 'public/inc/head.php';
 require_once APP_ROOT . 'public/inc/navbar.php';
+
+
 ?>
 <style>
   .container {
@@ -379,6 +381,39 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       padding: 2rem 2rem;
     }
   }
+
+  /* Estilos para roles protegidos (Administrador) */
+  .role-protected {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+    background-color: #fafafa !important;
+  }
+
+  .role-protected:hover {
+    background-color: #fafafa !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  .role-protected:hover svg {
+    transform: none !important;
+    stroke: #bbb !important;
+    filter: none !important;
+  }
+
+  .role-protected svg {
+    stroke: #bbb !important;
+  }
+
+  .role-protected[title]:hover::after {
+    background: rgba(200, 100, 100, 0.9) !important;
+    color: white !important;
+    font-weight: 500;
+  }
+
+  .role-protected[title]:hover::before {
+    border-top-color: rgba(200, 100, 100, 0.9) !important;
+  }
 </style>
 <div class="container">
   <div class="tools">
@@ -568,10 +603,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     });
   });
 
-  // Cargar datos
   async function loadData() {
     try {
-
       const response = await fetch('<?= APP_URL ?>api/roles');
 
       if (!response.ok) {
@@ -585,34 +618,49 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
         let incremental = 1;
         data.data.forEach(item => {
+
+          const isAdminRole = item.rol_descripcion === 'Administrador' || item.rol_id === 1;
+          let buttonsHtml = '<div class="action-buttons">';
+
+          <?php if (\App\Core\Auth::can('roles.edit')): ?>
+            buttonsHtml += `
+            <button type="button" 
+                    class="permisos-btn ${isAdminRole ? 'role-protected' : ''}" 
+                    ${isAdminRole ? 'disabled' : `onClick="gestionarPermisos(${item.rol_id})"`} 
+                    title="${isAdminRole ? 'No se puede modificar el rol de Administrador' : 'Gestionar Permisos'}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                <path d="M13.5 6.5l4 4" />
+              </svg>
+            </button>`;
+          <?php endif; ?>
+
+          <?php if (\App\Core\Auth::can('roles.delete')): ?>
+            buttonsHtml += `
+            <button type="button" 
+                    class="remover ${isAdminRole ? 'role-protected' : ''}" 
+                    ${isAdminRole ? 'disabled' : `onClick="eliminarRol(${item.rol_id}, '${item.rol_descripcion.replace(/'/g, "\\'")}', ${item.usuarios_count})"`} 
+                    title="${isAdminRole ? 'No se puede eliminar el rol de Administrador' : 'Eliminar Rol'}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M4 7l16 0" />
+                <path d="M10 11l0 6" />
+                <path d="M14 11l0 6" />
+                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+              </svg>
+            </button>`;
+          <?php endif; ?>
+
+          buttonsHtml += '</div>';
+
           table.row.add([
             item.rol_descripcion,
             item.usuarios_count || 0,
-            `<div class="action-buttons"> 
-              <?php if (\App\Core\Auth::can('roles.edit')): ?>
-                <button type="button" class="permisos-btn" onClick="gestionarPermisos(${item.rol_id})" title="Gestionar Permisos">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
-                    <path d="M13.5 6.5l4 4" />
-                  </svg>
-                </button>
-              <?php endif; ?>
-              
-              <?php if (\App\Core\Auth::can('roles.delete')): ?>
-                <button type="button" class="remover" onClick="eliminarRol(${item.rol_id}, '${item.rol_descripcion.replace(/'/g, "\\'")}', ${item.usuarios_count})" title="Eliminar Rol">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M4 7l16 0" />
-                    <path d="M10 11l0 6" />
-                    <path d="M14 11l0 6" />
-                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                  </svg>
-                </button>
-              <?php endif; ?>
-            </div>`
+            buttonsHtml
           ]);
+
         });
 
         table.draw();
