@@ -340,8 +340,8 @@ const TEMPLATE_HELPERS = {
   processUserDetailsData: (user) => {
     const avatarUrl =
       user.avatar && user.avatar !== "default.jpg"
-        ? `${APP_URL}/public/photos/thumbnail/${user.avatar}`
-        : `${APP_URL}/public/photos/default.jpg`;
+        ? `${APP_URL}public/photos/thumbnail/${user.avatar}`
+        : `${APP_URL}public/photos/default.jpg`;
 
     const statusClass = user.estado_id == 1 ? "active" : "inactive";
 
@@ -394,8 +394,8 @@ const TEMPLATE_HELPERS = {
   processChangeStatusData: (user) => {
     const avatarUrl =
       user.avatar && user.avatar !== "default.jpg"
-        ? `${APP_URL}/public/photos/thumbnail/${user.avatar}`
-        : `${APP_URL}/public/photos/default.jpg`;
+        ? `${APP_URL}public/photos/thumbnail/${user.avatar}`
+        : `${APP_URL}public/photos/default.jpg`;
 
     const currentStatus = user.estado_id === "1" ? "activo" : "inactivo";
     const newStatus = currentStatus === "activo" ? "inactivo" : "activo";

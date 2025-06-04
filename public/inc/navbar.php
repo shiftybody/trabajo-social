@@ -355,7 +355,6 @@ $finalAvatarUrl = (file_exists($avatarPath) && !empty($avatarFilename))
     position: relative;
     display: block;
     width: 100%;
-    margin-bottom: 1rem;
   }
 
   .instant-search-modal .search-icon {
@@ -367,12 +366,13 @@ $finalAvatarUrl = (file_exists($avatarPath) && !empty($avatarFilename))
     pointer-events: none;
   }
 
+  #modalSearchInput {
+    padding-left: 40px;
+    padding-right: 20px !important;
+  }
+
   .instant-search-input {
     width: 100%;
-    padding-left: 40px;
-    padding-right: 40px;
-    padding-top: 12px;
-    padding-bottom: 12px;
     border: 1px solid var(--gray-300);
     border-radius: var(--rounded-lg);
     font-size: 14px;
@@ -383,13 +383,6 @@ $finalAvatarUrl = (file_exists($avatarPath) && !empty($avatarFilename))
     transition: all 0.2s ease;
   }
 
-  .instant-search-input:focus {
-    outline: none;
-    border-color: var(--gray-500);
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-
   .instant-search-input::placeholder {
     color: var(--gray-500);
   }
@@ -398,7 +391,7 @@ $finalAvatarUrl = (file_exists($avatarPath) && !empty($avatarFilename))
   .instant-search-modal .clear-button {
     position: absolute;
     right: 1rem;
-    top: 50%;
+    top: 46%;
     transform: translateY(-50%);
     cursor: pointer;
     font-size: 2rem;
@@ -423,7 +416,7 @@ $finalAvatarUrl = (file_exists($avatarPath) && !empty($avatarFilename))
     overflow-y: auto;
     max-height: calc(70vh - 100px);
     margin: 0 -1.5rem;
-    padding: 0;
+    padding: 1.5rem;
   }
 
   .search-result-item {
@@ -498,10 +491,10 @@ $finalAvatarUrl = (file_exists($avatarPath) && !empty($avatarFilename))
   }
 
   .no-results {
-    padding: 3rem 1.5rem;
     text-align: center;
     color: var(--gray-500);
     font-size: 14px;
+    margin-top: 1.5rem;
   }
 
   .search-result-badge {

@@ -8,7 +8,7 @@ function resetearPassword(userId) {
   const resetModal = createModal("resetPassword", {
     title: "Resetear Contraseña",
     size: "medium",
-    endpoint: `${APP_URL}/api/users/${userId}/reset-password`,
+    endpoint: `${APP_URL}api/users/${userId}/reset-password`,
     data: {
       userName: "Cargando...", // Se actualizará con datos reales
     },
@@ -18,7 +18,7 @@ function resetearPassword(userId) {
 
       try {
         // Cargar datos del usuario
-        const response = await fetch(`${APP_URL}/api/users/${userId}`);
+        const response = await fetch(`${APP_URL}api/users/${userId}`);
         const userData = await response.json();
 
         if (userData.status === "success") {

@@ -370,56 +370,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     gap: 12px;
   }
 
-  .btn-secondary {
-    padding: 12px 24px;
-    border: 1px solid var(--modal-border);
-    background: white;
-    color: var(--modal-text-primary);
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 150ms ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn-secondary:hover {
-    background: #f3f4f6;
-    border-color: var(--modal-text-muted);
-  }
-
-  .btn-primary {
-    padding: 12px 24px;
-    background: var(--btn-primary);
-    width: auto !important;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 150ms ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn-primary:hover:not(:disabled) {
-    background: var(--btn-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-  }
-
-  .btn-primary:disabled {
-    background: var(--modal-text-muted);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-
   .changes-indicator {
     align-items: center;
     gap: .2rem;

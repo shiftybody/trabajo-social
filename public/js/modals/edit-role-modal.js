@@ -5,12 +5,12 @@ function editarRol(rolId) {
   const editModal = createModal("editRoleSimplified", {
     title: "Editar Rol",
     size: "medium", // Reducido de 'large'
-    endpoint: `${APP_URL}/api/roles/${rolId}`,
+    endpoint: `${APP_URL}api/roles/${rolId}`,
     onShow: async (modal) => {
       modal.showLoading("Cargando información del rol...");
 
       try {
-        const response = await fetch(`${APP_URL}/api/roles/${rolId}`);
+        const response = await fetch(`${APP_URL}api/roles/${rolId}`);
         const roleData = await response.json();
 
         if (roleData.status === "success") {

@@ -1,3 +1,7 @@
+<?php
+require_once APP_ROOT . 'public/inc/head.php';
+require_once APP_ROOT . 'public/inc/navbar.php';
+?>
 <style>
   .container {
     padding: 2.5rem 10rem 0 10rem;
@@ -339,7 +343,7 @@
 
   .opciones:hover svg {
     transform: translateY(-1px);
-    filter: drop-shadow(0 1px 1px var(--sombra));
+    filter: drop-shadow(0 1px 1px var(--shadow));
     stroke: #14171d;
   }
 
@@ -565,10 +569,6 @@
     display: none !important;
   }
 </style>
-<?php
-require_once APP_ROOT . 'public/inc/head.php';
-require_once APP_ROOT . 'public/inc/navbar.php';
-?>
 <div class="container">
   <div class="right_content">
     <div class="tools">
@@ -605,6 +605,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </div>
 
     <div class="table-container" id="table-container">
+
       <!-- Loading inicial -->
       <div class="table-loading-container" id="table-loading">
         <div class="table-loading">
@@ -613,7 +614,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         </div>
       </div>
 
-      <!-- Tabla (oculta inicialmente) -->
       <table id="users-table" class="hover nowrap cell-borders" style="display: none;">
         <thead>
           <tr>
@@ -630,7 +630,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </div>
   </div>
 </div>
-<script src="<?= APP_URL ?>public/js/libs/datatables.min.js"></script>
 <?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script>
   let table;

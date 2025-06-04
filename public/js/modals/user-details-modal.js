@@ -14,7 +14,7 @@ function verDetalles(userId) {
       modal.showLoading("Cargando información del usuario...");
 
       try {
-        const response = await fetch(`${APP_URL}/api/users/${userId}`);
+        const response = await fetch(`${APP_URL}api/users/${userId}`);
         const userData = await response.json();
 
         if (userData.status === "success") {

@@ -19,101 +19,6 @@ document.addEventListener("DOMContentLoaded", function () {
   initPasswordToggle();
 });
 
-// Función para inicializar el toggle de contraseña
-function initPasswordToggle() {
-  const passwordInput = document.getElementById("password");
-  const toggleButton = document.getElementById("password-toggle");
-
-  if (passwordInput && toggleButton) {
-    // Función para mostrar/ocultar el botón según el contenido
-    function toggleButtonVisibility() {
-      if (passwordInput.value.trim() === "") {
-        toggleButton.style.display = "none";
-      } else {
-        toggleButton.style.display = "flex";
-      }
-    }
-
-    // Inicializar la visibilidad del botón
-    toggleButtonVisibility();
-
-    // Escuchar cambios en el input
-    passwordInput.addEventListener("input", toggleButtonVisibility);
-    passwordInput.addEventListener("paste", function () {
-      // Usar setTimeout para esperar a que se procese el paste
-      setTimeout(toggleButtonVisibility, 0);
-    });
-
-    toggleButton.addEventListener("click", function () {
-      const isPassword = passwordInput.type === "password";
-
-      // Cambiar el tipo del input
-      passwordInput.type = isPassword ? "text" : "password";
-
-      // Cambiar el icono
-      const eyeIcon = toggleButton.querySelector(".eye-icon");
-      const eyeOffIcon = toggleButton.querySelector(".eye-off-icon");
-
-      if (isPassword) {
-        eyeIcon.style.display = "none";
-        eyeOffIcon.style.display = "block";
-      } else {
-        eyeIcon.style.display = "block";
-        eyeOffIcon.style.display = "none";
-      }
-    });
-  }
-}
-
-// Función para mostrar message de error en el contenedor principal
-function showMainError(message, className = "error-message") {
-  // Limpiar cualquier message anterior
-  clearMainError();
-
-  // Crear nuevo message
-  const errorP = document.createElement("p");
-  errorP.className = className;
-  errorP.textContent = message;
-
-  // Añadir al contenedor y mostrarlo
-  errorMsg.appendChild(errorP);
-  errorMsg.classList.add("visible");
-}
-
-// Función para limpiar el message de error principal
-function clearMainError() {
-  const existingError = errorMsg.querySelector("p");
-  if (existingError) {
-    existingError.remove();
-  }
-  errorMsg.classList.remove("visible");
-}
-
-// Limpiar messages de estado cuando el usuario comience a interactuar
-function clearStatusMessages() {
-  const statusMessages = errorMsg.querySelectorAll(
-    ".expired-session-message, .account-disabled-message"
-  );
-  if (statusMessages.length > 0) {
-    statusMessages.forEach((msg) => msg.remove());
-    if (!errorMsg.querySelector("p")) {
-      errorMsg.classList.remove("visible");
-    }
-  }
-}
-
-// Función auxiliar para manejar los estilos de error del input de password
-function togglePasswordErrorStyle(input, hasError) {
-  const toggleButton = document.getElementById("password-toggle");
-
-  if (input.id === "password" && toggleButton) {
-    if (hasError) {
-      toggleButton.classList.add("error-toggle");
-    } else {
-      toggleButton.classList.remove("error-toggle");
-    }
-  }
-}
 
 formulario.addEventListener("submit", async function (e) {
   e.preventDefault();
@@ -271,7 +176,7 @@ formulario
   });
 
 // También limpiar los messages de estado al hacer click en cualquier input
-formularios
+formulario
   .querySelectorAll("input[type='text'], input[type='password']")
   .forEach((input) => {
     input.addEventListener("focus", function (e) {
@@ -287,9 +192,103 @@ function showError(input, message) {
   input.parentElement.appendChild(error);
   input.classList.add("error-input");
 
-  // Aplicar estilo de error al toggle de password si aplica
   togglePasswordErrorStyle(input, true);
-
   // Mostrar el contenedor de errores
   errorMsg.classList.add("visible");
+}
+
+// Función auxiliar para manejar los estilos de error del input de password
+function togglePasswordErrorStyle(input, hasError) {
+  const toggleButton = document.getElementById("password-toggle");
+
+  if (input.id === "password" && toggleButton) {
+    if (hasError) {
+      toggleButton.classList.add("error-toggle");
+    } else {
+      toggleButton.classList.remove("error-toggle");
+    }
+  }
+}
+
+// Función para inicializar el toggle de contraseña
+function initPasswordToggle() {
+  const passwordInput = document.getElementById("password");
+  const toggleButton = document.getElementById("password-toggle");
+
+  if (passwordInput && toggleButton) {
+    // Función para mostrar/ocultar el botón según el contenido
+    function toggleButtonVisibility() {
+      if (passwordInput.value.trim() === "") {
+        toggleButton.style.display = "none";
+      } else {
+        toggleButton.style.display = "flex";
+      }
+    }
+
+    // Inicializar la visibilidad del botón
+    toggleButtonVisibility();
+
+    // Escuchar cambios en el input
+    passwordInput.addEventListener("input", toggleButtonVisibility);
+    passwordInput.addEventListener("paste", function () {
+      // Usar setTimeout para esperar a que se procese el paste
+      setTimeout(toggleButtonVisibility, 0);
+    });
+
+    toggleButton.addEventListener("click", function () {
+      const isPassword = passwordInput.type === "password";
+
+      // Cambiar el tipo del input
+      passwordInput.type = isPassword ? "text" : "password";
+
+      // Cambiar el icono
+      const eyeIcon = toggleButton.querySelector(".eye-icon");
+      const eyeOffIcon = toggleButton.querySelector(".eye-off-icon");
+
+      if (isPassword) {
+        eyeIcon.style.display = "none";
+        eyeOffIcon.style.display = "block";
+      } else {
+        eyeIcon.style.display = "block";
+        eyeOffIcon.style.display = "none";
+      }
+    });
+  }
+}
+
+// Función para mostrar un message de error principal
+function showMainError(message, className = "account-disabled-message") {
+  // Limpiar cualquier message anterior
+  clearMainError();
+
+  // Crear nuevo message
+  const errorP = document.createElement("p");
+  errorP.className = className;
+  errorP.textContent = message;
+
+  // Añadir al contenedor y mostrarlo
+  errorMsg.appendChild(errorP);
+  errorMsg.classList.add("visible");
+}
+
+// Función para limpiar el message de error principal
+function clearMainError() {
+  const existingError = errorMsg.querySelector("p");
+  if (existingError) {
+    existingError.remove();
+  }
+  errorMsg.classList.remove("visible");
+}
+
+// Limpiar messages de estado cuando el usuario comience a interactuar
+function clearStatusMessages() {
+  const statusMessages = errorMsg.querySelectorAll(
+    ".expired-session-message, .account-disabled-message"
+  );
+  if (statusMessages.length > 0) {
+    statusMessages.forEach((msg) => msg.remove());
+    if (!errorMsg.querySelector("p")) {
+      errorMsg.classList.remove("visible");
+    }
+  }
 }

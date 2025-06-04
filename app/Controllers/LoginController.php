@@ -20,10 +20,6 @@ class LoginController // Modificado: ya no extiende userModel
   public function indexView()
   {
 
-    // if (isset($_SESSION[APP_SESSION_NAME]) && !empty($_SESSION[APP_SESSION_NAME]['id'])) {
-    //   return Response::redirect(APP_URL . 'home');
-    // }
-
     // Mensaje de sesión expirada
     if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
       $status_message = 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';

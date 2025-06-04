@@ -22,7 +22,7 @@ async function eliminarRol(rolId, nombreRol, usuariosCount) {
     showTableLoading("Eliminando rol...");
 
     try {
-      const response = await fetch(`${APP_URL}/api/roles/${rolId}`, {
+      const response = await fetch(`${APP_URL}api/roles/${rolId}`, {
         method: "DELETE",
         headers: {
           Accept: "application/json",

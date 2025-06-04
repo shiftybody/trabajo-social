@@ -8,14 +8,14 @@ function cambiarEstado(usuario_id) {
   const statusModal = createModal("changeStatus", {
     title: "Cambiar Estado de Usuario",
     size: "medium",
-    endpoint: `${APP_URL}/api/users/${usuario_id}/status`,
+    endpoint: `${APP_URL}api/users/${usuario_id}/status`,
     onShow: async (modal) => {
       
       modal.showLoading("Cargando información del usuario...");
 
       try {
         // Cargar datos del usuario
-        const response = await fetch(`${APP_URL}/api/users/${usuario_id}`);
+        const response = await fetch(`${APP_URL}api/users/${usuario_id}`);
         const userData = await response.json();
 
         if (userData.status === "success") {

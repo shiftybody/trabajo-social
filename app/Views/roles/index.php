@@ -2,7 +2,6 @@
 require_once APP_ROOT . 'public/inc/head.php';
 require_once APP_ROOT . 'public/inc/navbar.php';
 
-
 ?>
 <style>
   .container {
@@ -165,7 +164,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
   .opciones:hover svg {
     transform: translateY(-1px);
-    filter: drop-shadow(0 1px 1px var(--sombra));
+    filter: drop-shadow(0 1px 1px var(--shadow));
     stroke: #14171d;
   }
 
@@ -455,7 +454,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </table>
   </div>
 </div>
-<script src="<?= APP_URL ?>public/js/libs/datatables.min.js"></script>
 <?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script>
   // Variables globales
@@ -682,16 +680,13 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     mostrarModalCrearRol();
   }
 
-
   function gestionarPermisos(rolId) {
-    window.location.href = `${APP_URL}/roles/${rolId}/permissions`;
+    window.location.href = `${APP_URL}roles/${rolId}/permissions`;
   }
-
 
   async function eliminarRol(rolId, nombreRol, usuariosCount) {
     mostrarModalEliminarRol(rolId, nombreRol, usuariosCount);
   }
-
 
   // Función para posicionar el menú correctamente
   function posicionarMenu(boton, menu) {

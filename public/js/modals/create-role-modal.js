@@ -5,13 +5,13 @@ function crearRol() {
   const roleModal = createModal("createRole", {
     title: "Crear Nuevo Rol",
     size: "medium",
-    endpoint: `${APP_URL}/api/roles`,
+    endpoint: `${APP_URL}api/roles`,
     onShow: (modal) => {
       modal.showLoading("Cargando roles base disponibles...");
 
-      console.log(`Cargando roles base desde: ${APP_URL}/api/roles`);
+      console.log(`Cargando roles base desde: ${APP_URL}api/roles`);
 
-      fetch( `${APP_URL}/api/roles`, {
+      fetch( `${APP_URL}api/roles`, {
         method: "GET",
         headers: {
           Accept: "application/json",

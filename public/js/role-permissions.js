@@ -114,7 +114,7 @@
       showLoading("Cargando información del rol...");
 
       // Cargar información del rol
-      const roleResponse = await fetch(`${APP_URL}/api/roles/${roleId}`);
+      const roleResponse = await fetch(`${APP_URL}api/roles/${roleId}`);
       const roleData = await roleResponse.json();
 
       if (roleData.status !== "success") {
@@ -127,7 +127,7 @@
       dom.usersCount.textContent = roleData.data.usuarios_count || 0;
 
       // Cargar todos los permisos disponibles
-      const permissionsResponse = await fetch(`${APP_URL}/api/permissions`);
+      const permissionsResponse = await fetch(`${APP_URL}api/permissions`);
       const permissionsData = await permissionsResponse.json();
 
       if (permissionsData.status !== "success") {
@@ -142,7 +142,7 @@
 
       // Cargar permisos asignados al rol
       const rolePermissionsResponse = await fetch(
-        `${APP_URL}/api/roles/${roleId}/permissions`
+        `${APP_URL}api/roles/${roleId}/permissions`
       );
       const rolePermissionsData = await rolePermissionsResponse.json();
 
@@ -584,7 +584,7 @@
       });
 
       const response = await fetch(
-        `${APP_URL}/api/roles/${roleId}/permissions`,
+        `${APP_URL}api/roles/${roleId}/permissions`,
         {
           method: "POST",
           headers: {
@@ -607,7 +607,7 @@
           data.message || "Los permisos del rol se actualizaron correctamente"
         );
 
-        window.location.href = `${APP_URL}/roles`;
+        window.location.href = `${APP_URL}roles`;
       } else {
         throw new Error(data.message || "Error al actualizar permisos");
       }

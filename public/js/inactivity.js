@@ -1,7 +1,7 @@
 (function () {
   const CHECK_INTERVAL = 5000; // 5 segundos
   const REFRESH_COOLDOWN = 1000; // 1 segundo de cooldown entre refrescos
-  const BASE_APP_URL = typeof APP_URL !== "undefined" && APP_URL ? APP_URL : "";
+  const BASE_APP_URL = APP_URL;
 
   // Estado simplificado
   let state = {
@@ -156,7 +156,7 @@
   function performLogout(isExpired = false) {
     cleanup();
 
-    const logoutUrl = `${BASE_APP_URL}/api/logout${isExpired ? "?expired=1" : ""}`;
+    const logoutUrl = `${BASE_APP_URL}api/logout${isExpired ? "?expired=1" : ""}`;
 
     fetch(logoutUrl, {
       method: "POST",
@@ -171,13 +171,13 @@
           window.location.href = data.redirect;
         } else {
           // Fallback
-          window.location.href = `${BASE_APP_URL}/login${isExpired ? "?expired_session=1" : ""}`;
+          window.location.href = `${BASE_APP_URL}login${isExpired ? "?expired_session=1" : ""}`;
         }
       })
       .catch(error => {
         console.error("Error al cerrar sesión:", error);
         // Fallback en caso de error
-        window.location.href = `${BASE_APP_URL}/login${isExpired ? "?expired_session=1" : ""}`;
+        window.location.href = `${BASE_APP_URL}login${isExpired ? "?expired_session=1" : ""}`;
       });
   }
 
@@ -186,7 +186,7 @@
     if (state.isRefreshing) return;
     
     state.isRefreshing = true;
-    const refreshUrl = `${BASE_APP_URL}/api/session/refresh`;
+    const refreshUrl = `${BASE_APP_URL}api/session/refresh`;
 
     fetch(refreshUrl, {
       method: "POST",
@@ -218,7 +218,7 @@
   }
 
   function checkSessionStatus() {
-    const statusUrl = `${BASE_APP_URL}/api/session/status`;
+    const statusUrl = `${BASE_APP_URL}api/session/status`;
 
     fetch(statusUrl, {
       method: "GET",
@@ -263,8 +263,6 @@
       })
       .catch(error => {
         console.error("Error al verificar sesión:", error);
-        // No hacer logout automático en caso de error de red
-        // para evitar cerrar sesión por problemas temporales
       });
   }
 

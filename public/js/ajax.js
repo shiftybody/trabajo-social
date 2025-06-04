@@ -116,7 +116,7 @@ const FormHandlers = {
         "Rol Creado",
         responseData.message || "El rol se creó correctamente"
       );
-      window.location.href = `${APP_URL}/roles`;
+      window.location.href = `${APP_URL}roles`;
     },
   },
 
@@ -130,7 +130,7 @@ const FormHandlers = {
         "Usuario Creado",
         responseData.message || "El usuario se creó correctamente"
       );
-      window.location.href = `${APP_URL}/users`;
+      window.location.href = `${APP_URL}users`;
     },
   },
 
@@ -143,7 +143,7 @@ const FormHandlers = {
         "Usuario Actualizado",
         responseData.message || "El usuario se actualizó correctamente"
       );
-      window.location.href = `${APP_URL}/users`;
+      window.location.href = `${APP_URL}users`;
     },
   },
 };
@@ -425,7 +425,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const userAvatar = document.querySelector(".user-avatar");
         if (userAvatar) {
-          userAvatar.style.backgroundImage = `url(${APP_URL}/public/photos/default.jpg)`;
+          userAvatar.style.backgroundImage = `url(${APP_URL}public/photos/default.jpg)`;
         }
 
         document.querySelectorAll(".error-input").forEach(clearError);

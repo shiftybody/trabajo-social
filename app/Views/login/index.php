@@ -1,26 +1,4 @@
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= APP_NAME ?></title>
-  <link rel="icon" href="<?= APP_URL ?>public/images/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="<?= APP_URL ?>public/css/base.css">
-  <link rel="stylesheet" href="<?= APP_URL ?>public/css/global.css">
-  <link rel="stylesheet" href="<?= APP_URL ?>public/css/login.css">
-  <style>
-    .account-disabled-message {
-      color: var(--red-600);
-      font-family: var(--font-family);
-      font-size: var(--font-size-small);
-      font-weight: var(--font-weight-medium);
-      line-height: var(--line-height-large);
-      background-color: #fef2f2;
-      border: 1px solid #f87171;
-      border-radius: 6px;
-      padding: 12px;
-      margin: 8px 0;
-    }
-  </style>
-</head>
+<?php require_once APP_ROOT . 'public/inc/head.php'; ?>
 
 <header>
   <img src="<?= APP_URL ?>public/images/imagotipo-neurodesarrollo.png" alt="imagotipo neurodesarrollo" id="imagotipo">
@@ -74,10 +52,10 @@
         <input type="checkbox" name="remember" id="remember">
       </div>
 
-      <button type="submit" class="dark-button">Iniciar Sesión</button>
+      <button type="submit">Iniciar Sesión</button>
 
     </form>
   </section>
 </main>
 
-<script src="<?= APP_URL ?>public/js/login.js"></script>
+<?php require_once APP_ROOT . 'public/inc/scripts.php'; ?>
