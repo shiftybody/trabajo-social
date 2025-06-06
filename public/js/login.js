@@ -85,7 +85,6 @@ formulario.addEventListener("submit", async function (e) {
 
   // si no es valido, no hacer la peticion
   if (!isValid) {
-    errorMsg.classList.add("visible"); // Asegurarse de que el contenedor de errores sea visible si hay errores de validación
     return;
   }
 
@@ -193,8 +192,6 @@ function showError(input, message) {
   input.classList.add("error-input");
 
   togglePasswordErrorStyle(input, true);
-  // Mostrar el contenedor de errores
-  errorMsg.classList.add("visible");
 }
 
 // Función auxiliar para manejar los estilos de error del input de password
@@ -269,6 +266,7 @@ function showMainError(message, className = "account-disabled-message") {
   // Añadir al contenedor y mostrarlo
   errorMsg.appendChild(errorP);
   errorMsg.classList.add("visible");
+  
 }
 
 // Función para limpiar el message de error principal

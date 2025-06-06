@@ -7,3 +7,4 @@
 **/public/photos/thumbnail/*
 **/logs/*
 /logs
+**/public/inc/passgen.php

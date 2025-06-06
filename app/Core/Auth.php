@@ -96,13 +96,10 @@ class Auth
       if ($user) {
         self::$user = $user;
 
-        // Verificar si la sesión está marcada como recordada pero la cookie ya no existe
         if (isset($_SESSION[APP_SESSION_NAME]['is_remembered']) && $_SESSION[APP_SESSION_NAME]['is_remembered'] === true) {
           if (!isset($_COOKIE[APP_SESSION_NAME])) {
-            // La cookie de recordar ha desaparecido, actualizar el estado de la sesión
             $_SESSION[APP_SESSION_NAME]['is_remembered'] = false;
-            $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time(); // Reiniciar el temporizador
-            error_log("Cookie 'recordarme' no encontrada para sesión recordada. Actualizando a sesión normal.");
+            $_SESSION[APP_SESSION_NAME]['ultima_actividad'] = time();
           }
         }
       } else {
@@ -145,8 +142,6 @@ class Auth
       return true;
     }
 
-    error_log("Attempted to refresh session activity, but no active session or user ID found in session.");
-
     return false;
   }
 
@@ -178,11 +173,9 @@ class Auth
     $expirationTimestamp = $_SESSION[APP_SESSION_NAME]['ultima_actividad'] + SESSION_EXPIRATION_TIMEOUT;
 
     $timeRemaining = $isRemembered
-      ? SESSION_EXPIRATION_TIMEOUT // Valor constante alto para sesiones recordadas
+      ? SESSION_EXPIRATION_TIMEOUT
       : max(0, $expirationTimestamp - time());
 
-    // Una sesión recordada siempre está activa mientras exista la cookie
-    // Una sesión normal está activa si tiene tiempo restante
     $isActive = $isRemembered ? true : ($timeRemaining > 0);
 
     return [
@@ -269,18 +262,45 @@ class Auth
   /**
    * Verifica si el usuario tiene un permiso específico
    */
-  public static function can($permission)
+  public static function can($permissions)
   {
     if (!self::check()) {
       return false;
     }
 
-    // Lazy loading de permisos
     if (self::$permissions === null) {
       self::loadPermissions();
     }
 
-    return isset(self::$permissions[$permission]) && self::$permissions[$permission];
+    foreach ((array)$permissions as $permission) {
+      if (!isset(self::$permissions[$permission]) || !self::$permissions[$permission]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Verifica si el usuario tiene alguno de los permisos especificados
+   */
+  public static function canAny($permissions)
+  {
+    if (!self::check()) {
+      return false;
+    }
+
+    if (self::$permissions === null) {
+      self::loadPermissions();
+    }
+
+    foreach ((array)$permissions as $permission) {
+      if (isset(self::$permissions[$permission]) && self::$permissions[$permission]) {
+        return true; // Tiene al menos uno
+      }
+    }
+
+    return false; // No tiene ninguno
   }
 
   /**
@@ -302,11 +322,12 @@ class Auth
       return;
     }
 
-    // Obtener permisos del rol
     $rolePermissions = self::$permissionModel->obtenerPermisosPorRol(self::role());
+    error_log("Los permisos del rol " . self::role() . " son: " . json_encode($rolePermissions));
     foreach ($rolePermissions as $permission) {
       self::$permissions[$permission->permiso_slug] = true;
     }
+    error_log("Permisos cargados para el usuario " . self::id() . ": " . json_encode(self::$permissions));
   }
 
   /**
@@ -326,7 +347,7 @@ class Auth
    */
   public static function attempt($identifier, $password, $remember = false)
   {
-    // Asegurar que los modelos estén disponibles
+
     if (!self::$userModel) {
       self::$userModel = new userModel();
     }
@@ -417,21 +438,18 @@ class Auth
    */
   public static function logout()
   {
-    // Limpiar variables estáticas
+
     self::$user = null;
     self::$permissions = null;
 
-    // Limpiar sesión
     if (isset($_SESSION[APP_SESSION_NAME])) {
       unset($_SESSION[APP_SESSION_NAME]);
     }
 
-    // Limpiar cookie
     if (isset($_COOKIE[APP_SESSION_NAME])) {
       setcookie(APP_SESSION_NAME, "", time() - 1, "/");
     }
 
-    // Solo destruir la sesión si está activa
     if (session_status() === PHP_SESSION_ACTIVE) {
       session_destroy();
     }

@@ -1,28 +1,21 @@
+/** Modal de confirmacion para eliminar usuario */
 /**
- * Modal de confirmación para eliminar rol
+ * Modal de confirmación para eliminar usuario
  */
-async function eliminarRol(rolId, nombreRol, usuariosCount) {
-
-  if (usuariosCount > 0) {
-    CustomDialog.error(
-      "No se puede eliminar",
-      `El rol "${nombreRol}" tiene ${usuariosCount} usuario(s) asignado(s). Primero debes reasignar estos usuarios a otro rol.`
-    );
-    return;
-  }
+async function eliminarUsuario(usuarioId, nombreUsuario) {
 
   const confirmacion = await CustomDialog.confirm(
     "Confirmar Eliminación",
-    `¿Está seguro de que desea eliminar el rol "${nombreRol}"?`,
+    `¿Está seguro de que desea eliminar el usuario "${nombreUsuario}"?`,
     "Eliminar",
     "Cancelar"
   );
 
   if (confirmacion) {
-    showTableLoading("Eliminando rol...");
+    showTableLoading("Eliminando usuario...");
 
     try {
-      const response = await fetch(`${APP_URL}api/roles/${rolId}`, {
+      const response = await fetch(`${APP_URL}api/users/${usuarioId}`, {
         method: "DELETE",
         headers: {
           Accept: "application/json",
@@ -34,17 +27,17 @@ async function eliminarRol(rolId, nombreRol, usuariosCount) {
       if (response.ok && data.status === "success") {
         await CustomDialog.success(
           "Operación exitosa",
-          data.message || "Rol eliminado correctamente"
+          data.message || "Usuario eliminado correctamente"
         );
 
-          await loadData();
+        await loadData();
       } else {
         if (typeof hideTableLoading === "function") {
           hideTableLoading();
         }
         CustomDialog.error(
           "Error",
-          data.message || "No se pudo eliminar el rol."
+          data.message || "No se pudo eliminar el usuario."
         );
       }
     } catch (error) {
@@ -62,4 +55,4 @@ async function eliminarRol(rolId, nombreRol, usuariosCount) {
   }
 }
 
-window.mostrarModalEliminarRol = eliminarRol;
+window.mostrarModalEliminarUsuario = eliminarUsuario;

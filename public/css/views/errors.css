@@ -1,0 +1,88 @@
+    html,
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+
+    main.error-page-container {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding-bottom: 4rem;
+      background-color: #fdfdfd;
+      color: #4a4a4a;
+    }
+
+    .error-content-wrapper {
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .error-content-wrapper .error-code {
+      font-size: 10rem;
+      font-weight: 600;
+      color: #363636;
+      line-height: 0.8;
+    }
+
+    .error-content-wrapper .error-title {
+      font-size: 2.5rem;
+      color: #4a4a4a;
+      font-weight: 500;
+    }
+
+    .error-content-wrapper .error-message {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.1rem;
+      color: #7a7a7a;
+      line-height: 1.6;
+    }
+
+    .error-content-wrapper .info-message {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--blue-500);
+      line-height: 1.6;
+    }
+
+    .info-message a {
+      color: var(--blue-500);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .error-content-wrapper .error-code {
+        font-size: 7rem;
+      }
+
+      .error-content-wrapper .error-title {
+        font-size: 2rem;
+      }
+
+      .error-content-wrapper .error-message {
+        font-size: 1rem;
+      }
+
+      .error-content-wrapper .info-message {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .error-content-wrapper .error-code {
+        font-size: 5rem;
+      }
+
+      .error-content-wrapper .error-title {
+        font-size: 1.6rem;
+      }
+    }

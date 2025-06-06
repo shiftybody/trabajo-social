@@ -44,8 +44,6 @@ class LoginController // Modificado: ya no extiende userModel
   public function login()
   {
 
-    error_log("Intento de login recibido");
-
     $usuario = isset($_POST['username']) ? $_POST['username'] : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
     $remember = isset($_POST['remember']) ? true : false;
@@ -62,9 +60,6 @@ class LoginController // Modificado: ya no extiende userModel
     $authStatus = Auth::attempt($usuario, $password, $remember);
 
     if ($authStatus === true) {
-      // Login exitoso
-      error_log("Login exitoso para usuario: $usuario");
-
       return Response::json([
         'status' => 'success',
         'message' => 'Login exitoso',

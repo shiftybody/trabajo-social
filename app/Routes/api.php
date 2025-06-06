@@ -26,16 +26,13 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
     $router->get('/users', 'UserController@getAllUsers');
   });
 
-  $router->group(array('middleware' => 'Permission:users.manage|users.create'), function ($router) {
+  $router->group(array('middleware' => 'Permission:users.manage|users.create|users.edit|roles.view'), function ($router) {
+    $router->get('/roles', 'RoleController@getAllRoles');
     $router->post('/users', 'UserController@store');
   });
 
-  $router->group(array('middleware' => 'Permission:users.manage|users.edit|roles.view'), function ($router) {
-    $router->get('/roles', 'RoleController@getAllRoles');
-    $router->get('/users/:id', 'UserController@getUserById');
-  });
-
   $router->group(array('middleware' => 'Permission:users.manage|users.edit'), function ($router) {
+    $router->get('/users/:id', 'UserController@getUserById');
     $router->post('/users/:id', 'UserController@update');
     $router->post('/users/:id/reset-password', 'UserController@resetPassword');
     $router->post('/users/:id/status', 'UserController@changeStatus');

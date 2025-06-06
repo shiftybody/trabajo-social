@@ -16,10 +16,7 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
     return Response::redirect(APP_URL . 'home');
   });
 
-  // HOME
-  $router->group(['middleware' => 'Permission:home.view'], function ($router) {
-    $router->get('/home', 'homeController@index')->name('home');
-  });
+  $router->get('/home', 'homeController@index')->name('home');
 
   // USERS
   $router->group(['middleware' => 'Permission:users.manage|users.view'], function ($router) {
@@ -36,7 +33,6 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
 
   $router->get('/profile', 'UserController@profile')->name('profile');
 
-  // ROLES
 
   // ROLES - Requiere permisos de gestión de roles
   $router->group(['middleware' => 'Permission:roles.view'], function ($router) {
@@ -56,6 +52,7 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
   $router->get('/error/401', function () {
     http_response_code(401);
     ob_start();
+    $titulo = 'Desautorizado';
     include APP_ROOT . 'app/Views/errors/401.php';
     $content = ob_get_clean();
     return Response::html($content, 401);
@@ -64,6 +61,7 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
   $router->get('/error/403', function () {
     http_response_code(403);
     ob_start();
+    $titulo = 'Prohibido';
     include APP_ROOT . 'app/Views/errors/403.php';
     $content = ob_get_clean();
     return Response::html($content, 403);
@@ -72,6 +70,7 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
   $router->get('/error/404', function () {
     http_response_code(404);
     ob_start();
+    $titulo = 'No encontrado';
     include APP_ROOT . 'app/Views/errors/404.php';
     $content = ob_get_clean();
     return Response::html($content, 404);
@@ -80,6 +79,7 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
   $router->get('/error/500', function () {
     http_response_code(500);
     ob_start();
+    $titulo = 'Error interno del servidor';
     include APP_ROOT . 'app/Views/errors/500.php';
     $content = ob_get_clean();
     return Response::html($content, 500);

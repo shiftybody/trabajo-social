@@ -2,573 +2,6 @@
 require_once APP_ROOT . 'public/inc/head.php';
 require_once APP_ROOT . 'public/inc/navbar.php';
 ?>
-<style>
-  .container {
-    padding: 2.5rem 10rem 0 10rem;
-  }
-
-  .navigation {
-    display: flex;
-    justify-content: flex-end;
-    padding: 2rem 0;
-    padding-bottom: 1.5rem;
-  }
-
-  .volver {
-    display: flex;
-    width: 15rem;
-    height: 2.06rem;
-    padding: var(--25, 10px) var(--5, 20px);
-    justify-content: center;
-    align-items: center;
-    gap: var(--2, .5rem);
-    flex-shrink: 0;
-    border-radius: var(--rounded-lg, 8px);
-    border: 1px solid var(--gray-300);
-    background: #ECECEC;
-    color: var(--gray-600);
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 150%;
-  }
-
-  hr {
-    width: 251px;
-  }
-
-  .dt-info {
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-  }
-
-  .side_button {
-    display: flex;
-    width: 251px;
-    height: 30px;
-    padding: var(--25, 10px) var(--5, 20px) var(--25, 10px) 18px;
-    align-items: center;
-    gap: var(--2, 8px);
-    flex-shrink: 0;
-    border-radius: var(--rounded-lg, 8px);
-    color: var(--gray-600, #465566);
-    color: var(--gray-600, color(display-p3 0.2941 0.3333 0.3882));
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 150%;
-    position: relative;
-  }
-
-  .side_button.active {
-    background: color(display-p3 0.9255 0.9255 0.9255);
-  }
-
-  .side_button:hover {
-    background: color(display-p3 0.9255 0.9255 0.9255);
-  }
-
-  .side_button::before {
-    content: "";
-    position: absolute;
-    left: -0.4rem;
-    top: 50%;
-    height: 80%;
-    width: 4px;
-    background-color: #007bff;
-    border-radius: 2px;
-    opacity: 0;
-    transform: translateY(-50%) translateX(-10px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-  }
-
-  .side_button:hover::before {
-    opacity: 1;
-    transform: translateY(-50%) translateX(0);
-  }
-
-  .side_button_content {
-    display: flex;
-    align-items: center;
-  }
-
-  .side_icon_button {
-    width: 1.375rem;
-    height: 1.375rem;
-  }
-
-  .left_side {
-    display: flex;
-    gap: .5rem;
-    flex-direction: column;
-  }
-
-  .right_side {
-    display: flex;
-    flex-direction: column;
-    padding-top: .5rem;
-  }
-
-  .right_content {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .tools {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    justify-content: space-between;
-  }
-
-  .filter_form {
-    display: flex;
-    gap: 1rem;
-  }
-
-  .action_create_new {
-    height: fit-content;
-    width: 8rem;
-    display: flex;
-    padding: var(--25, 10px) var(--5, 20px);
-    justify-content: center;
-    align-items: center;
-    gap: var(--2, 8px);
-    align-self: stretch;
-
-    border-radius: var(--rounded-lg, 8px);
-    background: #18181B;
-    background: color(display-p3 0.0941 0.0941 0.1059);
-
-    color: var(--white);
-
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 150%;
-  }
-
-  .filter_icon {
-    display: flex;
-    align-items: center;
-  }
-
-
-  tbody>tr:last-child>* {
-    border: 0 !important;
-  }
-
-  th {
-    padding-top: 1.2rem !important;
-    padding-bottom: 1.2rem !important;
-
-    background-color: #fbfbfb;
-    border: 0 !important;
-
-    color: var(--gray-500, var(--gray-500, #677283));
-    color: var(--gray-500, var(--gray-500, color(display-p3 0.4196 0.4471 0.502)));
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 150%;
-    text-transform: uppercase;
-  }
-
-  tr {
-    height: 4rem !important;
-    border-bottom: 1px solid #E5E5E5;
-    border-bottom: 1px solid color(display-p3 0.898 0.898 0.898);
-  }
-
-
-  tr:last-child {
-    border-bottom: 0;
-  }
-
-  td {
-    color: var(--gray-900, var(--gray-900, #0C192A));
-    color: var(--gray-900, var(--gray-900, color(display-p3 0.0667 0.098 0.1569)));
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 150%;
-  }
-
-  td:not(.dt-empty):last-child {
-    display: flex;
-    gap: 0.4rem;
-    padding: 11px;
-  }
-
-  td.dt-empty {
-    align-content: center;
-  }
-
-  button[bottom].editar {
-    background: #007bff;
-    background: color(display-p3 0 0.4824 1);
-    color: #FFF;
-    color: color(display-p3 1 1 1);
-    border: 0;
-    border-radius: 4px;
-    padding: 0.5rem 1rem;
-  }
-
-  .input-container {
-    position: relative;
-    display: inline-block;
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    stroke: #465566;
-    pointer-events: none;
-  }
-
-  #matchingInput {
-    padding-left: 40px;
-    padding-right: 24px;
-  }
-
-  .clear-button {
-    position: absolute;
-    right: 1rem;
-    top: 46%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 2rem;
-    font-weight: 300;
-    color: #aaa;
-    display: none;
-  }
-
-  .input-container input:focus+.clear-button,
-  .input-container input:not(:placeholder-shown)+.clear-button {
-    display: inline;
-  }
-
-  th {
-    background-color: #f2f2f2;
-  }
-
-  td.activo {
-    color: #007bff;
-    font-weight: 600;
-  }
-
-  td.inactivo {
-    color: #dc3545;
-    font-weight: 600;
-  }
-
-  .select-container {
-    position: relative;
-  }
-
-  .custom-select {
-    width: 100%;
-    padding: 8px 36px 8px 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    font-size: 14px;
-    cursor: pointer;
-    background-color: var(--gray-50);
-  }
-
-  .select-filter-icon {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    stroke: #465566;
-  }
-
-  .custom-select:focus {
-    outline: none;
-    border-color: rgb(152, 152, 152);
-    box-shadow: 0 0 0 2px rgba(222, 222, 222, 0.2);
-  }
-
-  .custom-select:-moz-focusring {
-    color: transparent;
-    text-shadow: 0 0 0 #000;
-  }
-
-  .editar,
-  .remover,
-  .opciones {
-    border: none;
-    padding: 6px;
-    border-radius: 6px;
-    background-color: transparent;
-    transition: all 0.25s ease;
-    cursor: pointer;
-  }
-
-  .editar:hover {
-    background-color: #f2f2f2;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .editar:hover svg {
-    transform: translateY(-1px) scale(1.05);
-    stroke: #007bff;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
-  }
-
-  .remover:hover {
-    background-color: #f2f2f2;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .remover:hover svg {
-    transform: translateY(-1px) rotate(-5deg);
-    stroke: var(--red-600);
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
-  }
-
-  /* Estilo hover para botón opciones */
-  .opciones:hover {
-    background-color: #f2f2f2;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .opciones:hover svg {
-    transform: translateY(-1px);
-    filter: drop-shadow(0 1px 1px var(--shadow));
-    stroke: #14171d;
-  }
-
-  /* Transiciones para los SVG */
-  .editar svg,
-  .remover svg,
-  .opciones svg {
-    transition: all 0.25s ease;
-    stroke: #465566;
-  }
-
-  .dropdown-menu {
-    position: absolute;
-    background-color: white;
-    border-radius: var(--rounded-lg);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    min-width: 160px;
-    z-index: 1000;
-    overflow: hidden;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px);
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
-  }
-
-  .dropdown-menu.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-
-  .dropdown-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    color: #465566;
-    font-size: 14px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .dropdown-item:hover {
-    background-color: #f8f8f8;
-  }
-
-  .dropdown-item svg {
-    margin-right: 8px;
-  }
-
-  thead:nth-child(2) {
-    visibility: collapse;
-  }
-
-  table.dataTable thead tr>.dtfc-fixed-start,
-  table.dataTable thead tr>.dtfc-fixed-end,
-  table.dataTable tfoot tr>.dtfc-fixed-start,
-  table.dataTable tfoot tr>.dtfc-fixed-end {
-    background-color: #f2f2f2 !important;
-  }
-
-
-
-  table.dataTable.cell-border tbody th,
-  table.dataTable.cell-border tbody td {
-    border-top: 1px solid #ddd;
-    border-right: 1px solid red;
-  }
-
-  table.dataTable.cell-border tbody tr th:first-child,
-  table.dataTable.cell-border tbody tr td:first-child {
-    border-left: 1px solid red;
-  }
-
-  table.dataTable.no-footer {
-    border-bottom: 0px solid #111;
-  }
-
-  div.dt-layout-table {
-    overflow: hidden;
-    background-color: #fff;
-    border-radius: var(--rounded-lg, 8px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--gray-300);
-  }
-
-  @media (max-width: 1080px) {
-    .container {
-      padding: 2rem 2rem;
-    }
-  }
-
-  div.dt-container.dt-empty-footer .dt-scroll-body {
-    border-bottom: none !important;
-  }
-
-  /* Loading container para la tabla */
-  .table-loading-container {
-    position: relative;
-    min-height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--modal-bg, #ffffff);
-    border-radius: var(--modal-border-radius, 12px);
-    opacity: 0;
-    transition: opacity 300ms ease;
-  }
-
-  .table-loading-container.show {
-    opacity: 1;
-  }
-
-  /* Loading spinner similar al de modales */
-  .table-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-    gap: 16px;
-  }
-
-  .table-spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid var(--modal-border, #e5e7eb);
-    border-top: 3px solid var(--btn-primary, #3b82f6);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
-  .table-loading p {
-    color: var(--modal-text-secondary, #6b7280);
-    font-size: 16px;
-    margin: 0;
-  }
-
-  #users-table_wrapper {
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 300ms cubic-bezier(0.215, 0.610, 0.355, 1),
-      transform 300ms cubic-bezier(0.215, 0.610, 0.355, 1);
-  }
-
-  #users-table_wrapper.show {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Estado de error */
-  .table-error {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-    gap: 16px;
-  }
-
-  .table-error svg {
-    width: 48px;
-    height: 48px;
-    color: var(--modal-error, #ef4444);
-  }
-
-  .table-error h3 {
-    color: var(--modal-text-primary, #111827);
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0;
-  }
-
-  .table-error p {
-    color: var(--modal-text-secondary, #6b7280);
-    font-size: 14px;
-    margin: 0;
-    text-align: center;
-  }
-
-  .btn-reload {
-    margin-top: 16px;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 150ms ease;
-    border: none;
-    background: var(--btn-primary, #3b82f6);
-    color: white;
-  }
-
-  .btn-reload:hover {
-    background: var(--btn-primary-hover, #2563eb);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-  }
-
-  /* Contenedor de la tabla con loading */
-  .table-container {
-    position: relative;
-    min-height: 400px;
-  }
-
-  /* Ocultar tabla mientras carga */
-  .table-container.loading table {
-    display: none;
-  }
-
-  /* Ocultar solo el primer elemento .dt-layout-row */
-  .dt-layout-row:first-of-type {
-    display: none !important;
-  }
-</style>
 <div class="container">
   <div class="right_content">
     <div class="tools">
@@ -579,8 +12,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
             <path d="M21 21l-6 -6" />
           </svg>
-          <input type="text" name="matchingColumn" id="matchingInput" placeholder="Buscar">
-          <span class="clear-button">×</span>
+          <input class="matching-search" name="matchingColumn" id="matchingInput" placeholder="Buscar">
+          <span class="clear-button" id="clearButton">×</span>
         </div>
         <div class="select-container">
           <select class="custom-select" name="filterColumn" title="" id="filterColumn">
@@ -600,7 +33,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       </form>
 
       <?php if (\App\Core\Auth::can('users.create')): ?>
-        <button class="action_create_new dark-button" onclick="goTo('users/create')">Nuevo</button>
+        <button type="submit" class="action_create_new" onclick="goTo('users/create')">Nuevo</button>
       <?php endif; ?>
     </div>
 
@@ -630,7 +63,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </div>
   </div>
 </div>
-<?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
+<?php require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script>
   let table;
   let isFirstLoad = true;
@@ -824,7 +257,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
           <?php if (\App\Core\Auth::can('users.delete')): ?>
             actionsHtml += `
-            <button type="button" class="remover" onClick="remover(${item.usuario_id}, '${(item.usuario_nombre + ' ' + item.usuario_apellido_paterno + ' ' + item.usuario_apellido_materno).replace(/'/g, "\\'")})" title="Eliminar Usuario">
+            <button type="button" class="remover" onClick="remover(${item.usuario_id}, '${(item.usuario_nombre + ' ' + item.usuario_apellido_paterno + ' ' + item.usuario_apellido_materno).replace(/'/g, "\\'")}')" title="Eliminar Usuario">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                 <path d="M4 7l16 0" />
@@ -877,8 +310,12 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   let matchingInput = document.getElementById('matchingInput');
   let filter_form = document.getElementById('filter_form');
   let filterColumn = document.getElementById('filterColumn');
+  let clearButton = document.getElementById('clearButton');
 
-  // Evento para el input de búsqueda
+  clearButton.addEventListener('click', () => {
+    clearInput();
+  });
+
   matchingInput.addEventListener('input', () => {
     applyFilter();
   });
@@ -891,20 +328,30 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     applyFilter();
   });
 
+  function clearInput() {
+    matchingInput.value = '';
+    matchingInput.focus();
+    clearButton.style.display = 'none';
+    applyFilter();
+  }
+
   // Función para aplicar el filtro global o por columna
   function applyFilter() {
     let searchValue = matchingInput.value.trim();
     let columnIndex = filterColumn.value;
+    clearButton.style.display = searchValue ? 'block' : 'none';
 
     if (columnIndex == 0) {
       // Filtro global
       table.columns().search('');
       table.search(searchValue, false, true).draw();
+
     } else {
-      // Filtro por columna
+
       table.search('');
       table.columns().search('');
       table.column(columnIndex).search(searchValue, false, true).draw();
+
     }
   }
 
@@ -912,44 +359,43 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     window.location.href = `<?= APP_URL ?>users/edit/${usuario_id}`;
   }
 
-  async function remover(usuario_id, nombreUsuario) {
-    const confirmacion = await CustomDialog.confirm(
+  function remover(usuario_id, nombreUsuario) {
+    console.log('ejecutando remover')
+    CustomDialog.confirm(
       'Confirmar Eliminación',
       `¿Está seguro de que desea eliminar a ${nombreUsuario}?`,
       'Eliminar',
       'Cancelar'
-    );
+    ).then(async (confirmado) => {
+      if (confirmado) {
+        showTableLoading('Eliminando usuario...');
 
-    if (confirmacion) {
+        try {
+          const response = await fetch(`<?= APP_URL; ?>api/users/${usuario_id}`, {
+            method: "DELETE",
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
 
-      showTableLoading('Eliminando usuario...');
+          const data = await response.json();
 
-      try {
-        const response = await fetch(`<?= APP_URL; ?>api/users/${usuario_id}`, {
-          method: "DELETE",
-          headers: {
-            'Accept': 'application/json'
+          if (response.ok && data.status === 'success') {
+            await CustomDialog.success('Operación exitosa', data.message || 'Usuario eliminado correctamente');
+            await loadData();
+          } else if (response.ok && data.status === 'error') {
+            hideTableLoading();
+            await CustomDialog.error('Error', data.message || 'No se pudo eliminar el usuario.');
+          } else {
+            hideTableLoading();
+            CustomDialog.error('Error', data.message || 'No se pudo eliminar el usuario.');
           }
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.status === 'success') {
-          await CustomDialog.success('Operación exitosa', data.message || 'Usuario eliminado correctamente');
-          await loadData();
-        } else if (response.ok && data.status === 'error') {
-          hideTableLoading();
-          await CustomDialog.error('Error', data.message || 'No se pudo eliminar el usuario.');
-        } else {
-          hideTableLoading();
-          CustomDialog.error('Error', data.message || 'No se pudo eliminar el usuario.');
+        } catch (error) {
+          console.error('Error en la petición fetch:', error);
+          CustomDialog.error('Error de Red', 'Ocurrió un problema al intentar conectar con el servidor.');
         }
-      } catch (error) {
-        console.error('Error en la petición fetch:', error);
-
-        CustomDialog.error('Error de Red', 'Ocurrió un problema al intentar conectar con el servidor.');
       }
-    }
+    });
   }
 
   function mostrarOpciones(usuario_id) {
@@ -1089,24 +535,157 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     mostrarModalVerDetalles(userId);
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
 
-    const clearButton = document.querySelector('.clear-button');
-    clearButton.addEventListener('click', clearInput);
+  let jsTooltipElement = null;
+  let currentTooltipButton = null;
 
-    function clearInput() {
-      matchingInput.value = '';
-      matchingInput.focus();
-      clearButton.style.display = 'none';
-      applyFilter();
+  function ensureTooltipElement() {
+    if (!jsTooltipElement) {
+      jsTooltipElement = document.createElement('div');
+      jsTooltipElement.className = 'custom-js-tooltip';
+      document.body.appendChild(jsTooltipElement);
+    }
+  }
+
+  function positionJsTooltip(targetButton, tooltipEl) {
+    if (!tooltipEl || !targetButton) return;
+
+    const rect = targetButton.getBoundingClientRect();
+    const tooltipRect = tooltipEl.getBoundingClientRect();
+
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+    let topPosition;
+    let isAbove = true;
+
+    topPosition = rect.top + scrollTop - tooltipRect.height - 8; // Intentar ARRIBA
+
+    if (topPosition < scrollTop + 5) { // No hay espacio arriba, intentar ABAJO
+      topPosition = rect.bottom + scrollTop + 8;
+      isAbove = false;
     }
 
-    matchingInput.addEventListener('input', () => {
-      if (matchingInput.value) {
-        clearButton.style.display = 'inline';
-      } else {
-        clearButton.style.display = 'none';
+    let leftPosition = rect.left + scrollLeft + (rect.width / 2) - (tooltipRect.width / 2);
+
+    if (leftPosition + tooltipRect.width > window.innerWidth - 5) {
+      leftPosition = window.innerWidth - tooltipRect.width - 5;
+    }
+    if (leftPosition < 5) {
+      leftPosition = 5;
+    }
+
+    tooltipEl.style.top = `${topPosition}px`;
+    tooltipEl.style.left = `${leftPosition}px`;
+
+    if (isAbove) {
+      tooltipEl.style.transform = 'translateY(5px)';
+    } else {
+      tooltipEl.style.transform = 'translateY(-5px)';
+    }
+  }
+
+  function clearTooltipStateForButton(button) {
+    if (button) {
+      const originalTitle = button.getAttribute('data-original-title');
+      if (originalTitle) {
+        button.setAttribute('title', originalTitle);
+        button.removeAttribute('data-original-title');
       }
+    }
+  }
+
+  function showJsTooltipForButton(button) {
+    if (!button) return;
+    if (currentTooltipButton === button && jsTooltipElement && jsTooltipElement.classList.contains('show')) {
+      return;
+    }
+
+    const tooltipText = button.getAttribute('title') || button.getAttribute('data-original-title');
+    if (!tooltipText) return;
+
+    if (currentTooltipButton && currentTooltipButton !== button) {
+      clearTooltipStateForButton(currentTooltipButton);
+      if (jsTooltipElement) {
+        jsTooltipElement.classList.remove('show');
+      }
+    }
+
+    if (button.getAttribute('title')) {
+      button.setAttribute('data-original-title', tooltipText);
+      button.removeAttribute('title');
+    }
+
+    ensureTooltipElement();
+    currentTooltipButton = button;
+
+    jsTooltipElement.textContent = tooltipText;
+    jsTooltipElement.style.display = 'block';
+
+    requestAnimationFrame(() => {
+      positionJsTooltip(button, jsTooltipElement);
+      requestAnimationFrame(() => {
+        if (jsTooltipElement) jsTooltipElement.classList.add('show');
+      });
     });
+  }
+
+  function hideActiveJsTooltip() {
+    if (currentTooltipButton) {
+      clearTooltipStateForButton(currentTooltipButton);
+    }
+    if (jsTooltipElement) {
+      jsTooltipElement.classList.remove('show');
+      setTimeout(() => {
+        if (jsTooltipElement && !jsTooltipElement.classList.contains('show')) {
+          jsTooltipElement.style.display = 'none';
+        }
+      }, 150);
+    }
+    currentTooltipButton = null;
+  }
+
+  // --- Manejadores de Eventos ---
+  function handleMouseOver(event) {
+    const button = event.target.closest('.editar, .remover, .opciones');
+    const createButton = event.target.closest('.action_create_new[title]');
+    const targetElement = button || createButton;
+
+    if (targetElement) {
+      showJsTooltipForButton(targetElement);
+    }
+  }
+
+  function handleMouseOut(event) {
+    const button = event.target.closest('.editar, .remover, .opciones');
+    const createButton = event.target.closest('.action_create_new[title]');
+    const targetElement = button || createButton;
+
+    if (targetElement) {
+      if (currentTooltipButton === targetElement && (!event.relatedTarget || !targetElement.contains(event.relatedTarget))) {
+        hideActiveJsTooltip();
+      }
+    }
+  }
+
+  // --- Adjuntar Eventos ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const tableContainer = document.getElementById('table-container');
+    if (tableContainer) {
+      tableContainer.addEventListener('mouseover', handleMouseOver);
+      tableContainer.addEventListener('mouseout', handleMouseOut);
+      // Se elimina el listener para 'click' que ocultaba el tooltip
+    }
+
+    const toolsContainer = document.querySelector('.tools');
+    if (toolsContainer) {
+      toolsContainer.addEventListener('mouseover', handleMouseOver);
+      toolsContainer.addEventListener('mouseout', handleMouseOut);
+      // Se elimina el listener para 'click' que ocultaba el tooltip
+    } else {
+      document.body.addEventListener('mouseover', handleMouseOver);
+      document.body.addEventListener('mouseout', handleMouseOut);
+      // Se elimina el listener para 'click' que ocultaba el tooltip
+    }
   });
 </script>

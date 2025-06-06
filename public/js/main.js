@@ -334,4 +334,6 @@ function goTo(path) {
       results[currentIndex].click();
     }
   });
+
+  window.openInputSearch = openInstantSearch;
 })();

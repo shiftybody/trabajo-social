@@ -1,47 +1,31 @@
-:root {
-  --text: #000;
-  --text-secondary: #666;
-  --text-tertiary: #999;
-  --bg: #fff;
-  --bg-overlay: rgba(0, 0, 0, 0.5);
-  --border: rgba(0, 0, 0, 0.08);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --danger: #ff3b30;
-  --success: #34c759;
-  --warning: #ff9500;
-  --info: #007aff;
-}
-
-/* Overlay minimalista con blur */
 .dialog-overlay {
   position: fixed;
   inset: 0;
-  background: var(--bg-overlay);
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
+  background: var(--black-alpha-5);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: 1000;
   opacity: 0;
   transition: opacity 200ms ease;
 }
+
 
 .dialog-overlay.show {
   opacity: 1;
 }
 
-/* Container ultra-minimalista */
 .dialog-container {
-  background: var(--bg);
+  background: var(--white);
   border-radius: 12px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow);
   max-width: 400px;
   width: calc(100% - 32px);
   padding: 32px;
   transform: scale(0.95) translateY(10px);
-  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: var(--transition-md);
   position: relative;
 }
 
@@ -49,7 +33,6 @@
   transform: scale(1) translateY(0);
 }
 
-/* Iconos como puntos de color sutiles */
 .dialog-icon {
   width: 0.5rem;
   height: 0.5rem;
@@ -60,32 +43,37 @@
 }
 
 .dialog-icon.success {
-  background: var(--success);
+  background: var(--green-400);
 }
 
 .dialog-icon.error {
-  background: var(--danger);
+  background: var(--red-900);
 }
 
 .dialog-icon.warning {
-  background: var(--warning);
+  background: var(--yellow-400);
 }
 
 .dialog-icon.info {
-  background: var(--info);
+  background: var(--blue-400);
 }
 
 .dialog-icon.question {
-  background: var(--text-tertiary);
+  background: var(--gray-500);
   width: 0.5rem;
   height: 0.5rem;
 }
 
-/* Tipografía limpia */
+.close-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+}
+
 .dialog-title {
   font-size: 20px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--black);
   margin: 0 0 8px 0;
   letter-spacing: -0.01em;
 }
@@ -93,7 +81,7 @@
 .dialog-message {
   justify-content: flex-start;
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--gray-700);
   margin: 0;
   padding: 0;
   line-height: 1.6;
@@ -111,21 +99,20 @@
   border: none;
   border-bottom: 1px solid var(--border);
   font-size: 14px;
-  color: var(--text);
+  color: var(--black);
   background: transparent;
   transition: border-color 200ms;
   outline: none;
 }
 
 .dialog-input input:focus {
-  border-bottom-color: var(--text);
+  border-bottom-color: var(--black);
 }
 
 .dialog-input input::placeholder {
-  color: var(--text-tertiary);
+  color: var(--gray-500);
 }
 
-/* Botones minimalistas */
 .dialog-buttons {
   display: flex;
   gap: 12px;
@@ -147,7 +134,7 @@
   cursor: pointer;
   transition: all 150ms;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--gray-700);
   position: relative;
   min-width: auto;
 }
@@ -157,10 +144,9 @@
   position: absolute;
   inset: 0;
   border-radius: 6px;
-  background: var(--text);
+  background: var(--black);
   opacity: 0;
   transition: opacity 150ms;
-  z-index: -1;
 }
 
 .dialog-btn:hover::after {
@@ -172,15 +158,14 @@
 }
 
 .dialog-btn:focus-visible {
-  outline: 2px solid var(--text);
+  outline: 2px solid var(--black);
   outline-offset: 2px;
 }
 
-/* Variantes de botones */
 .dialog-btn-primary {
   padding: 0rem 1.5rem;
-  background: var(--text);
-  color: var(--bg);
+  background: var(--black);
+  color: var(--white);
 }
 
 .dialog-btn-primary::after {
@@ -192,47 +177,46 @@
 }
 
 .dialog-btn-danger {
-  color: var(--danger);
+  color: var(--red-900);
 }
 
 .dialog-btn-danger::after {
-  background: var(--danger);
+  background: var(--red-900);
 }
 
 .dialog-btn-success {
-  color: var(--success);
+  color: var(--green-400);
 }
 
 .dialog-btn-success::after {
-  background: var(--success);
+  background: var(--green-400);
 }
 
-/* Toast ultra-minimalista */
 .toast-container {
   position: fixed;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 5000;
+  z-index: 1000;
   pointer-events: none;
 }
 
 .toast {
-  background: var(--text);
-  color: var(--bg);
+  background: var(--black);
+  color: var(--white);
   border-radius: 24px;
   padding: 12px 20px;
   margin-bottom: 8px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-small);
   font-size: 14px;
   font-weight: 500;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow);
   pointer-events: auto;
   opacity: 0;
   transform: translateY(8px);
-  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: var(--transition-md);
 }
 
 .toast.show {
@@ -256,32 +240,21 @@
 
 /* Colores para diferentes tipos de toast */
 .toast.success {
-  background: var(--success);
+  background: var(--green-400);
 }
 
 .toast.error {
-  background: var(--danger);
+  background: var(--red-900);
 }
 
 .toast.warning {
-  background: var(--warning);
+  background: var(--yellow-400);
 }
 
 .toast.info {
-  background: var(--info);
+  background: var(--blue-400);
 }
 
-/* Loading minimalista */
-.dialog-loading {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--border);
-  border-top-color: var(--text);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-right: 8px;
-}
 
 @keyframes spin {
   to {
@@ -325,7 +298,7 @@
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 8px;
-  color: var(--text);
+  color: var(--black);
   letter-spacing: -0.02em;
 }
 
@@ -334,20 +307,17 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-tertiary);
+  color: var(--gray-500);
   margin: 48px 0 16px;
 }
 
 .demo-buttons {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-small);
   flex-wrap: wrap;
   margin-bottom: 16px;
 }
 
-/* Agregar estos estilos a tu dialog.css existente */
-
-/* Header con flexbox para alinear contenido */
 .dialog-header-content {
   display: flex;
   justify-content: space-between;
@@ -361,55 +331,13 @@
   flex: 1;
 }
 
-/* Botón de cerrar */
-.dialog-close-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 6px;
-  color: var(--text-tertiary);
-  transition: all 150ms ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-left: 16px;
-}
 
-.dialog-close-btn:hover {
-  color: var(--text-secondary);
-}
-
-.dialog-close-btn:active {
-  transform: scale(0.95);
-}
-
-.dialog-close-btn svg {
-  width: 24px;
-  height: 24px;
-}
-
-/* Ajustar el margen del header cuando hay botón de cerrar */
 .dialog-header {
   padding: 0;
   border: none;
 }
 
-/* Responsive para botón de cerrar */
-@media (max-width: 640px) {
-  .dialog-close-btn {
-    width: 28px;
-    height: 28px;
-    margin-left: 12px;
-  }
 
-  .dialog-close-btn svg {
-    width: 16px;
-    height: 16px;
-  }
-}
-
-/* Transición suave para el cierre */
 @keyframes fadeOut {
   to {
     opacity: 0;

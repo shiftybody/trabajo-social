@@ -15,13 +15,18 @@
   <script src="<?= APP_URL . 'public/js/base-modal.js' ?>"></script>
   <script src="<?= APP_URL . 'public/js/modal-templates.js' ?>"></script>
 
-  <?php
-  $modalFiles = glob(APP_ROOT . 'public/js/modals/*.js');
-  foreach ($modalFiles as $file) {
-    $fileName = basename($file);
-    echo "<script src=\"" . APP_URL . "public/js/modals/{$fileName}\"></script>\n";
-  }
-  ?>
+  <?php if (strpos($_SERVER['REQUEST_URI'], 'users') !== false): ?>
+    <script src="<?= APP_URL . 'public/js/modals/change-status-modal.js' ?>"></script>
+    <script src="<?= APP_URL . 'public/js/modals/reset-password-modal.js' ?>"></script>
+    <script src="<?= APP_URL . 'public/js/modals/user-details-modal.js' ?>"></script>
+    <script src="<?= APP_URL . 'public/js/modals/delete-user-modal.js' ?>"></script>
+  <?php endif; ?>
+
+  <?php if (strpos($_SERVER['REQUEST_URI'], 'roles') !== false): ?>
+    <script src="<?= APP_URL . 'public/js/modals/create-role-modal.js' ?>"></script>
+    <script src="<?= APP_URL . 'public/js/modals/edit-role-modal.js' ?>"></script>
+    <script src="<?= APP_URL . 'public/js/modals/delete-role-modal.js' ?>"></script>
+  <?php endif; ?>
 
   <script src="<?= APP_URL . 'public/js/libs/datatables.min.js' ?>"></script>
 <?php endif; ?>

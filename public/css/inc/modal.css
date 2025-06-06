@@ -1,76 +1,13 @@
-/* ==========================================================================
-  BASE MODAL SYSTEM - CSS UNIFICADO
-  ========================================================================== */
-
-:root {
-  /* Colores */
-  --modal-overlay: rgba(0, 0, 0, 0.5);
-  --modal-bg: #ffffff;
-  --modal-border: #e5e7eb;
-  --modal-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
-  /* Texto */
-  --modal-text-primary: #111827;
-  --modal-text-secondary: #6b7280;
-  --modal-text-muted: #9ca3af;
-
-  /* Estados */
-  --modal-success: #2563eb;
-  --modal-success-bg: #2563eb;
-  --modal-error: #ef4444;
-  --modal-error-bg: #fef2f2;
-  --modal-warning: #f59e0b;
-  --modal-warning-bg: #fffbeb;
-  --modal-info: #3b82f6;
-  --modal-info-bg: #eff6ff;
-
-  /* Botones */
-  --btn-primary: #3b82f6;
-  --btn-primary-hover: #2563eb;
-  --btn-secondary: #f3f4f6;
-  --btn-secondary-hover: #e5e7eb;
-  --btn-cancel: #6b7280;
-  --btn-danger: #ef4444;
-  --btn-danger-hover: #dc2626;
-
-  /* Estados de usuario */
-  --status-active: #2563eb;
-  --status-active-bg: #e3e9f6;
-  --status-inactive: #ef4444;
-  --status-inactive-bg: #fef2f2;
-
-  /* Espaciado */
-  --modal-padding: 1.75rem;
-  --modal-margin: 14px;
-  --modal-gap: 16px;
-  --modal-border-radius: 12px;
-
-  /* Tamaños */
-  --modal-width-small: 400px;
-  --modal-width-medium: 500px;
-  --modal-width-large: 700px;
-  --modal-width-xlarge: 900px;
-
-  /* Transiciones */
-  --modal-transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
-  --modal-transition-fast: all 150ms ease;
-}
-
-/* ==========================================================================
-   ESTRUCTURA BASE DEL MODAL
-   ========================================================================== */
-
 .base-modal {
   position: fixed;
   inset: 0;
-  background: var(--modal-overlay);
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
+  background: var(--black-alpha-5);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1050;
+  z-index: 900;
   opacity: 0;
   pointer-events: none;
   transition: opacity 200ms ease;
@@ -82,14 +19,14 @@
 }
 
 .base-modal-content {
-  background: var(--modal-bg);
-  border-radius: var(--modal-border-radius);
-  box-shadow: var(--modal-shadow);
+  background: var(--white);
+  border-radius: var(--rounded-lg);
+  box-shadow: var(--shadow-normal);
   width: calc(100% - 32px);
   max-height: 90vh;
   overflow: hidden;
   transform: scale(0.95) translateY(20px);
-  transition: var(--modal-transition);
+  transition: var(--transition);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -98,10 +35,6 @@
 .base-modal.show .base-modal-content {
   transform: scale(1) translateY(0);
 }
-
-/* ==========================================================================
-   TAMAÑOS DE MODAL
-   ========================================================================== */
 
 .base-modal.modal-small .base-modal-content {
   max-width: var(--modal-width-small);
@@ -119,16 +52,12 @@
   max-width: var(--modal-width-xlarge);
 }
 
-/* ==========================================================================
-   HEADER DEL MODAL
-   ========================================================================== */
-
 .base-modal-header {
   padding: var(--modal-padding) var(--modal-padding) 0 var(--modal-padding);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: var(--modal-gap);
+  padding-bottom: var(--spacing-large);
   margin-bottom: var(--modal-margin);
   flex-shrink: 0;
 }
@@ -136,7 +65,7 @@
 .base-modal-title {
   font-size: 20px;
   font-weight: 600;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
   margin: 0;
 }
 
@@ -150,12 +79,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--modal-transition-fast);
-  color: var(--modal-text-secondary);
+  transition: var(--transition-fast);
+  color: var(--gray-500);
 }
 
 .base-modal-close:hover {
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
 }
 
 .base-modal-close svg {
@@ -163,81 +92,51 @@
   height: 1.5rem;
 }
 
-/* ==========================================================================
-   BODY DEL MODAL
-   ========================================================================== */
-
 .base-modal-body {
   padding: 0 var(--modal-padding) var(--modal-padding) var(--modal-padding);
   overflow-y: auto;
   flex: 1;
 }
 
-/* Personalizar scrollbar */
-.base-modal-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-.base-modal-body::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.base-modal-body::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-.base-modal-body::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-/* ==========================================================================
-   FORMULARIOS EN MODALES
-   ========================================================================== */
-
 .base-modal-form {
   margin-bottom: 6px;
   display: flex;
   flex-direction: column;
-  gap: var(--modal-gap);
+  gap: var(--spacing-large);
 }
 
 .input-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-small);
 }
 
 .field-label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
   margin: 0;
 }
 
 .input.error-input,
 .input-reset.error-input {
-  border-color: var(--modal-error);
-  background: var(--modal-error-bg);
-  color: var(--modal-error);
+  border-color: var(--red-500);
+  background: var(--red-300);
+  color: var(--red-500);
 }
 
 .input.error-input:focus,
 .input-reset.error-input:focus {
-  border-color: var(--modal-error);
+  border-color: var(--red-500);
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
 .password-hint {
   font-size: 12px;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   line-height: 1.4;
   margin-top: 4px;
 }
-
-/* ==========================================================================
-   BOTONES DEL MODAL
-   ========================================================================== */
 
 .base-modal-actions {
   display: flex;
@@ -256,61 +155,61 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: var(--modal-transition-fast);
+  transition: var(--transition-fast);
   border: none;
   min-width: 100px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--spacing-small);
 }
 
 .btn-primary {
-  background: var(--btn-primary);
+  background: var(--blue-300);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--btn-primary-hover);
+  background: var(--blue-300);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .btn-secondary {
-  background: var(--btn-secondary);
-  color: var(--modal-text-primary);
+  background: var(--gray-50);
+  color: var(--gray-900);
   border: 1px solid var(--modal-border);
 }
 
 .btn-secondary:hover {
-  background: var(--btn-secondary-hover);
-  border-color: var(--modal-text-muted);
+  background: var(--gray-50);
+  border-color: var(--gray-300);
 }
 
 .btn-cancel {
   background: transparent;
-  color: var(--btn-cancel);
+  color: var(--gray-500);
   border: 1px solid var(--modal-border);
 }
 
 .btn-cancel:hover {
-  background: var(--btn-secondary);
-  border-color: var(--modal-text-muted);
+  background: var(--gray-50);
+  border-color: var(--gray-300);
 }
 
 .btn-danger {
-  background: var(--btn-danger);
+  background: var(--red-500);
   color: white;
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: var(--btn-danger-hover);
+  background: var(--red-900);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 .btn-retry {
-  background: var(--btn-primary);
+  background: var(--blue-300);
   color: white;
 }
 
@@ -318,7 +217,7 @@
 .btn-primary:disabled,
 .btn-secondary:disabled,
 .btn-danger:disabled {
-  background: var(--modal-text-muted);
+  background: var(--gray-300);
   color: white;
   cursor: not-allowed;
   transform: none;
@@ -330,7 +229,7 @@
 .btn-primary:focus-visible,
 .btn-secondary:focus-visible,
 .btn-danger:focus-visible {
-  outline: 2px solid var(--btn-primary);
+  outline: 2px solid var(--blue-300);
   outline-offset: 2px;
 }
 
@@ -345,7 +244,7 @@
 
 .reset-password-info p {
   font-size: 16px;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   margin: 0 0 12px 0;
 }
 
@@ -359,7 +258,7 @@
 .reset-user-name {
   font-size: 16px;
   font-weight: 600;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
 }
 
 .password-fields {
@@ -401,13 +300,13 @@
   margin: 0 0 4px 0;
   font-size: 16px;
   font-weight: 600;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
 }
 
 .user-basic-info p {
   margin: 0;
   font-size: 14px;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
 }
 
 .status-change-section {
@@ -431,7 +330,7 @@
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: var(--modal-text-muted);
+  color: var(--gray-300);
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -447,18 +346,18 @@
 }
 
 .status-badge.activo {
-  background: var(--status-active-bg);
-  color: var(--status-active);
+  background: var(--blue-300);
+  color: var(--blue-400);
 }
 
 .status-badge.inactivo {
-  background: var(--status-inactive-bg);
-  color: var(--status-inactive);
+  background: var(--red-300);
+  color: var(--red-900);
 }
 
 .arrow-change {
   margin: 0 16px;
-  color: var(--modal-text-muted);
+  color: var(--gray-300);
 }
 
 .status-warning {
@@ -466,14 +365,14 @@
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
-  background: var(--modal-warning-bg);
+  background: var(--yellow-300);
   border: 1px solid #fed7aa;
   border-radius: 8px;
   margin: 16px 0;
 }
 
 .status-warning svg {
-  color: var(--modal-warning);
+  color: var(--yellow-400);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -513,13 +412,13 @@
 .user-profile-info h3 {
   font-size: 24px;
   font-weight: 700;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
   margin: 0 0 4px 0;
 }
 
 .user-profile-info .user-username {
   font-size: 16px;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   margin: 0 0 8px 0;
 }
 
@@ -534,13 +433,13 @@
 }
 
 .user-status-badge.active {
-  background: var(--status-active-bg);
-  color: var(--status-active);
+  background: var(--blue-300);
+  color: var(--blue-400);
 }
 
 .user-status-badge.inactive {
-  background: var(--status-inactive-bg);
-  color: var(--status-inactive);
+  background: var(--red-300);
+  color: var(--red-900);
 }
 
 .status-dot {
@@ -550,11 +449,11 @@
 }
 
 .status-dot.active {
-  background: var(--status-active);
+  background: var(--blue-400);
 }
 
 .status-dot.inactive {
-  background: var(--status-inactive);
+  background: var(--red-900);
 }
 
 .user-details-grid {
@@ -573,17 +472,17 @@
 .user-detail-section h4 {
   font-size: 16px;
   font-weight: 600;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
   margin: 0 0 16px 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-small);
 }
 
 .user-detail-section h4 svg {
   width: 18px;
   height: 18px;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
 }
 
 .user-detail-item {
@@ -604,13 +503,13 @@
 .user-detail-label {
   font-size: 14px;
   font-weight: 500;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   min-width: 100px;
 }
 
 .user-detail-value {
   font-size: 14px;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
   text-align: right;
   flex: 1;
   word-break: break-word;
@@ -634,7 +533,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid var(--modal-border);
-  border-top: 3px solid var(--btn-primary);
+  border-top: 3px solid var(--blue-400);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -650,7 +549,7 @@
 }
 
 .base-modal-loading p {
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   font-size: 16px;
   margin: 0;
 }
@@ -668,18 +567,18 @@
 .base-modal-error svg {
   width: 48px;
   height: 48px;
-  color: var(--modal-error);
+  color: var(--red-500);
 }
 
 .base-modal-error h3 {
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
   font-size: 18px;
   font-weight: 600;
   margin: 0;
 }
 
 .base-modal-error p {
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   font-size: 14px;
   margin: 0;
   text-align: center;
@@ -703,23 +602,23 @@
 }
 
 .confirm-icon.warning {
-  background: var(--modal-warning-bg);
-  color: var(--modal-warning);
+  background: var(--yellow-300);
+  color: var(--yellow-400);
 }
 
 .confirm-icon.danger {
-  background: var(--modal-error-bg);
-  color: var(--modal-error);
+  background: var(--red-300);
+  color: var(--red-500);
 }
 
 .confirm-icon.info {
-  background: var(--modal-info-bg);
-  color: var(--modal-info);
+  background: var(--blue-300);
+  color: var(--blue-400);
 }
 
 .confirm-message {
   font-size: 16px;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
   line-height: 1.5;
 }
 
@@ -757,7 +656,7 @@
 
   .base-modal-actions {
     flex-direction: column;
-    gap: 8px;
+    gap: var(--spacing-small);
   }
 
   .btn-cancel,
@@ -795,10 +694,10 @@
 .permissions-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-small);
   font-size: 16px;
   font-weight: 600;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
   margin: 0 0 16px 0;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--modal-border);
@@ -820,7 +719,7 @@
   margin: 0;
   font-size: 12px;
   font-weight: 600;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   letter-spacing: 0.5px;
   /* border-bottom: 1px solid var(--modal-border); */
 }
@@ -853,7 +752,7 @@
   margin: 0;
   width: 16px;
   height: 16px;
-  accent-color: var(--btn-primary);
+  accent-color: var(--blue-300);
   cursor: pointer;
   flex-shrink: 0;
   margin-top: 2px;
@@ -862,13 +761,13 @@
 .permission-name {
   font-size: 14px;
   font-weight: 500;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
   flex: 1;
 }
 
 .permission-description {
   font-size: 12px;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   display: block;
   margin-top: 2px;
 }
@@ -877,7 +776,7 @@
 .no-permissions {
   padding: 24px;
   text-align: center;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   font-style: italic;
 }
 
@@ -903,13 +802,13 @@
 
 .stat-label {
   font-size: 14px;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
 }
 
 .stat-value {
   font-size: 14px;
   font-weight: 600;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
 }
 
 /* Detalles de rol - similar a detalles de usuario */
@@ -928,7 +827,7 @@
   width: 80px;
   height: 80px;
   border-radius: 12px;
-  background: var(--btn-primary);
+  background: var(--blue-300);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -939,13 +838,13 @@
 .role-profile-info h3 {
   font-size: 24px;
   font-weight: 700;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
   margin: 0 0 4px 0;
 }
 
 .role-description {
   font-size: 16px;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   margin: 0 0 8px 0;
 }
 
@@ -957,8 +856,8 @@
   border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
-  background: var(--status-active-bg);
-  color: var(--status-active);
+  background: var(--blue-300);
+  color: var(--blue-400);
 }
 
 .role-details-grid {
@@ -977,11 +876,11 @@
 .role-detail-section h4 {
   font-size: 16px;
   font-weight: 600;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
   margin: 0 0 16px 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-small);
 }
 
 .permissions-list {
@@ -996,7 +895,7 @@
   border-radius: 4px;
   margin-bottom: 4px;
   font-size: 14px;
-  color: var(--modal-text-primary);
+  color: var(--gray-900);
 }
 
 .permissions-list .permission-item:last-child {
@@ -1018,7 +917,7 @@
   .permission-label {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: var(--spacing-small);
   }
 
   .permission-checkbox {
@@ -1053,21 +952,21 @@
 
 .permission-search-input:focus {
   outline: none;
-  border-color: var(--btn-primary);
+  border-color: var(--blue-300);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .search-input-icon {
   position: absolute;
   left: 12px;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   pointer-events: none;
 }
 
 /* Botones de selección masiva */
 .bulk-selection-buttons {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-small);
   margin-bottom: 12px;
   padding: 12px;
   background: #f8fafc;
@@ -1084,15 +983,15 @@
   border: 1px solid var(--modal-border);
   border-radius: 4px;
   font-size: 12px;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   cursor: pointer;
   transition: all 150ms ease;
 }
 
 .bulk-btn:hover {
-  background: var(--btn-primary);
+  background: var(--blue-300);
   color: white;
-  border-color: var(--btn-primary);
+  border-color: var(--blue-300);
 }
 
 .bulk-btn svg {
@@ -1106,7 +1005,7 @@
 }
 
 .counter-badge {
-  background: var(--btn-primary);
+  background: var(--blue-300);
   color: white;
   padding: 2px 8px;
   border-radius: 12px;
@@ -1140,7 +1039,7 @@
 /* Estados de permisos seleccionados */
 .permission-label.selected {
   background: rgba(59, 130, 246, 0.1) !important;
-  border-left: 3px solid var(--btn-primary) !important;
+  border-left: 3px solid var(--blue-300) !important;
 }
 
 /* Loading específico para permisos */
@@ -1156,7 +1055,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid var(--modal-border);
-  border-top: 2px solid var(--btn-primary);
+  border-top: 2px solid var(--blue-400);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -1180,13 +1079,13 @@
 /* Estilos para helper text en modales */
 .field-help {
   font-size: 12px;
-  color: var(--modal-text-secondary);
+  color: var(--gray-500);
   margin-top: 4px;
   line-height: 1.4;
 }
 
 .permissions-info {
-  background: var(--modal-info-bg);
+  background: var(--blue-300);
   border: 1px solid #e3f2fd;
   border-radius: 6px;
   padding: 12px;
@@ -1196,7 +1095,7 @@
 .permissions-info p {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--spacing-small);
   margin: 0;
   font-size: 14px;
   color: #1565c0;
@@ -1234,7 +1133,7 @@
 
 .opciones:hover svg {
   transform: translateY(-1px) scale(1.05);
-  stroke: var(--btn-primary);
+  stroke: var(--blue-300);
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
 }
 
@@ -1260,7 +1159,7 @@
   border-radius: 4px;
   font-size: 12px;
   white-space: nowrap;
-  z-index: 1000;
+  z-index: 900;
   margin-bottom: 4px;
 }
 
@@ -1272,7 +1171,7 @@
   transform: translateX(-50%);
   border: 4px solid transparent;
   border-top-color: #333;
-  z-index: 1000;
+  z-index: 900;
 }
 
 /* Animación de spin para loading */
@@ -1299,18 +1198,18 @@
 .permissions-error svg {
   width: 48px;
   height: 48px;
-  color: var(--modal-error, #ef4444);
+  color: var(--red-500, #ef4444);
 }
 
 .permissions-error h3 {
-  color: var(--modal-text-primary, #111827);
+  color: var(--gray-900, #111827);
   font-size: 18px;
   font-weight: 600;
   margin: 0;
 }
 
 .permissions-error p {
-  color: var(--modal-text-secondary, #6b7280);
+  color: var(--gray-500, #6b7280);
   font-size: 14px;
   margin: 0;
   text-align: center;
@@ -1320,17 +1219,17 @@
   margin-top: 16px;
   padding: 12px 24px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: var(--font-size-small);
   font-weight: 600;
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: var(--transition-fast);
   border: none;
-  background: var(--btn-primary, #3b82f6);
+  background: var(--blue-400);
   color: white;
 }
 
 .btn-reload:hover {
-  background: var(--btn-primary-hover, #2563eb);
+  background: var(--blue-500);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }

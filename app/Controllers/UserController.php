@@ -422,7 +422,6 @@ class UserController
       ]);
     }
 
-
     // evitar desactivar el usuario a si mismo    
     if (isset($_SESSION[APP_SESSION_NAME]['id']) && $_SESSION[APP_SESSION_NAME]['id'] == $id && $resultado['datos']['estado'] == 0) {
       return Response::json([
@@ -763,6 +762,24 @@ class UserController
 
     // Eliminar el usuario
     $eliminar = $this->userModel->eliminarUsuario($id);
+
+    // Eliminar el avatar del usuario si no es el default
+    if ($usuario->usuario_avatar && $usuario->usuario_avatar !== 'default.jpg') {
+      $baseDir = APP_ROOT . 'public/photos';
+      $originalDir = $baseDir . '/original';
+      $thumbnailDir = $baseDir . '/thumbnail';
+
+      $rutaOriginal = $originalDir . '/' . $usuario->usuario_avatar;
+      $rutaThumbnail = $thumbnailDir . '/' . $usuario->usuario_avatar;
+
+      // Eliminar archivos si existen
+      if (file_exists($rutaOriginal)) {
+        unlink($rutaOriginal);
+      }
+      if (file_exists($rutaThumbnail)) {
+        unlink($rutaThumbnail);
+      }
+    }
 
     if ($eliminar) {
       return Response::json([
