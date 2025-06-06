@@ -653,10 +653,10 @@ main.container {
   justify-content: center;
   gap: var(--spacing-medium);
   padding: var(--spacing-medium) 16px;
-  background-color: var(--white);
-  color: var(--gray-900);
+  background-color: var(--gray-200);
+  color: var(--gray-700);
   border: 1px solid var(--gray-300);
-  border-radius: 6px;
+  border-radius: var(--rounded-md);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
@@ -666,14 +666,19 @@ main.container {
 }
 
 .btn-upload-avatar:hover {
-  background-color: var(--gray-50);
-  border-color: var(--gray-500);
+  background-color: var(--gray-300);
+  border-color: var(--gray-300);
   box-shadow: var(--shadow-soft);
+  color: var(--gray-900);
 }
 
 .btn-upload-avatar svg {
   width: 1.2rem;
   height: 1.2rem;
+}
+
+.btn-upload-avatar:hover svg {
+  stroke: var(--gray-900);
 }
 
 #file-input {
@@ -858,4 +863,209 @@ input:checked+.slider:before {
   margin-left: -4px;
   border: 4px solid transparent;
   border-top-color: var(--gray-900);
+}
+
+.user-info-section {
+  margin-bottom: 24px;
+}
+
+.user-info-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 32px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid var(--modal-border);
+}
+
+.user-avatar-status {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--modal-border);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.user-basic-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.user-basic-info p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--gray-500);
+}
+
+.status-change-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 24px 0;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.current-status,
+.new-status {
+  text-align: center;
+  flex: 1;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.activo {
+  background: var(--blue-300);
+  color: var(--blue-400);
+}
+
+.status-badge.inactivo {
+  background: var(--red-300);
+  color: var(--red-900);
+}
+
+.arrow-change {
+  margin: 0 16px;
+  color: var(--gray-300);
+}
+
+.user-profile-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: #f9fafb;
+  border: 1px solid var(--modal-border);
+  border-radius: 8px;
+}
+
+.user-avatar-large {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.user-profile-info h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0 0 4px 0;
+}
+
+.user-profile-info .user-username {
+  font-size: 16px;
+  color: var(--gray-500);
+  margin: 0 0 8px 0;
+}
+
+.user-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.user-status-badge.active {
+  background: var(--blue-300);
+  color: var(--blue-400);
+}
+
+.user-status-badge.inactive {
+  background: var(--red-300);
+  color: var(--red-900);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-dot.active {
+  background: var(--blue-400);
+}
+
+.status-dot.inactive {
+  background: var(--red-900);
+}
+
+.user-details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-detail-section {
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--modal-border);
+}
+
+.user-detail-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-small);
+}
+
+.user-detail-section h4 svg {
+  width: 18px;
+  height: 18px;
+  color: var(--gray-500);
+}
+
+.user-detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--modal-border);
+}
+
+.user-detail-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.user-detail-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-500);
+  min-width: 100px;
+}
+
+.user-detail-value {
+  font-size: 14px;
+  color: var(--gray-900);
+  text-align: right;
+  flex: 1;
+  word-break: break-word;
 }

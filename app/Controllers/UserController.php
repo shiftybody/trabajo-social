@@ -350,6 +350,9 @@ class UserController
     $avatar = $request->FILES('avatar');
     $datos = $request->POST();
 
+    error_log("Actualización de usuario - ID: " . $id);
+    error_log("Datos recibidos: " . print_r($datos, true));
+
     // Validar que el usuario existe
     $usuario = $this->userModel->getUserById($id);
     if (!$usuario) {
@@ -430,8 +433,8 @@ class UserController
       ]);
     }
 
-    // evitar que se cambie de rol si es el ultimo administrador  userModel->esUltimoAdministrador($id)
-    if ($this->userModel->esUltimoAdministrador($id)) {
+    // evitar que se cambie de rol si es el ultimo administrador y si el rol es diferente a 1 (administrador)
+    if ($this->userModel->esUltimoAdministrador($id) && $resultado['datos']['rol'] != 1) {
       return Response::json([
         'status' => 'error',
         'message' => 'No puedes cambiar de rol a un administrador si es el ultimo administrador'

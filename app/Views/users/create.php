@@ -5,7 +5,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 <main class="container">
     <div class="content">
         <div class="navigation-header">
-            <nav class="breadcrumb">
+            <nav class="breadcrumb" id="breadcrumb-nav">
                 <a href="<?= APP_URL ?>users">Usuarios</a>
                 <span class="breadcrumb-separator">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -257,32 +257,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         }
     });
 
-    // Función para confirmar navegación si hay cambios sin guardar
-    let formChanged = false;
-    const form = document.querySelector('form');
-
-    // Detectar cambios en el formulario
-    form.addEventListener('input', function() {
-        formChanged = true;
-    });
-
-    form.addEventListener('change', function() {
-        formChanged = true;
-    });
-
-    // Advertir al usuario si intenta salir con cambios sin guardar
-    window.addEventListener('beforeunload', function(e) {
-        if (formChanged) {
-            e.preventDefault();
-            e.returnValue = '¿Está seguro de que desea salir? Los cambios no guardados se perderán.';
-        }
-    });
-
-    // Limpiar la marca de cambios al enviar el formulario exitosamente
-    form.addEventListener('submit', function() {
-        formChanged = false;
-    });
-
     // Validación adicional del email en tiempo real
     document.getElementById('correo').addEventListener('blur', function() {
         const email = this.value.trim();
@@ -315,6 +289,63 @@ require_once APP_ROOT . 'public/inc/navbar.php';
                     this.parentElement.appendChild(error);
                 }
             }
+        }
+    });
+
+    // Manejo de cambios en el formulario
+    const form = document.querySelector('form');
+    const breadcrumbNav = document.getElementById('breadcrumb-nav');
+    let formChanged = false;
+    let isSubmitting = false;
+
+    form.addEventListener('input', () => {
+        formChanged = true;
+    });
+
+    form.addEventListener('change', () => {
+        formChanged = true;
+    });
+
+    form.addEventListener('submit', () => {
+        isSubmitting = true;
+        formChanged = false;
+    });
+
+
+    async function confirmAndNavigate(url) {
+        // Verifica si hay cambios sin guardar o si el formulario está siendo enviado.
+        if (!formChanged || isSubmitting) {
+            window.location.href = url;
+            return;
+        }
+        // Si hay cambios sin guardar, muestra un diálogo de confirmación.
+        const userConfirmed = await CustomDialog.confirm(
+            'Cambios sin guardar',
+            'Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?',
+            'Sí, salir',
+            'Cancelar'
+        );
+
+        if (userConfirmed) {
+            formChanged = false;
+            window.location.href = url;
+        }
+    }
+
+    // --- Manejadores de Eventos en el Breadcrumb ---
+    breadcrumbNav.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link && link.href) {
+            e.preventDefault();
+            confirmAndNavigate(link.href);
+        }
+    });
+
+    window.addEventListener('beforeunload', (e) => {
+        if (formChanged && !isSubmitting) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
         }
     });
 </script>

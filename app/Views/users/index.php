@@ -67,106 +67,59 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 <script>
   let table;
   let isFirstLoad = true;
+  let jsTooltipElement = null;
+  let currentTooltipButton = null;
+  let matchingInput = document.getElementById('matchingInput');
+  let filter_form = document.getElementById('filter_form');
+  let filterColumn = document.getElementById('filterColumn');
+  let clearButton = document.getElementById('clearButton');
 
-  // Función para mostrar loading
-  function showTableLoading(message = 'Cargando usuarios...') {
-    const container = document.getElementById('table-container');
-    const loadingContainer = document.getElementById('table-loading');
+  // --- BUSQUEDA Y FILTRO DE REGISTROS ---
 
-    if (!loadingContainer) {
-      // Crear loading si no existe
-      const loadingHTML = `
-        <div class="table-loading-container" id="table-loading">
-          <div class="table-loading">
-            <div class="table-spinner"></div>
-            <p>${message}</p>
-          </div>
-        </div>
-      `;
-      container.insertAdjacentHTML('afterbegin', loadingHTML);
+  // Manejo de eventos de entrada en el campo de búsqueda
+  matchingInput.addEventListener('input', () => {
+    applyFilter();
+  });
+
+  // Manejo del formulario de filtro
+  filter_form.addEventListener('submit', () => {
+    event.preventDefault();
+  });
+
+  // Manejo del cambio en el select de filtro
+  filterColumn.addEventListener('change', () => {
+    applyFilter();
+  });
+
+  // Función para limpiar el input de búsqueda
+  function clearInput() {
+    matchingInput.value = '';
+    matchingInput.focus();
+    clearButton.style.display = 'none';
+    applyFilter();
+  }
+
+  // Función para aplicar el filtro global o por columna
+  function applyFilter() {
+    let searchValue = matchingInput.value.trim();
+    let columnIndex = filterColumn.value;
+    clearButton.style.display = searchValue ? 'block' : 'none';
+
+    if (columnIndex == 0) {
+      // Filtro global
+      table.columns().search('');
+      table.search(searchValue, false, true).draw();
+
     } else {
-      // Actualizar message si ya existe
-      const messageEl = loadingContainer.querySelector('p');
-      if (messageEl) messageEl.textContent = message;
-      loadingContainer.style.display = 'flex';
-    }
 
-    // Animar entrada del loading
-    setTimeout(() => {
-      const loading = document.getElementById('table-loading');
-      if (loading) loading.classList.add('show');
-    }, 10);
+      table.search('');
+      table.columns().search('');
+      table.column(columnIndex).search(searchValue, false, true).draw();
 
-    // Ocultar tabla y wrapper
-    const tableWrapper = document.getElementById('users-table_wrapper');
-    if (tableWrapper) {
-      tableWrapper.classList.remove('show');
-      tableWrapper.style.display = 'none';
-    }
-
-    container.classList.add('loading');
-  }
-
-  function hideTableLoading() {
-    const container = document.getElementById('table-container');
-    const loadingContainer = document.getElementById('table-loading');
-    const tableWrapper = document.getElementById('users-table_wrapper');
-
-    const loaderFadeOutDuration = 10;
-    let delayForTableAnimationStart = 10;
-
-    if (loadingContainer) {
-      const isActiveLoader = window.getComputedStyle(loadingContainer).display !== 'none';
-
-      if (isActiveLoader) {
-        loadingContainer.classList.remove('show');
-        setTimeout(() => {
-          loadingContainer.style.display = 'none';
-        }, loaderFadeOutDuration);
-        delayForTableAnimationStart = loaderFadeOutDuration;
-      } else {
-        loadingContainer.style.display = 'none';
-      }
-    }
-
-    container.classList.remove('loading');
-
-    if (tableWrapper) {
-      tableWrapper.style.display = '';
-
-      setTimeout(() => {
-        tableWrapper.classList.add('show');
-
-        if (table) {
-          table.columns.adjust();
-          table.draw();
-        }
-      }, delayForTableAnimationStart);
     }
   }
 
-  // Función para mostrar error
-  function showTableError(message = 'Error al cargar los datos') {
-    const container = document.getElementById('table-container');
-    const loadingContainer = document.getElementById('table-loading');
-
-    if (loadingContainer) {
-      loadingContainer.innerHTML = `
-        <div class="table-error">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="15" y1="9" x2="9" y2="15"></line>
-            <line x1="9" y1="9" x2="15" y2="15"></line>
-          </svg>
-          <h3>Error</h3>
-          <p>${message}</p>
-          <button type="button" class="btn-reload" onclick="loadData()">Reintentar</button>
-        </div>
-      `;
-      loadingContainer.style.display = 'flex';
-      loadingContainer.classList.add('show');
-    }
-  }
+  // --- CARGA DE DATOS ---
 
   // Inicializar DataTable
   document.addEventListener('DOMContentLoaded', () => {
@@ -215,7 +168,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     });
   });
 
-
+  // Cargar datos al iniciar
   async function loadData() {
     try {
       showTableLoading('Cargando usuarios...');
@@ -307,53 +260,106 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   }
 
-  let matchingInput = document.getElementById('matchingInput');
-  let filter_form = document.getElementById('filter_form');
-  let filterColumn = document.getElementById('filterColumn');
-  let clearButton = document.getElementById('clearButton');
+  // Función para mostrar loading
+  function showTableLoading(message = 'Cargando usuarios...') {
+    const container = document.getElementById('table-container');
+    const loadingContainer = document.getElementById('table-loading');
 
-  clearButton.addEventListener('click', () => {
-    clearInput();
-  });
+    if (!loadingContainer) {
+      // Crear loading si no existe
+      const loadingHTML = `
+        <div class="table-loading-container" id="table-loading">
+          <div class="table-loading">
+            <div class="table-spinner"></div>
+            <p>${message}</p>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('afterbegin', loadingHTML);
+    } else {
+      // Actualizar message si ya existe
+      const messageEl = loadingContainer.querySelector('p');
+      if (messageEl) messageEl.textContent = message;
+      loadingContainer.style.display = 'flex';
+    }
 
-  matchingInput.addEventListener('input', () => {
-    applyFilter();
-  });
+    // Animar entrada del loading
+    setTimeout(() => {
+      const loading = document.getElementById('table-loading');
+      if (loading) loading.classList.add('show');
+    }, 10);
 
-  filter_form.addEventListener('submit', () => {
-    event.preventDefault();
-  });
+    // Ocultar tabla y wrapper
+    const tableWrapper = document.getElementById('users-table_wrapper');
+    if (tableWrapper) {
+      tableWrapper.classList.remove('show');
+      tableWrapper.style.display = 'none';
+    }
 
-  filterColumn.addEventListener('change', () => {
-    applyFilter();
-  });
-
-  function clearInput() {
-    matchingInput.value = '';
-    matchingInput.focus();
-    clearButton.style.display = 'none';
-    applyFilter();
+    container.classList.add('loading');
   }
 
-  // Función para aplicar el filtro global o por columna
-  function applyFilter() {
-    let searchValue = matchingInput.value.trim();
-    let columnIndex = filterColumn.value;
-    clearButton.style.display = searchValue ? 'block' : 'none';
+  function hideTableLoading() {
+    const container = document.getElementById('table-container');
+    const loadingContainer = document.getElementById('table-loading');
+    const tableWrapper = document.getElementById('users-table_wrapper');
 
-    if (columnIndex == 0) {
-      // Filtro global
-      table.columns().search('');
-      table.search(searchValue, false, true).draw();
+    const loaderFadeOutDuration = 10;
+    let delayForTableAnimationStart = 10;
 
-    } else {
+    if (loadingContainer) {
+      const isActiveLoader = window.getComputedStyle(loadingContainer).display !== 'none';
 
-      table.search('');
-      table.columns().search('');
-      table.column(columnIndex).search(searchValue, false, true).draw();
+      if (isActiveLoader) {
+        loadingContainer.classList.remove('show');
+        setTimeout(() => {
+          loadingContainer.style.display = 'none';
+        }, loaderFadeOutDuration);
+        delayForTableAnimationStart = loaderFadeOutDuration;
+      } else {
+        loadingContainer.style.display = 'none';
+      }
+    }
 
+    container.classList.remove('loading');
+
+    if (tableWrapper) {
+      tableWrapper.style.display = '';
+
+      setTimeout(() => {
+        tableWrapper.classList.add('show');
+
+        if (table) {
+          table.columns.adjust();
+          table.draw();
+        }
+      }, delayForTableAnimationStart);
     }
   }
+
+  function showTableError(message = 'Error al cargar los datos') {
+    const container = document.getElementById('table-container');
+    const loadingContainer = document.getElementById('table-loading');
+
+    if (loadingContainer) {
+      loadingContainer.innerHTML = `
+        <div class="table-error">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+          <h3>Error</h3>
+          <p>${message}</p>
+          <button type="button" class="btn-reload" onclick="loadData()">Reintentar</button>
+        </div>
+      `;
+      loadingContainer.style.display = 'flex';
+      loadingContainer.classList.add('show');
+    }
+  }
+
+  // --- FUNCIONES DE LOS ACTION BUTTONS
 
   function actualizar(usuario_id) {
     window.location.href = `<?= APP_URL ?>users/edit/${usuario_id}`;
@@ -453,6 +459,23 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }, 10);
   }
 
+  // User Details Modal
+  function verDetalles(userId) {
+    mostrarModalVerDetalles(userId);
+  }
+
+  // Change Status Modal
+  function cambiarEstado(usuario_id) {
+    mostrarModalCambiarEstado(usuario_id);
+  }
+
+  function resetearPassword(userId) {
+    mostrarModalResetearPassword(userId);
+  }
+
+
+  // --- FUNCIONES DE POSICIONAMIENTO DEL OPTION MENU ---
+
   // Función para posicionar el menú correctamente
   function posicionarMenu(boton, menu) {
     const rect = boton.getBoundingClientRect();
@@ -496,7 +519,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     menu.style.opacity = '';
   }
 
-  // Función para cerrar todos los menús
   function cerrarTodosLosMenus() {
     document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
       menu.classList.remove('show');
@@ -521,23 +543,26 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   }
 
-  function resetearPassword(userId) {
-    mostrarModalResetearPassword(userId);
-  }
+  // --- FUNCIONES DE TOOLTIP PERSONALIZADO ---
 
-  // Change Status Modal
-  function cambiarEstado(usuario_id) {
-    mostrarModalCambiarEstado(usuario_id);
-  }
+  // --- Adjuntar Eventos para los tooltips ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const tableContainer = document.getElementById('table-container');
+    if (tableContainer) {
+      tableContainer.addEventListener('mouseover', handleMouseOver);
+      tableContainer.addEventListener('mouseout', handleMouseOut);
+    }
 
-  // User Details Modal
-  function verDetalles(userId) {
-    mostrarModalVerDetalles(userId);
-  }
+    const toolsContainer = document.querySelector('.tools');
+    if (toolsContainer) {
+      toolsContainer.addEventListener('mouseover', handleMouseOver);
+      toolsContainer.addEventListener('mouseout', handleMouseOut);
+    } else {
+      document.body.addEventListener('mouseover', handleMouseOver);
+      document.body.addEventListener('mouseout', handleMouseOut);
+    }
+  });
 
-
-  let jsTooltipElement = null;
-  let currentTooltipButton = null;
 
   function ensureTooltipElement() {
     if (!jsTooltipElement) {
@@ -668,24 +693,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   }
 
-  // --- Adjuntar Eventos ---
-  document.addEventListener('DOMContentLoaded', () => {
-    const tableContainer = document.getElementById('table-container');
-    if (tableContainer) {
-      tableContainer.addEventListener('mouseover', handleMouseOver);
-      tableContainer.addEventListener('mouseout', handleMouseOut);
-      // Se elimina el listener para 'click' que ocultaba el tooltip
-    }
-
-    const toolsContainer = document.querySelector('.tools');
-    if (toolsContainer) {
-      toolsContainer.addEventListener('mouseover', handleMouseOver);
-      toolsContainer.addEventListener('mouseout', handleMouseOut);
-      // Se elimina el listener para 'click' que ocultaba el tooltip
-    } else {
-      document.body.addEventListener('mouseover', handleMouseOver);
-      document.body.addEventListener('mouseout', handleMouseOut);
-      // Se elimina el listener para 'click' que ocultaba el tooltip
-    }
+  // Manejo del botón de limpiar
+  clearButton.addEventListener('click', () => {
+    clearInput();
   });
 </script>

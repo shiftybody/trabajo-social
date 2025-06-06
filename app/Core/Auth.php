@@ -323,11 +323,9 @@ class Auth
     }
 
     $rolePermissions = self::$permissionModel->obtenerPermisosPorRol(self::role());
-    error_log("Los permisos del rol " . self::role() . " son: " . json_encode($rolePermissions));
     foreach ($rolePermissions as $permission) {
       self::$permissions[$permission->permiso_slug] = true;
     }
-    error_log("Permisos cargados para el usuario " . self::id() . ": " . json_encode(self::$permissions));
   }
 
   /**

@@ -176,7 +176,6 @@ input.matching-search {
   -moz-appearance: none;
   appearance: none;
   font-size: var(--font-size-small);
-  cursor: pointer;
   background-color: var(--gray-50);
 }
 
@@ -350,54 +349,77 @@ input.error-input:-webkit-autofill:focus {
   border: 1px solid var(--red-500) !important;
 }
 
-/* BUTTONS */
-.btn-primary {
+.btn-cancel,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-retry {
   padding: 12px 24px;
-  background: var(--blue-300);
-  width: auto !important;
-  color: var(--white);
-  border: none;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-fast);
+  border: none;
+  min-width: 100px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-small);
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: var(--blue-300);
-  box-shadow: var(--blue-alpha-4) 0px 2px 4px;
+
+.btn-cancel {
+  background: transparent;
+  color: var(--gray-500);
+  border: 1px solid var(--modal-border);
 }
 
-.btn-primary:disabled {
+.btn-cancel:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+}
+
+.btn-danger {
+  background: var(--red-500);
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--red-900);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.btn-retry {
+  background: var(--blue-300);
+  color: white;
+}
+
+/* Estados deshabilitados */
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-danger:disabled {
   background: var(--gray-300);
+  color: white;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
-.btn-secondary {
-  padding: 12px 24px;
-  border: 1px solid var(--modal-border);
-  background: var(--white);
-  color: var(--gray-900);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition-fast);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-small);
+/* Estados de focus */
+.btn-cancel:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-danger:focus-visible {
+  outline: 2px solid var(--blue-300);
+  outline-offset: 2px;
 }
 
-.btn-secondary:hover {
+
+.btn-cancel:hover {
   background: var(--gray-300);
-  border-color: var(--gray-300);
+  box-shadow: var(--black-alpha-3) 0px 2px 4px;
 }
 
 /* BREADCRUMB */

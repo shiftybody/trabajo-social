@@ -5,7 +5,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 <main class="container">
   <div class="content">
     <div class="navigation-header">
-      <nav class="breadcrumb">
+      <nav class="breadcrumb" id="breadcrumb-nav">
         <a href="<?= APP_URL ?>users">Usuarios</a>
         <span class="breadcrumb-separator">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -15,7 +15,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         <span>Editar Usuario</span>
       </nav>
     </div>
-    <!-- <?= var_dump($usuario) ?> -->
     <div class="form-wrapper">
       <div class="form-information">
         <h1 class="form-title">
@@ -140,7 +139,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
             <input type="file" name="avatar" id="foto" accept="image/png, image/jpeg, image/gif" style="display: none;">
 
-            <button id="upload_photo_btn" class="btn-upload-avatar" onclick="document.getElementById('foto').click()">
+            <button id="upload_photo_btn" class="btn-upload-avatar">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
@@ -154,36 +153,13 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </div>
   </div>
   </div>
-
-  <script src="<?= APP_URL ?>public/js/ajax.js"></script>
+  <?php require_once APP_ROOT . 'public/inc/scripts.php'; ?>
   <script>
+    // Obtener el usuario actual desde PHP
     const rolActual = "<?= $usuario->usuario_rol ?>";
     const estadoActual = "<?= $usuario->usuario_estado ?>";
 
-    // Cargar los roles disponibles
-    fetch("<?= APP_URL ?>api/roles", {
-        method: "GET",
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log("Roles disponibles:", data);
-        const select = document.getElementById("rol");
-        data.data.forEach(rol => {
-          const option = document.createElement("option");
-          option.value = rol.rol_id;
-          option.textContent = rol.rol_descripcion;
-
-          // Comparamos el valor del rol con el rol actual del usuario
-          if (rol.rol_id == rolActual) {
-            option.selected = true; // Marcamos esta opción como seleccionada
-          }
-
-          select.appendChild(option);
-
-        });
-      })
-      .catch(error => console.error('Error al cargar los roles:', error));
-
+    // Objetos de estado para el select
     const estadoSelect = document.getElementById("estado");
     const estados = [{
         id: 1,
@@ -194,20 +170,43 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         descripcion: "Inactivo"
       }
     ];
+
+    // Cargar los roles disponibles 
+    fetch("<?= APP_URL ?>api/roles", {
+        method: "GET",
+      })
+      .then(response => response.json())
+      .then(data => {
+        const select = document.getElementById("rol");
+        data.data.forEach(rol => {
+          const option = document.createElement("option");
+          option.value = rol.rol_id;
+          option.textContent = rol.rol_descripcion;
+
+          if (rol.rol_id == rolActual) {
+            option.selected = true;
+          }
+
+          select.appendChild(option);
+
+        });
+      })
+      .catch(error => console.error('Error al cargar los roles:', error));
+
+    // Recorrer los estados y agregarlos al select
     estados.forEach(estado => {
       const option = document.createElement("option");
       option.value = estado.id;
       option.textContent = estado.descripcion;
 
-      // Comparamos el valor del estado con el estado actual del usuario
       if (estado.id == estadoActual) {
-        option.selected = true; // Marcamos esta opción como seleccionada
+        option.selected = true;
       }
 
       estadoSelect.appendChild(option);
     });
 
-    // SCRIPT CORREGIDO: Funcionalidad para mostrar/ocultar sección de contraseña
+    // Manejo del evento de clic de la seccion de contraseña
     document.getElementById('toggle_password_section').addEventListener('click', async function(e) {
       e.preventDefault(); // Prevenir comportamiento por defecto del enlace
 
@@ -255,29 +254,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       }
     });
 
-    // Validación mejorada para contraseñas coincidentes
-    document.querySelector('form').addEventListener('submit', function(e) {
-      const changePassword = document.getElementById('change_password').value;
-
-      if (changePassword === '1') {
-        const password = document.getElementById('password').value;
-        const password2 = document.getElementById('password2').value;
-
-        if (password !== password2) {
-          e.preventDefault();
-
-          // Marcar campos con error (el CustomDialog se maneja en ajax.js)
-          ['password', 'password2'].forEach(fieldName => {
-            const field = document.getElementById(fieldName);
-            if (field) {
-              field.classList.add('error-input');
-            }
-          });
-
-          return false;
-        }
-      }
-    });
 
     // Mejorar el manejo de la carga de imagen de perfil
     document.getElementById('foto').addEventListener('change', function(e) {
@@ -315,29 +291,64 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       }
     });
 
-    // Función para confirmar navegación si hay cambios sin guardar
-    let formChanged = false;
+    // Manejo del evento de clic en el botón de subir foto
+    document.getElementById('upload_photo_btn').addEventListener('click', function(e) {
+      e.preventDefault(); // Prevenir comportamiento por defecto del enlace
+      document.getElementById('foto').click(); // Simular clic en el input de archivo
+    });
+
     const form = document.querySelector('form');
+    const breadcrumbNav = document.getElementById('breadcrumb-nav');
+    let formChanged = false;
+    let isSubmitting = false;
 
-    // Detectar cambios en el formulario
-    form.addEventListener('input', function() {
+    form.addEventListener('input', () => {
       formChanged = true;
     });
 
-    form.addEventListener('change', function() {
+    form.addEventListener('change', () => {
       formChanged = true;
     });
 
-    // Advertir al usuario si intenta salir con cambios sin guardar
-    window.addEventListener('beforeunload', function(e) {
-      if (formChanged) {
+    form.addEventListener('submit', () => {
+      isSubmitting = true;
+      formChanged = false;
+    });
+
+    async function confirmAndNavigate(url) {
+      // Verifica si hay cambios sin guardar o si el formulario está siendo enviado.
+      if (!formChanged || isSubmitting) {
+        window.location.href = url;
+        return;
+      }
+      // Si hay cambios sin guardar, muestra un diálogo de confirmación.
+      const userConfirmed = await CustomDialog.confirm(
+        'Cambios sin guardar',
+        'Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?',
+        'Sí, salir',
+        'Cancelar'
+      );
+
+      if (userConfirmed) {
+        formChanged = false;
+        window.location.href = url;
+      }
+    }
+
+    // --- Manejadores de Eventos en el Breadcrumb ---
+    breadcrumbNav.addEventListener('click', (e) => {
+      const link = e.target.closest('a');
+      if (link && link.href) {
         e.preventDefault();
-        e.returnValue = '¿Está seguro de que desea salir? Los cambios no guardados se perderán.';
+        confirmAndNavigate(link.href);
       }
     });
 
-    // Limpiar la marca de cambios al enviar el formulario exitosamente
-    form.addEventListener('submit', function() {
-      formChanged = false;
+    window.addEventListener('beforeunload', (e) => {
+      if (formChanged && !isSubmitting) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
     });
   </script>

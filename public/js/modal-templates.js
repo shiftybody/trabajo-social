@@ -77,7 +77,7 @@ const MODAL_TEMPLATES = {
       <input type="hidden" name="estado" value="{{newStatusValue}}">
       
       <div class="base-modal-actions">
-        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
+        <button class="btn-cancel btn-secondary" data-action="close">Cancelar</button>
         <button type="submit" class="btn-primary">{{submitText}}</button>
       </div>
     </form>
