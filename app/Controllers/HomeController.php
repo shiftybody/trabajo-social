@@ -6,32 +6,17 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Models\userModel;
 
-/**
- * Controlador del home principal
- */
 class homeController
 {
-  /**
-   * Modelo de usuario
-   * @var userModel
-   */
+
   private $userModel;
 
-  /**
-   * Constructor
-   */
   public function __construct()
   {
     $this->userModel = new userModel();
   }
 
-  /**
-   * Muestra la página principal del home
-   * 
-   * @param Request $request Petición actual
-   * @return Response Respuesta HTML
-   */
-  public function index(Request $request)
+  public function indexView(Request $request)
   {
     ob_start();
     $titulo = 'Inicio';

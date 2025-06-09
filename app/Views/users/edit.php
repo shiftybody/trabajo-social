@@ -155,7 +155,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   </div>
   <?php require_once APP_ROOT . 'public/inc/scripts.php'; ?>
   <script>
-    // Obtener el usuario actual desde PHP
     const rolActual = "<?= $usuario->usuario_rol ?>";
     const estadoActual = "<?= $usuario->usuario_estado ?>";
 
@@ -181,7 +180,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         data.data.forEach(rol => {
           const option = document.createElement("option");
           option.value = rol.rol_id;
-          option.textContent = rol.rol_descripcion;
+          option.textContent = rol.rol_nombre;
 
           if (rol.rol_id == rolActual) {
             option.selected = true;

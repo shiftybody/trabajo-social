@@ -93,7 +93,7 @@
     padding: 0px 0px 28px 34px;
     cursor: pointer;
     border-radius: 100px;
-    border: 1px solid #F2F2F2;
+    border: 1px solid var(--gray-200);
   }
 
   #avatar-status {
@@ -101,7 +101,7 @@
     width: 1rem;
     height: 1rem;
     border-radius: var(--rounded-md, 8px);
-    border: 2px solid #F2F2F2;
+    border: 2px solid var(--gray-200);
     background: var(--green-400);
   }
 
@@ -163,7 +163,12 @@
     line-height: 150%;
   }
 
+  a:hover .btn-close svg {
+    stroke: var(--gray-800);
+  }
+
   #sidebar-options a {
+    color: var(--gray-600);
     display: flex;
     min-width: 200px;
     height: 3rem;
@@ -183,8 +188,12 @@
   }
 
   #sidebar-options a:hover {
-    background-color: #ececec;
-    color: #1F2329;
+    background-color: var(--gray-200);
+    color: var(--gray-800);
+  }
+
+  #sidebar-options a:hover svg {
+    stroke: var(--gray-800);
   }
 
   .sidebar .sidebar-header {

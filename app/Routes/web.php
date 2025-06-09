@@ -16,7 +16,7 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
     return Response::redirect(APP_URL . 'home');
   });
 
-  $router->get('/home', 'homeController@index')->name('home');
+  $router->get('/home', 'homeController@indexView')->name('home');
 
   // USERS
   $router->group(['middleware' => 'Permission:users.manage|users.view'], function ($router) {

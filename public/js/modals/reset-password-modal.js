@@ -13,9 +13,6 @@ function resetearPassword(userId) {
       userName: "Cargando...", // Se actualizará con datos reales
     },
     onShow: async (modal) => {
-      // Mostrar loading mientras cargamos datos del usuario
-      modal.showLoading("Cargando información del usuario...");
-
       try {
         // Cargar datos del usuario
         const response = await fetch(`${APP_URL}api/users/${userId}`);

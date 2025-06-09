@@ -6,3 +6,5 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 echo '<pre>';
 print_r($_SESSION);
 echo '</pre>';
+
+require_once APP_ROOT . 'public/inc/scripts.php';

@@ -12,3 +12,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     <p class="error-message"><?= htmlspecialchars($errorMessage) ?></p>
   </div>
 </main>
+<?php
+require_once APP_ROOT . 'public/inc/scripts.php';
+?>

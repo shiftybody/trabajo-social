@@ -18,6 +18,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     <?php endif; ?>
   </div>
 </main>
+<?php
+require_once APP_ROOT . 'public/inc/scripts.php';
+?>
 <script>
   const mainSearchInput = document.getElementById('mainSearchInput');
   document.querySelector('.info-message a').addEventListener('click', function(event) {

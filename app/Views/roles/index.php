@@ -2,7 +2,7 @@
 require_once APP_ROOT . 'public/inc/head.php';
 require_once APP_ROOT . 'public/inc/navbar.php';
 ?>
-<div class="container">
+<div class="container role-table-container">
   <div class="tools">
     <form class="filter_form" id="filter_form">
       <div class="input-container">
@@ -11,13 +11,13 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
           <path d="M21 21l-6 -6" />
         </svg>
-        <input type="text" name="matchingColumn" id="matchingInput" placeholder="Buscar roles">
-        <span class="clear-button">×</span>
+        <input class="matching-search" name="matchingColumn" id="matchingInput" placeholder="Buscar roles">
+        <span class="clear-button" id="clearButton">×</span>
       </div>
     </form>
 
     <?php if (\App\Core\Auth::can('roles.create')): ?>
-      <button class="action_create_new dark-button" onclick="crearRol()">Nuevo Rol</button>
+      <button type="submit" onclick="crearRol()">Nuevo Rol</button>
     <?php endif; ?>
   </div>
 
@@ -133,7 +133,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           </svg>
           <h3>Error</h3>
           <p>${message}</p>
-          <button type="button" class="btn-reload" onclick="loadData()">Reintentar</button>
+          <button class="btn-reload" onclick="loadData()">Reintentar</button>
         </div>
       `;
       loadingContainer.style.display = 'flex';
@@ -176,7 +176,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     });
 
     // Configurar botón limpiar
-    const clearButton = document.querySelector('.clear-button');
+    const clearButton = document.getElementById('clearButton');
     clearButton.addEventListener('click', () => {
       matchingInput.value = '';
       matchingInput.focus();
@@ -205,7 +205,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         let incremental = 1;
         data.data.forEach(item => {
 
-          const isAdminRole = item.rol_descripcion === 'Administrador' || item.rol_id === 1;
+          const isAdminRole = item.rol_nombre === 'Administrador' || item.rol_id === 1;
           let buttonsHtml = '<div class="action-buttons">';
 
           <?php if (\App\Core\Auth::can('roles.edit')): ?>
@@ -226,7 +226,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             buttonsHtml += `
             <button type="button" 
                     class="remover ${isAdminRole ? 'role-protected' : ''}" 
-                    ${isAdminRole ? 'disabled' : `onClick="eliminarRol(${item.rol_id}, '${item.rol_descripcion.replace(/'/g, "\\'")}', ${item.usuarios_count})"`} 
+                    ${isAdminRole ? 'disabled' : `onClick="eliminarRol(${item.rol_id}, '${item.rol_nombre.replace(/'/g, "\\'")}', ${item.usuarios_count})"`} 
                     title="${isAdminRole ? 'No se puede eliminar el rol de Administrador' : 'Eliminar Rol'}">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -242,7 +242,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           buttonsHtml += '</div>';
 
           table.row.add([
-            item.rol_descripcion,
+            item.rol_nombre,
             item.usuarios_count || 0,
             buttonsHtml
           ]);

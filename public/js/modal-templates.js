@@ -8,77 +8,8 @@ const MODAL_TEMPLATES = {
     <form novalidate class="base-modal-form form-ajax" method="POST" enctype="multipart/form-data">
       {{fields}}
       <div class="base-modal-actions">
-        <button type="button" class="btn-cancel" data-action="close">{{cancelText}}</button>
+        <button class="btn-cancel" data-action="close">{{cancelText}}</button>
         <button type="submit" class="btn-primary" data-action="submit">{{submitText}}</button>
-      </div>
-    </form>
-  `,
-
-  // Template específico para reset de contraseña
-  resetPassword: `
-    <form novalidate id="resetPasswordForm" class="base-modal-form form-ajax" method="POST">
-      <div class="password-fields">
-        <div class="input-field">
-          <label for="newPassword" class="field-label">Nueva contraseña</label>
-          <input type="password" name="password" id="newPassword" 
-                 class="input-reset" placeholder="Nueva contraseña"
-                 pattern="(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" 
-                 maxlength="20" required>
-        </div>
-        
-        <div class="input-field">
-          <label for="confirmPassword" class="field-label">Confirmar contraseña</label>
-          <input type="password" name="password2" id="confirmPassword" 
-                 class="input-reset" placeholder="Confirmar contraseña"
-                 pattern="(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" 
-                 maxlength="20" required>
-        </div>
-      </div>
-      
-      <div class="base-modal-actions">
-        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
-        <button type="submit" class="btn-primary">Resetear Contraseña</button>
-      </div>
-    </form>
-  `,
-
-  // Template para cambio de estado
-  changeStatus: `
-    <div class="user-info-section">
-      <div class="user-info-header">
-        <div class="user-avatar-status" style="background-image: url('{{avatarUrl}}')"></div>
-        <div class="user-basic-info">
-          <h3>{{userName}}</h3>
-          <p>@{{username}}</p>
-        </div>
-      </div>
-    </div>
- 
-    <div class="status-change-section">
-      <div class="current-status">
-        <label class="status-label">Estado actual:</label>
-        <span class="status-badge {{currentStatusClass}}">{{currentStatus}}</span>
-      </div>
-      
-      <div class="arrow-change">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12h14"></path>
-          <path d="m12 5 7 7-7 7"></path>
-        </svg>
-      </div>
-      
-      <div class="new-status">
-        <label class="status-label">Nuevo estado:</label>
-        <span class="status-badge {{newStatusClass}}">{{newStatus}}</span>
-      </div>
-    </div>
- 
-    <form novalidate id="changeStatusForm" class="base-modal-form form-ajax" method="POST">
-      <input type="hidden" name="estado" value="{{newStatusValue}}">
-      
-      <div class="base-modal-actions">
-        <button class="btn-cancel btn-secondary" data-action="close">Cancelar</button>
-        <button type="submit" class="btn-primary">{{submitText}}</button>
       </div>
     </form>
   `,
@@ -133,6 +64,75 @@ const MODAL_TEMPLATES = {
     </div>
   `,
 
+  // Template para cambio de estado
+  changeStatus: `
+    <div class="user-info-section">
+      <div class="user-info-header">
+        <div class="user-avatar-status" style="background-image: url('{{avatarUrl}}')"></div>
+        <div class="user-basic-info">
+          <h3>{{userName}}</h3>
+          <p>@{{username}}</p>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="status-change-section">
+      <div class="current-status">
+        <label class="status-label">Estado actual:</label>
+        <span class="status-badge {{currentStatusClass}}">{{currentStatus}}</span>
+      </div>
+      
+      <div class="arrow-change">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"></path>
+          <path d="m12 5 7 7-7 7"></path>
+        </svg>
+      </div>
+      
+      <div class="new-status">
+        <label class="status-label">Nuevo estado:</label>
+        <span class="status-badge {{newStatusClass}}">{{newStatus}}</span>
+      </div>
+    </div>
+ 
+    <form novalidate id="changeStatusForm" class="base-modal-form form-ajax" method="POST">
+      <input type="hidden" name="estado" value="{{newStatusValue}}">
+      
+      <div class="base-modal-actions">
+        <button class="btn-cancel btn-secondary" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">{{submitText}}</button>
+      </div>
+    </form>
+  `,
+
+  // Template específico para reset de contraseña
+  resetPassword: `
+    <form novalidate id="resetPasswordForm" class="base-modal-form form-ajax" method="POST">
+      <div class="password-fields">
+        <div class="input-field">
+          <label for="newPassword" class="field-label">Nueva contraseña</label>
+          <input type="password" name="password" id="newPassword" 
+                 class="input-reset" placeholder="Nueva contraseña"
+                 pattern="(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" 
+                 maxlength="20" required>
+        </div>
+        
+        <div class="input-field">
+          <label for="confirmPassword" class="field-label">Confirmar contraseña</label>
+          <input type="password" name="password2" id="confirmPassword" 
+                 class="input-reset" placeholder="Confirmar contraseña"
+                 pattern="(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}" 
+                 maxlength="20" required>
+        </div>
+      </div>
+      
+      <div class="base-modal-actions">
+        <button class="btn-cancel" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">Resetear Contraseña</button>
+      </div>
+    </form>
+  `,
+
   // Template para confirmación simple
   confirm: `
     <div class="confirm-content">
@@ -143,8 +143,8 @@ const MODAL_TEMPLATES = {
     </div>
     
     <div class="base-modal-actions">
-      <button type="button" class="btn-cancel" data-action="close">{{cancelText}}</button>
-      <button type="button" class="btn-primary" data-action="confirm">{{confirmText}}</button>
+      <button class="btn-cancel" data-action="close">{{cancelText}}</button>
+      <button class="btn-primary" data-action="confirm">{{confirmText}}</button>
     </div>
   `,
 
@@ -219,7 +219,7 @@ const MODAL_TEMPLATES = {
     <form novalidate id="createRoleForm" class="base-modal-form form-ajax" method="POST">
       <div class="input-field">
         <label for="roleName" class="field-label">Nombre del Rol</label>
-        <input type="text" name="descripcion" id="roleName" 
+        <input type="text" name="nombre" id="roleName" 
                class="input-reset" placeholder="Ingrese el nombre del rol"
                maxlength="50" required>
       </div>
@@ -234,12 +234,11 @@ const MODAL_TEMPLATES = {
       </div>
       
       <div class="base-modal-actions">
-        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
+        <button class="btn-cancel" data-action="close">Cancelar</button>
         <button type="submit" class="btn-primary">Crear Rol</button>
       </div>
     </form>
   `,
-
 };
 
 /**
@@ -314,7 +313,7 @@ const TEMPLATE_GENERATORS = {
   // Genera botón de retry
   generateRetryButton: (show = true) => {
     return show
-      ? '<button type="button" class="btn-retry" data-action="retry">Reintentar</button>'
+      ? '<button class="btn-retry" data-action="retry">Reintentar</button>'
       : "";
   },
 };
@@ -327,7 +326,7 @@ const TEMPLATE_HELPERS = {
     const baseRolesOptions = roles
       .map(
         (role) =>
-          `<option value="${role.rol_id}">${role.rol_descripcion}</option>`
+          `<option value="${role.rol_id}">${role.rol_nombre}</option>`
       )
       .join("");
 
@@ -422,7 +421,7 @@ const TEMPLATE_HELPERS = {
     const assignedPermissionIds = rolePermissions.map((p) => p.permiso_id);
 
     return {
-      roleName: role.rol_descripcion,
+      roleName: role.rol_nombre,
       usuariosCount: role.usuarios_count || 0,
       permissionsHTML: TEMPLATE_HELPERS.generatePermissionsGrid(
         allPermissions,
@@ -434,10 +433,10 @@ const TEMPLATE_HELPERS = {
   // Procesa datos para detalles de rol
   processRoleDetailsData: (role) => {
     return {
-      roleName: role.rol_descripcion,
+      roleName: role.rol_nombre,
       roleDetails: [
         ["ID del Rol", `#${role.rol_id}`],
-        ["Nombre", role.rol_descripcion],
+        ["Nombre", role.rol_nombre],
         ["Usuarios Asignados", role.usuarios_count || 0],
         ["Estado", "Activo"],
         ["Fecha de Creación", role.rol_fecha_creacion || "No disponible"],

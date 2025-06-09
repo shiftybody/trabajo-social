@@ -224,7 +224,7 @@ class Auth
    */
   public static function roleName()
   {
-    return self::$user ? self::$user->rol_descripcion : null;
+    return self::$user ? self::$user->rol_nombre : null;
   }
 
   /**
@@ -398,7 +398,7 @@ class Auth
       'email' => $user->usuario_email,
       'avatar' => $user->usuario_avatar,
       'rol' => $user->usuario_rol,
-      'rol_descripcion' => $user->rol_descripcion,
+      'rol_nombre' => $user->rol_nombre,
       'estado_id' => $user->usuario_estado,
       'ultima_actividad' => time(),
       'is_remembered' => $isRemembered,

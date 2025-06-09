@@ -116,12 +116,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         </div>
     </div>
 </main>
-<script src="<?= APP_URL ?>public/js/ajax.js"></script>
-<!-- Script para  -->
+<?php require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script>
-    // Agregar esto al final de create.php, después del script existente
-
-    // Mejorar la carga de roles con manejo de errores (simplificado)
     fetch("<?= APP_URL ?>api/roles", {
             method: "GET",
         })
@@ -144,7 +140,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             roles.forEach(rol => {
                 const option = document.createElement("option");
                 option.value = rol.rol_id;
-                option.textContent = rol.rol_descripcion;
+                option.textContent = rol.rol_nombre;
                 select.appendChild(option);
             });
         })

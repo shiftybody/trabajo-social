@@ -7,9 +7,6 @@ use App\Core\Response;
 
 class SessionController
 {
-  /**
-   * Devuelve el estado actual de la sesión.
-   */
   public function status()
   {
     $status = Auth::getSessionStatus();
@@ -23,9 +20,6 @@ class SessionController
     ]);
   }
 
-  /**
-   * Refresca la actividad de la sesión.
-   */
   public function refresh()
   {
     if (Auth::refreshSessionActivity()) {

@@ -47,7 +47,7 @@ class CustomDialog {
       // Botón de cerrar con SVG (solo si no se especifica que no se muestre)
       if (options.showCloseButton !== false) {
         const closeBtn = document.createElement("button");
-        closeBtn.className = "close-btn";
+        closeBtn.className = "btn-close";
         closeBtn.setAttribute("aria-label", "Cerrar");
         closeBtn.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x">
@@ -103,7 +103,7 @@ class CustomDialog {
       if (options.showConfirmButton !== false) {
         const confirmBtn = document.createElement("button");
         confirmBtn.className = `dialog-btn ${
-          options.confirmButtonClass || "dialog-btn-primary"
+          options.confirmButtonClass || "btn-primary"
         }`;
         confirmBtn.textContent = options.confirmButtonText || "Aceptar";
         confirmBtn.onclick = () => {
@@ -117,7 +117,7 @@ class CustomDialog {
       if (options.showCancelButton) {
         const cancelBtn = document.createElement("button");
         cancelBtn.className = `dialog-btn ${
-          options.cancelButtonClass || "dialog-btn-secondary"
+          options.cancelButtonClass || "btn-cancel"
         }`;
         cancelBtn.textContent = options.cancelButtonText || "Cancelar";
         cancelBtn.onclick = () => closeDialog({ isConfirmed: false });
@@ -128,7 +128,7 @@ class CustomDialog {
       if (options.showDenyButton) {
         const denyBtn = document.createElement("button");
         denyBtn.className = `dialog-btn ${
-          options.denyButtonClass || "dialog-btn-danger"
+          options.denyButtonClass || "btn-danger"
         }`;
         denyBtn.textContent = options.denyButtonText || "Denegar";
         denyBtn.onclick = () => closeDialog({ isDenied: true });
@@ -180,8 +180,8 @@ class CustomDialog {
       showCancelButton: true,
       confirmButtonText: confirmText,
       cancelButtonText: cancelText,
-      confirmButtonClass: "dialog-btn-primary",
-      cancelButtonClass: "dialog-btn-secondary",
+      confirmButtonClass: "btn-primary",
+      cancelButtonClass: "btn-cancel",
     });
     return result.isConfirmed;
   }

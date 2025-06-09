@@ -64,12 +64,6 @@
   height: 0.5rem;
 }
 
-.close-btn {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-}
-
 .dialog-title {
   font-size: 20px;
   font-weight: 600;
@@ -133,10 +127,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 150ms;
-  background: transparent;
-  color: var(--gray-700);
   position: relative;
-  min-width: auto;
 }
 
 .dialog-btn::after {
@@ -162,33 +153,11 @@
   outline-offset: 2px;
 }
 
-.dialog-btn-primary {
-  padding: 0rem 1.5rem;
-  background: var(--black);
-  color: var(--white);
-}
-
-.dialog-btn-primary::after {
-  display: none;
-}
-
-.dialog-btn-primary:hover {
-  opacity: 0.9;
-}
-
-.dialog-btn-danger {
-  color: var(--red-900);
-}
-
-.dialog-btn-danger::after {
-  background: var(--red-900);
-}
-
-.dialog-btn-success {
+.btn-success {
   color: var(--green-400);
 }
 
-.dialog-btn-success::after {
+.btn-success::after {
   background: var(--green-400);
 }
 

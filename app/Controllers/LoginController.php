@@ -5,28 +5,20 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Request;
 use App\Core\Response;
-use Error;
 
-/**
- * Controlador para autenticación API con sesiones
- * Compatible con PHP 5.6+
- */
-class LoginController // Modificado: ya no extiende userModel
+class LoginController
 {
 
-  /**
-   * Vista de inicio de sesión
-   */
   public function indexView()
   {
 
-    // Mensaje de sesión expirada
+    // Preparar mensaje de sesión expirada
     if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
       $status_message = 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';
       $message_class = 'expired-session-message';
     }
 
-    // Mensaje de cuenta deshabilitada
+    //  Preparar mensaje de cuenta deshabilitada
     if (isset($_GET['account_disabled']) && $_GET['account_disabled'] == '1') {
       $status_message = 'Tu cuenta ha sido deshabilitada. Contacta al administrador para más información.';
       $message_class = 'account-disabled-message';
@@ -38,9 +30,6 @@ class LoginController // Modificado: ya no extiende userModel
     return Response::html($content);
   }
 
-  /**
-   * Inicia sesión del usuario
-   */
   public function login()
   {
 
@@ -48,7 +37,6 @@ class LoginController // Modificado: ya no extiende userModel
     $password = isset($_POST['password']) ? $_POST['password'] : '';
     $remember = isset($_POST['remember']) ? true : false;
 
-    // Si no se proporcionan usuario o contraseña, devolver un error
     if (empty($usuario) || empty($password)) {
       return Response::json([
         'status' => 'error',
@@ -79,16 +67,11 @@ class LoginController // Modificado: ya no extiende userModel
     exit;
   }
 
-  /**
-   * Cierra la sesión del usuario
-   */
-  public function logout(Request $request) // Modificar la firma del método
+  public function logout(Request $request)
   {
     Auth::logout();
 
     $expired = $request->get('expired');
-
-    // Construir la URL de login base
     $loginUrlBase = APP_URL . 'login';
     $loginUrl = $loginUrlBase;
 

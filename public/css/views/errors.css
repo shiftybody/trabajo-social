@@ -5,7 +5,6 @@
       flex-direction: column;
     }
 
-
     main.error-page-container {
       flex-grow: 1;
       display: flex;

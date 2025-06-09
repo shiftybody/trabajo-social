@@ -66,7 +66,7 @@ use App\Core\Auth;
   <div class="sidebar-header">
     <img src="<?php echo APP_URL; ?>public/images/logotipo-neurodesarrollo.png" alt="" class="logo">
     <a href="javascript:void(0)" id="leftCloseButton">
-      <button id="menu" class="close-btn">
+      <button class="btn-close" id="menu">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M18 6l-12 12" />
@@ -188,14 +188,14 @@ use App\Core\Auth;
         <span id="user-name">
           <?php echo $_SESSION['trabajo_social']['username'] ?> </span>
         <span id="user-role">
-          <?php echo $_SESSION['trabajo_social']['rol_descripcion']; ?>
+          <?php echo $_SESSION['trabajo_social']['rol_nombre']; ?>
         </span>
 
       </div>
     </div>
     <div class="close-container">
-      <a href="javascript:void(0)" class="closebtn" id="rightCloseButton">
-        <button id="menu" class="closebtn">
+      <a href="javascript:void(0)" id="rightCloseButton">
+        <button class="btn-close" id="menu">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x">
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
             <path d="M18 6l-12 12" />
@@ -249,60 +249,6 @@ use App\Core\Auth;
     </div>
   </div>
 </div>
-<?php require_once APP_ROOT . 'public/inc/scripts.php'; ?>
-<script>
-  // cuando se presione un tag img con clase logo
-  document.querySelectorAll("img.logo").forEach((logo) => {
-    logo.addEventListener("click", function() {
-      // redirigir a la página principal
-      window.location.href = "<?= APP_URL ?>home";
-    });
-  });
-
-  async function logout() {
-
-    sidebarAvatar.classList.remove("open");
-    contentBlur.classList.remove("active");
-
-    const confirmacion = await CustomDialog.confirm(
-      'Cerrar Sesión',
-      `¿Está seguro de que deseas cerrar sesión?`,
-      'Cerrar Sesión',
-      'Cancelar'
-    );
-
-    if (confirmacion) {
-      try {
-        fetch("<?= APP_URL ?>api/logout", {
-            method: "POST",
-            headers: {
-              "Accept": "application/json"
-            },
-            credentials: "same-origin",
-          })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Error en la respuesta del servidor');
-            }
-            return response.json();
-          })
-          .then(data => {
-            console.log(data);
-            if (data.status === 'success') {
-              window.location.href = data.redirect;
-            } else {
-              CustomDialog.error('Error', data.message);
-            }
-          });
-
-      } catch (error) {
-        console.error('Error en la petición fetch:', error);
-        CustomDialog.error('Error de Red', 'Ocurrió un problema al intentar conectar con el servidor.');
-      }
-    }
-  }
-</script>
-
 <?php
 require_once 'inactivity.php';
 ?>

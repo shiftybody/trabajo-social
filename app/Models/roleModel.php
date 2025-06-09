@@ -45,14 +45,14 @@ class roleModel extends mainModel
   /**
    * Crea un nuevo rol
    * 
-   * @param string $descripcion Descripción del rol
+   * @param string $nombre Descripción del rol
    * @return int|false ID del rol creado o false si hubo error
    */
-  public function crearRol($descripcion)
+  public function crearRol($nombre)
   {
     try {
       $datos = [
-        'rol_descripcion' => $descripcion,
+        'rol_nombre' => $nombre,
         'rol_estado' => 1,
         'rol_fecha_creacion' => date("Y-m-d H:i:s"),
         'rol_ultima_modificacion' => date("Y-m-d H:i:s")
@@ -75,17 +75,17 @@ class roleModel extends mainModel
    * Actualiza un rol existente
    * 
    * @param int $rolId ID del rol
-   * @param string $descripcion Nueva descripción
+   * @param string $nombre Nueva descripción
    * @return bool True si se actualizó correctamente, false en caso contrario
    */
-  public function actualizarRol($rolId, $descripcion)
+  public function actualizarRol($rolId, $nombre)
   {
     try {
       $camposActualizar = [
         [
-          "campo_nombre" => "rol_descripcion",
-          "campo_marcador" => ":descripcion",
-          "campo_valor" => $descripcion
+          "campo_nombre" => "rol_nombre",
+          "campo_marcador" => ":nombre",
+          "campo_valor" => $nombre
         ],
         [
           "campo_nombre" => "rol_ultima_modificacion",
@@ -202,17 +202,17 @@ class roleModel extends mainModel
   /**
    * Verifica si existe un rol con la descripción dada
    * 
-   * @param string $descripcion Descripción del rol
+   * @param string $nombre Descripción del rol
    * @return bool True si existe, false en caso contrario
    */
-  public function existeRolPorDescripcion($descripcion)
+  public function existeRolPornombre($nombre)
   {
     try {
-      $query = "SELECT COUNT(*) FROM rol WHERE rol_descripcion = :descripcion";
-      $resultado = $this->ejecutarConsulta($query, [':descripcion' => $descripcion]);
+      $query = "SELECT COUNT(*) FROM rol WHERE rol_nombre = :nombre";
+      $resultado = $this->ejecutarConsulta($query, [':nombre' => $nombre]);
       return $resultado->fetchColumn() > 0;
     } catch (\Exception $e) {
-      error_log("Error en existeRolPorDescripcion: " . $e->getMessage());
+      error_log("Error en existeRolPornombre: " . $e->getMessage());
       return false;
     }
   }

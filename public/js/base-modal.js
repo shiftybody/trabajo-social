@@ -295,7 +295,7 @@ class BaseModal {
           </svg>
           <h3>Error</h3>
           <p>${message}</p>
-          <button type="button" class="btn-retry" data-action="retry">Reintentar</button>
+          <button class="btn-retry" data-action="retry">Reintentar</button>
         </div>
       `;
     }

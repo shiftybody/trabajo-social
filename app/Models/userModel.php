@@ -47,8 +47,6 @@ class userModel extends mainModel
         try {
             $camposActualizar = [];
 
-            error_log("Datos recibidos en actualizarUsuario: " . print_r($datos, true));
-
             // Mapeo de claves de entrada a nombres de columna de BD
             $mapeoColumnas = [
                 'nombre' => 'usuario_nombre',
@@ -85,17 +83,6 @@ class userModel extends mainModel
                 }
             }
 
-            // Si no hay campos para actualizar (ej. solo se envió un password vacío), no continuar
-            if (empty($camposActualizar)) {
-                // Opcionalmente, puedes retornar true si consideras que no hacer nada es un "éxito"
-                // o false/un message si esperabas alguna actualización.
-                // Por ahora, si no hay cambios efectivos, no se añade la fecha de modificación y podría no ejecutar la consulta.
-                // Considera el caso en que $datos solo trae un password vacío.
-                // Si $camposActualizar está vacío, la llamada a actualizarDatos podría fallar o no hacer nada.
-                // Podrías retornar true aquí si es un caso válido no actualizar nada.
-                // O, si siempre se debe actualizar 'usuario_ultima_modificacion', manejarlo fuera de este if.
-            }
-
             // Añadir fecha de última modificación solo si hay algo que actualizar
             if (!empty($camposActualizar)) {
                 $camposActualizar[] = [
@@ -114,9 +101,6 @@ class userModel extends mainModel
                 $resultado = $this->actualizarDatos("usuario", $camposActualizar, $condicion);
                 return $resultado->rowCount() > 0;
             } else {
-                // Si no hubo campos válidos para actualizar (ej. solo se envió un password vacío y nada más)
-                // puedes decidir si esto es un éxito o no.
-                // Retornar true podría ser apropiado si no se esperaba un cambio obligatorio.
                 return true; // O false, dependiendo de la lógica de negocio.
             }
         } catch (\Exception $e) {
@@ -152,7 +136,7 @@ class userModel extends mainModel
         try {
             $query = "SELECT u.usuario_id, u.usuario_nombre, u.usuario_apellido_paterno, 
                      u.usuario_apellido_materno, u.usuario_usuario, u.usuario_email, 
-                     r.rol_descripcion, u.usuario_estado 
+                     r.rol_nombre, u.usuario_estado 
                      FROM usuario u 
                      JOIN rol r ON u.usuario_rol = r.rol_id";
 
@@ -173,7 +157,7 @@ class userModel extends mainModel
     public function getUserById($id)
     {
         try {
-            $query = "SELECT u.*, r.rol_descripcion 
+            $query = "SELECT u.*, r.rol_nombre 
                      FROM usuario u 
                      JOIN rol r ON u.usuario_rol = r.rol_id 
                      WHERE u.usuario_id = :id";
@@ -195,7 +179,7 @@ class userModel extends mainModel
     public function obtenerUsuarioPorUsername($username)
     {
         try {
-            $query = "SELECT u.*, r.rol_descripcion 
+            $query = "SELECT u.*, r.rol_nombre 
                      FROM usuario u 
                      JOIN rol r ON u.usuario_rol = r.rol_id 
                      WHERE u.usuario_usuario = :username";
@@ -217,7 +201,7 @@ class userModel extends mainModel
     public function obtenerUsuarioPorEmail($email)
     {
         try {
-            $query = "SELECT u.*, r.rol_descripcion 
+            $query = "SELECT u.*, r.rol_nombre 
                      FROM usuario u 
                      JOIN rol r ON u.usuario_rol = r.rol_id 
                      WHERE u.usuario_email = :email";
@@ -281,7 +265,7 @@ class userModel extends mainModel
     public function getRoles()
     {
         try {
-            $query = "SELECT rol_id, rol_descripcion FROM rol WHERE rol_estado = 1";
+            $query = "SELECT rol_id, rol_nombre FROM rol WHERE rol_estado = 1";
             $resultado = $this->ejecutarConsulta($query);
             return $resultado->fetchAll(PDO::FETCH_OBJ);
         } catch (\Exception $e) {

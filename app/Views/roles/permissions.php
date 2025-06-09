@@ -54,7 +54,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
             <path d="M21 21l-6 -6" />
           </svg>
-          <input type="text" id="permissions-search" class="search-input" placeholder="Buscar permisos">
+          <input id="permissions-search" class="matching-search" placeholder="Buscar permisos">
           <span class="clear-button">×</span>
         </div>
 
@@ -119,4 +119,5 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   </div>
 </div>
 
+<?php require_once APP_ROOT . 'public/inc/scripts.php' ?>
 <script src="<?= APP_URL ?>public/js/role-permissions.js"></script>

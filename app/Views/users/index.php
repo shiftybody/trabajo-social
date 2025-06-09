@@ -50,7 +50,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       <table id="users-table" class="hover nowrap cell-borders" style="display: none;">
         <thead>
           <tr>
-            <th class="dt-head-center">NO</th>
+            <th class="dt-head-center">ID</th>
             <th>NOMBRE COMPLETO</th>
             <th>NOMBRE DE USUARIO</th>
             <th>CORREO</th>
@@ -191,8 +191,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         // Limpiar tabla
         table.clear();
 
-        // Agregar datos
-        let incremental = 1;
         data.data.forEach(item => {
           // Construir los botones de acción basándose en permisos
           let actionsHtml = '';
@@ -235,12 +233,12 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           <?php endif; ?>
 
           table.row.add([
-            incremental++,
+            item.usuario_id,
             `${item.usuario_nombre} ${item.usuario_apellido_paterno} ${item.usuario_apellido_materno}`,
             item.usuario_usuario,
             item.usuario_email,
             item.usuario_estado === "1" ? 'Activo' : 'Inactivo',
-            item.rol_descripcion,
+            item.rol_nombre,
             actionsHtml
           ]);
         });
@@ -351,7 +349,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           </svg>
           <h3>Error</h3>
           <p>${message}</p>
-          <button type="button" class="btn-reload" onclick="loadData()">Reintentar</button>
+          <button class="btn-reload" onclick="loadData()">Reintentar</button>
         </div>
       `;
       loadingContainer.style.display = 'flex';

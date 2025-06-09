@@ -112,11 +112,20 @@ const FormHandlers = {
       // Cerrar modal actual
       await closeCurrentModal();
 
-      await CustomDialog.success(
-        "Rol Creado",
-        responseData.message || "El rol se creó correctamente"
-      );
-      window.location.href = `${APP_URL}roles`;
+      // si responseData incluye un redirect mostra un mensaje de éxito y redirige
+      // si no mostrar un info de que no se han enviado cambios
+      if (responseData.redirect) {
+        await CustomDialog.success(
+          "Rol Creado",
+          responseData.message || "El rol se creó correctamente"
+        );
+        window.location.href = responseData.redirect;
+      } else {
+        await CustomDialog.info(
+          "Sin Cambios",
+          "No se han enviado cambios al crear el rol"
+        );
+      }
     },
   },
 
@@ -135,15 +144,22 @@ const FormHandlers = {
   },
 
   // Manejo para formularios de edición
-  editForm: {
+  editUserForm: {
     async onSuccess(responseData) {
       await closeCurrentModal();
-
-      await CustomDialog.success(
-        "Usuario Actualizado",
-        responseData.message || "El usuario se actualizó correctamente"
-      );
-      window.location.href = `${APP_URL}users`;
+      
+      if (responseData.redirect) {
+        await CustomDialog.success(
+          "Usuario Actualizado",
+          responseData.message || "El usuario se actualizó correctamente"
+        );
+        window.location.href = responseData.redirect;
+      } else {
+        await CustomDialog.info(
+          "Sin Cambios",
+          "No se han enviado cambios al actualizar el usuario"
+        );
+      }
     },
   },
 };
@@ -153,7 +169,7 @@ function getFormType(form) {
   if (form.id === "resetPasswordForm") return "resetPasswordForm";
   if (form.id === "changeStatusForm") return "changeStatusForm";
   if (form.id === "createRoleForm") return "createRoleForm";
-  if (form.id === "editUserForm") return "editForm";
+  if (form.id === "editUserForm") return "editUserForm";
   if (form.id === "createUserForm") return "createUserForm";
 }
 
@@ -161,8 +177,8 @@ function getFormType(form) {
 function validateForm(form, data) {
   let isValid = true;
   const formType = getFormType(form);
-  const isEditForm = formType === "editForm";
-  const changePassword = isEditForm
+  const iseditUserForm = formType === "editUserForm";
+  const changePassword = iseditUserForm
     ? document.getElementById("change_password")?.value === "1"
     : false;
 
@@ -184,7 +200,7 @@ function validateForm(form, data) {
     // Validar campos obligatorios
     if (typeof value === "string" && value.trim() === "" && key !== "avatar") {
       if (
-        isEditForm &&
+        iseditUserForm &&
         (key === "password" || key === "password2") &&
         !changePassword
       ) {

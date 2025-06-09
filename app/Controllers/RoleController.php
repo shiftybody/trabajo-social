@@ -20,7 +20,7 @@ class RoleController
     $this->permissionModel = new permissionModel();
   }
 
-  public function indexView(Request $request)
+  public function indexView()
   {
     ob_start();
     $titulo = 'Roles';
@@ -29,7 +29,7 @@ class RoleController
     return Response::html($contenido);
   }
 
-  public function createView(Request $request)
+  public function createView()
   {
     ob_start();
     $titulo = 'Crear Rol';
@@ -40,6 +40,7 @@ class RoleController
 
   public function editView(Request $request)
   {
+
     $id = $request->param('id');
     $rol = $this->roleModel->obtenerRolPorId($id);
 
@@ -95,7 +96,7 @@ class RoleController
     }
   }
 
-  public function getAllPermissions(Request $request)
+  public function getAllPermissions()
   {
     $permisos = $this->permissionModel->obtenerTodosPermisos();
     return Response::json([
@@ -147,9 +148,8 @@ class RoleController
     try {
       $datos = $request->POST();
 
-      // Validar datos básicos
       $validar = [
-        'descripcion' => [
+        'nombre' => [
           'requerido' => true,
           'min' => 2,
           'max' => 50,
@@ -167,14 +167,14 @@ class RoleController
         ]);
       }
 
-      if ($this->roleModel->existeRolPorDescripcion($resultado['datos']['descripcion'])) {
+      if ($this->roleModel->existeRolPornombre($resultado['datos']['nombre'])) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['descripcion' => 'Ya existe un rol con este nombre']
+          'errores' => ['nombre' => 'Ya existe un rol con este nombre']
         ]);
       }
 
-      $rolId = $this->roleModel->crearRol($resultado['datos']['descripcion']);
+      $rolId = $this->roleModel->crearRol($resultado['datos']['nombre']);
 
       error_log("Rol creado con ID: $rolId");
       error_log("rol base : " . $resultado['datos']['rol_base']);
@@ -219,9 +219,8 @@ class RoleController
     try {
       $id = $request->param('id');
       $datos = $request->POST();
-
-      // Verificar que el rol existe
       $rol = $this->roleModel->obtenerRolPorId($id);
+
       if (!$rol) {
         return Response::json([
           'status' => 'error',
@@ -229,9 +228,8 @@ class RoleController
         ], 404);
       }
 
-      // Validar datos
       $validar = [
-        'descripcion' => [
+        'nombre' => [
           'requerido' => true,
           'min' => 2,
           'max' => 50,
@@ -249,17 +247,17 @@ class RoleController
       }
 
       // Verificar que el nombre no exista (excepto el rol actual)
-      if ($resultado['datos']['descripcion'] !== $rol->rol_descripcion) {
-        if ($this->roleModel->existeRolPorDescripcion($resultado['datos']['descripcion'])) {
+      if ($resultado['datos']['nombre'] !== $rol->rol_nombre) {
+        if ($this->roleModel->existeRolPornombre($resultado['datos']['nombre'])) {
           return Response::json([
             'status' => 'error',
-            'errores' => ['descripcion' => 'Ya existe un rol con este nombre']
+            'errores' => ['nombre' => 'Ya existe un rol con este nombre']
           ]);
         }
       }
 
       // Actualizar el rol
-      $actualizado = $this->roleModel->actualizarRol($id, $resultado['datos']['descripcion']);
+      $actualizado = $this->roleModel->actualizarRol($id, $resultado['datos']['nombre']);
 
       if ($actualizado) {
         return Response::json([
@@ -281,9 +279,6 @@ class RoleController
     }
   }
 
-  /**
-   * API: Elimina un rol
-   */
   public function delete(Request $request)
   {
     try {

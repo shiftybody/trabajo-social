@@ -1,21 +1,16 @@
 <?php
 
-/**
- * Configuración de rutas API
- */
-
 use App\Core\Router;
 
 $router = new Router();
 
 // Rutas públicas
 $router->post('/login', 'LoginController@login');
+// LOGOUT
+$router->post('/logout', 'LoginController@logout');
 
 // Rutas protegidas (requieren autenticación)
 $router->group(array('middleware' => 'Auth'), function ($router) {
-
-  // LOGOUT
-  $router->post('/logout', 'LoginController@logout');
 
   // SESSION
   $router->post('/session/refresh', 'SessionController@refresh');

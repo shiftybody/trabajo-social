@@ -7,10 +7,6 @@ function crearRol() {
     size: "medium",
     endpoint: `${APP_URL}api/roles`,
     onShow: (modal) => {
-      modal.showLoading("Cargando roles base disponibles...");
-
-      console.log(`Cargando roles base desde: ${APP_URL}api/roles`);
-
       fetch( `${APP_URL}api/roles`, {
         method: "GET",
         headers: {

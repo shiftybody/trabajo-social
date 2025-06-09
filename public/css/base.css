@@ -64,7 +64,6 @@ strong {
   font-weight: bolder;
 }
 
-
 code,
 kbd,
 samp,
@@ -77,6 +76,7 @@ pre {
 
 small {
   font-size: 80%;
+  color: var(--gray-600);
 }
 
 sub,

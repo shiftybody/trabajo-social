@@ -13,10 +13,10 @@
     <link rel="stylesheet" href="<?= APP_URL ?>public/css/views/login.css">
   <?php else: ?>
 
-    <link rel="stylesheet" href="<?= APP_URL ?>public/css/inc/dialog.css">
-    <link rel="stylesheet" href="<?= APP_URL ?>public/css/inc/modal.css">
     <link rel="stylesheet" href="<?= APP_URL ?>public/css/inc/navbar.css">
     <link rel="stylesheet" href="<?= APP_URL ?>public/css/inc/inactivity.css">
+    <link rel="stylesheet" href="<?= APP_URL ?>public/css/inc/dialog.css">
+    <link rel="stylesheet" href="<?= APP_URL ?>public/css/inc/modal.css">
 
     <!-- Estilos del home -->
     <?php if (strpos($_SERVER['REQUEST_URI'], 'home') !== false): ?>

@@ -10,9 +10,7 @@ function cambiarEstado(usuario_id) {
     size: "medium",
     endpoint: `${APP_URL}api/users/${usuario_id}/status`,
     onShow: async (modal) => {
-      
-      modal.showLoading("Cargando información del usuario...");
-
+    
       try {
         // Cargar datos del usuario
         const response = await fetch(`${APP_URL}api/users/${usuario_id}`);

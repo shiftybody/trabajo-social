@@ -274,13 +274,6 @@
     gap: var(--spacing-small);
   }
 
-  .btn-cancel,
-  .btn-primary,
-  .btn-secondary,
-  .btn-danger {
-    width: 100%;
-  }
-
   .status-change-section {
     flex-direction: column;
     gap: 16px;

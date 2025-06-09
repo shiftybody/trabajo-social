@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\Response;
 use App\Models\userModel;
+use App\Utils\ImageUtils;
 use Exception;
 
 class UserController
@@ -17,7 +18,7 @@ class UserController
     $this->userModel = new userModel();
   }
 
-  public function indexView(Request $request)
+  public function indexView()
   {
 
     ob_start();
@@ -28,7 +29,7 @@ class UserController
     return Response::html($contenido);
   }
 
-  public function createView(Request $request)
+  public function createView()
   {
 
     ob_start();
@@ -51,7 +52,7 @@ class UserController
     return Response::html($contenido);
   }
 
-  public function getAllUsers(Request $request)
+  public function getAllUsers()
   {
     try {
       $usuarios = $this->userModel->obtenerTodosUsuarios();
@@ -88,8 +89,8 @@ class UserController
         ], 404);
       }
 
-      // Formatear los datos del usuario para mostrar
-      $usuarioDetalle = [
+
+      $usuarioDetalles = [
         'id' => $usuario->usuario_id,
         'nombre_completo' => trim($usuario->usuario_nombre . ' ' . $usuario->usuario_apellido_paterno . ' ' . $usuario->usuario_apellido_materno),
         'nombre' => $usuario->usuario_nombre,
@@ -98,7 +99,7 @@ class UserController
         'usuario' => $usuario->usuario_usuario,
         'email' => $usuario->usuario_email,
         'telefono' => $usuario->usuario_telefono ?: 'No especificado',
-        'rol' => $usuario->rol_descripcion,
+        'rol' => $usuario->rol_nombre,
         'rol_id' => $usuario->usuario_rol,
         'estado' => $usuario->usuario_estado == 1 ? 'Activo' : 'Inactivo',
         'estado_id' => $usuario->usuario_estado,
@@ -110,7 +111,7 @@ class UserController
 
       return Response::json([
         'status' => 'success',
-        'data' => $usuarioDetalle
+        'data' => $usuarioDetalles
       ]);
     } catch (Exception $e) {
       error_log("Error en getUserById: " . $e->getMessage());
@@ -124,8 +125,8 @@ class UserController
   public function store(Request $request)
   {
 
-    $avatar = $request->FILES('avatar');
-    $datos = $request->POST();
+    $avatar = $request->files('avatar');
+    $datos = $request->post();
 
     error_log(print_r($datos, true));
     error_log(print_r($avatar, true));
@@ -182,7 +183,7 @@ class UserController
 
     $resultado = $this->userModel->validarDatos($datos, $validar);
 
-    // Verificar errores de validación
+    // Si hay errores de validación, devolverlos
     if (!empty($resultado['errores'])) {
       return Response::json([
         'status' => 'error',
@@ -190,7 +191,7 @@ class UserController
       ]);
     }
 
-    // Verificar coincidencia de contraseñas
+    // Si las contraseñas no coinciden, devolver error
     if ($resultado['datos']['password'] !== $datos['password2']) {
       return Response::json([
         'status' => 'error',
@@ -198,7 +199,7 @@ class UserController
       ]);
     }
 
-    // si las contraseñas coinciden borrar el campo password2
+    // Si coincidieron eliminar el campo password2
     unset($resultado['datos']['password2']);
 
     // Verificar si el correo ya existe
@@ -209,7 +210,7 @@ class UserController
       ]);
     }
 
-    // verificar que el username no exista
+    // si el nombre de usuario ya existe devolver error
     if ($this->userModel->localizarUsername($resultado['datos']['username'])) {
       return Response::json([
         'status' => 'error',
@@ -344,14 +345,50 @@ class UserController
     }
   }
 
+  /**
+   * [08-Jun-2025 18:06:14 America/Mexico_City] Array
+(
+    [usuario_id] => 29
+    [change_password] => 0
+    [nombre] => David Emmanuel
+    [apellidoPaterno] => Cano
+    [apellidoMaterno] => Cabrera
+    [telefono] => 4181293358
+    [correo] => shiftybody@gmail.com
+    [rol] => 1
+    [username] => shiftybody
+    [estado] => 1
+    [password] => 
+    [password2] => 
+)
+
+[08-Jun-2025 18:06:14 America/Mexico_City] stdClass Object
+(
+    [usuario_id] => 29
+    [usuario_nombre] => David Emmanuel
+    [usuario_apellido_paterno] => Cano
+    [usuario_apellido_materno] => Cabrera
+    [usuario_telefono] => 4181293358
+    [usuario_email] => shiftybody@gmail.com
+    [usuario_usuario] => shiftybody
+    [usuario_password_hash] => $2a$10$KLbQQt5gBJmMf9NjVhD/0e3SDad7QdwPFPU.J6Y7Bpwp7f1mJEVgu
+    [usuario_avatar] => David_Emmanuel_68434a3242206.png
+    [usuario_rol] => 1
+    [usuario_estado] => 1
+    [usuario_fecha_creacion] => 2025-06-06 15:06:10
+    [usuario_ultima_modificacion] => 2025-06-08 18:03:42
+    [usuario_ultimo_acceso] => 2025-06-08 17:41:44
+    [rol_nombre] => Administrador
+)
+
+   * 
+   *  */
+
   public function update(Request $request)
   {
     $id = $request->param('id');
-    $avatar = $request->FILES('avatar');
-    $datos = $request->POST();
-
-    error_log("Actualización de usuario - ID: " . $id);
-    error_log("Datos recibidos: " . print_r($datos, true));
+    $avatar = $request->files('avatar');
+    $datos = $request->post();
 
     // Validar que el usuario existe
     $usuario = $this->userModel->getUserById($id);
@@ -360,6 +397,24 @@ class UserController
         'status' => 'error',
         'message' => 'Usuario no encontrado'
       ], 404);
+    }
+
+    // si los datos subidos son iguales a los del usuario no hacer nada
+    if (
+      $datos['nombre'] == $usuario->usuario_nombre &&
+      $datos['apellidoPaterno'] == $usuario->usuario_apellido_paterno &&
+      $datos['apellidoMaterno'] == $usuario->usuario_apellido_materno &&
+      $datos['telefono'] == $usuario->usuario_telefono &&
+      $datos['correo'] == $usuario->usuario_email &&
+      $datos['username'] == $usuario->usuario_usuario &&
+      $datos['rol'] == $usuario->usuario_rol &&
+      $datos['estado'] == $usuario->usuario_estado &&
+      (!isset($datos['change_password']) || ($datos['change_password'] == 0 && empty($datos['password'])))
+    ) {
+      return Response::json([
+        'status' => 'success',
+        'message' => 'No se realizaron cambios en el usuario'
+      ]);
     }
 
     // Definir reglas de validación
@@ -441,7 +496,6 @@ class UserController
       ]);
     }
 
-
     // --- Manejo del Avatar --- //
     $nombreArchivo = $usuario->usuario_avatar; // Mantener avatar actual por defecto
     $archivoSubido = false;
@@ -511,10 +565,7 @@ class UserController
 
       if (file_exists($rutaOriginalNueva)) {
         try {
-          if (!class_exists('\App\Utils\ImageUtils')) {
-            require_once APP_ROOT . 'app/Utils/ImageUtils.php';
-          }
-          \App\Utils\ImageUtils::createThumbnail(
+          ImageUtils::createThumbnail(
             $rutaOriginalNueva,
             $rutaThumbnailNueva,
             200
@@ -522,7 +573,7 @@ class UserController
         } catch (\Exception $e) {
           error_log("Error al crear miniatura para actualización: " . $e->getMessage());
           if (file_exists($rutaOriginalNueva)) {
-            unlink($rutaOriginalNueva); // Eliminar la nueva original si falla la miniatura
+            unlink($rutaOriginalNueva);
           }
           return Response::json([
             'status' => 'error',
@@ -576,8 +627,6 @@ class UserController
           'errores' => ['password2' => 'Las contraseñas no coinciden']
         ]);
       }
-      // No es necesario hashear aquí si el modelo se encarga de ello al detectar el campo password
-      // $resultado['datos']['password'] = password_hash($resultado['datos']['password'], PASSWORD_DEFAULT);
       unset($resultado['datos']['password2']);
     } else {
       // Si no se cambia la contraseña, eliminar los campos para no actualizarlos
@@ -592,7 +641,8 @@ class UserController
     if ($actualizar) {
       return Response::json([
         'status' => 'success',
-        'message' => 'Usuario actualizado correctamente'
+        'message' => 'Usuario actualizado correctamente',
+        'redirect' =>  APP_URL . 'users'
       ]);
     } else {
       return Response::json([
