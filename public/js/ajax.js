@@ -112,20 +112,12 @@ const FormHandlers = {
       // Cerrar modal actual
       await closeCurrentModal();
 
-      // si responseData incluye un redirect mostra un mensaje de éxito y redirige
-      // si no mostrar un info de que no se han enviado cambios
-      if (responseData.redirect) {
-        await CustomDialog.success(
-          "Rol Creado",
-          responseData.message || "El rol se creó correctamente"
-        );
-        window.location.href = responseData.redirect;
-      } else {
-        await CustomDialog.info(
-          "Sin Cambios",
-          "No se han enviado cambios al crear el rol"
-        );
-      }
+      await CustomDialog.success(
+        "Rol Creado",
+        responseData.message || "El rol se creó correctamente"
+      );
+
+      loadData();
     },
   },
 
@@ -147,7 +139,7 @@ const FormHandlers = {
   editUserForm: {
     async onSuccess(responseData) {
       await closeCurrentModal();
-      
+
       if (responseData.redirect) {
         await CustomDialog.success(
           "Usuario Actualizado",

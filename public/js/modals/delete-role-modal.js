@@ -19,8 +19,6 @@ async function eliminarRol(rolId, nombreRol, usuariosCount) {
   );
 
   if (confirmacion) {
-    showTableLoading("Eliminando rol...");
-
     try {
       const response = await fetch(`${APP_URL}api/roles/${rolId}`, {
         method: "DELETE",

@@ -33,7 +33,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       </form>
 
       <?php if (\App\Core\Auth::can('users.create')): ?>
-        <button type="submit" class="action_create_new" onclick="goTo('users/create')">Nuevo</button>
+        <button type="submit" class="action_create_new" title="Crear nuevo usuario" onclick="goTo('users/create')">Nuevo</button>
       <?php endif; ?>
     </div>
 
@@ -124,7 +124,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   // Inicializar DataTable
   document.addEventListener('DOMContentLoaded', () => {
     // Mostrar loading inicial
-    showTableLoading('Inicializando tabla...');
+    // showTableLoading('Inicializando tabla...');
 
     // Mostrar la tabla para que DataTables pueda inicializarse
     document.getElementById('users-table').style.display = '';
@@ -372,8 +372,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       'Cancelar'
     ).then(async (confirmado) => {
       if (confirmado) {
-        showTableLoading('Eliminando usuario...');
-
         try {
           const response = await fetch(`<?= APP_URL; ?>api/users/${usuario_id}`, {
             method: "DELETE",
@@ -561,7 +559,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   });
 
-
   function ensureTooltipElement() {
     if (!jsTooltipElement) {
       jsTooltipElement = document.createElement('div');
@@ -668,24 +665,29 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     currentTooltipButton = null;
   }
 
-  // --- Manejadores de Eventos ---
   function handleMouseOver(event) {
     const button = event.target.closest('.editar, .remover, .opciones');
-    const createButton = event.target.closest('.action_create_new[title]');
-    const targetElement = button || createButton;
 
-    if (targetElement) {
-      showJsTooltipForButton(targetElement);
+    if (button) {
+      showJsTooltipForButton(button);
     }
   }
 
   function handleMouseOut(event) {
     const button = event.target.closest('.editar, .remover, .opciones');
-    const createButton = event.target.closest('.action_create_new[title]');
-    const targetElement = button || createButton;
 
-    if (targetElement) {
-      if (currentTooltipButton === targetElement && (!event.relatedTarget || !targetElement.contains(event.relatedTarget))) {
+    if (!button) {
+      // Si no hay botón en el elemento actual, ocultar tooltip activo
+      hideActiveJsTooltip();
+      return;
+    }
+
+    // Solo ocultar si estamos saliendo del botón actual que tiene el tooltip activo
+    if (currentTooltipButton === button) {
+      // Verificar si realmente estamos saliendo del botón
+      const relatedTarget = event.relatedTarget;
+
+      if (!relatedTarget || !button.contains(relatedTarget)) {
         hideActiveJsTooltip();
       }
     }

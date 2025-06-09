@@ -89,7 +89,7 @@ use App\Core\Auth;
       </a>
     <?php endif; ?>
     <?php if (Auth::canAny(['users.view', 'users.create', 'users.edit', 'users.delete'])): ?>
-      <a href="<?= APP_URL ?>users">
+      <a href="<?= APP_URL ?>users" <?= stripos($titulo, 'usuario') !== false ? 'class="active"' : '' ?>>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-users">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
@@ -101,7 +101,7 @@ use App\Core\Auth;
       </a>
     <?php endif; ?>
     <?php if (Auth::can('roles.view')): ?>
-      <a href="<?= APP_URL ?>roles">
+      <a href="<?= APP_URL ?>roles" <?= stripos($titulo, 'rol') !== false ? 'class="active"' : '' ?>>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-shield">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
@@ -110,7 +110,7 @@ use App\Core\Auth;
       </a>
     <?php endif; ?>
     <?php if (Auth::can('patients.view')): ?>
-      <a href="<?= APP_URL ?>patients ">
+      <a href="<?= APP_URL ?>patients " <?= stripos($titulo, 'paciente') !== false ? 'class="active"' : '' ?>>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-horse-toy">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M3.5 17.5c5.667 4.667 11.333 4.667 17 0" />
@@ -122,7 +122,7 @@ use App\Core\Auth;
       </a>
     <?php endif; ?>
     <?php if (Auth::can('donations.view')): ?>
-      <a href="<?= APP_URL ?>donations">
+      <a href="<?= APP_URL ?>donations" <?= stripos($titulo, 'donacion') !== false ? 'class="active"' : '' ?>>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-hearts">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M14.017 18l-2.017 2l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 0 1 8.153 5.784" />
@@ -132,7 +132,7 @@ use App\Core\Auth;
       </a>
     <?php endif; ?>
     <?php if (Auth::can('reports.view')): ?>
-      <a href="<?= APP_URL ?>reports">
+      <a href="<?= APP_URL ?>reports" <?= stripos($titulo, 'reporte') !== false ? 'class="active"' : '' ?>>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-clipboard">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
@@ -142,7 +142,7 @@ use App\Core\Auth;
       </a>
     <?php endif; ?>
     <?php if (Auth::can('stats.view')): ?>
-      <a href="<?= APP_URL ?>stats">
+      <a href="<?= APP_URL ?>stats" <?= stripos($titulo, 'estadisticas') !== false ? 'class="active"' : '' ?>>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chart-bar">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
@@ -154,7 +154,7 @@ use App\Core\Auth;
       </a>
     <?php endif; ?>
     <?php if (Auth::can('notifications.view')): ?>
-      <a href="<?= APP_URL ?>notifications">
+      <a href="<?= APP_URL ?>notifications" <?= stripos($titulo, 'notificacion') !== false ? 'class="active"' : '' ?>>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-bell">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" />
@@ -164,7 +164,7 @@ use App\Core\Auth;
       </a>
     <?php endif; ?>
     <?php if (Auth::can('settings.view')): ?>
-      <a href="<?= APP_URL ?>settings">
+      <a href="<?= APP_URL ?>settings" <?= stripos($titulo, 'configuracion') !== false ? 'class="active"' : '' ?>>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
@@ -207,7 +207,7 @@ use App\Core\Auth;
   </div>
   <div id="sidebar-options">
     <?php if (Auth::can('profile.view')): ?>
-      <a href="<?= APP_URL . "users/profile/" . $_SESSION['id'] . "/"; ?>">
+      <a href="<?= APP_URL . "users/profile/" . $_SESSION['id'] . "/"; ?>" <?= stripos($titulo, 'perfil') !== false ? 'class="active"' : '' ?>>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user-square-rounded">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M12 13a3 3 0 1 0 0 -6a3 3 0 0 0 0 6z" />

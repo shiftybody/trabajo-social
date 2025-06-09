@@ -2,6 +2,14 @@
   padding: 2rem 24rem;
 }
 
+/* media query 1200px */
+
+@media (max-width: 1200px) {
+  .role-table-container {
+    padding: 2rem 2rem;
+  }
+}
+
 #roles-table_wrapper {
   opacity: 0;
   transform: translateY(10px);
@@ -51,47 +59,10 @@ td:not(.dt-empty):last-child .action-buttons {
   stroke: var(--gray-500);
 }
 
-/* Tooltips for action buttons */
-.action-buttons button[title] {
-  position: relative;
-}
-
-.action-buttons button[title]:hover::after {
-  content: attr(title);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.9);
-  color: white;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  white-space: nowrap;
-  z-index: 1000;
-  margin-bottom: 8px;
-  pointer-events: none;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
-
-.action-buttons button[title]:hover::before {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: rgba(0, 0, 0, 0.9);
-  z-index: 1000;
-  margin-bottom: 3px;
-  pointer-events: none;
-}
 
 /* Responsive for roles table */
 @media (max-width: 768px) {
   .action-buttons {
-    flex-direction: column;
     gap: 0.2rem;
   }
 
@@ -110,40 +81,29 @@ td:not(.dt-empty):last-child .action-buttons {
   }
 }
 
-/* Protected roles styles */
-.role-protected {
+
+.protected-btn {
   opacity: 0.4 !important;
   cursor: not-allowed !important;
   background-color: var(--gray-50) !important;
 }
 
-.role-protected:hover {
+.protected-tbn:hover {
   background-color: var(--gray-50) !important;
   box-shadow: none !important;
   transform: none !important;
 }
 
-.role-protected:hover svg {
+.protected-btn:hover svg {
   transform: none !important;
   stroke: #bbb !important;
   filter: none !important;
 }
 
-.role-protected svg {
+.protected-btn svg {
   stroke: #bbb !important;
 }
 
-.role-protected[title]:hover::after {
-  background: rgba(200, 100, 100, 0.9) !important;
-  color: white !important;
-  font-weight: 500;
-}
-
-.role-protected[title]:hover::before {
-  border-top-color: rgba(200, 100, 100, 0.9) !important;
-}
-
-/* Permissions specific styles */
 .permissions-container {
   padding: 2.5rem 10rem 0 10rem;
   min-height: calc(100vh - 4.1rem);

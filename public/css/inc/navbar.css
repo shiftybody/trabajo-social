@@ -113,7 +113,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #fbfbfb;
+    background-color: var(--gray-50);
     overflow-x: hidden;
     z-index: 1000;
     border: 1px solid #d2d2d2;
@@ -138,7 +138,7 @@
     position: fixed;
     top: 0;
     right: 0;
-    background-color: #fbfbfb;
+    background-color: var(--gray-50);
     overflow-x: hidden;
     z-index: 1000;
     border: 1px solid #d2d2d2;
@@ -177,8 +177,19 @@
     gap: .5rem;
     flex-shrink: 0;
     border-radius: var(--rounded-md, 8px);
-    background: #fbfbfb;
+    background: var(--gray-50);
   }
+
+  a.active {
+    background-color: var(--gray-300) !important;
+    color: var(--gray-800) !important;
+    ;
+  }
+
+  a.active svg {
+    stroke: var(--gray-800) !important;
+  }
+
 
   #sidebar-options {
     display: flex;

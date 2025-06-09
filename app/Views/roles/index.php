@@ -47,6 +47,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   // Variables globales
   let table;
   let isFirstLoad = true;
+  let jsTooltipElement = null;
+  let currentTooltipButton = null;
 
   // Funciones de loading 
   function showTableLoading(message = 'Cargando roles...') {
@@ -211,9 +213,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           <?php if (\App\Core\Auth::can('roles.edit')): ?>
             buttonsHtml += `
             <button type="button" 
-                    class="permisos-btn ${isAdminRole ? 'role-protected' : ''}" 
+                    class="editar ${isAdminRole ? 'protected-btn' : ''}"
                     ${isAdminRole ? 'disabled' : `onClick="gestionarPermisos(${item.rol_id})"`} 
-                    title="${isAdminRole ? 'No se puede modificar el rol de Administrador' : 'Gestionar Permisos'}">
+                    title="${isAdminRole ? 'No se puede editar el rol de administrador' : 'Gestionar Permisos'}">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                 <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
@@ -225,7 +227,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           <?php if (\App\Core\Auth::can('roles.delete')): ?>
             buttonsHtml += `
             <button type="button" 
-                    class="remover ${isAdminRole ? 'role-protected' : ''}" 
+                    class="remover ${isAdminRole ? 'protected-btn' : ''}" 
                     ${isAdminRole ? 'disabled' : `onClick="eliminarRol(${item.rol_id}, '${item.rol_nombre.replace(/'/g, "\\'")}', ${item.usuarios_count})"`} 
                     title="${isAdminRole ? 'No se puede eliminar el rol de Administrador' : 'Eliminar Rol'}">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -276,48 +278,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     mostrarModalEliminarRol(rolId, nombreRol, usuariosCount);
   }
 
-  // Función para posicionar el menú correctamente
-  function posicionarMenu(boton, menu) {
-    const rect = boton.getBoundingClientRect();
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
 
-    // Calcular posición inicial (debajo y a la derecha del botón)
-    let top = rect.bottom + scrollTop;
-    let left = rect.left + scrollLeft;
-
-    // Mostrar temporalmente el menú para obtener sus dimensiones
-    menu.style.visibility = 'hidden';
-    menu.style.display = 'block';
-    menu.style.opacity = '0';
-
-    // Obtener dimensiones del menú
-    const menuWidth = menu.offsetWidth;
-    const menuHeight = menu.offsetHeight;
-
-    // Obtener dimensiones de la ventana
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-
-    // Ajustar posición si el menú se sale por la derecha
-    if (left + menuWidth > windowWidth - 20) {
-      left = rect.right + scrollLeft - menuWidth;
-    }
-
-    // Ajustar posición si el menú se sale por abajo
-    if (top + menuHeight > windowHeight + scrollTop - 20) {
-      top = rect.top + scrollTop - menuHeight;
-    }
-
-    // Aplicar posición
-    menu.style.top = `${top}px`;
-    menu.style.left = `${left}px`;
-
-    // Restaurar visibilidad
-    menu.style.visibility = '';
-    menu.style.display = '';
-    menu.style.opacity = '';
-  }
 
   // Función para cerrar todos los menús
   function cerrarTodosLosMenus() {
@@ -344,35 +305,163 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si hay un message de éxito de actualización de usuario
-    const updateSuccess = sessionStorage.getItem('userUpdateSuccess');
+  // --- FUNCIONES DE TOOLTIP PERSONALIZADO ---
 
-    if (updateSuccess) {
-      try {
-        const successData = JSON.parse(updateSuccess);
+  document.addEventListener('DOMContentLoaded', () => {
+    const tableContainer = document.getElementById('table-container');
+    if (tableContainer) {
+      tableContainer.addEventListener('mouseover', handleMouseOver);
+      tableContainer.addEventListener('mouseout', handleMouseOut);
+    }
 
-        // Verificar que el message no sea muy antiguo (máximo 10 segundos)
-        const now = Date.now();
-        const messageAge = now - successData.timestamp;
-
-        if (messageAge < 10000) { // 10 segundos
-          // Esperar a que la página se cargue completamente antes de mostrar el modal
-          setTimeout(async () => {
-            await CustomDialog.success(
-              'Usuario Actualizado',
-              successData.message
-            );
-          }, 500); // Pequeño delay para asegurar que todo esté cargado
-        }
-
-        // Limpiar el message del sessionStorage
-        sessionStorage.removeItem('userUpdateSuccess');
-
-      } catch (error) {
-        console.error('Error al procesar message de éxito:', error);
-        sessionStorage.removeItem('userUpdateSuccess');
-      }
+    const toolsContainer = document.querySelector('.tools');
+    if (toolsContainer) {
+      toolsContainer.addEventListener('mouseover', handleMouseOver);
+      toolsContainer.addEventListener('mouseout', handleMouseOut);
+    } else {
+      document.body.addEventListener('mouseover', handleMouseOver);
+      document.body.addEventListener('mouseout', handleMouseOut);
     }
   });
+
+  function ensureTooltipElement() {
+    if (!jsTooltipElement) {
+      jsTooltipElement = document.createElement('div');
+      jsTooltipElement.className = 'custom-js-tooltip';
+      document.body.appendChild(jsTooltipElement);
+    }
+  }
+
+  function positionJsTooltip(targetButton, tooltipEl) {
+    if (!tooltipEl || !targetButton) return;
+
+    const rect = targetButton.getBoundingClientRect();
+    const tooltipRect = tooltipEl.getBoundingClientRect();
+
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+    let topPosition;
+    let isAbove = true;
+
+    topPosition = rect.top + scrollTop - tooltipRect.height - 8; // Intentar ARRIBA
+
+    if (topPosition < scrollTop + 5) { // No hay espacio arriba, intentar ABAJO
+      topPosition = rect.bottom + scrollTop + 8;
+      isAbove = false;
+    }
+
+    let leftPosition = rect.left + scrollLeft + (rect.width / 2) - (tooltipRect.width / 2);
+
+    if (leftPosition + tooltipRect.width > window.innerWidth - 5) {
+      leftPosition = window.innerWidth - tooltipRect.width - 5;
+    }
+    if (leftPosition < 5) {
+      leftPosition = 5;
+    }
+
+    tooltipEl.style.top = `${topPosition}px`;
+    tooltipEl.style.left = `${leftPosition}px`;
+
+    if (isAbove) {
+      tooltipEl.style.transform = 'translateY(5px)';
+    } else {
+      tooltipEl.style.transform = 'translateY(-5px)';
+    }
+  }
+
+  function clearTooltipStateForButton(button) {
+    if (button) {
+      const originalTitle = button.getAttribute('data-original-title');
+      if (originalTitle) {
+        button.setAttribute('title', originalTitle);
+        button.removeAttribute('data-original-title');
+      }
+    }
+  }
+
+  function showJsTooltipForButton(button) {
+    if (!button) return;
+    if (currentTooltipButton === button && jsTooltipElement && jsTooltipElement.classList.contains('show')) {
+      return;
+    }
+
+    const tooltipText = button.getAttribute('title') || button.getAttribute('data-original-title');
+    if (!tooltipText) return;
+
+    if (currentTooltipButton && currentTooltipButton !== button) {
+      clearTooltipStateForButton(currentTooltipButton);
+      if (jsTooltipElement) {
+        jsTooltipElement.classList.remove('show');
+      }
+    }
+
+    if (button.getAttribute('title')) {
+      button.setAttribute('data-original-title', tooltipText);
+      button.removeAttribute('title');
+    }
+
+    ensureTooltipElement();
+
+    jsTooltipElement.classList.remove('protected-tooltip');
+
+    if (button.classList.contains('protected-btn')) {
+      jsTooltipElement.classList.add('protected-tooltip');
+    }
+
+    currentTooltipButton = button;
+
+    jsTooltipElement.textContent = tooltipText;
+    jsTooltipElement.style.display = 'block';
+
+    requestAnimationFrame(() => {
+      positionJsTooltip(button, jsTooltipElement);
+      requestAnimationFrame(() => {
+        if (jsTooltipElement) jsTooltipElement.classList.add('show');
+      });
+    });
+  }
+
+  function hideActiveJsTooltip() {
+    if (currentTooltipButton) {
+      clearTooltipStateForButton(currentTooltipButton);
+    }
+    if (jsTooltipElement) {
+      jsTooltipElement.classList.remove('show');
+      setTimeout(() => {
+        if (jsTooltipElement && !jsTooltipElement.classList.contains('show')) {
+          jsTooltipElement.style.display = 'none';
+        }
+      }, 150);
+    }
+    currentTooltipButton = null;
+  }
+
+  function handleMouseOver(event) {
+    const button = event.target.closest('.editar, .remover');
+
+    if (button) {
+      showJsTooltipForButton(button);
+    }
+  }
+
+  function handleMouseOut(event) {
+    const button = event.target.closest('.editar, .remover');
+
+    if (!button) {
+      // Si no hay botón en el elemento actual, ocultar tooltip activo
+      hideActiveJsTooltip();
+      return;
+    }
+
+    // Solo ocultar si estamos saliendo del botón actual que tiene el tooltip activo
+    if (currentTooltipButton === button) {
+      // Verificar si realmente estamos saliendo del botón
+      const relatedTarget = event.relatedTarget;
+
+      if (!relatedTarget || !button.contains(relatedTarget)) {
+        hideActiveJsTooltip();
+      }
+    }
+  }
 </script>

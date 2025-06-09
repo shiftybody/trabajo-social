@@ -1,4 +1,5 @@
 <?php
+
 use App\Core\Auth;
 use App\Core\View;
 ?>
@@ -61,7 +62,7 @@ use App\Core\View;
     'form_Salud.php',
     'form_Alimentacion.php',
     'form_vivienda.php',
-    'form_Economia.php', 
+    'form_Economia.php',
   ];
   let indiceFormulario = 0;
   let table;
@@ -96,7 +97,7 @@ use App\Core\View;
 
   async function loadData() {
     try {
-      showTableLoading('Cargando usuarios...');
+      // showTableLoading('Cargando usuarios...');
 
       const response = await fetch('<?= APP_URL ?>pacientes/get_datos_generales.php');
       const html = await response.text();
@@ -106,10 +107,19 @@ use App\Core\View;
       if (!tabla) return;
 
       table = new DataTable('#tabla-datos-generales', {
-        fixedColumns: { end: 1 },
+        fixedColumns: {
+          end: 1
+        },
         scrollX: true,
-        columnDefs: [{ targets: [0, 4, 5], className: 'dt-body-center' }],
-        layout: { topStart: null, buttomStart: null, buttomEnd: null },
+        columnDefs: [{
+          targets: [0, 4, 5],
+          className: 'dt-body-center'
+        }],
+        layout: {
+          topStart: null,
+          buttomStart: null,
+          buttomEnd: null
+        },
         language: {
           zeroRecords: "No se encontraron registros",
           emptyTable: "Aún no hay registros, crea uno nuevo aquí",
