@@ -131,21 +131,30 @@ let searchData = [];
 // Función para cargar la configuración de rutas
 async function loadRoutesConfig() {
   try {
-    const response = await fetch(
-      APP_URL + "public/js/data/navigation-routes.json"
-    );
-    const config = await response.json();
+    const response = await fetch(APP_URL + "api/navigation-routes", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+      credentials: "same-origin",
+    });
+    const result = await response.json();
 
-    // Procesar las rutas para el formato que espera tu código
-    searchData = config.routes.map((route) => ({
-      name: route.name,
-      url: APP_URL + route.url,
-      permissionKey: route.permissionKey,
-      section: route.section,
-      icon: route.icon || null,
-      badge: route.badge || null,
-      id: route.id,
-    }));
+    if (result.status === 'success') {
+      // Procesar las rutas que ya están filtradas por permisos
+      searchData = result.data.routes.map((route) => ({
+        name: route.name,
+        url: APP_URL + route.url,
+        permissionKey: route.permissionKey,
+        section: route.section,
+        icon: route.icon || null,
+        badge: route.badge || null,
+        id: route.id,
+      }));
+    } else {
+      console.error("Error en la respuesta:", result.message);
+      searchData = [];
+    }
   } catch (error) {
     console.error("Error loading routes config:", error);
     searchData = [];
@@ -264,9 +273,8 @@ function displaySearchResults(results, query) {
 
 // Generar HTML para un elemento de resultado
 function generateResultItemHTML(item, highlightQuery = "") {
-  // Generar el HTML con la sintaxis PHP para verificación de permisos
-  let html = `<?php if (App\\Core\\Auth::can('${item.permissionKey}')): ?>`;
-  html += `<a href="${item.url}" class="search-result-item">`;
+  // Ya no necesitas verificar permisos aquí porque ya están filtradas
+  let html = `<a href="${item.url}" class="search-result-item">`;
 
   // Agregar icono si existe
   if (item.icon) {
@@ -288,7 +296,6 @@ function generateResultItemHTML(item, highlightQuery = "") {
   }
 
   html += `</a>`;
-  html += `<?php endif; ?>`;
 
   return html;
 }

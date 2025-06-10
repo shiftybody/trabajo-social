@@ -31,7 +31,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           </svg>
         </div>
       </form>
-
       <?php if (\App\Core\Auth::can('users.create')): ?>
         <button type="submit" class="action_create_new" title="Crear nuevo usuario" onclick="goTo('users/create')">Nuevo</button>
       <?php endif; ?>
@@ -56,7 +55,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             <th>CORREO</th>
             <th class="dt-head-center">ESTADO</th>
             <th class="dt-head-center">ROL</th>
-            <th>ACCIONES</th>
+            <?php if (\App\Core\Auth::canAny(['users.view', 'users.edit', 'users.delete'])): ?>
+              <th>ACCIONES</th>
+            <?php endif; ?>
           </tr>
         </thead>
       </table>
@@ -217,7 +218,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             </button>`;
           <?php endif; ?>
 
-          <?php if (\App\Core\Auth::can('users.edit')): ?>
+          <?php if (\App\Core\Auth::can('users.view')): ?>
             actionsHtml += `
             <button type="button" class="opciones" onClick="mostrarOpciones(${item.usuario_id})" title="Más Opciones">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-dots-vertical">
@@ -354,8 +355,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     }
   }
 
-  // --- FUNCIONES DE LOS ACTION BUTTONS
-
+  // --- FUNCIONES DE LOS ACTION BUTTONS ---
   function actualizar(usuario_id) {
     window.location.href = `<?= APP_URL ?>users/edit/${usuario_id}`;
   }
@@ -398,31 +398,29 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   }
 
   function mostrarOpciones(usuario_id) {
-    // Prevenir comportamiento por defecto
     event.preventDefault();
     event.stopPropagation();
 
-    // Cerrar cualquier menú abierto anteriormente
     cerrarTodosLosMenus();
 
-    // Obtener el botón que se hizo clic
     const boton = event.currentTarget;
 
-    // Verificar si ya existe un menú para este usuario
     let menu = document.getElementById(`menu-${usuario_id}`);
 
-    // Si no existe, crear el menú
     if (!menu) {
       menu = document.createElement('div');
       menu.id = `menu-${usuario_id}`;
       menu.className = 'dropdown-menu';
       menu.innerHTML = `
+      <?php if (\App\Core\Auth::can('users.view')): ?>
       <div class="dropdown-item" onclick="verDetalles(${usuario_id})">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="8" r="1"></circle><line x1="12" y1="12" x2="12" y2="16"></line>
         </svg>
         Ver detalles
       </div>
+      <?php endif; ?>
+      <?php if (\App\Core\Auth::can('users.edit')): ?>
       <div class="dropdown-item" onclick="cambiarEstado(${usuario_id})">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -436,17 +434,14 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         </svg>
         Resetear contraseña
       </div>
+      <?php endif; ?>
     `;
       document.body.appendChild(menu);
     }
 
-    // Posicionar el menú
     posicionarMenu(boton, menu);
-
-    // Mostrar el menú
     menu.classList.add('show');
 
-    // Agregar listener para cerrar el menú cuando se haga clic fuera de él
     setTimeout(() => {
       document.addEventListener('click', cerrarMenuAlClickearFuera);
     }, 10);
@@ -468,8 +463,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
 
   // --- FUNCIONES DE POSICIONAMIENTO DEL OPTION MENU ---
-
-  // Función para posicionar el menú correctamente
   function posicionarMenu(boton, menu) {
     const rect = boton.getBoundingClientRect();
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;

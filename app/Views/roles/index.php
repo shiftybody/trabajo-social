@@ -36,7 +36,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         <tr>
           <th class="dt-head-left">ROL</th>
           <th class="dt-head-left">USUARIOS</th>
-          <th class="dt-head-left">ACCIONES</th>
+          <?php if (\App\Core\Auth::canAny(['permissions.assign', 'permissions.view', 'roles.delete'])): ?>
+            <th class="dt-head-left">ACCIONES</th>
+          <?php endif; ?>
         </tr>
       </thead>
     </table>
@@ -210,7 +212,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           const isAdminRole = item.rol_nombre === 'Administrador' || item.rol_id === 1;
           let buttonsHtml = '<div class="action-buttons">';
 
-          <?php if (\App\Core\Auth::can('roles.edit')): ?>
+          <?php if (\App\Core\Auth::canAny(['permissions.assign', 'permissions.view'])): ?>
             buttonsHtml += `
             <button type="button" 
                     class="editar ${isAdminRole ? 'protected-btn' : ''}"

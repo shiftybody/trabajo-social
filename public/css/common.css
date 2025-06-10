@@ -399,8 +399,14 @@ input.error-input:-webkit-autofill:focus {
 }
 
 .btn-retry {
-  background: var(--blue-200);
+  background: var(--blue-400);
   color: white;
+}
+
+.btn-retry:hover:not(:disabled) {
+  background: var(--blue-500);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--blue-alpha-4);
 }
 
 .btn-primary:disabled,
@@ -573,10 +579,14 @@ td {
   line-height: var(--line-height-large);
 }
 
+/* este es el último td */
 td:not(.dt-empty):last-child {
   display: flex;
   gap: 0.4rem;
   padding: 11px;
+  height: inherit;
+  align-items: center;
+  justify-content:flex-start;
 }
 
 td.dt-empty {

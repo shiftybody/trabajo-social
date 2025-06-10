@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Core\Auth;
 use App\Core\Request;
 use App\Core\Response;
 use App\Models\roleModel;
@@ -396,6 +397,52 @@ class RoleController
       return Response::json([
         'status' => 'error',
         'message' => 'Error interno del servidor'
+      ], 500);
+    }
+  }
+
+  /**
+   * API: Obtiene las rutas de navegación filtradas por permisos del usuario
+   */
+  public function getNavigationRoutes()
+  {
+    try {
+      // Leer el archivo JSON de rutas
+      $rutasPath = APP_ROOT . 'public/js/data/navigation-routes.json';
+
+      if (!file_exists($rutasPath)) {
+        throw new Exception('Archivo de rutas no encontrado');
+      }
+
+      $rutasJson = file_get_contents($rutasPath);
+      $rutasData = json_decode($rutasJson, true);
+
+      if (!$rutasData || !isset($rutasData['routes'])) {
+        throw new Exception('Formato de archivo de rutas inválido');
+      }
+
+      // Filtrar rutas según permisos del usuario actual
+      $rutasFiltradas = [];
+
+      foreach ($rutasData['routes'] as $ruta) {
+        if (Auth::can($ruta['permissionKey'])) {
+          $rutasFiltradas[] = $ruta;
+        }
+      }
+
+      error_log("Rutas filtradas: " . json_encode($rutasFiltradas));
+
+      return Response::json([
+        'status' => 'success',
+        'data' => [
+          'routes' => $rutasFiltradas
+        ]
+      ]);
+    } catch (Exception $e) {
+      error_log("Error en getNavigationRoutes: " . $e->getMessage());
+      return Response::json([
+        'status' => 'error',
+        'message' => 'Error al obtener rutas de navegación'
       ], 500);
     }
   }

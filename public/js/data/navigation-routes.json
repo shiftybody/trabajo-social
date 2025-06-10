@@ -22,6 +22,20 @@
       "section": "Usuarios"
     },
     {
+      "id" : "users-edit",
+      "name": "Editar Usuario",
+      "url": "users",
+      "permissionKey": "users.edit",
+      "section": "Usuarios"
+    },
+    {
+      "id": "users-delete",
+      "name": "Eliminar Usuario",
+      "url": "users",
+      "permissionKey": "users.delete",
+      "section": "Usuarios"
+    },
+    {
       "id": "roles-list",
       "name": "Ver Roles",
       "url": "roles",
@@ -29,9 +43,23 @@
       "section": "Roles y Permisos"
     },
     {
+      "id": "roles-create",
+      "name": "Crear Rol",
+      "url": "roles",
+      "permissionKey": "roles.create",
+      "section": "Roles y Permisos"
+    },
+    {
+      "id": "roles-delete",
+      "name": "Eliminar Rol",
+      "url": "roles",
+      "permissionKey": "roles.delete",
+      "section": "Roles y Permisos"
+    },
+    {
       "id": "permissions",
       "name": "Gestionar Permisos",
-      "url": "permissions",
+      "url": "roles",
       "permissionKey": "permissions.view",
       "section": "Roles y Permisos"
     }

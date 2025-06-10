@@ -87,6 +87,11 @@ main #section-container #login-form #login-inputs #username-input,
   position: relative;
 }
 
+input[type="text"],
+input[type="password"] {
+  background-color: var(--gray-100);
+}
+
 .password-toggle {
   display: none;
   position: absolute;
@@ -96,7 +101,7 @@ main #section-container #login-form #login-inputs #username-input,
   height: 2rem;
   width: 2rem;
   border: none;
-  background-color: #f9fafb;
+  background-color: var(--gray-100);
   cursor: pointer;
   padding: 0.25rem;
   align-items: center;
@@ -182,6 +187,16 @@ div#remember-check label:hover {
   }
 }
 
+@media (max-width: 800px) {
+  main #section-container #logotipo {
+    display: none;
+  }
+
+  main #section-container {
+    padding-bottom: 1rem;
+  }
+}
+
 @media (max-width: 500px) {
   main #section-container {
     width: 100%;
@@ -197,4 +212,5 @@ div#remember-check label:hover {
     width: 4rem;
     margin-right: 5%;
   }
+
 }

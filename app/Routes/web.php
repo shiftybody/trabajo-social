@@ -43,8 +43,7 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
     $router->get('/roles/create', 'RoleController@createView')->name('roles.create');
   });
 
-  $router->group(['middleware' => 'Permission:roles.edit'], function ($router) {
-    $router->get('/roles/edit/:id', 'RoleController@editView')->name('roles.edit');
+  $router->group(['middleware' => 'Permission:permissions.view'], function ($router) {
     $router->get('/roles/:id/permissions', 'RoleController@permissionsView')->name('roles.permissions');
   });
 

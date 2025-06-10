@@ -87,7 +87,14 @@ use App\Core\Auth;
       Inicio
     </a>
     <?php if (Auth::canAny(['users.view', 'users.create', 'users.edit', 'users.delete'])): ?>
-      <a href="<?= APP_URL ?>users" <?= stripos($titulo, 'usuario') !== false ? 'class="active"' : '' ?>>
+      <?php
+      // Determinar la URL según los permisos
+      $userUrl = APP_URL . 'users';
+      if (!Auth::canAny(['users.view', 'users.edit', 'users.delete']) && Auth::can('users.create')) {
+        $userUrl = APP_URL . 'users/create';
+      }
+      ?>
+      <a href="<?= $userUrl ?>" <?= stripos($titulo, 'usuario') !== false ? 'class="active"' : '' ?>>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-users">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
@@ -98,7 +105,7 @@ use App\Core\Auth;
         Usuarios
       </a>
     <?php endif; ?>
-    <?php if (Auth::can('roles.view')): ?>
+    <?php if (Auth::canAny(['roles.view', 'roles.create', 'roles.delete', 'permissions.view', 'permissions.assign'])): ?>
       <a href="<?= APP_URL ?>roles" <?= (stripos($titulo, 'rol') !== false) || (stripos($titulo, 'permisos') !== false) ? 'class="active"' : '' ?>>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-shield">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />

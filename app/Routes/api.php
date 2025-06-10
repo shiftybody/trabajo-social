@@ -16,19 +16,24 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   $router->post('/session/refresh', 'SessionController@refresh');
   $router->get('/session/status', 'SessionController@status');
 
+  // NAVIGATION
+  $router->group(array('middleware' => 'Permission:search.view'), function ($router) {
+    $router->get('/navigation-routes', 'RoleController@getNavigationRoutes');
+  });
+
   // USERS
   $router->group(array('middleware' => 'Permission:users.manage|users.view'), function ($router) {
     $router->get('/users', 'UserController@getAllUsers');
   });
 
-  $router->group(array('middleware' => 'Permission:users.manage|users.create|users.edit|roles.view'), function ($router) {
+  $router->group(array('middleware' => 'Permission:users.manage|users.create|users.view|users.edit|roles.view'), function ($router) {
     $router->get('/roles', 'RoleController@getAllRoles');
     $router->post('/users', 'UserController@store');
+    $router->get('/users/:id', 'UserController@getUserById');
+    $router->post('/users/:id', 'UserController@update');
   });
 
   $router->group(array('middleware' => 'Permission:users.manage|users.edit'), function ($router) {
-    $router->get('/users/:id', 'UserController@getUserById');
-    $router->post('/users/:id', 'UserController@update');
     $router->post('/users/:id/reset-password', 'UserController@resetPassword');
     $router->post('/users/:id/status', 'UserController@changeStatus');
   });
@@ -47,20 +52,19 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   $router->group(['middleware' => 'Permission:roles.create'], function ($router) {
     $router->post('/roles', 'RoleController@store');
   });
-
-  $router->group(['middleware' => 'Permission:roles.edit'], function ($router) {
-    $router->post('/roles/:id', 'RoleController@update');
+  // PERMISOS
+  $router->group(['middleware' => 'Permission:permissions.view'], function ($router) {
     $router->get('/roles/:id/permissions', 'RoleController@getRolePermissions');
+    $router->get('/permissions', 'RoleController@getAllPermissions');
+  });
+
+  $router->group(['middleware' => 'Permission:permissions.assign'], function ($router) {
+    $router->post('/roles/:id', 'RoleController@update');
     $router->post('/roles/:id/permissions', 'RoleController@updateRolePermissions');
   });
 
   $router->group(['middleware' => 'Permission:roles.delete'], function ($router) {
     $router->delete('/roles/:id', 'RoleController@delete');
-  });
-
-  // PERMISOS (para cargar en formularios)
-  $router->group(['middleware' => 'Permission:roles.edit|roles.create'], function ($router) {
-    $router->get('/permissions', 'RoleController@getAllPermissions');
   });
 });
 

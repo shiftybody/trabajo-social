@@ -461,6 +461,24 @@ button.bulk-btn:hover {
   animation: spin 0.8s linear infinite;
 }
 
+.dependency-badge,
+.required-badge {
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+  opacity: 0.7;
+  cursor: help;
+}
+
+.dependency-badge {
+  color: #3b82f6;
+  /* Azul para dependencias */
+}
+
+.required-badge {
+  color: #f59e0b;
+  /* Naranja para requeridos */
+}
+
 @media (max-width: 1080px) {
   .permissions-container {
     padding: 2rem;
@@ -492,6 +510,6 @@ button.bulk-btn:hover {
   }
 
   .actions-right {
-    justify-content: center;
+    flex-direction: row-reverse;
   }
 }

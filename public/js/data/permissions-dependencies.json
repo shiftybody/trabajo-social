@@ -1,0 +1,59 @@
+{
+  "dependencies": [
+    {
+      "permissionSlug": "users.edit",
+      "requires": ["users.view"],
+      "description": "Editar usuarios requiere poder verlos"
+    },
+    {
+      "permissionSlug": "users.delete",
+      "requires": ["users.view"],
+      "description": "Eliminar usuarios requiere poder verlos"
+    },
+    {
+      "permissionSlug": "roles.create",
+      "requires": ["roles.view"],
+      "description": "Asignar roles requiere ver roles"
+    },
+    {
+      "permissionSlug": "roles.delete",
+      "requires": ["roles.view"],
+      "description": "Eliminar roles requiere ver roles"
+    },
+    {
+      "permissionSlug": "permissions.assign",
+      "requires": ["permissions.view", "roles.view"],
+      "description": "Asignar permisos requiere ver permisos y roles"
+    },
+    {
+      "permissionSlug": "permissions.view",
+      "requires": ["roles.view"],
+      "description": "Ver permisos requiere ver roles"
+    },
+    {
+      "permissionSlug": "reports.export",
+      "requires": ["reports.view"],
+      "description": "Exportar reportes requiere poder verlos"
+    },
+    {
+      "permissionSlug": "patients.edit",
+      "requires": ["patients.view"],
+      "description": "Editar pacientes requiere poder verlos"
+    },
+    {
+      "permissionSlug": "patients.delete",
+      "requires": ["patients.view"],
+      "description": "Eliminar pacientes requiere poder verlos"
+    },
+    {
+      "permissionSlug": "donations.approve",
+      "requires": ["donations.view"],
+      "description": "Aprobar donaciones requiere poder verlas"
+    },
+    {
+      "permissionSlug": "donations.reject",
+      "requires": ["donations.view"],
+      "description": "Rechazar donaciones requiere poder verlas"
+    }
+  ]
+}

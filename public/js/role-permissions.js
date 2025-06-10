@@ -5,6 +5,8 @@ let roleId = null;
 let roleName = "";
 let hasChanges = false;
 let managePermissions = {}; // Mapa de permisos manage por categoría
+let permissionDependencies = {}; // Mapa de dependencias de permisos
+let permissionSlugToId = {}; // Mapa de slug a ID para búsqueda rápida
 
 // Elementos DOM
 const dom = {
@@ -36,6 +38,28 @@ document.addEventListener("DOMContentLoaded", function () {
   // Configurar event listeners
   setupEventListeners();
 });
+
+// Función para cargar las dependencias de permisos
+async function loadPermissionDependencies() {
+  try {
+    const response = await fetch(
+      APP_URL + "public/js/data/permissions-dependencies.json"
+    );
+    const config = await response.json();
+
+    // Procesar las dependencias para crear un mapa
+    permissionDependencies = {};
+    config.dependencies.forEach((dep) => {
+      permissionDependencies[dep.permissionSlug] = {
+        requires: dep.requires || [],
+        description: dep.description || ""
+      };
+    });
+  } catch (error) {
+    console.error("Error loading permission dependencies:", error);
+    permissionDependencies = {};
+  }
+}
 
 // Configurar event listeners
 function setupEventListeners() {
@@ -110,7 +134,8 @@ function clearSearch() {
 // Cargar datos del rol
 async function loadRoleData() {
   try {
-    // showLoading("Cargando información del rol...");
+    // Cargar las dependencias de permisos primero
+    await loadPermissionDependencies();
 
     // Cargar información del rol
     const roleResponse = await fetch(`${APP_URL}api/roles/${roleId}`);
@@ -135,6 +160,11 @@ async function loadRoleData() {
 
     allPermissions = permissionsData.data;
     dom.totalPermissions.textContent = allPermissions.length;
+
+    // Crear mapa de slug a ID
+    allPermissions.forEach((permission) => {
+      permissionSlugToId[permission.permiso_slug] = parseInt(permission.permiso_id);
+    });
 
     // Identificar permisos "manage"
     identifyManagePermissions();
@@ -165,6 +195,41 @@ async function loadRoleData() {
     console.error("Error:", error);
     showError("Error al cargar los datos. Por favor, recarga la página.");
   }
+}
+
+// Obtener las dependencias de un permiso
+function getPermissionDependencies(permissionSlug) {
+  const deps = permissionDependencies[permissionSlug];
+  if (!deps || !deps.requires || deps.requires.length === 0) {
+    return [];
+  }
+
+  // Convertir slugs a IDs
+  const dependencyIds = [];
+  deps.requires.forEach((depSlug) => {
+    const depId = permissionSlugToId[depSlug];
+    if (depId) {
+      dependencyIds.push(depId);
+    }
+  });
+
+  return dependencyIds;
+}
+
+// Obtener permisos que dependen de este
+function getDependentPermissions(permissionSlug) {
+  const dependents = [];
+  
+  Object.entries(permissionDependencies).forEach(([slug, deps]) => {
+    if (deps.requires && deps.requires.includes(permissionSlug)) {
+      const permId = permissionSlugToId[slug];
+      if (permId) {
+        dependents.push(permId);
+      }
+    }
+  });
+
+  return dependents;
 }
 
 // Identificar permisos "manage" por categoría
@@ -214,7 +279,7 @@ function renderPermissions() {
 
   // Crear HTML
   let html = "";
-  Object.entries(groupedPermissions).forEach(([category, permissions]) => {
+  groupedPermissions.forEach((permissions, category) => {
     html += createCategoryHTML(category, permissions);
   });
 
@@ -270,27 +335,6 @@ function groupPermissionsByCategory(permissions) {
   return sortedGrouped;
 }
 
-// Modificar la función renderPermissions para trabajar con Map
-function renderPermissions() {
-  if (!allPermissions || allPermissions.length === 0) {
-    dom.permissionsGrid.innerHTML =
-      '<div class="no-permissions">No hay permisos disponibles</div>';
-    return;
-  }
-
-  // Agrupar permisos por categoría (ahora retorna un Map)
-  const groupedPermissions = groupPermissionsByCategory(allPermissions);
-
-  // Crear HTML
-  let html = "";
-  groupedPermissions.forEach((permissions, category) => {
-    html += createCategoryHTML(category, permissions);
-  });
-
-  dom.permissionsGrid.innerHTML = html;
-
-}
-
 // Crear HTML para una categoría
 function createCategoryHTML(category, permissions) {
   const categoryName = getCategoryDisplayName(category);
@@ -322,7 +366,7 @@ function createCategoryHTML(category, permissions) {
   return html;
 }
 
-// Crear HTML para un permiso
+// Crear HTML para un permiso (simplificado sin badges)
 function createPermissionHTML(permission, isChecked) {
   const isManage = permission.permiso_slug.includes("manage");
 
@@ -403,7 +447,6 @@ function handlePermissionChange(checkbox) {
       const category = permissionSlug.split(".")[0];
       const categoryPermissions = getCategoryPermissions(category);
 
-      let addedCount = 0;
       categoryPermissions.forEach((catPermId) => {
         if (!currentPermissions.includes(catPermId)) {
           currentPermissions.push(catPermId);
@@ -414,7 +457,51 @@ function handlePermissionChange(checkbox) {
           if (catCheckbox && !catCheckbox.checked) {
             catCheckbox.checked = true;
             catCheckbox.closest(".permission-label").classList.add("selected");
-            addedCount++;
+          }
+        }
+      });
+    } else {
+      // Si NO es un permiso manage, verificar si todos los permisos de la categoría están seleccionados
+      // para marcar automáticamente el manage si existe
+      const category = permissionSlug.split(".")[0];
+      const categoryPermissions = getCategoryPermissions(category);
+      const managePermissionIds = managePermissions[category] || [];
+      
+      if (managePermissionIds.length > 0) {
+        const allCategoryPermissionsSelected = categoryPermissions.every(catPermId => 
+          currentPermissions.includes(catPermId)
+        );
+        
+        if (allCategoryPermissionsSelected) {
+          managePermissionIds.forEach(manageId => {
+            if (!currentPermissions.includes(manageId)) {
+              currentPermissions.push(manageId);
+              const manageCheckbox = dom.permissionsGrid.querySelector(
+                `input[value="${manageId}"]`
+              );
+              if (manageCheckbox && !manageCheckbox.checked) {
+                manageCheckbox.checked = true;
+                manageCheckbox.closest(".permission-label").classList.add("selected");
+              }
+            }
+          });
+        }
+      }
+    }
+
+    // Verificar y agregar dependencias
+    const dependencies = getPermissionDependencies(permissionSlug);
+    if (dependencies.length > 0) {
+      dependencies.forEach((depId) => {
+        if (!currentPermissions.includes(depId)) {
+          currentPermissions.push(depId);
+          // Actualizar visualmente el checkbox
+          const depCheckbox = dom.permissionsGrid.querySelector(
+            `input[value="${depId}"]`
+          );
+          if (depCheckbox && !depCheckbox.checked) {
+            depCheckbox.checked = true;
+            depCheckbox.closest(".permission-label").classList.add("selected");
           }
         }
       });
@@ -427,26 +514,52 @@ function handlePermissionChange(checkbox) {
     }
     label.classList.remove("selected");
 
-    // Si es un permiso "manage", deseleccionar todos los permisos de la categoría
-    if (permissionSlug && permissionSlug.includes("manage")) {
-      const category = permissionSlug.split(".")[0];
-      const categoryPermissions = getCategoryPermissions(category);
-
-      categoryPermissions.forEach((catPermId) => {
-        const idx = currentPermissions.indexOf(catPermId);
-        if (idx > -1) {
-          currentPermissions.splice(idx, 1);
+    // Verificar si hay permisos que dependen de este y desmarcarlos también
+    const dependents = getDependentPermissions(permissionSlug);
+    const activeDependents = dependents.filter(depId => currentPermissions.includes(depId));
+    
+    if (activeDependents.length > 0) {
+      // Desmarcar los dependientes automáticamente
+      activeDependents.forEach((depId) => {
+        const depIndex = currentPermissions.indexOf(depId);
+        if (depIndex > -1) {
+          currentPermissions.splice(depIndex, 1);
         }
-        // Actualizar visualmente el checkbox
-        const catCheckbox = dom.permissionsGrid.querySelector(
-          `input[value="${catPermId}"]`
+        const depCheckbox = dom.permissionsGrid.querySelector(
+          `input[value="${depId}"]`
         );
-        if (catCheckbox && catCheckbox.checked) {
-          catCheckbox.checked = false;
-          catCheckbox.closest(".permission-label").classList.remove("selected");
+        if (depCheckbox && depCheckbox.checked) {
+          depCheckbox.checked = false;
+          depCheckbox.closest(".permission-label").classList.remove("selected");
         }
       });
     }
+
+    // Si NO es un permiso manage, verificar si hay que desmarcar el manage de la categoría
+    if (permissionSlug && !permissionSlug.includes("manage")) {
+      const category = permissionSlug.split(".")[0];
+      const managePermissionIds = managePermissions[category] || [];
+      
+      if (managePermissionIds.length > 0) {
+        // Desmarcar el manage ya que al menos un permiso de la categoría está desmarcado
+        managePermissionIds.forEach(manageId => {
+          const manageIndex = currentPermissions.indexOf(manageId);
+          if (manageIndex > -1) {
+            currentPermissions.splice(manageIndex, 1);
+            const manageCheckbox = dom.permissionsGrid.querySelector(
+              `input[value="${manageId}"]`
+            );
+            if (manageCheckbox && manageCheckbox.checked) {
+              manageCheckbox.checked = false;
+              manageCheckbox.closest(".permission-label").classList.remove("selected");
+            }
+          }
+        });
+      }
+    }
+    
+    // ELIMINAMOS la lógica que deseleccionaba toda la categoría cuando se desmarca "manage"
+    // para evitar romper dependencias de otras categorías
   }
 
   // Actualizar UI
@@ -654,6 +767,7 @@ async function savePermissions() {
     checkForChanges();
   }
 }
+
 // Mostrar loading
 function showLoading(message) {
   dom.permissionsGrid.innerHTML = `

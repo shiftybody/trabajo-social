@@ -147,6 +147,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     const link = e.target.closest('a');
     console.log(link)
 
+    // tambi
     if (link && link.href) {
       if (link.target === '_blank') return;
 
@@ -156,14 +157,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
       e.preventDefault();
       confirmAndNavigate(link.href);
-    }
-  });
-
-  window.addEventListener('beforeunload', (e) => {
-    if (formChanged && !isSubmitting) {
-      e.preventDefault();
-      e.returnValue = '';
-      return '';
     }
   });
 </script>
