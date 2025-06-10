@@ -328,10 +328,19 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         }
     }
 
-    // --- Manejadores de Eventos en el Breadcrumb ---
-    breadcrumbNav.addEventListener('click', (e) => {
+    // Interceptar TODOS los clics en enlaces <a>
+    document.addEventListener('click', (e) => {
+
         const link = e.target.closest('a');
+        console.log(link)
+
         if (link && link.href) {
+            if (link.target === '_blank') return;
+
+            if (link.getAttribute('href').startsWith('#')) return;
+
+            if (link.href.startsWith('mailto:') || link.href.startsWith('tel:')) return;
+
             e.preventDefault();
             confirmAndNavigate(link.href);
         }

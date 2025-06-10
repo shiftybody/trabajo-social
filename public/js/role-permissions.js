@@ -45,7 +45,7 @@ function setupEventListeners() {
   }
 
   // Botón clear para el input de búsqueda
-  const clearButton = document.querySelector(".clear-button");
+  const clearButton = document.getElementById("clearButton");
   if (clearButton) {
     clearButton.addEventListener("click", clearSearch);
   }
@@ -53,7 +53,7 @@ function setupEventListeners() {
   // Mostrar/ocultar botón clear basado en el contenido del input
   if (dom.searchInput) {
     dom.searchInput.addEventListener("input", () => {
-      const clearBtn = document.querySelector(".clear-button");
+      const clearBtn = document.getElementById("clearButton");
       if (clearBtn) {
         clearBtn.style.display = dom.searchInput.value ? "inline" : "none";
       }
@@ -99,7 +99,7 @@ function clearSearch() {
   if (dom.searchInput) {
     dom.searchInput.value = "";
     dom.searchInput.focus();
-    const clearBtn = document.querySelector(".clear-button");
+    const clearBtn = document.getElementById("clearButton");
     if (clearBtn) {
       clearBtn.style.display = "none";
     }
@@ -219,10 +219,6 @@ function renderPermissions() {
   });
 
   dom.permissionsGrid.innerHTML = html;
-
-  // Colapsar todas las categorías al inicio
-  const headers = dom.permissionsGrid.querySelectorAll(".category-header");
-  headers.forEach((header) => toggleCategory(header));
 }
 
 // Modificar la función groupPermissionsByCategory
@@ -293,9 +289,6 @@ function renderPermissions() {
 
   dom.permissionsGrid.innerHTML = html;
 
-  // Colapsar todas las categorías al inicio
-  const headers = dom.permissionsGrid.querySelectorAll(".category-header");
-  headers.forEach((header) => toggleCategory(header));
 }
 
 // Crear HTML para una categoría
@@ -547,10 +540,10 @@ function handleSearch() {
   });
 }
 
-// Cambiar de window.selectAllVisiblePermissions a una función normal
 function selectAllVisiblePermissions() {
+  // Cambiar el selector para incluir categorías no colapsadas
   const visibleCheckboxes = dom.permissionsGrid.querySelectorAll(
-    '.permission-item:not([style*="display: none"]) .permission-checkbox'
+    '.permission-category:not([style*="display: none"]) .category-permissions:not([style*="display: none"]) .permission-item:not([style*="display: none"]) .permission-checkbox'
   );
 
   let addedCount = 0;
@@ -563,7 +556,7 @@ function selectAllVisiblePermissions() {
   });
 
   if (addedCount > 0) {
-    CustomDialog.toast("Todos los permisos seleccionados", "success", 2000);
+    CustomDialog.toast("Todos los permisos visibles seleccionados", "success", 2000);
   } else {
     CustomDialog.toast(
       "Todos los permisos visibles ya estaban seleccionados",

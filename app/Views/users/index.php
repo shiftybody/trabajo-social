@@ -123,10 +123,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
   // Inicializar DataTable
   document.addEventListener('DOMContentLoaded', () => {
-    // Mostrar loading inicial
-    // showTableLoading('Inicializando tabla...');
 
-    // Mostrar la tabla para que DataTables pueda inicializarse
     document.getElementById('users-table').style.display = '';
 
     table = new DataTable('#users-table', {

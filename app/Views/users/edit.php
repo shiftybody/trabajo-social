@@ -334,10 +334,39 @@ require_once APP_ROOT . 'public/inc/navbar.php';
       }
     }
 
-    // --- Manejadores de Eventos en el Breadcrumb ---
-    breadcrumbNav.addEventListener('click', (e) => {
+    async function confirmAndNavigate(url) {
+      // Verifica si hay cambios sin guardar o si el formulario está siendo enviado.
+      if (!formChanged || isSubmitting) {
+        window.location.href = url;
+        return;
+      }
+      // Si hay cambios sin guardar, muestra un diálogo de confirmación.
+      const userConfirmed = await CustomDialog.confirm(
+        'Cambios sin guardar',
+        'Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?',
+        'Sí, salir',
+        'Cancelar'
+      );
+
+      if (userConfirmed) {
+        formChanged = false;
+        window.location.href = url;
+      }
+    }
+
+    // Interceptar TODOS los clics en enlaces <a>
+    document.addEventListener('click', (e) => {
+
       const link = e.target.closest('a');
+      console.log(link)
+
       if (link && link.href) {
+        if (link.target === '_blank') return;
+
+        if (link.getAttribute('href').startsWith('#')) return;
+
+        if (link.href.startsWith('mailto:') || link.href.startsWith('tel:')) return;
+
         e.preventDefault();
         confirmAndNavigate(link.href);
       }
