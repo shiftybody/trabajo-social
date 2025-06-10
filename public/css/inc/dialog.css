@@ -19,7 +19,7 @@
 
 .dialog-container {
   background: var(--white);
-  border-radius: 12px;
+  border-radius: 1rem;
   box-shadow: var(--shadow);
   max-width: 400px;
   width: calc(100% - 32px);
@@ -175,7 +175,7 @@
   color: var(--white);
   border-radius: 24px;
   padding: 12px 20px;
-  margin-bottom: 8px;
+  margin: 8px;
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-small);

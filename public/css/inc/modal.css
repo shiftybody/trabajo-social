@@ -21,7 +21,7 @@
 .base-modal-content {
   background: var(--white);
   border-radius: var(--rounded-lg);
-  box-shadow: var(--shadow-normal);
+  box-shadow: var(--shadow-soft);
   width: calc(100% - 32px);
   max-height: 90vh;
   overflow: hidden;
@@ -121,7 +121,7 @@
 .input.error-input,
 .input-reset.error-input {
   border-color: var(--red-500);
-  background: var(--red-300);
+  background: var(--red-50);
   color: var(--red-500);
 }
 
@@ -221,17 +221,17 @@
 }
 
 .confirm-icon.warning {
-  background: var(--yellow-300);
+  background: var(--yellow-50);
   color: var(--yellow-400);
 }
 
 .confirm-icon.danger {
-  background: var(--red-300);
+  background: var(--red-50);
   color: var(--red-500);
 }
 
 .confirm-icon.info {
-  background: var(--blue-300);
+  background: var(--blue-200);
   color: var(--blue-400);
 }
 

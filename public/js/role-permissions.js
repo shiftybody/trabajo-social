@@ -110,7 +110,7 @@ function clearSearch() {
 // Cargar datos del rol
 async function loadRoleData() {
   try {
-    showLoading("Cargando información del rol...");
+    // showLoading("Cargando información del rol...");
 
     // Cargar información del rol
     const roleResponse = await fetch(`${APP_URL}api/roles/${roleId}`);
@@ -225,27 +225,77 @@ function renderPermissions() {
   headers.forEach((header) => toggleCategory(header));
 }
 
-// Agrupar permisos por categoría
+// Modificar la función groupPermissionsByCategory
 function groupPermissionsByCategory(permissions) {
-  const grouped = {};
+  const grouped = new Map();
 
   permissions.forEach((permission) => {
     const category = permission.permiso_slug.split(".")[0] || "otros";
-    if (!grouped[category]) {
-      grouped[category] = [];
+    if (!grouped.has(category)) {
+      grouped.set(category, []);
     }
-    grouped[category].push(permission);
+    grouped.get(category).push(permission);
   });
 
-  // Ordenar categorías
-  const sortedGrouped = {};
-  Object.keys(grouped)
-    .sort()
-    .forEach((key) => {
-      sortedGrouped[key] = grouped[key];
-    });
+  // Crear un Map ordenado
+  const sortedGrouped = new Map();
+  
+  // Definir el orden deseado de categorías
+  const categoryOrder = [
+    'users',
+    'roles', 
+    'permissions',
+    'patients',
+    'reports',
+    'search',
+    'notifications',
+    'donations',
+    'stats',
+    'settings',
+    'profile'
+  ];
+
+  // Primero agregar las categorías en el orden definido
+  categoryOrder.forEach(category => {
+    if (grouped.has(category)) {
+      sortedGrouped.set(category, grouped.get(category));
+    }
+  });
+
+  // Luego agregar cualquier categoría restante alfabéticamente
+  const remainingCategories = Array.from(grouped.keys())
+    .filter(category => !categoryOrder.includes(category))
+    .sort();
+  
+  remainingCategories.forEach(category => {
+    sortedGrouped.set(category, grouped.get(category));
+  });
 
   return sortedGrouped;
+}
+
+// Modificar la función renderPermissions para trabajar con Map
+function renderPermissions() {
+  if (!allPermissions || allPermissions.length === 0) {
+    dom.permissionsGrid.innerHTML =
+      '<div class="no-permissions">No hay permisos disponibles</div>';
+    return;
+  }
+
+  // Agrupar permisos por categoría (ahora retorna un Map)
+  const groupedPermissions = groupPermissionsByCategory(allPermissions);
+
+  // Crear HTML
+  let html = "";
+  groupedPermissions.forEach((permissions, category) => {
+    html += createCategoryHTML(category, permissions);
+  });
+
+  dom.permissionsGrid.innerHTML = html;
+
+  // Colapsar todas las categorías al inicio
+  const headers = dom.permissionsGrid.querySelectorAll(".category-header");
+  headers.forEach((header) => toggleCategory(header));
 }
 
 // Crear HTML para una categoría

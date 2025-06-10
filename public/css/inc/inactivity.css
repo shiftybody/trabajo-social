@@ -34,6 +34,18 @@
   transform: scale(1) translateY(0);
 }
 
+#inactivityModalCloseBtn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer
+}
+
 .warning-icon {
   width: 8px;
   height: 8px;
@@ -62,12 +74,12 @@
 }
 
 #legend {
+  width: 100%;
   font-size: 14px;
   color: var(--gray-700);
   margin: 0 0 24px 0;
   font-weight: 400;
   justify-content: center;
-  ;
 }
 
 .modal-buttons {
@@ -79,10 +91,10 @@
 
 .btn-modal {
   padding: 12px 24px;
-  border: none;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
+  height: 3rem;
   cursor: pointer;
   transition: all 150ms;
   position: relative;
@@ -90,19 +102,18 @@
 }
 
 .btn-modal-primary {
-  background: var(--black);
-  color: var(--white);
+  background: var(--gray-800);
+  color: white;
+  min-width: 8rem;
 }
 
 .btn-modal-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+  background: var(--gray-900);
+  box-shadow: 0 4px 12px var(--black-alpha-3);
 }
 
 .btn-modal-secondary {
   background: transparent;
-  color: var(--gray-700);
-  border: 1px solid var(--border);
 }
 
 .btn-modal-secondary::after {
@@ -120,7 +131,7 @@
 }
 
 .btn-modal-secondary:hover {
-  transform: translateY(-1px);
+  background: var(--gray-200);
 }
 
 .btn-modal:active {

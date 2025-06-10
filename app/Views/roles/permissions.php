@@ -23,7 +23,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             </svg>
             <span id="role-name">Cargando...</span>
           </h1>
-          <p class="role-description">Gestión de permisos del rol</p>
         </div>
       </div>
     </div>
@@ -31,7 +30,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     <div class="role-stats">
       <div class="stat-card">
         <span class="stat-number" id="total-permissions">0</span>
-        <span class="stat-label">Total Permisos</span>
+        <span class="stat-label">Permisos Totales</span>
       </div>
       <div class="stat-card">
         <span class="stat-number" id="assigned-permissions">0</span>
@@ -60,16 +59,9 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
         <div class="bulk-actions">
           <button type="button" class="bulk-btn" id="select-all-visible-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="9,11 12,14 22,4"></polyline>
-              <path d="M21,12v7a2,2 0 0,1 -2,2H5a2,2 0 0,1 -2,-2V5a2,2 0 0,1 2,-2h11"></path>
-            </svg>
-            Seleccionar visibles
+            Seleccionar todos
           </button>
           <button type="button" class="bulk-btn" id="deselect-all-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" width="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            </svg>
             Deseleccionar todos
           </button>
         </div>
@@ -101,18 +93,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     </div>
 
     <div class="actions-right">
-      <a href="<?= APP_URL ?>roles" class="btn-secondary">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 12H5"></path>
-          <path d="M12 19l-7-7 7-7"></path>
-        </svg>
-        Volver
-      </a>
-
       <button type="submit" id="save-permissions" class="btn-primary" disabled>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 5v14m-7-7h14" />
-        </svg>
+        <span class="plus-icon">+</span>
         Guardar Cambios
       </button>
     </div>

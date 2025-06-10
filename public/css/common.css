@@ -35,14 +35,15 @@
   --black: #000;
   --red-900: #e02424;
   --red-500: #ef4444;
-  --red-300: #fef2f2;
+  --red-50: #fef2f2;
   --green-400: #34c759;
-  --green-300: #d4f7e0;
+  --green-100: #d4f7e0;
   --yellow-400: #ff9500;
-  --yellow-300: #fffbeb;
+  --yellow-50: #fffbeb;
   --blue-500: #2563eb;
   --blue-400: #3b82f6;
-  --blue-300: #eff6ff;
+  --blue-200: #bfdbfe;
+  --blue-100: #eff6ff;
 
   /* Common shadows */
   --shadow-soft: 0 4px 6px -1px rgb(0 0 0 / 0.1),
@@ -250,7 +251,7 @@ button[type="submit"] {
 
 button[type="submit"]:hover {
   background: var(--gray-900);
-  box-shadow: var(--black-alpha-3);
+  box-shadow: 0 4px 12px var(--black-alpha-3);
 }
 
 button[type="reset"] {
@@ -311,7 +312,7 @@ svg {
 .error-input {
   border-radius: var(--rounded-md) !important;
   border: 1px solid var(--red-500) !important;
-  background: var(--red-300) !important;
+  background: var(--red-50) !important;
   color: var(--red-900) !important;
 }
 
@@ -338,7 +339,7 @@ input:-webkit-autofill {
 input.error-input:-webkit-autofill,
 input.error-input:-webkit-autofill:hover,
 input.error-input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 30px var(--red-300) inset !important;
+  -webkit-box-shadow: 0 0 0 30px var(--red-50) inset !important;
   -webkit-text-fill-color: var(--red-900) !important;
   border: 1px solid var(--red-500) !important;
 }
@@ -383,7 +384,7 @@ input.error-input:-webkit-autofill:focus {
 
 .btn-primary:hover:not(:disabled) {
   background: var(--gray-900);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px var(--black-alpha-3);
 }
 
 .btn-danger {
@@ -398,7 +399,7 @@ input.error-input:-webkit-autofill:focus {
 }
 
 .btn-retry {
-  background: var(--blue-300);
+  background: var(--blue-200);
   color: white;
 }
 
@@ -509,6 +510,12 @@ input.error-input:-webkit-autofill:focus {
   pointer-events: none;
 }
 
+
+.plus-icon {
+  font-weight: var(--font-weight-thin);
+  font-size: 1.5em;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
 
 .clear-button {
   position: absolute;
