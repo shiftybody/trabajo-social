@@ -1,11 +1,14 @@
 :root {
   /* Common text styles */
   --font-family: "Inter", console;
+  --font-size-tiny: 12px;
   --font-size-small: 14px;
+
   --font-size-large: 24px;
   --font-weight-thin: 300;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
+  --font-weight-semibold: 600;
   --font-weight-bold: 700;
   --line-height-small: 125%;
   --line-height-large: 150%;
@@ -586,7 +589,7 @@ td:not(.dt-empty):last-child {
   padding: 11px;
   height: inherit;
   align-items: center;
-  justify-content:flex-start;
+  justify-content: flex-start;
 }
 
 td.dt-empty {

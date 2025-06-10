@@ -4,7 +4,6 @@
       "id": "home",
       "name": "Inicio",
       "url": "home",
-      "permissionKey": "home.view",
       "section": "Principal"
     },
     {

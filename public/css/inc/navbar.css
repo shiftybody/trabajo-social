@@ -177,13 +177,12 @@
     gap: .5rem;
     flex-shrink: 0;
     border-radius: var(--rounded-md, 8px);
-    background: var(--gray-50);
   }
 
   a.active {
     background-color: var(--gray-300) !important;
     color: var(--gray-800) !important;
-    ;
+    box-shadow: var(--shadow-normal);
   }
 
   a.active svg {
@@ -201,6 +200,7 @@
   #sidebar-options a:hover {
     background-color: var(--gray-200);
     color: var(--gray-800);
+    box-shadow: var(--shadow-normal);
   }
 
   #sidebar-options a:hover svg {
@@ -408,18 +408,20 @@
     overflow-y: auto;
     max-height: calc(70vh - 100px);
     margin: 0 -1.5rem;
-    padding: 1.5rem;
+    margin-top: 1rem;
+    padding: 0 1.3rem 1.5rem 1.5rem;
   }
 
 
   .search-result-item {
     display: flex;
     align-items: center;
-    padding: 0.75rem 1.5rem;
+    padding: 1rem 1.5rem;
     color: var(--gray-700);
     text-decoration: none;
     transition: all 0.15s ease;
     gap: 0.75rem;
+    border-radius: var(--rounded-md);
     border-bottom: 1px solid var(--gray-300);
   }
 
@@ -428,14 +430,15 @@
   }
 
   .search-result-item:hover {
-    background: #f8f9fa;
+    background: var(--gray-100);
     color: var(--gray-900);
+    box-shadow: var(--shadow-normal);
   }
 
   .search-result-item:focus {
     outline: none;
-    background: #f3f4f6;
-    box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.2);
+    background: var(--gray-100);
+    box-shadow: var(--shadow-normal);
   }
 
   .search-result-icon {
@@ -460,22 +463,16 @@
     color: var(--gray-900);
   }
 
-  .search-result-section {
-    padding: 0.5rem 0;
-  }
-
-  .search-result-section:first-child {
-    padding-top: 0;
-  }
 
   .search-section-title {
-    font-size: 11px;
-    font-weight: 600;
+    font-size: var(--font-size-tiny);
+    font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
     color: var(--gray-500);
-    padding: 0.5rem 1.5rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--rounded-md);
     letter-spacing: 0.5px;
-    background: #f9fafb;
+    background: var(--gray-200);
     margin: 0.5rem 0;
   }
 
@@ -487,7 +484,7 @@
     text-align: center;
     color: var(--gray-500);
     font-size: 14px;
-    margin-top: 1.5rem;
+    padding-top: 1.5rem;
   }
 
   .search-result-badge {
@@ -515,11 +512,5 @@
     .search-results-list {
       max-height: calc(80vh - 80px);
       margin: 0 -1rem;
-    }
-
-    .search-result-item,
-    .search-section-title {
-      padding-left: 1rem;
-      padding-right: 1rem;
     }
   }

@@ -92,6 +92,10 @@
   height: 1.5rem;
 }
 
+.base-modal-close:hover svg {
+  stroke: var(--gray-800);
+}
+
 .base-modal-body {
   padding: 0 var(--modal-padding) var(--modal-padding) var(--modal-padding);
   overflow-y: auto;

@@ -29,31 +29,6 @@
       "permissionSlug": "permissions.view",
       "requires": ["roles.view"],
       "description": "Ver permisos requiere ver roles"
-    },
-    {
-      "permissionSlug": "reports.export",
-      "requires": ["reports.view"],
-      "description": "Exportar reportes requiere poder verlos"
-    },
-    {
-      "permissionSlug": "patients.edit",
-      "requires": ["patients.view"],
-      "description": "Editar pacientes requiere poder verlos"
-    },
-    {
-      "permissionSlug": "patients.delete",
-      "requires": ["patients.view"],
-      "description": "Eliminar pacientes requiere poder verlos"
-    },
-    {
-      "permissionSlug": "donations.approve",
-      "requires": ["donations.view"],
-      "description": "Aprobar donaciones requiere poder verlas"
-    },
-    {
-      "permissionSlug": "donations.reject",
-      "requires": ["donations.view"],
-      "description": "Rechazar donaciones requiere poder verlas"
     }
   ]
 }
