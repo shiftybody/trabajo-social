@@ -168,6 +168,12 @@
   transform: translateX(-50%);
   z-index: 1000;
   pointer-events: none;
+  display: flex;
+  flex-direction: column-reverse;
+  /* Los más nuevos aparecen abajo */
+  align-items: center;
+  gap: 8px;
+  /* Espacio entre toasts */
 }
 
 .toast {
@@ -175,8 +181,10 @@
   color: var(--white);
   border-radius: 24px;
   padding: 12px 20px;
-  margin: 8px;
-  display: inline-flex;
+  margin: 0;
+  /* Remover margin ya que usamos gap */
+  display: flex;
+  /* Cambiar de inline-flex a flex */
   align-items: center;
   gap: var(--spacing-small);
   font-size: 14px;
@@ -186,11 +194,34 @@
   opacity: 0;
   transform: translateY(8px);
   transition: var(--transition-md);
+  width: fit-content;
+  /* Ancho ajustado al contenido */
+  max-width: 400px;
+  /* Máximo ancho */
+  white-space: nowrap;
+  /* Evitar salto de línea en textos cortos */
 }
 
 .toast.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Responsive para toast */
+@media (max-width: 640px) {
+  .toast-container {
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    transform: none;
+  }
+
+  .toast {
+    width: 100%;
+    max-width: none;
+    white-space: normal;
+    /* Permitir salto de línea en móviles */
+  }
 }
 
 .toast-icon {
