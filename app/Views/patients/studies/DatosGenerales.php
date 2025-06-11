@@ -6,6 +6,13 @@
   <link rel="stylesheet" href="../../public/css/views/estudios.css">
   <title>Formulario de Datos Generales</title>
 </head>
+<form id="form-datos-generales" action="<?= APP_URL ?>api/pacientes/crear.php" method="POST">
+  <label>Folio</label>
+  <input type="text" name="folio" required>
+  <!-- Otros campos... -->
+  <button type="submit">Guardar</button>
+</form>
+
 <body>
   <h2>Datos Generales</h2>
   <form>
@@ -152,3 +159,42 @@
   </form>
 </body>
 </html>
+
+<script>
+  document.getElementById('form-datos-generales').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('<?= APP_URL ?>api/pacientes/store', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        // Guardar ID o folio para los siguientes formularios si es necesario
+        const folio = result.folio || result.data?.id;
+
+        alert('Datos generales guardados correctamente.');
+
+        // Cargar el siguiente formulario (por ejemplo: Alimentacion.php)
+        fetch(`<?= APP_URL ?>pacientes/estudio/Alimentacion.php?folio=${folio}`)
+          .then(res => res.text())
+          .then(html => {
+            document.getElementById('formulario-container').innerHTML = html;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+
+      } else {
+        alert('Ocurrió un error al guardar: ' + (result.message || 'Verifique los datos.'));
+      }
+    } catch (error) {
+      console.error('Error al enviar el formulario:', error);
+      alert('Error de conexión o del servidor.');
+    }
+  });
+</script>

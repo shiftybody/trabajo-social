@@ -48,6 +48,11 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
     $router->get('/roles/:id/permissions', 'RoleController@permissionsView')->name('roles.permissions');
   });
 
+  // PATIENTS
+  $router->group(['middleware' => 'Permission:patients.view'], function ($router) {
+    $router->get('/patients', 'PatientController@indexView')->name('patients.index');
+  });
+
   //ERRORS
   $router->get('/error/401', function () {
     http_response_code(401);

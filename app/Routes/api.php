@@ -21,9 +21,11 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
     $router->get('/users', 'UserController@getAllUsers');
   });
 
-  $router->group(array('middleware' => 'Permission:users.manage|users.create|users.edit|roles.view'), function ($router) {
+  $router->group(array('middleware' => 'Permission:users.manage|users.create|users.edit|roles.view | patients.view |patients.create' ), function ($router) {
     $router->get('/roles', 'RoleController@getAllRoles');
     $router->post('/users', 'UserController@store');
+    $router->post('/pacientes', 'PatientController@store');
+
   });
 
   $router->group(array('middleware' => 'Permission:users.manage|users.edit'), function ($router) {
@@ -57,6 +59,23 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   $router->group(['middleware' => 'Permission:roles.delete'], function ($router) {
     $router->delete('/roles/:id', 'RoleController@delete');
   });
+
+  // PACIENTES
+  $router->group(['middleware' => 'Permission:patients.manage|patients.view'], function ($router) {
+    $router->get('/pacientes', 'PatientController@getAll');
+  });
+
+  $router->group(['middleware' => 'Permission:patients.create'], function ($router) {
+    $router->post('/pacientes', 'PatientController@store');
+  });
+
+  $router->get('/pacientes/:id', 'PatientController@getById');
+  $router->post('/pacientes/:id', 'PatientController@update');
+  $router->delete('/pacientes/:id', 'PatientController@delete');
+
+  $router->group(['middleware' => 'Permission:patients.create'], function ($router) {
+  $router->post('/pacientes/store', 'PatientController@store');
+});
 
   // PERMISOS (para cargar en formularios)
   $router->group(['middleware' => 'Permission:roles.edit|roles.create'], function ($router) {

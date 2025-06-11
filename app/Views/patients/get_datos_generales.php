@@ -17,7 +17,7 @@ $sql = "SELECT
           fecha_nacimiento,
           lugar_nacimiento,
           fecha_ingreso_inb
-        FROM datosgenerales";
+        FROM paciente";
 
 $result = $conn->query($sql);
 
