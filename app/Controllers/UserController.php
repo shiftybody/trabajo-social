@@ -183,7 +183,7 @@ class UserController
 
     $resultado = $this->userModel->validarDatos($datos, $validar);
 
-    // Si hay errores de validación, devolverlos
+    // Si hay errores de formato, devolverlos
     if (!empty($resultado['errores'])) {
       return Response::json([
         'status' => 'error',
@@ -344,45 +344,6 @@ class UserController
       ]);
     }
   }
-
-  /**
-   * [08-Jun-2025 18:06:14 America/Mexico_City] Array
-(
-    [usuario_id] => 29
-    [change_password] => 0
-    [nombre] => David Emmanuel
-    [apellidoPaterno] => Cano
-    [apellidoMaterno] => Cabrera
-    [telefono] => 4181293358
-    [correo] => shiftybody@gmail.com
-    [rol] => 1
-    [username] => shiftybody
-    [estado] => 1
-    [password] => 
-    [password2] => 
-)
-
-[08-Jun-2025 18:06:14 America/Mexico_City] stdClass Object
-(
-    [usuario_id] => 29
-    [usuario_nombre] => David Emmanuel
-    [usuario_apellido_paterno] => Cano
-    [usuario_apellido_materno] => Cabrera
-    [usuario_telefono] => 4181293358
-    [usuario_email] => shiftybody@gmail.com
-    [usuario_usuario] => shiftybody
-    [usuario_password_hash] => $2a$10$KLbQQt5gBJmMf9NjVhD/0e3SDad7QdwPFPU.J6Y7Bpwp7f1mJEVgu
-    [usuario_avatar] => David_Emmanuel_68434a3242206.png
-    [usuario_rol] => 1
-    [usuario_estado] => 1
-    [usuario_fecha_creacion] => 2025-06-06 15:06:10
-    [usuario_ultima_modificacion] => 2025-06-08 18:03:42
-    [usuario_ultimo_acceso] => 2025-06-08 17:41:44
-    [rol_nombre] => Administrador
-)
-
-   * 
-   *  */
 
   public function update(Request $request)
   {

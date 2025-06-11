@@ -16,36 +16,39 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
     return Response::redirect(APP_URL . 'home');
   });
 
-  $router->get('/home', 'homeController@indexView')->name('home');
+  $router->get('/home', 'homeController@indexView');
 
   // USERS
   $router->group(['middleware' => 'Permission:users.manage|users.view'], function ($router) {
-    $router->get('/users', 'UserController@indexView')->name('users.index');
+    $router->get('/users', 'UserController@indexView');
   });
 
   $router->group(['middleware' => 'Permission:users.manage|users.edit'], function ($router) {
-    $router->get('/users/edit/:id', 'UserController@editView')->name('users.edit');
+    $router->get('/users/edit/:id', 'UserController@editView');
   });
 
   $router->group(['middleware' => 'Permission:users.manage|users.create'], function ($router) {
-    $router->get('/users/create', 'UserController@createView')->name('users.create');
+    $router->get('/users/create', 'UserController@createView');
   });
 
-  $router->get('/profile', 'UserController@profile')->name('profile');
+  $router->get('/profile', 'UserController@profile');
 
 
   // ROLES - Requiere permisos de gestión de roles
   $router->group(['middleware' => 'Permission:roles.view'], function ($router) {
-    $router->get('/roles', 'RoleController@indexView')->name('roles.index');
+    $router->get('/roles', 'RoleController@indexView');
   });
 
   $router->group(['middleware' => 'Permission:roles.create'], function ($router) {
-    $router->get('/roles/create', 'RoleController@createView')->name('roles.create');
+    $router->get('/roles/create', 'RoleController@createView');
   });
 
   $router->group(['middleware' => 'Permission:permissions.view'], function ($router) {
-    $router->get('/roles/:id/permissions', 'RoleController@permissionsView')->name('roles.permissions');
+    $router->get('/roles/:id/permissions', 'RoleController@permissionsView');
   });
+
+  // SETTINGS
+  $router->get('/settings', 'SettingController@indexView');
 
   //ERRORS
   $router->get('/error/401', function () {

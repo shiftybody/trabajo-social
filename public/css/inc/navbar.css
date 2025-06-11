@@ -183,10 +183,13 @@
     background-color: var(--gray-300) !important;
     color: var(--gray-800) !important;
     box-shadow: var(--shadow-normal);
+    font-weight: var(--font-weight-semibold);
+    transition: 0.2s ease-in-out;
   }
 
   a.active svg {
     stroke: var(--gray-800) !important;
+    stroke-width: 2;
   }
 
 

@@ -1,0 +1,117 @@
+/* Estilos para el layout Master-Detail de Configuración */
+.config-container {
+  display: flex;
+  gap: 2rem;
+  /* Espacio entre la navegación y el contenido */
+  margin-top: 1.5rem;
+  align-items: flex-start;
+  /* Alinea los items al inicio */
+}
+
+/* --- Barra de Navegación Izquierda (Master) --- */
+.config-nav {
+  flex: 0 0 240px;
+  /* Base de 240px, no crece, no se encoge */
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.config-nav-group h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  /* gris-500 */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.config-nav-group:first-child h3 {
+  margin-top: 0;
+}
+
+.config-nav a {
+  display: block;
+  padding: 0.6rem 0.75rem;
+  text-decoration: none;
+  color: #374151;
+  /* gris-700 */
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.config-nav a:hover {
+  background-color: #f3f4f6;
+  /* gris-100 */
+}
+
+.config-nav a.active {
+  background-color: #e9eafc;
+  /* Color de acento suave */
+  color: #4f46e5;
+  /* Color de acento principal */
+  font-weight: 600;
+}
+
+
+/* --- Área de Contenido Derecha (Detail) --- */
+.config-content {
+  flex: 1;
+  /* Ocupa el resto del espacio */
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.config-content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.config-content-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Reutilizamos el estilo de botón que ya tienes */
+.config-content-header .btn-primary {
+  /* Tu estilo de .btn-primary existente funcionará aquí */
+}
+
+/* Estilos para la tabla de criterios (puedes reutilizar tu clase de tabla) */
+.criteria-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.criteria-table th,
+.criteria-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.criteria-table th {
+  background-color: #f9fafb;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.criteria-table .actions {
+  display: flex;
+  gap: 0.5rem;
+}
