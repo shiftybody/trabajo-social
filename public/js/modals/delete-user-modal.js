@@ -1,7 +1,4 @@
 /** Modal de confirmacion para eliminar usuario */
-/**
- * Modal de confirmación para eliminar usuario
- */
 async function eliminarUsuario(usuarioId, nombreUsuario) {
 
   const confirmacion = await CustomDialog.confirm(
@@ -12,8 +9,6 @@ async function eliminarUsuario(usuarioId, nombreUsuario) {
   );
 
   if (confirmacion) {
-    showTableLoading("Eliminando usuario...");
-
     try {
       const response = await fetch(`${APP_URL}api/users/${usuarioId}`, {
         method: "DELETE",

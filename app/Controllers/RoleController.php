@@ -430,8 +430,6 @@ class RoleController
         }
       }
 
-      error_log("Rutas filtradas: " . json_encode($rutasFiltradas));
-
       return Response::json([
         'status' => 'success',
         'data' => [

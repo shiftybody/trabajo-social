@@ -14,7 +14,7 @@ use \Exception;
  * - ejecutar consultas SQL.
  * - limpiar cadenas,
  * - validar datos y 
- * - encripta & desencriptar contraseñas.
+ * - encripta & desencriptar cadenas.
  */
 class mainModel
 {

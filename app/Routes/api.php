@@ -6,7 +6,6 @@ $router = new Router();
 
 // Rutas públicas
 $router->post('/login', 'LoginController@login');
-// LOGOUT
 $router->post('/logout', 'LoginController@logout');
 
 // Rutas protegidas (requieren autenticación)
@@ -52,6 +51,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   $router->group(['middleware' => 'Permission:roles.create'], function ($router) {
     $router->post('/roles', 'RoleController@store');
   });
+
   // PERMISOS
   $router->group(['middleware' => 'Permission:permissions.view'], function ($router) {
     $router->get('/roles/:id/permissions', 'RoleController@getRolePermissions');
@@ -65,6 +65,83 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
 
   $router->group(['middleware' => 'Permission:roles.delete'], function ($router) {
     $router->delete('/roles/:id', 'RoleController@delete');
+  });
+
+  // ==================== CONFIGURACIÓN ====================
+
+  // Rutas principales de configuración
+  $router->group(['middleware' => 'Permission:settings.view|settings.manage'], function ($router) {
+    // Obtener contenido de secciones
+    $router->get('/settings/section', 'SettingController@getSection');
+
+    // Estadísticas generales
+    $router->get('/settings/stats', 'SettingController@getConfigStats');
+
+    // Datos auxiliares
+    $router->get('/settings/categories', 'SettingController@getAllCategories');
+    $router->get('/settings/subcategories', 'SettingController@getSubcategoriesByCategory');
+  });
+
+  // ==================== NIVELES SOCIOECONÓMICOS ====================
+
+  $router->group(['middleware' => 'Permission:settings.levels.view|settings.manage'], function ($router) {
+    $router->get('/settings/levels', 'SettingController@getAllLevels');
+    $router->get('/settings/levels/:id', 'SettingController@getLevelById');
+  });
+
+  $router->group(['middleware' => 'Permission:settings.levels.create|settings.manage'], function ($router) {
+    $router->post('/settings/levels', 'SettingController@createLevel');
+  });
+
+  $router->group(['middleware' => 'Permission:settings.levels.edit|settings.manage'], function ($router) {
+    $router->put('/settings/levels/:id', 'SettingController@updateLevel');
+    $router->post('/settings/levels/:id/status', 'SettingController@toggleLevelStatus');
+  });
+
+  $router->group(['middleware' => 'Permission:settings.levels.delete|settings.manage'], function ($router) {
+    $router->delete('/settings/levels/:id', 'SettingController@deleteLevel');
+  });
+
+  // ==================== REGLAS DE APORTACIÓN ====================
+
+  $router->group(['middleware' => 'Permission:settings.rules.view|settings.manage'], function ($router) {
+    $router->get('/settings/rules', 'SettingController@getAllRules');
+    $router->get('/settings/rules/:id', 'SettingController@getRuleById');
+    $router->get('/settings/rules/matrix', 'SettingController@getContributionMatrix');
+  });
+
+  $router->group(['middleware' => 'Permission:settings.rules.create|settings.manage'], function ($router) {
+    $router->post('/settings/rules', 'SettingController@createRule');
+    $router->post('/settings/rules/bulk', 'SettingController@createBulkRules');
+  });
+
+  $router->group(['middleware' => 'Permission:settings.rules.edit|settings.manage'], function ($router) {
+    $router->put('/settings/rules/:id', 'SettingController@updateRule');
+    $router->post('/settings/rules/:id/status', 'SettingController@toggleRuleStatus');
+  });
+
+  $router->group(['middleware' => 'Permission:settings.rules.delete|settings.manage'], function ($router) {
+    $router->delete('/settings/rules/:id', 'SettingController@deleteRule');
+  });
+
+  // ==================== CRITERIOS DE PUNTUACIÓN ====================
+
+  $router->group(['middleware' => 'Permission:settings.criteria.view|settings.manage'], function ($router) {
+    $router->get('/settings/criteria', 'SettingController@getAllCriteria');
+    $router->get('/settings/criteria/:id', 'SettingController@getCriteriaById');
+  });
+
+  $router->group(['middleware' => 'Permission:settings.criteria.create|settings.manage'], function ($router) {
+    $router->post('/settings/criteria', 'SettingController@createCriteria');
+  });
+
+  $router->group(['middleware' => 'Permission:settings.criteria.edit|settings.manage'], function ($router) {
+    $router->put('/settings/criteria/:id', 'SettingController@updateCriteria');
+    $router->post('/settings/criteria/:id/status', 'SettingController@toggleCriteriaStatus');
+  });
+
+  $router->group(['middleware' => 'Permission:settings.criteria.delete|settings.manage'], function ($router) {
+    $router->delete('/settings/criteria/:id', 'SettingController@deleteCriteria');
   });
 });
 

@@ -80,9 +80,7 @@ const FormHandlers = {
   // Manejo para reset de contraseña
   resetPasswordForm: {
     async onSuccess(responseData) {
-      // Cerrar modal actual
       await closeCurrentModal();
-
       await CustomDialog.success(
         "Contraseña Actualizada",
         responseData.message || "La contraseña se actualizó correctamente"
@@ -93,40 +91,38 @@ const FormHandlers = {
   // Manejo para cambio de estado
   changeStatusForm: {
     async onSuccess(responseData) {
-      // Cerrar modal actual
       await closeCurrentModal();
-
       await CustomDialog.success(
         "Estado Actualizado",
         responseData.message ||
           "El estado del usuario se actualizó correctamente"
       );
-
-      table.clear().draw();
-      loadData();
+      if (typeof table !== 'undefined') {
+        table.clear().draw();
+      }
+      if (typeof loadData === 'function') {
+        loadData();
+      }
     },
   },
 
   createRoleForm: {
     async onSuccess(responseData) {
-      // Cerrar modal actual
       await closeCurrentModal();
-
       await CustomDialog.success(
         "Rol Creado",
         responseData.message || "El rol se creó correctamente"
       );
-
-      loadData();
+      if (typeof loadData === 'function') {
+        loadData();
+      }
     },
   },
 
   // Manejo para formularios de creación
   createUserForm: {
     async onSuccess(responseData) {
-      // Cerrar modal actual
       await closeCurrentModal();
-
       await CustomDialog.success(
         "Usuario Creado",
         responseData.message || "El usuario se creó correctamente"
@@ -139,7 +135,6 @@ const FormHandlers = {
   editUserForm: {
     async onSuccess(responseData) {
       await closeCurrentModal();
-
       if (responseData.redirect) {
         await CustomDialog.success(
           "Usuario Actualizado",
@@ -154,15 +149,68 @@ const FormHandlers = {
       }
     },
   },
+
+  // ==================== MANEJADORES DE CONFIGURACIÓN ====================
+
+  // Manejo para formularios de niveles socioeconómicos
+  levelForm: {
+    async onSuccess(responseData) {
+      await closeCurrentModal();
+      await CustomDialog.success(
+        "Nivel Guardado",
+        responseData.message || "El nivel socioeconómico se guardó correctamente"
+      );
+      // Recargar la sección actual en ConfigManager
+      if (typeof configManager !== 'undefined' && configManager) {
+        configManager.loadSection(configManager.currentSection);
+      }
+    },
+  },
+
+  // Manejo para formularios de reglas de aportación
+  ruleForm: {
+    async onSuccess(responseData) {
+      await closeCurrentModal();
+      await CustomDialog.success(
+        "Regla Guardada",
+        responseData.message || "La regla de aportación se guardó correctamente"
+      );
+      // Recargar la sección actual en ConfigManager
+      if (typeof configManager !== 'undefined' && configManager) {
+        configManager.loadSection(configManager.currentSection);
+      }
+    },
+  },
+
+  // Manejo para formularios de criterios
+  criteriaForm: {
+    async onSuccess(responseData) {
+      await closeCurrentModal();
+      await CustomDialog.success(
+        "Criterio Guardado",
+        responseData.message || "El criterio se guardó correctamente"
+      );
+      // Recargar la sección actual en ConfigManager
+      if (typeof configManager !== 'undefined' && configManager) {
+        configManager.loadSection(configManager.currentSection);
+      }
+    },
+  },
 };
 
 // ==================== IDENTIFICACIÓN DE TIPO DE FORMULARIO ====================
 function getFormType(form) {
+  // Formularios existentes
   if (form.id === "resetPasswordForm") return "resetPasswordForm";
   if (form.id === "changeStatusForm") return "changeStatusForm";
   if (form.id === "createRoleForm") return "createRoleForm";
   if (form.id === "editUserForm") return "editUserForm";
   if (form.id === "createUserForm") return "createUserForm";
+  if (form.id === "levelForm") return "levelForm";
+  if (form.id === "ruleForm") return "ruleForm";
+  if (form.id === "criteriaForm") return "criteriaForm";
+
+  return null;
 }
 
 // ==================== VALIDACIÓN DE FORMULARIOS ====================
@@ -182,6 +230,16 @@ function validateForm(form, data) {
     .querySelectorAll(".error-input")
     .forEach((errorInput) => errorInput.classList.remove("error-input"));
 
+  // Validaciones específicas por tipo de formulario
+  if (formType === "levelForm") {
+    return validateLevelForm(form, data);
+  } else if (formType === "ruleForm") {
+    return validateRuleForm(form, data);
+  } else if (formType === "criteriaForm") {
+    return validateCriteriaForm(form, data);
+  }
+
+  // Validación genérica para otros formularios
   data.forEach((value, key) => {
     const input = form.querySelector(`[name="${key}"]`);
     if (!input || input.type === "hidden") return;
@@ -246,6 +304,152 @@ function validateForm(form, data) {
   return isValid;
 }
 
+// ==================== VALIDACIONES ESPECÍFICAS DE CONFIGURACIÓN ====================
+
+function validateLevelForm(form, data) {
+  let isValid = true;
+
+  // Validar nombre del nivel
+  const nivel = data.get('nivel');
+  const nivelInput = form.querySelector('[name="nivel"]');
+  if (!nivel || nivel.trim() === '') {
+    showError(nivelInput, 'El nombre del nivel es requerido');
+    isValid = false;
+  } else if (nivel.length > 20) {
+    showError(nivelInput, 'El nombre del nivel no debe exceder 20 caracteres');
+    isValid = false;
+  }
+
+  // Validar puntaje mínimo
+  const puntaje = data.get('puntaje_minimo');
+  const puntajeInput = form.querySelector('[name="puntaje_minimo"]');
+  if (!puntaje || puntaje.trim() === '') {
+    showError(puntajeInput, 'El puntaje mínimo es requerido');
+    isValid = false;
+  } else if (isNaN(puntaje) || parseInt(puntaje) < 0) {
+    showError(puntajeInput, 'El puntaje mínimo debe ser un número válido mayor o igual a 0');
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+function validateRuleForm(form, data) {
+  let isValid = true;
+
+  // Validar nivel socioeconómico
+  const nivelId = data.get('nivel_socioeconomico_id');
+  const nivelSelect = form.querySelector('[name="nivel_socioeconomico_id"]');
+  if (!nivelId || nivelId === '') {
+    showError(nivelSelect, 'Debe seleccionar un nivel socioeconómico');
+    isValid = false;
+  }
+
+  // Validar edad
+  const edad = data.get('edad');
+  const edadInput = form.querySelector('[name="edad"]');
+  if (!edad || edad.trim() === '') {
+    showError(edadInput, 'La edad es requerida');
+    isValid = false;
+  } else if (isNaN(edad) || parseInt(edad) < 0 || parseInt(edad) > 150) {
+    showError(edadInput, 'La edad debe ser un número válido entre 0 y 150');
+    isValid = false;
+  }
+
+  // Validar periodicidad
+  const periodicidad = data.get('periodicidad');
+  const periodicidadSelect = form.querySelector('[name="periodicidad"]');
+  if (!periodicidad || periodicidad === '') {
+    showError(periodicidadSelect, 'Debe seleccionar una periodicidad');
+    isValid = false;
+  }
+
+  // Validar monto de aportación
+  const monto = data.get('monto_aportacion');
+  const montoInput = form.querySelector('[name="monto_aportacion"]');
+  if (!monto || monto.trim() === '') {
+    showError(montoInput, 'El monto de aportación es requerido');
+    isValid = false;
+  } else if (isNaN(monto) || parseFloat(monto) < 0) {
+    showError(montoInput, 'El monto debe ser un número válido mayor o igual a 0');
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+function validateCriteriaForm(form, data) {
+  let isValid = true;
+
+  // Validar nombre del criterio
+  const nombre = data.get('nombre');
+  const nombreInput = form.querySelector('[name="nombre"]');
+  if (!nombre || nombre.trim() === '') {
+    showError(nombreInput, 'El nombre del criterio es requerido');
+    isValid = false;
+  } else if (nombre.length > 100) {
+    showError(nombreInput, 'El nombre del criterio no debe exceder 100 caracteres');
+    isValid = false;
+  }
+
+  // Validar tipo de criterio
+  const tipoCriterio = data.get('tipo_criterio');
+  const tipoSelect = form.querySelector('[name="tipo_criterio"]');
+  if (!tipoCriterio || tipoCriterio === '') {
+    showError(tipoSelect, 'Debe seleccionar un tipo de criterio');
+    isValid = false;
+  }
+
+  // Validar puntaje
+  const puntaje = data.get('puntaje');
+  const puntajeInput = form.querySelector('[name="puntaje"]');
+  if (!puntaje || puntaje.trim() === '') {
+    showError(puntajeInput, 'El puntaje es requerido');
+    isValid = false;
+  } else if (isNaN(puntaje) || parseInt(puntaje) < 0) {
+    showError(puntajeInput, 'El puntaje debe ser un número válido mayor o igual a 0');
+    isValid = false;
+  }
+
+  // Validaciones específicas según tipo de criterio
+  if (tipoCriterio === 'rango_numerico') {
+    const valorMinimo = data.get('valor_minimo');
+    const valorMinimoInput = form.querySelector('[name="valor_minimo"]');
+    if (!valorMinimo || valorMinimo.trim() === '') {
+      showError(valorMinimoInput, 'El valor mínimo es requerido para rangos numéricos');
+      isValid = false;
+    } else if (isNaN(valorMinimo)) {
+      showError(valorMinimoInput, 'El valor mínimo debe ser un número válido');
+      isValid = false;
+    }
+
+    const valorMaximo = data.get('valor_maximo');
+    if (valorMaximo && valorMaximo.trim() !== '') {
+      if (isNaN(valorMaximo)) {
+        const valorMaximoInput = form.querySelector('[name="valor_maximo"]');
+        showError(valorMaximoInput, 'El valor máximo debe ser un número válido');
+        isValid = false;
+      } else if (parseFloat(valorMaximo) <= parseFloat(valorMinimo)) {
+        const valorMaximoInput = form.querySelector('[name="valor_maximo"]');
+        showError(valorMaximoInput, 'El valor máximo debe ser mayor al valor mínimo');
+        isValid = false;
+      }
+    }
+  } else if (tipoCriterio === 'valor_especifico') {
+    const valorTexto = data.get('valor_texto');
+    const valorTextoInput = form.querySelector('[name="valor_texto"]');
+    if (!valorTexto || valorTexto.trim() === '') {
+      showError(valorTextoInput, 'El valor de texto es requerido');
+      isValid = false;
+    } else if (valorTexto.length > 100) {
+      showError(valorTextoInput, 'El valor de texto no debe exceder 100 caracteres');
+      isValid = false;
+    }
+  }
+
+  return isValid;
+}
+
 // ==================== MANEJO DE RESPUESTAS ====================
 async function handleSuccessResponse(form, responseData) {
   const formType = getFormType(form);
@@ -284,9 +488,7 @@ function handleErrorResponse(form, responseData) {
     });
 
     if (generalErrors.length > 0) {
-      // cerrar modal actual
       closeCurrentModal();
-
       CustomDialog.error("Error del Sistema", generalErrors.join("\n"));
     }
 
@@ -298,9 +500,7 @@ function handleErrorResponse(form, responseData) {
       );
     }
   } else {
-    // cerrar modal actual
     closeCurrentModal();
-
     CustomDialog.error(
       "Error",
       responseData.message || "Ocurrió un error al procesar la solicitud"
@@ -360,7 +560,6 @@ function attachAjaxFormHandlers(formulario) {
         handleErrorResponse(this, responseData);
       }
     } catch (error) {
-      // cerrar modal actual
       closeCurrentModal();
       CustomDialog.error(
         "Error de Conexión",
@@ -451,7 +650,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// ==================== EXPORTAR FUNCIONES ==================
 window.attachAjaxFormHandlers = attachAjaxFormHandlers;
 window.showError = showError;
 window.clearError = clearError;

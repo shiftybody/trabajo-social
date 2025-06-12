@@ -1,9 +1,9 @@
 .role-table-container {
+  margin-top: 1.25rem;
   padding: 2rem 24rem;
 }
 
 /* media query 1200px */
-
 @media (max-width: 1200px) {
   .role-table-container {
     padding: 2rem 2rem;

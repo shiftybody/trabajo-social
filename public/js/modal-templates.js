@@ -213,7 +213,7 @@ const MODAL_TEMPLATES = {
       </div>
     </div>
   `,
-  
+
   // Template para editar rol
   createRole: `
     <form novalidate id="createRoleForm" class="base-modal-form form-ajax" method="POST">
@@ -238,6 +238,205 @@ const MODAL_TEMPLATES = {
         <button type="submit" class="btn-primary">Crear Rol</button>
       </div>
     </form>
+  `,
+
+  // ==================== TEMPLATES DE CONFIGURACIÓN ====================
+
+  // Template para formulario de nivel socioeconómico
+  levelForm: `
+    <form novalidate id="levelForm" class="base-modal-form form-ajax config-form" method="POST">
+      <div class="form-group">
+        <label for="nivel" class="field-label">Nombre del Nivel *</label>
+        <input type="text" id="nivel" name="nivel" class="input-reset" 
+               value="{{nivel}}" placeholder="ej: Alto, Medio, Bajo" 
+               maxlength="20" required>
+        <small class="field-help">Máximo 20 caracteres</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="puntaje_minimo" class="field-label">Puntaje Mínimo *</label>
+        <input type="number" id="puntaje_minimo" name="puntaje_minimo" class="input-reset"
+               value="{{puntaje_minimo}}" min="0" required>
+        <small class="field-help">Puntaje mínimo requerido para este nivel</small>
+      </div>
+      
+      <div class="base-modal-actions">
+        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">{{submitText}}</button>
+      </div>
+    </form>
+  `,
+
+  // Template para formulario de regla de aportación
+  ruleForm: `
+    <form novalidate id="ruleForm" class="base-modal-form form-ajax config-form" method="POST">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nivel_socioeconomico_id" class="field-label">Nivel Socioeconómico *</label>
+          <select id="nivel_socioeconomico_id" name="nivel_socioeconomico_id" class="input-reset" required>
+            <option value="">Seleccione un nivel...</option>
+            {{levelsOptions}}
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="edad" class="field-label">Edad del Paciente *</label>
+          <input type="number" id="edad" name="edad" class="input-reset"
+                 value="{{edad}}" min="0" max="150" required>
+          <small class="field-help">Edad en años</small>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="periodicidad" class="field-label">Periodicidad *</label>
+          <select id="periodicidad" name="periodicidad" class="input-reset" required>
+            <option value="">Seleccione periodicidad...</option>
+            <option value="mensual" {{periodicidadMensualSelected}}>Mensual</option>
+            <option value="semestral" {{periodicidadSemestralSelected}}>Semestral</option>
+            <option value="anual" {{periodicidadAnualSelected}}>Anual</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="monto_aportacion" class="field-label">Monto de Aportación *</label>
+          <div class="input-group">
+            <span class="input-group-text">$</span>
+            <input type="number" id="monto_aportacion" name="monto_aportacion" class="input-reset"
+                   value="{{monto_aportacion}}" min="0" step="0.01" required>
+          </div>
+        </div>
+      </div>
+      
+      <div class="base-modal-actions">
+        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">{{submitText}}</button>
+      </div>
+    </form>
+  `,
+
+  // Template para formulario de criterio
+  criteriaForm: `
+    <form novalidate id="criteriaForm" class="base-modal-form form-ajax config-form" method="POST">
+      <input type="hidden" name="subcategoria_id" value="{{subcategoria_id}}">
+      
+      <div class="form-group">
+        <label for="nombre" class="field-label">Nombre del Criterio *</label>
+        <input type="text" id="nombre" name="nombre" class="input-reset"
+               value="{{nombre}}" placeholder="ej: Casa propia, 3-4 integrantes" 
+               maxlength="100" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="tipo_criterio" class="field-label">Tipo de Criterio *</label>
+        <select id="tipo_criterio" name="tipo_criterio" class="input-reset" required 
+                onchange="window.configManager?.toggleCriteriaFields?.(this.value)">
+          <option value="">Seleccione tipo...</option>
+          <option value="rango_numerico" {{tipoRangoSelected}}>Rango Numérico</option>
+          <option value="valor_especifico" {{tipoValorSelected}}>Valor Específico</option>
+          <option value="booleano" {{tipoBoolSelected}}>Booleano (Sí/No)</option>
+        </select>
+      </div>
+      
+      <!-- Campos para rango numérico -->
+      <div id="rango-fields" class="criteria-type-fields" style="display: {{rangoDisplay}}">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="valor_minimo" class="field-label">Valor Mínimo *</label>
+            <input type="number" id="valor_minimo" name="valor_minimo" class="input-reset"
+                   value="{{valor_minimo}}">
+          </div>
+          <div class="form-group">
+            <label for="valor_maximo" class="field-label">Valor Máximo</label>
+            <input type="number" id="valor_maximo" name="valor_maximo" class="input-reset"
+                   value="{{valor_maximo}}">
+            <small class="field-help">Dejar vacío para "sin límite"</small>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Campos para valor específico -->
+      <div id="texto-fields" class="criteria-type-fields" style="display: {{textoDisplay}}">
+        <div class="form-group">
+          <label for="valor_texto" class="field-label">Valor de Texto *</label>
+          <input type="text" id="valor_texto" name="valor_texto" class="input-reset"
+                 value="{{valor_texto}}" placeholder="ej: Casa, Departamento, Sí, No" 
+                 maxlength="100">
+        </div>
+      </div>
+      
+      <!-- Campos para booleano -->
+      <div id="booleano-fields" class="criteria-type-fields" style="display: {{booleanoDisplay}}">
+        <div class="form-group">
+          <label for="valor_booleano" class="field-label">Valor Booleano *</label>
+          <select id="valor_booleano" name="valor_booleano" class="input-reset">
+            <option value="1" {{boolTrueSelected}}>Sí (Verdadero)</option>
+            <option value="0" {{boolFalseSelected}}>No (Falso)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="puntaje" class="field-label">Puntaje *</label>
+        <input type="number" id="puntaje" name="puntaje" class="input-reset"
+               value="{{puntaje}}" min="0" required>
+        <small class="field-help">Puntos que otorga este criterio</small>
+      </div>
+      
+      <div class="base-modal-actions">
+        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">{{submitText}}</button>
+      </div>
+    </form>
+  `,
+
+  // Template para matriz de reglas
+  rulesMatrix: `
+    <div class="matrix-modal-content">
+      <div class="matrix-controls">
+        <div class="form-group">
+          <label for="matrix-level-select" class="field-label">Seleccionar Nivel:</label>
+          <select id="matrix-level-select" class="input-reset" 
+                  onchange="window.configManager?.loadMatrixForLevel?.(this.value)">
+            {{levelsOptions}}
+          </select>
+        </div>
+      </div>
+      
+      <div id="matrix-container">
+        <div class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Cargando matriz...</p>
+        </div>
+      </div>
+      
+      <div class="matrix-actions">
+        <button class="btn-primary" onclick="window.configManager?.openBulkRulesModal?.()">
+          <i class="icon-plus"></i> Crear Reglas en Lote
+        </button>
+      </div>
+    </div>
+  `,
+
+  // Template para acciones grupales
+  groupActions: `
+    <div class="group-actions">
+      <p>Seleccione una acción para gestionar los criterios de esta sección:</p>
+      <div class="actions-grid">
+        <button class="action-btn" onclick="window.configManager?.showBulkCriteriaForm?.()">
+          <i class="icon-plus"></i>
+          Crear Múltiples Criterios
+        </button>
+        <button class="action-btn" onclick="window.configManager?.exportCriteria?.()">
+          <i class="icon-download"></i>
+          Exportar Criterios
+        </button>
+        <button class="action-btn" onclick="window.configManager?.importCriteria?.()">
+          <i class="icon-upload"></i>
+          Importar Criterios
+        </button>
+      </div>
+    </div>
   `,
 };
 
@@ -325,8 +524,7 @@ const TEMPLATE_HELPERS = {
   processCreateRole: (roles) => {
     const baseRolesOptions = roles
       .map(
-        (role) =>
-          `<option value="${role.rol_id}">${role.rol_nombre}</option>`
+        (role) => `<option value="${role.rol_id}">${role.rol_nombre}</option>`
       )
       .join("");
 
@@ -461,6 +659,87 @@ const TEMPLATE_HELPERS = {
     };
   },
 
+  // ==================== HELPERS DE CONFIGURACIÓN ====================
+
+  // Procesa datos para formulario de nivel
+  processLevelFormData: (level = null) => {
+    return {
+      nivel: level?.nivel || "",
+      puntaje_minimo: level?.puntaje_minimo || "",
+      submitText: level ? "Actualizar Nivel" : "Crear Nivel",
+    };
+  },
+
+  // Procesa datos para formulario de regla
+  processRuleFormData: (rule = null, levels = []) => {
+    const levelsOptions = levels
+      .map(
+        (level) => `
+        <option value="${level.id}" ${
+          rule?.nivel_socioeconomico_id == level.id ? "selected" : ""
+        }>
+          ${level.nivel} (≥ ${level.puntaje_minimo} pts)
+        </option>
+      `
+      )
+      .join("");
+
+    return {
+      levelsOptions,
+      edad: rule?.edad || "",
+      periodicidadMensualSelected:
+        rule?.periodicidad === "mensual" ? "selected" : "",
+      periodicidadSemestralSelected:
+        rule?.periodicidad === "semestral" ? "selected" : "",
+      periodicidadAnualSelected:
+        rule?.periodicidad === "anual" ? "selected" : "",
+      monto_aportacion: rule?.monto_aportacion || "",
+      submitText: rule ? "Actualizar Regla" : "Crear Regla",
+    };
+  },
+
+  // Procesa datos para formulario de criterio
+  processCriteriaFormData: (criteria = null, subcategoryId = null) => {
+    const isRango = criteria?.tipo_criterio === "rango_numerico";
+    const isTexto = criteria?.tipo_criterio === "valor_especifico";
+    const isBooleano = criteria?.tipo_criterio === "booleano";
+
+    return {
+      subcategoria_id: subcategoryId || criteria?.subcategoria_id || "",
+      nombre: criteria?.nombre || "",
+      tipoRangoSelected: isRango ? "selected" : "",
+      tipoValorSelected: isTexto ? "selected" : "",
+      tipoBoolSelected: isBooleano ? "selected" : "",
+      rangoDisplay: isRango ? "block" : "none",
+      textoDisplay: isTexto ? "block" : "none",
+      booleanoDisplay: isBooleano ? "block" : "none",
+      valor_minimo: criteria?.valor_minimo || "",
+      valor_maximo: criteria?.valor_maximo || "",
+      valor_texto: criteria?.valor_texto || "",
+      boolTrueSelected: criteria?.valor_booleano == 1 ? "selected" : "",
+      boolFalseSelected: criteria?.valor_booleano == 0 ? "selected" : "",
+      puntaje: criteria?.puntaje || "",
+      submitText: criteria ? "Actualizar Criterio" : "Crear Criterio",
+    };
+  },
+
+  // Procesa datos para matriz de reglas
+  processRulesMatrixData: (levels = []) => {
+    const levelsOptions = levels
+      .map(
+        (level) => `
+        <option value="${level.id}">
+          ${level.nivel} (≥ ${level.puntaje_minimo} pts)
+        </option>
+      `
+      )
+      .join("");
+
+    return {
+      levelsOptions,
+    };
+  },
+
   // Genera grid de permisos
   generatePermissionsGrid: (permissions, assignedIds) => {
     if (!permissions || permissions.length === 0) {
@@ -529,7 +808,7 @@ const TEMPLATE_HELPERS = {
       donations: "Donaciones",
       stats: "Estadísticas",
       settings: "Configuración",
-      profile: "Perfil"
+      profile: "Perfil",
     };
 
     return (
@@ -543,6 +822,57 @@ const TEMPLATE_HELPERS = {
     return fields
       .map((field) => TEMPLATE_GENERATORS.generateFormField(field))
       .join("");
+  },
+
+  // ==================== UTILIDADES DE FORMATEO ====================
+
+  // Formatea valores monetarios
+  formatMoney: (amount) => {
+    return new Intl.NumberFormat("es-MX", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  },
+
+  // Formatea periodicidad
+  formatPeriodicity: (periodicity) => {
+    const periodicities = {
+      mensual: "Mensual",
+      semestral: "Semestral",
+      anual: "Anual",
+    };
+    return periodicities[periodicity] || periodicity;
+  },
+
+  // Formatea tipo de criterio
+  formatCriteriaType: (type) => {
+    const types = {
+      rango_numerico: "Rango Numérico",
+      valor_especifico: "Valor Específico",
+      booleano: "Booleano",
+    };
+    return types[type] || type;
+  },
+
+  // Formatea valores de criterio según su tipo
+  formatCriteriaValues: (criterion) => {
+    switch (criterion.tipo_criterio) {
+      case "rango_numerico":
+        if (criterion.valor_maximo) {
+          return `${criterion.valor_minimo} - ${criterion.valor_maximo}`;
+        } else {
+          return `${criterion.valor_minimo}+`;
+        }
+
+      case "valor_especifico":
+        return `"${criterion.valor_texto}"`;
+
+      case "booleano":
+        return criterion.valor_booleano ? "Sí" : "No";
+
+      default:
+        return "Sin valor";
+    }
   },
 };
 

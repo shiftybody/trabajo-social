@@ -9,7 +9,7 @@ $router = new Router();
 $router->get('/login', 'LoginController@indexView');
 
 // Rutas protegidas (requieren autenticación)
-$router->group(['middleware' => 'Auth'], function ($router) {;
+$router->group(['middleware' => 'Auth'], function ($router) {
 
   // Ruta por defecto
   $router->get('/', function () {
@@ -33,8 +33,7 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
 
   $router->get('/profile', 'UserController@profile');
 
-
-  // ROLES - Requiere permisos de gestión de roles
+  // ROLES
   $router->group(['middleware' => 'Permission:roles.view'], function ($router) {
     $router->get('/roles', 'RoleController@indexView');
   });
@@ -47,10 +46,12 @@ $router->group(['middleware' => 'Auth'], function ($router) {;
     $router->get('/roles/:id/permissions', 'RoleController@permissionsView');
   });
 
-  // SETTINGS
-  $router->get('/settings', 'SettingController@indexView');
+  // CONFIGURACIÓN
+  $router->group(['middleware' => 'Permission:settings.view|settings.manage'], function ($router) {
+    $router->get('/settings', 'SettingController@indexView');
+  });
 
-  //ERRORS
+  // ERRORS
   $router->get('/error/401', function () {
     http_response_code(401);
     ob_start();
