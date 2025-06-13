@@ -395,5 +395,4 @@ modalSearchInput.addEventListener("keydown", (e) => {
 
 // Cargar configuración al cargar la página
 document.addEventListener("DOMContentLoaded", loadRoutesConfig);
-
 window.openInputSearch = openInstantSearch;

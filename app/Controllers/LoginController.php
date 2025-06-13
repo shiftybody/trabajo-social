@@ -12,6 +12,10 @@ class LoginController
   public function indexView()
   {
 
+    if (Auth::check()) {
+      return Response::redirect(APP_URL . 'home');
+    }
+
     // Preparar mensaje de sesión expirada
     if (isset($_GET['expired_session']) && $_GET['expired_session'] == '1') {
       $status_message = 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';
