@@ -4,12 +4,11 @@
   window.APP_URL = '<?= defined('APP_URL') ? APP_URL : '' ?>';
 </script>
 
-<script src="<?= APP_URL . 'public/js/modules/form-manager.js' ?>"></script>
-<script src="<?= APP_URL . 'public/js/modules/form-validator.js' ?>"></script>
+<script src="<?= APP_URL . 'public/js/modules/form-manager.js' ?>" type="module"></script>
+<script src="<?= APP_URL . 'public/js/modules/form-validator.js' ?>" type="module"></script>
 
 <?php if (strpos($_SERVER['REQUEST_URI'], 'login') !== false) : ?>
   <script src="<?= APP_URL . 'public/js/validations/auth-validations.js' ?>"></script>
-  <script src="<?= APP_URL . 'public/js/login.js' ?>"></script>
 <?php else : ?>
   <script src="<?= APP_URL . "public/js/navbar.js" ?>"></script>
   <script src="<?= APP_URL . 'public/js/main.js' ?>"></script>
