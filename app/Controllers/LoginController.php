@@ -6,9 +6,23 @@ use App\Core\Auth;
 use App\Core\Request;
 use App\Core\Response;
 
+/**
+ * Controlador para manejar el inicio de sesión de usuarios.
+ * Este controlador proporciona métodos para
+ * - Mostrar la vista de inicio de sesión
+ * - Procesar el inicio de sesión
+ * - Manejar el cierre de sesión
+ */
 class LoginController
 {
 
+  /**
+   * Muestra la vista de inicio de sesión.
+   * Si el usuario ya está autenticado, redirige a la página de inicio.
+   * Si la sesión ha expirado o la cuenta está deshabilitada, muestra un mensaje correspondiente.
+   *
+   * @return Response
+   */
   public function indexView()
   {
 
@@ -34,6 +48,13 @@ class LoginController
     return Response::html($content);
   }
 
+  /**
+   * Procesa el inicio de sesión del usuario.
+   * Valida las credenciales y maneja el estado de autenticación.
+   * Responde con un mensaje JSON indicando el resultado del inicio de sesión.
+   *
+   * @return Response 
+   */
   public function login()
   {
 
@@ -71,6 +92,14 @@ class LoginController
     exit;
   }
 
+  /**
+   * Maneja el cierre de sesión del usuario.
+   * Desautentica al usuario y redirige a la página de inicio de sesión.
+   * Si la sesión expiró, añade un parámetro a la URL de redirección.
+   *
+   * @param Request $request
+   * @return Response
+   */
   public function logout(Request $request)
   {
     Auth::logout();
