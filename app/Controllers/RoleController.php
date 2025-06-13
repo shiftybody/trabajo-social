@@ -9,6 +9,14 @@ use App\Models\roleModel;
 use App\Models\permissionModel;
 use Exception;
 
+/**
+ * Controlador para manejar roles y permisos
+ * - Maneja la visualización de roles y permisos
+ * - Permite crear, editar, eliminar roles
+ * - Asignar permisos a roles
+ * - Obtener roles y permisos
+ * - Proporciona rutas de navegación basadas en permisos
+ */
 class RoleController
 {
 
@@ -21,6 +29,9 @@ class RoleController
     $this->permissionModel = new permissionModel();
   }
 
+  /**
+   * Muestra la vista de roles.
+   */
   public function indexView()
   {
     ob_start();
@@ -30,32 +41,13 @@ class RoleController
     return Response::html($contenido);
   }
 
-  public function createView()
-  {
-    ob_start();
-    $titulo = 'Crear Rol';
-    include APP_ROOT . 'app/Views/roles/create.php';
-    $contenido = ob_get_clean();
-    return Response::html($contenido);
-  }
 
-  public function editView(Request $request)
-  {
-
-    $id = $request->param('id');
-    $rol = $this->roleModel->obtenerRolPorId($id);
-
-    if (!$rol) {
-      return Response::redirect(APP_URL . 'error/404');
-    }
-
-    ob_start();
-    $titulo = 'Editar Rol';
-    include APP_ROOT . 'app/Views/roles/edit.php';
-    $contenido = ob_get_clean();
-    return Response::html($contenido);
-  }
-
+  /**
+   * Muestra la vista de permisos de un rol específico.
+   * 
+   * @param Request $request
+   * @return Response
+   */
   public function permissionsView(Request $request)
   {
     $id = $request->param('id');
@@ -74,6 +66,11 @@ class RoleController
     return Response::html($contenido);
   }
 
+  /**
+   * Obtiene todos los roles y sus usuarios asignados.
+   * 
+   * @return Response
+   */
   public function getAllRoles()
   {
     try {
@@ -97,6 +94,11 @@ class RoleController
     }
   }
 
+  /**
+   * Obtiene todos los permisos disponibles.
+   * 
+   * @return Response
+   */
   public function getAllPermissions()
   {
     $permisos = $this->permissionModel->obtenerTodosPermisos();
@@ -106,6 +108,12 @@ class RoleController
     ]);
   }
 
+  /**
+   * Obtiene un rol por su ID y sus usuarios asignados.
+   * 
+   * @param Request $request
+   * @return Response
+   */
   public function getRoleById(Request $request)
   {
     try {
@@ -144,6 +152,12 @@ class RoleController
     }
   }
 
+  /**
+   * Crea un nuevo rol.
+   * 
+   * @param Request $request
+   * @return Response
+   */
   public function store(Request $request)
   {
     try {
@@ -215,6 +229,12 @@ class RoleController
     }
   }
 
+  /**
+   * Actualiza un rol existente.
+   * 
+   * @param Request $request
+   * @return Response
+   */
   public function update(Request $request)
   {
     try {
@@ -280,6 +300,12 @@ class RoleController
     }
   }
 
+  /**
+   * Elimina un rol.
+   * 
+   * @param Request $request
+   * @return Response
+   */
   public function delete(Request $request)
   {
     try {
@@ -335,7 +361,10 @@ class RoleController
   }
 
   /**
-   * API: Obtiene los permisos de un rol
+   * Obtiene los permisos asignados a un rol específico.
+   * 
+   * @param Request $request
+   * @return Response
    */
   public function getRolePermissions(Request $request)
   {
@@ -358,7 +387,10 @@ class RoleController
   }
 
   /**
-   * API: Actualiza los permisos de un rol
+   * Actualiza los permisos de un rol específico.
+   * 
+   * @param Request $request
+   * @return Response
    */
   public function updateRolePermissions(Request $request)
   {
@@ -402,7 +434,9 @@ class RoleController
   }
 
   /**
-   * API: Obtiene las rutas de navegación filtradas por permisos del usuario
+   * Obtiene las rutas de navegación basadas en los permisos del usuario actual.
+   * 
+   * @return Response
    */
   public function getNavigationRoutes()
   {

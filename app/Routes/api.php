@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * En este archivo se definen las rutas de la API.
+ * Las rutas están organizadas en grupos según su funcionalidad y permisos requeridos.
+ */
+
 use App\Core\Router;
 
 $router = new Router();

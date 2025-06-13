@@ -5,9 +5,19 @@ namespace App\Models;
 use PDO;
 use App\Models\mainModel;
 
+/**
+ * Modelo para manejar la información de los usuarios.
+ * Proporciona métodos para interactuar con la base de datos y realizar operaciones CRUD.
+ */
 class userModel extends mainModel
 {
 
+    /**
+     * Registra un nuevo usuario en la base de datos
+     * 
+     * @param array $data Datos del usuario a registrar
+     * @return bool True si el registro fue exitoso, false en caso contrario
+     */
     public function registrarUsuario($data)
     {
         try {
@@ -127,7 +137,7 @@ class userModel extends mainModel
     }
 
     /**
-     * Obtiene todos los usuarios con información de roles
+     * Obtiene todos los usuarios con información de su rol
      * 
      * @return array Lista de usuarios
      */

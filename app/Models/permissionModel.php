@@ -6,11 +6,11 @@ use PDO;
 use App\Models\mainModel;
 
 /**
- * Modelo de permisos simplificado
- * 
- * Maneja los permisos siguiendo la estructura:
- * rol -> rol_permiso -> permiso
- * usuario -> usuario_permiso -> permiso
+ * Modelo de permisos
+ * Maneja los permisos en la base de datos.
+ * Proporciona métodos para crear, actualizar, eliminar y obtener permisos.
+ * Incluye validaciones para comprobar si un rol tiene un permiso específico,
+ * asignar permisos a roles y obtener permisos de usuarios.
  */
 class permissionModel extends mainModel
 {

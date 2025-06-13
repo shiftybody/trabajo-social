@@ -46,13 +46,13 @@
   /* gris-700 */
   border-radius: var(--rounded-md);
   font-size: 0.9rem;
-  transition: background-color 0.2s ease-in-out;
+  transition: 0.2s ease-in-out;
   margin-bottom: .25rem;
 }
 
 .config-nav a:hover {
+  box-shadow: var(--shadow-normal);
   background-color: #f3f4f6;
-  /* gris-100 */
 }
 
 .config-nav a.active {

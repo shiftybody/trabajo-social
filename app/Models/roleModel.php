@@ -5,6 +5,11 @@ namespace App\Models;
 use PDO;
 use App\Models\mainModel;
 
+/**
+ * Modelo para manejar operaciones relacionadas con roles en la base de datos.
+ * Proporciona métodos para crear, actualizar, eliminar y obtener roles.
+ * Incluye validaciones para evitar duplicados y manejar estados de roles.
+ */
 class roleModel extends mainModel
 {
   /**

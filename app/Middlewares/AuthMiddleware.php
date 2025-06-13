@@ -6,9 +6,19 @@ use App\Core\Auth;
 use App\Core\Request;
 use App\Core\Response;
 
+/**
+ * Middleware para manejar la autenticación y el estado del usuario
+ * - Verifica si el usuario está autenticado
+ * - Verifica si el usuario está activo
+ * - Refresca la sesión del usuario si es necesario
+ */
 class AuthMiddleware
 {
 
+    /**
+     * Rutas que no requieren refresco de sesión
+     * Estas rutas no deben actualizar la actividad de la sesión del usuario
+     */
     private $rutasNoRefresh = [
         '/session/status',
         '/session/refresh'

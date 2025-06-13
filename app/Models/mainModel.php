@@ -234,22 +234,17 @@ class mainModel
    */
   protected function hashearContraseña($password)
   {
-    // Mejorar la generación del salt
-    // En PHP 5.1 no tenemos funciones modernas, así que hacemos lo mejor posible
+
     $salt = '';
     $saltChars = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    $saltLength = 22; // Longitud recomendada para Blowfish
+    $saltLength = 22; 
 
     for ($i = 0; $i < $saltLength; $i++) {
       $salt .= $saltChars[mt_rand(0, strlen($saltChars) - 1)];
     }
 
-    // Configuración para usar Blowfish (más seguro que DES por defecto)
-    // El formato $2a$ es para Blowfish con costo de 10 iteraciones
     $saltFormateado = '$2a$10$' . $salt;
 
-    // Aplicar la constante TOKEN_SECRET_KEY si es necesario
-    // (ajusta esto según cómo utilizas TOKEN_SECRET_KEY)
     if (defined('TOKEN_SECRET_KEY') && strpos(TOKEN_SECRET_KEY, '%s') !== false) {
       $saltFormateado = sprintf(TOKEN_SECRET_KEY, $salt);
     }

@@ -19,5 +19,10 @@ ini_set('file_uploads', 1);
 ini_set('max_execution_time', 30);
 ini_set('memory_limit', '1024M');
 
+// crear directorio de logs si no existe
+if (!is_dir(APP_ROOT . 'logs')) {
+  mkdir(APP_ROOT . 'logs', 0755, true);
+}
+
 ini_set('log_errors', 1);
 ini_set('error_log', APP_ROOT . 'logs/php_errors.log');

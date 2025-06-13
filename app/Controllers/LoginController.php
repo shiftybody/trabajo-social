@@ -113,6 +113,7 @@ class LoginController
       $loginUrl .= '?expired_session=1';
     }
 
+    // Devolver respuesta JSON o redirección según el tipo de solicitud
     if ($request->expectsJson()) {
       return Response::json([
         'status' => 'success',

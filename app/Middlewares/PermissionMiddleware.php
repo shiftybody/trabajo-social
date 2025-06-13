@@ -7,20 +7,25 @@ use App\Core\Request;
 use App\Core\Response;
 
 /**
- * Middleware de Permisos Flexible
+ * Middleware de Permisos
  */
 class PermissionMiddleware
 {
-    private $permissions; // Cambiado a un array para manejar múltiples permisos
+    private $permissions;
 
     public function __construct($permissions)
     {
-        // Dividir la cadena de permisos en un array, si hay múltiples
-        // Permitimos separadores como ',' o '|' para mayor flexibilidad
+        // Dividir la cadena de permisos en un array
         $this->permissions = explode('|', str_replace(' ', '', $permissions));
-        // Si solo se pasó un permiso, el array tendrá un solo elemento
     }
 
+    /**
+     * Maneja la verificación de permisos del usuario
+     *
+     * @param Request $request
+     * @param callable $next
+     * @return Response
+     */
     public function handle(Request $request, callable $next)
     {
 
@@ -32,6 +37,7 @@ class PermissionMiddleware
             return Response::redirect(APP_URL . 'login');
         }
 
+        // Verificar si el usuario tiene permisos
         if (!empty($this->permissions)) {
             $hasAnyPermission = false;
             foreach ($this->permissions as $permission) {

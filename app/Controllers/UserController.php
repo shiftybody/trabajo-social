@@ -8,6 +8,17 @@ use App\Models\userModel;
 use App\Utils\ImageUtils;
 use Exception;
 
+/**
+ * Controlador para manejar las operaciones relacionadas con los usuarios.
+ * Este controlador proporciona métodos para:
+ * - Mostrar vistas de usuarios ( listar, crear y editar )
+ * - Obtener todos los usuarios
+ * - Obtener un usuario por ID
+ * - Registrar un nuevo usuario
+ * - Actualizar un usuario existente
+ * - Resetear la contraseña de un usuario
+ * - Cambiar el estado de un usuario (activo/inactivo)
+ */
 class UserController
 {
 
@@ -18,6 +29,11 @@ class UserController
     $this->userModel = new userModel();
   }
 
+  /**
+   * Muestra la vista de lista de usuarios.
+   *
+   * @return Response
+   */
   public function indexView()
   {
 
@@ -29,6 +45,11 @@ class UserController
     return Response::html($contenido);
   }
 
+  /**
+   * Muestra la vista para crear un nuevo usuario.
+   *
+   * @return Response
+   */
   public function createView()
   {
 
@@ -40,6 +61,12 @@ class UserController
     return Response::html($contenido);
   }
 
+  /**
+   * Muestra la vista para editar un usuario existente.
+   *
+   * @param Request $request
+   * @return Response
+   */
   public function editView(Request $request)
   {
     ob_start();
@@ -52,6 +79,11 @@ class UserController
     return Response::html($contenido);
   }
 
+  /**
+   * Obtiene todos los usuarios y devuelve una respuesta JSON.
+   *
+   * @return Response
+   */
   public function getAllUsers()
   {
     try {
@@ -68,6 +100,9 @@ class UserController
     }
   }
 
+  /**
+   * Obtiene un usuario por su ID y devuelve una respuesta JSON.
+   */
   public function getUserById(Request $request)
   {
     try {
@@ -122,6 +157,12 @@ class UserController
     }
   }
 
+  /**
+   * Registra un nuevo usuario con los datos proporcionados en la solicitud.
+   *
+   * @param Request $request
+   * @return Response
+   */
   public function store(Request $request)
   {
 
@@ -345,6 +386,12 @@ class UserController
     }
   }
 
+  /**
+   * Actualiza un usuario existente con los datos proporcionados en la solicitud.
+   *
+   * @param Request $request
+   * @return Response
+   */
   public function update(Request $request)
   {
     $id = $request->param('id');
@@ -613,6 +660,12 @@ class UserController
     }
   }
 
+  /**
+   * Resetea la contraseña de un usuario.
+   *
+   * @param Request $request
+   * @return Response
+   */
   public function resetPassword(Request $request)
   {
     $id = $request->param('id');
@@ -675,6 +728,12 @@ class UserController
     }
   }
 
+  /**
+   * Cambia el estado de un usuario (activo/inactivo).
+   * 
+   * @param Request $request
+   * @return Response
+   */
   public function changeStatus(Request $request)
   {
     $id = $request->param('id');
@@ -752,6 +811,12 @@ class UserController
     }
   }
 
+  /**
+   * Elimina un usuario por su ID.
+   * 
+   * @param Request $request
+   * @return Response
+   */
   public function delete(Request $request)
   {
 

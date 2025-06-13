@@ -1,5 +1,8 @@
 <?php
 
+// Este archivo define las rutas de la aplicación web.
+// Las rutas están organizadas en grupos según su funcionalidad y permisos requeridos.
+
 use App\Core\Router;
 use App\Core\Response;
 
@@ -38,9 +41,6 @@ $router->group(['middleware' => 'Auth'], function ($router) {
     $router->get('/roles', 'RoleController@indexView');
   });
 
-  $router->group(['middleware' => 'Permission:roles.create'], function ($router) {
-    $router->get('/roles/create', 'RoleController@createView');
-  });
 
   $router->group(['middleware' => 'Permission:permissions.view'], function ($router) {
     $router->get('/roles/:id/permissions', 'RoleController@permissionsView');

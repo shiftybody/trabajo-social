@@ -1,5 +1,10 @@
 <?php
 
+/**
+ *  En este archivo se definen las constantes de configuración 
+ *  y se cargan las variables de entorno desde el archivo .env
+ */
+
 $dotenv =  new Dotenv\Dotenv(__DIR__ . '/../');
 $dotenv->load();
 
