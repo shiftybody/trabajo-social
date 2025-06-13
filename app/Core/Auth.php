@@ -7,9 +7,7 @@ use App\Models\permissionModel;
 
 /**
  * Clase Auth simplificada
- * 
- * Sistema de autenticación y autorización RBAC simplificado
- * siguiendo la estructura de BD: usuario -> rol -> permisos
+ * Sistema de autenticación y autorización RBAC.
  */
 class Auth
 {
@@ -330,6 +328,7 @@ class Auth
 
   /**
    * Obtiene todos los permisos del usuario
+   * @return array Un array asociativo con los permisos del usuario.
    */
   public static function permissions()
   {
@@ -361,7 +360,6 @@ class Auth
             self::createRememberCookie($user);
           }
           self::$userModel->actualizarUltimoAcceso($user->usuario_id);
-          error_log("Login exitoso para: " . $identifier);
           return true; // Autenticación exitosa
         case 'inactive':
           error_log("Intento de login de usuario inactivo: " . $identifier);

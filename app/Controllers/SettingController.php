@@ -54,7 +54,6 @@ class SettingController
    */
   public function getSection(Request $request)
   {
-    error_log("getSection called with request: " . json_encode($request->all()));
     try {
       $section = $request->get('section');
 

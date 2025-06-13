@@ -9,10 +9,6 @@
   <section id="section-container">
     <img src="<?= APP_URL ?>public/images/logotipo-neurodesarrollo.png" alt="logitipo neurodesarrollo" id="logotipo">
 
-    <!-- Cambios principales: 
-         - Cambié 'ajax-form' por 'form-ajax' (para consistencia con nuestro sistema)
-         - Mantuve 'novalidate' 
-         - El ID y action se mantienen igual -->
     <form novalidate action="<?= APP_URL ?>api/login" method="POST" id="login-form" class="form-ajax">
 
       <div id="login-info">
@@ -29,18 +25,15 @@
       <div id="login-inputs">
         <div id="username-input">
           <label for="username">Correo o Nombre de Usuario</label>
-          <!-- Agregué class="input" para consistencia con el resto del sistema -->
           <input type="text" name="username" id="username" class="input"
             placeholder="usuario@dominio.com" autocomplete="username" maxlength="100">
         </div>
 
         <div id="password-input">
           <label for="password">Contraseña</label>
-          <!-- Agregué class="input" y autocomplete para mejor UX -->
           <input type="password" name="password" id="password" class="input"
             placeholder="•••••••••••" autocomplete="current-password" maxlength="50">
 
-          <!-- Cambié de <a> a <button> para mejor accesibilidad -->
           <a type="button" class="password-toggle" id="password-toggle">
             <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
