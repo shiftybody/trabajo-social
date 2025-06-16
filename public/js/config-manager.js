@@ -1,11 +1,11 @@
 /**
  * Gestor de Configuración Simplificado
- * 
+ *
  * Maneja únicamente las 3 funcionalidades principales:
  * - Niveles socioeconómicos
- * - Reglas de aportación  
+ * - Reglas de aportación
  * - Criterios básicos
- * 
+ *
  * Utiliza DataTables para todas las tablas
  */
 class ConfigManager {
@@ -27,7 +27,7 @@ class ConfigManager {
     try {
       this.cacheElements();
       this.bindNavigationEvents();
-      this.loadLevelsData(); // Cargar niveles al inicio
+      this.loadLevelsData();
       this.loadInitialSection();
     } catch (error) {
       console.error("Error initializing ConfigManager:", error);
@@ -52,9 +52,9 @@ class ConfigManager {
     try {
       const response = await fetch(`${this.baseUrl}/levels`);
       const data = await response.json();
-      
-      if (data.status === 'success') {
-        this.levelsData = data.data.filter(level => level.estado == 1); // Solo activos
+
+      if (data.status === "success") {
+        this.levelsData = data.data.filter((level) => level.estado == 1); // Solo activos
       }
     } catch (error) {
       console.error("Error loading levels data:", error);
@@ -110,28 +110,28 @@ class ConfigManager {
 
       // Solo manejar las 3 secciones principales
       switch (section) {
-        case 'niveles-socioeconomicos':
+        case "niveles-socioeconomicos":
           await this.loadLevelsSection();
           break;
-        case 'reglas-aportacion':
+        case "reglas-aportacion":
           await this.loadRulesSection();
           break;
-        case 'criterios':
-        case 'protocolo':
-        case 'gasto-traslado':
-        case 'tiempo-traslado':
-        case 'integrantes':
-        case 'hijos':
-        case 'tipo-familia':
-        case 'tipo-vivienda':
-        case 'tenencia':
-        case 'zona':
-        case 'materiales':
-        case 'servicios':
+        case "criterios":
+        case "protocolo":
+        case "gasto-traslado":
+        case "tiempo-traslado":
+        case "integrantes":
+        case "hijos":
+        case "tipo-familia":
+        case "tipo-vivienda":
+        case "tenencia":
+        case "zona":
+        case "materiales":
+        case "servicios":
           await this.loadCriteriaSection();
           break;
         default:
-          this.showError('Sección no implementada');
+          this.showError("Sección no implementada");
       }
     } catch (error) {
       console.error("Error loading section:", error);
@@ -147,7 +147,6 @@ class ConfigManager {
    * Carga la sección de niveles socioeconómicos
    */
   async loadLevelsSection() {
-    
     const html = `
       <div class="config-content-header">
         <h2>Niveles Socioeconómicos</h2>
@@ -178,35 +177,35 @@ class ConfigManager {
    * Inicializa la tabla de niveles con DataTables
    */
   async initializeLevelsTable() {
-    this.currentTable = new DataTable('#levels-table', {
+    this.currentTable = new DataTable("#levels-table", {
       ajax: {
         url: `${this.baseUrl}/levels`,
-        dataSrc: 'data'
+        dataSrc: "data",
       },
       columns: [
-        { data: 'nivel', className: 'dt-body-center' },
-        { 
-          data: 'puntaje_minimo',
-          className: 'dt-body-center'
+        { data: "nivel", className: "dt-body-center" },
+        {
+          data: "puntaje_minimo",
+          className: "dt-body-center",
         },
-        { 
-          data: 'estado',
-          className: 'dt-body-center',
-          render: function(data, type, row) {
-            const checked = data == 1 ? 'checked' : '';
+        {
+          data: "estado",
+          className: "dt-body-center",
+          render: function (data, type, row) {
+            const checked = data == 1 ? "checked" : "";
             return `
               <label class="toggle-switch">
                 <input type="checkbox" ${checked} onchange="configManager.toggleLevelStatus(${row.id}, this.checked)">
                 <span class="toggle-slider"></span>
               </label>
             `;
-          }
+          },
         },
-        { 
+        {
           data: null,
-          className: 'dt-body-center',
+          className: "dt-body-center",
           orderable: false,
-          render: function(data, type, row) {
+          render: function (data, type, row) {
             return `
               <button type="button" class="editar" onclick="configManager.editLevel(${row.id})" title="Editar Nivel">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
@@ -226,27 +225,28 @@ class ConfigManager {
                 </svg>
               </button>
             `;
-          }
-        }
+          },
+        },
       ],
+      order: [[1, "asc"]], // Ordenar por nivel ascendente
       paging: false,
       info: false,
       language: {
-        "zeroRecords": "No se encontraron niveles",
-        "emptyTable": "Aún no hay niveles, crea uno nuevo",
-        "processing": '<div class="table-spinner"></div>Procesando...'
+        zeroRecords: "No se encontraron niveles",
+        emptyTable: "Aún no hay niveles, crea uno nuevo",
+        processing: '<div class="table-spinner"></div>Procesando...',
       },
       drawCallback: () => {
         // Aplicar clases de estado
-        document.querySelectorAll('td').forEach(td => {
-          if (td.textContent === 'Inactivo') {
-            td.classList.add('inactivo');
+        document.querySelectorAll("td").forEach((td) => {
+          if (td.textContent === "Inactivo") {
+            td.classList.add("inactivo");
           }
-          if (td.textContent === 'Activo') {
-            td.classList.add('activo');
+          if (td.textContent === "Activo") {
+            td.classList.add("activo");
           }
         });
-      }
+      },
     });
   }
 
@@ -257,9 +257,9 @@ class ConfigManager {
    */
   async loadRulesSection() {
     // Generar opciones de niveles
-    const levelOptions = this.levelsData.map(level => 
-      `<option value="${level.id}">${level.nivel}</option>`
-    ).join('');
+    const levelOptions = this.levelsData
+      .map((level) => `<option value="${level.id}">${level.nivel}</option>`)
+      .join("");
 
     const html = `
       <div class="config-content-header">
@@ -305,58 +305,60 @@ class ConfigManager {
    * Inicializa la tabla de reglas con DataTables
    */
   async initializeRulesTable() {
-    this.currentTable = new DataTable('#rules-table', {
+    this.currentTable = new DataTable("#rules-table", {
       ajax: {
         url: `${this.baseUrl}/rules`,
-        dataSrc: 'data',
-        data: function(d) {
+        dataSrc: "data",
+        data: function (d) {
           // Agregar filtro de nivel si está seleccionado
-          const levelFilter = document.getElementById('levelFilter');
+          const levelFilter = document.getElementById("levelFilter");
           if (levelFilter && levelFilter.value) {
             d.nivel_id = levelFilter.value;
           }
-        }
+        },
       },
       columns: [
-        { data: 'nivel_nombre' },
-        { 
-          data: 'edad',
-          className: 'dt-body-center',
-          render: function(data) {
+        { data: "nivel_nombre" },
+        {
+          data: "edad",
+          className: "dt-body-center",
+          render: function (data) {
             return `<span class="age-badge">${data} años</span>`;
-          }
+          },
         },
-        { 
-          data: 'periodicidad',
-          render: function(data) {
+        {
+          data: "periodicidad",
+          render: function (data) {
             return `<span class="periodicity-badge periodicity-${data}">${data}</span>`;
-          }
+          },
         },
-        { 
-          data: 'monto_aportacion',
-          className: 'dt-body-center',
-          render: function(data) {
-            return `<strong>$${parseFloat(data).toLocaleString('es-MX')}</strong>`;
-          }
+        {
+          data: "monto_aportacion",
+          className: "dt-body-center",
+          render: function (data) {
+            return `<strong>$${parseFloat(data).toLocaleString(
+              "es-MX"
+            )}</strong>`;
+          },
         },
-        { 
-          data: 'estado',
-          className: 'dt-body-center',
-          render: function(data, type, row) {
-            const checked = data == 1 ? 'checked' : '';
+        {
+          data: "estado",
+          className: "dt-body-center",
+          render: function (data, type, row) {
+            const checked = data == 1 ? "checked" : "";
             return `
               <label class="toggle-switch">
                 <input type="checkbox" ${checked} onchange="configManager.toggleRuleStatus(${row.id}, this.checked)">
                 <span class="toggle-slider"></span>
               </label>
             `;
-          }
+          },
         },
-        { 
+        {
           data: null,
-          className: 'dt-body-center',
+          className: "dt-body-center",
           orderable: false,
-          render: function(data, type, row) {
+          render: function (data, type, row) {
             return `
               <button type="button" class="editar" onclick="configManager.editRule(${row.id})" title="Editar Regla">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
@@ -376,16 +378,16 @@ class ConfigManager {
                 </svg>
               </button>
             `;
-          }
-        }
+          },
+        },
       ],
       paging: false,
       info: false,
       language: {
-        "zeroRecords": "No se encontraron reglas para el nivel seleccionado",
-        "emptyTable": "Seleccione un nivel para ver las reglas de aportación",
-        "processing": '<div class="table-spinner"></div>Procesando...'
-      }
+        zeroRecords: "No se encontraron reglas para el nivel seleccionado",
+        emptyTable: "Seleccione un nivel para ver las reglas de aportación",
+        processing: '<div class="table-spinner"></div>Procesando...',
+      },
     });
 
     // Configurar filtro por nivel
@@ -396,10 +398,10 @@ class ConfigManager {
    * Configura el filtro por nivel para reglas
    */
   setupLevelFilter() {
-    const levelFilter = document.getElementById('levelFilter');
+    const levelFilter = document.getElementById("levelFilter");
     if (!levelFilter) return;
 
-    levelFilter.addEventListener('change', () => {
+    levelFilter.addEventListener("change", () => {
       if (this.currentTable) {
         this.currentTable.ajax.reload();
       }
@@ -444,45 +446,48 @@ class ConfigManager {
    * Inicializa la tabla de criterios con DataTables
    */
   async initializeCriteriaTable() {
-    this.currentTable = new DataTable('#criteria-table', {
+    this.currentTable = new DataTable("#criteria-table", {
       ajax: {
         url: `${this.baseUrl}/criteria`,
-        dataSrc: 'data'
+        dataSrc: "data",
       },
       columns: [
-        { data: 'criterio' },
-        { data: 'categoria_nombre' },
-        { 
-          data: 'tipo',
-          render: function(data) {
-            return `<span class="type-badge type-${data}">${data.replace('_', ' ')}</span>`;
-          }
+        { data: "criterio" },
+        { data: "categoria_nombre" },
+        {
+          data: "tipo",
+          render: function (data) {
+            return `<span class="type-badge type-${data}">${data.replace(
+              "_",
+              " "
+            )}</span>`;
+          },
         },
-        { 
-          data: 'puntuacion',
-          className: 'dt-body-center',
-          render: function(data) {
+        {
+          data: "puntuacion",
+          className: "dt-body-center",
+          render: function (data) {
             return `<span class="score-badge">${data}</span>`;
-          }
+          },
         },
-        { 
-          data: 'estado',
-          className: 'dt-body-center',
-          render: function(data, type, row) {
-            const checked = data == 1 ? 'checked' : '';
+        {
+          data: "estado",
+          className: "dt-body-center",
+          render: function (data, type, row) {
+            const checked = data == 1 ? "checked" : "";
             return `
               <label class="toggle-switch">
                 <input type="checkbox" ${checked} onchange="configManager.toggleCriteriaStatus(${row.id}, this.checked)">
                 <span class="toggle-slider"></span>
               </label>
             `;
-          }
+          },
         },
-        { 
+        {
           data: null,
-          className: 'dt-body-center',
+          className: "dt-body-center",
           orderable: false,
-          render: function(data, type, row) {
+          render: function (data, type, row) {
             return `
               <button type="button" class="editar" onclick="configManager.editCriteria(${row.id})" title="Editar Criterio">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
@@ -502,16 +507,16 @@ class ConfigManager {
                 </svg>
               </button>
             `;
-          }
-        }
+          },
+        },
       ],
       paging: false,
       info: false,
       language: {
-        "zeroRecords": "No se encontraron criterios",
-        "emptyTable": "Aún no hay criterios, crea uno nuevo",
-        "processing": '<div class="table-spinner"></div>Procesando...'
-      }
+        zeroRecords: "No se encontraron criterios",
+        emptyTable: "Aún no hay criterios, crea uno nuevo",
+        processing: '<div class="table-spinner"></div>Procesando...',
+      },
     });
   }
 
@@ -525,7 +530,7 @@ class ConfigManager {
    * Edita un nivel
    */
   editLevel(levelId) {
-    mostrarModalCrearNivel();
+    mostrarModalEditarNivel(levelId);
   }
 
   /**
@@ -534,16 +539,16 @@ class ConfigManager {
   async toggleLevelStatus(levelId, status) {
     try {
       const response = await fetch(`${this.baseUrl}/levels/${levelId}/status`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ estado: status })
+        body: JSON.stringify({ estado: status }),
       });
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         this.showSuccess(data.message);
         // Recargar datos de niveles
         await this.loadLevelsData();
@@ -552,7 +557,7 @@ class ConfigManager {
         this.currentTable.ajax.reload(null, false);
       }
     } catch (error) {
-      this.showError('Error de conexión');
+      this.showError("Error de conexión");
       this.currentTable.ajax.reload(null, false);
     }
   }
@@ -561,24 +566,23 @@ class ConfigManager {
    * Elimina un nivel
    */
   async deleteLevel(levelId) {
-
     const userConfirmed = await CustomDialog.confirm(
-      'Eliminar Nivel',
-      '¿Estás seguro de que quieres eliminar este nivel?',
-      'Sí, Eliminar',
-      'Cancelar'
+      "Eliminar Nivel",
+      "¿Estás seguro de que quieres eliminar este nivel?",
+      "Sí, Eliminar",
+      "Cancelar"
     );
 
     if (!userConfirmed) return;
 
     try {
       const response = await fetch(`${this.baseUrl}/levels/${levelId}`, {
-        method: 'DELETE'
+        method: "DELETE",
       });
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         this.showSuccess(data.message);
         this.currentTable.ajax.reload(null, false);
         // Recargar datos de niveles
@@ -587,7 +591,7 @@ class ConfigManager {
         this.showError(data.message);
       }
     } catch (error) {
-      this.showError('Error de conexión');
+      this.showError("Error de conexión");
     }
   }
 
@@ -611,23 +615,23 @@ class ConfigManager {
   async toggleRuleStatus(ruleId, status) {
     try {
       const response = await fetch(`${this.baseUrl}/rules/${ruleId}/status`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ estado: status })
+        body: JSON.stringify({ estado: status }),
       });
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         this.showSuccess(data.message);
       } else {
         this.showError(data.message);
         this.currentTable.ajax.reload(null, false);
       }
     } catch (error) {
-      this.showError('Error de conexión');
+      this.showError("Error de conexión");
       this.currentTable.ajax.reload(null, false);
     }
   }
@@ -636,23 +640,23 @@ class ConfigManager {
    * Elimina una regla
    */
   async deleteRule(ruleId) {
-    if (!confirm('¿Está seguro de eliminar esta regla?')) return;
+    if (!confirm("¿Está seguro de eliminar esta regla?")) return;
 
     try {
       const response = await fetch(`${this.baseUrl}/rules/${ruleId}`, {
-        method: 'DELETE'
+        method: "DELETE",
       });
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         this.showSuccess(data.message);
         this.currentTable.ajax.reload(null, false);
       } else {
         this.showError(data.message);
       }
     } catch (error) {
-      this.showError('Error de conexión');
+      this.showError("Error de conexión");
     }
   }
 
@@ -675,24 +679,27 @@ class ConfigManager {
    */
   async toggleCriteriaStatus(criteriaId, status) {
     try {
-      const response = await fetch(`${this.baseUrl}/criteria/${criteriaId}/status`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ estado: status })
-      });
+      const response = await fetch(
+        `${this.baseUrl}/criteria/${criteriaId}/status`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ estado: status }),
+        }
+      );
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         this.showSuccess(data.message);
       } else {
         this.showError(data.message);
         this.currentTable.ajax.reload(null, false);
       }
     } catch (error) {
-      this.showError('Error de conexión');
+      this.showError("Error de conexión");
       this.currentTable.ajax.reload(null, false);
     }
   }
@@ -701,23 +708,23 @@ class ConfigManager {
    * Elimina un criterio
    */
   async deleteCriteria(criteriaId) {
-    if (!confirm('¿Está seguro de eliminar este criterio?')) return;
+    if (!confirm("¿Está seguro de eliminar este criterio?")) return;
 
     try {
       const response = await fetch(`${this.baseUrl}/criteria/${criteriaId}`, {
-        method: 'DELETE'
+        method: "DELETE",
       });
 
       const data = await response.json();
-      
-      if (data.status === 'success') {
+
+      if (data.status === "success") {
         this.showSuccess(data.message);
         this.currentTable.ajax.reload(null, false);
       } else {
         this.showError(data.message);
       }
     } catch (error) {
-      this.showError('Error de conexión');
+      this.showError("Error de conexión");
     }
   }
 
@@ -804,6 +811,20 @@ let configManager;
 document.addEventListener("DOMContentLoaded", function () {
   try {
     configManager = new ConfigManager();
+
+    // Exponer funciones globales para uso desde otros módulos
+    window.configManager = configManager;
+    window.loadLevelsData = function () {
+      return configManager.loadLevelsData();
+    };
+    window.reloadLevelsTable = function () {
+      if (
+        configManager.currentTable &&
+        configManager.currentSection === "niveles-socioeconomicos"
+      ) {
+        configManager.currentTable.ajax.reload();
+      }
+    };
   } catch (error) {
     console.error("Error al inicializar ConfigManager:", error);
 
@@ -824,8 +845,6 @@ window.addEventListener("beforeunload", function () {
   }
 });
 
-// Exponer funciones globales para uso en HTML
-window.configManager = configManager;
 
 // Manejo de errores globales para este módulo
 window.addEventListener("error", function (event) {

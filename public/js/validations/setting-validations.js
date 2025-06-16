@@ -2,35 +2,39 @@ const SETTING_VALIDATION_SCHEMAS = {
   'levels': {
     'nivel': {
       required: {
-        message: 'El campo nivel no puede estar vacío.'
+        message: 'El campo nivel no puede estar vacío'
       },
       minLength: {
         value: 1,
-        message: 'El campo nivel debe tener al menos 1 carácter.'
+        message: 'El campo nivel debe tener al menos 1 carácter'
       },
       maxLength: {
-        value: 20,
-        message: 'El campo nivel debe tener como máximo 20 caracteres.'
+        value: 50,
+        message: 'El campo nivel debe tener como máximo 50 caracteres'
       },
       pattern: {
-        value: "^[a-zA-Z0-9 ]+$",
-        message: 'El campo nivel solo puede contener letras, números y espacios.'
+        value: "^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]+$",
+        message: 'El campo nivel solo puede contener letras, números, espacios y acentos'
       }
     },
     'puntaje_minimo': {
       required: {
-        message: 'El campo puntaje mínimo no puede estar vacío.'
+        message: 'El campo puntaje mínimo no puede estar vacío'
+      },
+      pattern: {
+        value: "^[0-9]+$",
+        message: 'El campo puntaje mínimo debe ser un número entero'
       },
       min: {
         value: 0,
-        message: 'El campo puntaje mínimo debe ser mayor o igual a 0.'
+        message: 'El campo puntaje mínimo debe ser mayor o igual a 0'
       },
       max: {
         value: 1000,
-        message: 'El campo puntaje mínimo debe tener como máximo 1000.'
+        message: 'El campo puntaje mínimo no puede exceder 1000'
       }
-    },
-  }
+    }
+  },
 };
 
 const LevelValidations = {
@@ -41,25 +45,88 @@ const LevelValidations = {
       SETTING_VALIDATION_SCHEMAS.levels
     );
   },
+
+  validateEdit: async (form) => {
+    const formData = new FormData(form);
+    return await FormValidator.validate(
+      formData,
+      SETTING_VALIDATION_SCHEMAS.levels
+    );
+  }
 };
 
 const LevelHandlers = {
-  onCreateSuccess: async (form, response) => {
-
-    console.log("Nivel creado exitosamente:", response);
+  onCreateSuccess: async (data, form) => {
+    // Cerrar modal si existe
+    if (typeof BaseModal !== 'undefined') {
+      BaseModal.closeAll();
+    }
+    
+    await CustomDialog.success(
+      "Nivel Creado",
+      data.message || "El nivel socioeconómico se creó correctamente"
+    );
+    
+    // Recargar datos si existe la función
+    if (typeof window.reloadLevelsTable === 'function') {
+      await window.reloadLevelsTable();
+    } else {
+      window.location.reload();
+    }
   },
 
-  onError: async (data, aform) => {
-
-    Modal.closeAll();
-
-    await CustomDialog.error(
-      "Error",
-      data.message || "Ocurrió un error al procesar la solicitud."
-    )
+  onEditSuccess: async (data, form) => {
+    // Cerrar modal si existe
+    if (typeof BaseModal !== 'undefined') {
+      BaseModal.closeAll();
+    }
+    
+    await CustomDialog.success(
+      "Nivel Actualizado", 
+      data.message || "El nivel socioeconómico se actualizó correctamente"
+    );
+    
+    // Recargar datos si existe la función
+    if (typeof loadData === 'function') {
+      await loadData();
+    } else {
+      window.location.reload();
+    }
   },
+
+  onError: async (data, form) => {
+    if (data.errors) {
+      // Mostrar errores específicos de campos
+      for (const [field, message] of Object.entries(data.errors)) {
+        const input = form.querySelector(`[name="${field}"]`);
+        if (input) {
+          input.classList.add("error-input");
+          
+          // Crear mensaje de error
+          const errorElement = document.createElement("p");
+          errorElement.className = "error-message";
+          errorElement.textContent = message;
+          
+          // Insertar el mensaje después del input
+          input.parentElement.appendChild(errorElement);
+        }
+      }
+
+      // Si hay errores específicos de campos, mostrar toast genérico
+      CustomDialog.toast(
+        "Corrija los errores marcados en el formulario",
+        "error",
+        3000
+      );
+    } else {
+      // Si no hay errores específicos, mostrar el mensaje general
+      await CustomDialog.error(
+        "Error",
+        data.message || "Ocurrió un error al procesar la solicitud"
+      );
+    }
+  }
 };
-
 
 function registerAvailableForms(container) {
   // Asegurarse de que el contenedor sea un elemento válido antes de usar querySelector
@@ -84,7 +151,7 @@ function registerAvailableForms(container) {
     });
   }
 
-  // Registrar formulario de edicion de nivel
+  // Registrar formulario de edición de nivel
   if (container.querySelector("#editLevelForm")) {
     console.log("Registrando editLevelForm...");
 
@@ -96,12 +163,11 @@ function registerAvailableForms(container) {
   }
 }
 
-
 document.addEventListener("DOMContentLoaded", function () {
   // Registra los formularios que ya existen al cargar la página
   registerAvailableForms(document.body);
 
-  // 3. Configurar el observador para futuros cambios en el DOM
+  // Configurar el observador para futuros cambios en el DOM
   const observer = new MutationObserver((mutationsList) => {
     for (const mutation of mutationsList) {
       // Si se han añadido nodos (como un modal)
@@ -118,5 +184,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
   observer.observe(document.body, { childList: true, subtree: true });
 });
-
-

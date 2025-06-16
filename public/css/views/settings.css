@@ -67,7 +67,7 @@
 /* --- Área de Contenido Derecha (Detail) --- */
 .config-content {
   flex: 1;
-  /* Ocupa el resto del espacio */
+  width: 100%;
   background-color: #ffffff;
   border-radius: 8px;
   padding: 2rem;

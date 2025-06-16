@@ -221,6 +221,28 @@ const MODAL_TEMPLATES = {
     </form>
   `,
 
+  editarNivel: `
+      <form novalidate id="editLevelForm" class="base-modal-form form-ajax config-form" method="POST">
+      <div class="form-group">
+        <label for="nivel" class="field-label">Nombre del Nivel</label>
+        <input type="text" id="nivel" name="nivel" class="input-reset" 
+               value="{{nivel}}" 
+               maxlength="20" required>s
+      </div>
+      
+      <div class="form-group">
+        <label for="puntaje_minimo" class="field-label">Puntaje Mínimo</label>
+        <input type="number" id="puntaje_minimo" name="puntaje_minimo" class="input-reset"
+               value="{{puntaje_minimo}}" min="0" required>
+      </div>
+      
+      <div class="base-modal-actions">
+        <button class="btn-cancel" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">Actualizar Nivel</button>
+      </div>
+    </form>
+  `,
+
   // Template para formulario de regla de aportación
   ruleForm: `
     <form novalidate id="ruleForm" class="base-modal-form form-ajax config-form" method="POST">

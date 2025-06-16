@@ -419,45 +419,6 @@ class ContributionRuleModel extends MainModel
     }
   }
 
-  /**
-   * Crea reglas en lote para un nivel socioeconómico
-   * 
-   * @param int $nivelId ID del nivel socioeconómico
-   * @param array $reglas Array de reglas con edad, periodicidad y monto
-   * @param int $userId ID del usuario que crea las reglas
-   * @return array Resultado con éxitos y errors
-   */
-  public function createBulkRules($nivelId, $reglas, $userId)
-  {
-    try {
-      $resultado = ['success' => 0, 'errors' => 0, 'details' => []];
-
-      foreach ($reglas as $regla) {
-        $data = [
-          'nivel_socioeconomico_id' => $nivelId,
-          'edad' => $regla['edad'],
-          'periodicidad' => $regla['periodicidad'],
-          'monto_aportacion' => $regla['monto_aportacion'],
-          'usuario_creacion_id' => $userId
-        ];
-
-        $ruleId = $this->createRule($data);
-
-        if ($ruleId) {
-          $resultado['success']++;
-          $resultado['details'][] = "Regla creada: Edad {$regla['edad']}, {$regla['periodicidad']}";
-        } else {
-          $resultado['errors']++;
-          $resultado['details'][] = "Error en regla: Edad {$regla['edad']}, {$regla['periodicidad']}";
-        }
-      }
-
-      return $resultado;
-    } catch (\Exception $e) {
-      error_log("Error en createBulkRules: " . $e->getMessage());
-      return ['success' => 0, 'errors' => count($reglas), 'details' => ['Error general en creación masiva']];
-    }
-  }
 
   /**
    * Obtiene estadísticas de uso de las reglas de aportación

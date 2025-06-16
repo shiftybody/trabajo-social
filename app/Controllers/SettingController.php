@@ -106,31 +106,32 @@ class SettingController
       $data = $request->post();
       $data['usuario_creacion_id'] = Auth::user()->usuario_id;
 
-      $levelId = $this->levelModel->createLevel($data);
+      // Validar datos usando la validación del modelo
+      $resultado = $this->levelModel->createLevel($data);
 
-      if ($levelId) {
+      if ($resultado['success']) {
         return Response::json([
           'status' => 'success',
-          'message' => 'Nivel creado correctamente',
-          'data' => ['id' => $levelId]
+          'message' => 'Nivel socioeconómico creado correctamente',
+          'data' => ['id' => $resultado['data']]
         ]);
       } else {
         return Response::json([
           'status' => 'error',
-          'message' => 'El nivel ya existe o el puntaje es inválido'
+          'errors' => $resultado['errors']
         ], 400);
       }
     } catch (Exception $e) {
       error_log("Error en createLevel: " . $e->getMessage());
       return Response::json([
         'status' => 'error',
-        'message' => 'Error interno del servidor'
+        'errors' => ['general' => 'Error interno del servidor']
       ], 500);
     }
   }
 
   /**
-   * API: Actualiza un nivel socioeconómico
+   * API: Actualiza un nivel socioeconómico existente
    */
   public function updateLevel(Request $request)
   {
@@ -139,24 +140,53 @@ class SettingController
       $data = $request->post();
       $data['usuario_modificacion_id'] = Auth::user()->usuario_id;
 
-      $updated = $this->levelModel->updateLevel($id, $data);
+      // Verificar que el nivel existe
+      $nivelExistente = $this->levelModel->getLevelById($id);
+      if (!$nivelExistente) {
+        return Response::json([
+          'status' => 'error',
+          'errors' => ['general' => 'Nivel socioeconómico no encontrado']
+        ], 404);
+      }
 
-      if ($updated) {
+      // Validar que se hayan enviado cambios
+      $cambiosDetectados = false;
+      if (isset($data['nivel']) && $data['nivel'] !== $nivelExistente->nivel) {
+        $cambiosDetectados = true;
+      }
+      if (isset($data['puntaje_minimo']) && $data['puntaje_minimo'] != $nivelExistente->puntaje_minimo) {
+        $cambiosDetectados = true;
+      }
+      if (isset($data['estado']) && $data['estado'] != $nivelExistente->estado) {
+        $cambiosDetectados = true;
+      }
+
+      if (!$cambiosDetectados) {
         return Response::json([
           'status' => 'success',
-          'message' => 'Nivel actualizado correctamente'
+          'message' => 'No se realizaron cambios en el nivel'
+        ]);
+      }
+
+      // Actualizar usando la validación del modelo
+      $resultado = $this->levelModel->updateLevel($id, $data);
+
+      if ($resultado['success']) {
+        return Response::json([
+          'status' => 'success',
+          'message' => 'Nivel socioeconómico actualizado correctamente'
         ]);
       } else {
         return Response::json([
           'status' => 'error',
-          'message' => 'Error al actualizar nivel'
+          'errors' => $resultado['errors']
         ], 400);
       }
     } catch (Exception $e) {
       error_log("Error en updateLevel: " . $e->getMessage());
       return Response::json([
         'status' => 'error',
-        'message' => 'Error interno del servidor'
+        'errors' => ['general' => 'Error interno del servidor']
       ], 500);
     }
   }

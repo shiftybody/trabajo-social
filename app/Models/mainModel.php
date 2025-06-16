@@ -374,12 +374,15 @@ class mainModel
             break;
 
           case 'entero':
-            if (!filter_var($valor, FILTER_VALIDATE_INT)) {
-              $resultado['errors'][$campo] = "El campo $campo debe ser un número entero";
+            $validatedValue = filter_var($valor, FILTER_VALIDATE_INT, [
+              'options' => ['min_range' => 0]
+            ]);
+            if ($validatedValue === false) {
+              $resultado['errors'][$campo] = "El campo $campo debe ser un número entero mayor o igual a 0";
               continue 2;
             }
             // Convertir a entero si es válido
-            $valor = (int)$valor;
+            $valor = $validatedValue;
             break;
 
           case 'alfa':

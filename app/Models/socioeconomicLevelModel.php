@@ -100,61 +100,210 @@ class SocioeconomicLevelModel extends MainModel
    * Crea un nuevo nivel socioeconómico
    * 
    * @param array $data Datos del nivel (nivel, puntaje_minimo, usuario_creacion_id)
-   * @return int|false ID del nivel creado o false si hubo error
+   * @return array Resultado con success, data/errors
    */
   public function createLevel($data)
   {
     error_log("Intentando crear nivel socioeconómico: " . json_encode($data));
 
     try {
-      // Validar datos
-      $validationResult = $this->validateLevelData($data);
-      if (!$validationResult['valid']) {
-        error_log("Error de validación en createLevel: " . implode(', ', $validationResult['errors']));
-        return false;
+      // Definir reglas de validación
+      $validar = [
+        'nivel' => [
+          'requerido' => true,
+          'min' => 1,
+          'max' => 50,
+          'formato' => '[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]{1,50}',
+          'sanitizar' => true
+        ],
+        'puntaje_minimo' => [
+          'requerido' => true,
+          'formato' => 'entero',
+          'min_valor' => 0,
+          'max_valor' => 1000
+        ],
+        'usuario_creacion_id' => [
+          'requerido' => true,
+          'formato' => 'entero'
+        ]
+      ];
+
+      // Validar datos usando el método del MainModel
+      $validationResult = $this->validarDatos($data, $validar);
+
+      if (!empty($validationResult['errors'])) {
+        error_log("Errores de validación en createLevel: " . json_encode($validationResult['errors']));
+        return [
+          'success' => false,
+          'errors' => $validationResult['errors']
+        ];
       }
+
+      $datosValidados = $validationResult['datos'];
 
       // Verificar que no exista un nivel con el mismo nombre
-      if ($this->getLevelByName($data['nivel'])) {
-        error_log("Intento de crear nivel duplicado: " . $data['nivel']);
-        return false;
+      if ($this->getLevelByName($datosValidados['nivel'])) {
+        error_log("Intento de crear nivel duplicado: " . $datosValidados['nivel']);
+        return [
+          'success' => false,
+          'errors' => ['nivel' => 'Ya existe un nivel socioeconómico con este nombre']
+        ];
       }
 
-      // Verificar que no haya conflictos de rangos
-      if ($this->hasScoreConflict($data['puntaje_minimo'])) {
-        error_log("Conflicto de rangos de puntaje: " . $data['puntaje_minimo']);
-        return false;
+      // Verificar conflictos de rangos y orden lógico
+      $conflictResult = $this->checkScoreConflict(
+        $datosValidados['puntaje_minimo'],
+        $datosValidados['nivel']
+      );
+
+      if (!$conflictResult['valid']) {
+        error_log("Conflicto de rangos/orden: " . $conflictResult['message']);
+        return [
+          'success' => false,
+          'errors' => ['puntaje_minimo' => $conflictResult['message']]
+        ];
       }
 
       $datosParaInsertar = [
-        'nivel' => $data['nivel'],
-        'puntaje_minimo' => $data['puntaje_minimo'],
+        'nivel' => $datosValidados['nivel'],
+        'puntaje_minimo' => $datosValidados['puntaje_minimo'],
         'estado' => 1,
         'fecha_creacion' => date("Y-m-d H:i:s"),
         'fecha_modificacion' => date("Y-m-d H:i:s"),
-        'usuario_creacion_id' => $data['usuario_creacion_id'],
-        'usuario_modificacion_id' => $data['usuario_creacion_id']
+        'usuario_creacion_id' => $datosValidados['usuario_creacion_id'],
+        'usuario_modificacion_id' => $datosValidados['usuario_creacion_id']
       ];
 
       $resultado = $this->insertarDatos("nivel_socioeconomico", $datosParaInsertar);
 
       if ($resultado->rowCount() > 0) {
-        return $this->getLastInsertId();
+        return [
+          'success' => true,
+          'data' => $this->getLastInsertId()
+        ];
       }
 
-      return false;
+      return [
+        'success' => false,
+        'errors' => ['general' => 'No se pudo crear el nivel socioeconómico']
+      ];
     } catch (\Exception $e) {
       error_log("Error en createLevel: " . $e->getMessage());
-      return false;
+      return [
+        'success' => false,
+        'errors' => ['general' => 'Error interno del servidor']
+      ];
     }
   }
+
+
+  /**
+   * Verifica si hay conflictos de rangos de puntaje con niveles existentes
+   * LÓGICA: A mayor puntaje, mejor nivel (alfabéticamente anterior)
+   * 
+   * @param int $puntaje_minimo Puntaje mínimo a verificar
+   * @param string $nivel_nombre Nombre del nivel a crear/editar
+   * @param int|null $excludeId ID del nivel a excluir de la verificación
+   * @return array Resultado con valid y message
+   */
+  private function checkScoreConflict($puntaje_minimo, $nivel_nombre, $excludeId = null)
+  {
+    try {
+      $query = "SELECT * FROM nivel_socioeconomico WHERE estado = 1";
+      $params = [];
+
+      if ($excludeId !== null) {
+        $query .= " AND id != :exclude_id";
+        $params[':exclude_id'] = $excludeId;
+      }
+
+      $query .= " ORDER BY puntaje_minimo ASC";
+
+      $resultado = $this->ejecutarConsulta($query, $params);
+      $nivelesExistentes = $resultado->fetchAll(PDO::FETCH_OBJ);
+
+      if (empty($nivelesExistentes)) {
+        return ['valid' => true, 'message' => ''];
+      }
+
+      // 1. Verificar duplicados exactos
+      foreach ($nivelesExistentes as $nivel) {
+        if ($puntaje_minimo == $nivel->puntaje_minimo) {
+          return [
+            'valid' => false,
+            'message' => "Ya existe un nivel con puntaje mínimo {$puntaje_minimo} (Nivel: {$nivel->nivel})"
+          ];
+        }
+      }
+
+      // 2. Verificar orden lógico: A MAYOR puntaje, MEJOR nivel (alfabéticamente anterior)
+      $todosLosNiveles = $nivelesExistentes;
+
+      // Agregar el nuevo nivel temporalmente para validar el orden
+      $nuevoNivel = (object)[
+        'nivel' => $nivel_nombre,
+        'puntaje_minimo' => $puntaje_minimo
+      ];
+      $todosLosNiveles[] = $nuevoNivel;
+
+      // Ordenar por puntaje ascendente (compatible con PHP 5.4)
+      usort($todosLosNiveles, function ($a, $b) {
+        if ($a->puntaje_minimo == $b->puntaje_minimo) {
+          return 0;
+        }
+        return ($a->puntaje_minimo < $b->puntaje_minimo) ? -1 : 1;
+      });
+
+      // Verificar que el orden de puntajes (ascendente) coincida con orden alfabético (descendente)
+      for ($i = 0; $i < count($todosLosNiveles) - 1; $i++) {
+        $actual = $todosLosNiveles[$i];
+        $siguiente = $todosLosNiveles[$i + 1];
+
+        // Skip si alguno es "Excenta" o niveles especiales
+        if ($actual->nivel === 'Excenta' || $siguiente->nivel === 'Excenta') {
+          continue;
+        }
+
+        // Para niveles alfabéticos (A-Z), verificar que el orden sea correcto
+        if (preg_match('/^[A-Z]$/', $actual->nivel) && preg_match('/^[A-Z]$/', $siguiente->nivel)) {
+          // El nivel con menor puntaje debe ser alfabéticamente posterior
+          if (strcmp($actual->nivel, $siguiente->nivel) <= 0) {
+            return [
+              'valid' => false,
+              'message' => "Orden lógico incorrecto: El nivel '{$actual->nivel}' (puntaje: {$actual->puntaje_minimo}) debe ser alfabéticamente posterior al nivel '{$siguiente->nivel}' (puntaje: {$siguiente->puntaje_minimo}) porque tiene menor puntaje"
+            ];
+          }
+        }
+      }
+
+      // 3. Verificar espaciado mínimo entre niveles
+      $espaciadoMinimo = 1;
+      foreach ($nivelesExistentes as $nivel) {
+        if (abs($puntaje_minimo - $nivel->puntaje_minimo) < $espaciadoMinimo && $puntaje_minimo != $nivel->puntaje_minimo) {
+          return [
+            'valid' => false,
+            'message' => "El puntaje debe tener al menos {$espaciadoMinimo} punto(s) de diferencia con el nivel '{$nivel->nivel}' (puntaje: {$nivel->puntaje_minimo})"
+          ];
+        }
+      }
+
+      return ['valid' => true, 'message' => ''];
+    } catch (\Exception $e) {
+      error_log("Error en checkScoreConflict: " . $e->getMessage());
+      return [
+        'valid' => false,
+        'message' => 'Error al validar conflictos de puntaje'
+      ];
+    }
+  }
+
 
   /**
    * Actualiza un nivel socioeconómico existente
    * 
    * @param int $levelId ID del nivel
    * @param array $data Datos a actualizar
-   * @return bool True si se actualizó correctamente, false en caso contrario
+   * @return array Resultado con success, data/errors
    */
   public function updateLevel($levelId, $data)
   {
@@ -162,46 +311,124 @@ class SocioeconomicLevelModel extends MainModel
       // Verificar que el nivel existe
       $nivelExistente = $this->getLevelById($levelId);
       if (!$nivelExistente) {
-        return false;
+        return [
+          'success' => false,
+          'errors' => ['general' => 'Nivel socioeconómico no encontrado']
+        ];
       }
 
-      // Validar datos
-      $validationResult = $this->validateLevelData($data, $levelId);
-      if (!$validationResult['valid']) {
-        error_log("Error de validación en updateLevel: " . implode(', ', $validationResult['errors']));
-        return false;
+      // Definir reglas de validación (solo para campos que se van a actualizar)
+      $validar = [];
+
+      if (isset($data['nivel'])) {
+        $validar['nivel'] = [
+          'requerido' => true,
+          'min' => 1,
+          'max' => 50,
+          'formato' => '[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]{1,50}',
+          'sanitizar' => true
+        ];
       }
+
+      if (isset($data['puntaje_minimo'])) {
+        $validar['puntaje_minimo'] = [
+          'requerido' => true,
+          'formato' => 'entero',
+          'min_valor' => 0,
+          'max_valor' => 1000
+        ];
+      }
+
+      if (isset($data['estado'])) {
+        $validar['estado'] = [
+          'requerido' => true,
+          'formato' => 'entero'
+        ];
+      }
+
+      if (isset($data['usuario_modificacion_id'])) {
+        $validar['usuario_modificacion_id'] = [
+          'requerido' => true,
+          'formato' => 'entero'
+        ];
+      }
+
+      // Validar datos usando el método del MainModel
+      $validationResult = $this->validarDatos($data, $validar);
+
+      if (!empty($validationResult['errors'])) {
+        error_log("Errores de validación en updateLevel: " . json_encode($validationResult['errors']));
+        return [
+          'success' => false,
+          'errors' => $validationResult['errors']
+        ];
+      }
+
+      $datosValidados = $validationResult['datos'];
 
       // Si se está cambiando el nombre, verificar que no exista otro con el mismo nombre
-      if (isset($data['nivel']) && $data['nivel'] !== $nivelExistente->nivel) {
-        $nivelConNombre = $this->getLevelByName($data['nivel']);
+      if (isset($datosValidados['nivel']) && $datosValidados['nivel'] !== $nivelExistente->nivel) {
+        $nivelConNombre = $this->getLevelByName($datosValidados['nivel']);
         if ($nivelConNombre && $nivelConNombre->id != $levelId) {
-          error_log("Intento de actualizar nivel con nombre duplicado: " . $data['nivel']);
-          return false;
+          error_log("Intento de actualizar nivel con nombre duplicado: " . $datosValidados['nivel']);
+          return [
+            'success' => false,
+            'errors' => ['nivel' => 'Ya existe un nivel socioeconómico con este nombre']
+          ];
         }
       }
 
-      // Si se está cambiando el puntaje, verificar conflictos
-      if (isset($data['puntaje_minimo']) && $data['puntaje_minimo'] != $nivelExistente->puntaje_minimo) {
-        if ($this->hasScoreConflict($data['puntaje_minimo'], $levelId)) {
-          error_log("Conflicto de rangos de puntaje en actualización: " . $data['puntaje_minimo']);
-          return false;
+      // Si se está cambiando el puntaje o el nombre, verificar conflictos de rangos y orden lógico
+      $verificarConflictos = false;
+      $nombreParaValidar = $datosValidados['nivel'] ?: $nivelExistente->nivel;
+      $puntajeParaValidar = $datosValidados['puntaje_minimo'] ?: $nivelExistente->puntaje_minimo;
+
+      if (isset($datosValidados['puntaje_minimo']) && $datosValidados['puntaje_minimo'] != $nivelExistente->puntaje_minimo) {
+        $verificarConflictos = true;
+      }
+
+      if (isset($datosValidados['nivel']) && $datosValidados['nivel'] !== $nivelExistente->nivel) {
+        $verificarConflictos = true;
+      }
+
+      if ($verificarConflictos) {
+        $conflictResult = $this->checkScoreConflict(
+          $puntajeParaValidar,
+          $nombreParaValidar,
+          $levelId // Excluir el nivel actual de la validación
+        );
+
+        if (!$conflictResult['valid']) {
+          error_log("Conflicto de rangos/orden en actualización: " . $conflictResult['message']);
+          return [
+            'success' => false,
+            'errors' => ['puntaje_minimo' => $conflictResult['message']]
+          ];
         }
       }
 
+      // Preparar campos para actualizar
       $camposActualizar = [];
 
       // Campos permitidos para actualizar
       $camposPermitidos = ['nivel', 'puntaje_minimo', 'estado'];
 
       foreach ($camposPermitidos as $campo) {
-        if (isset($data[$campo])) {
+        if (isset($datosValidados[$campo])) {
           $camposActualizar[] = [
             "campo_nombre" => $campo,
             "campo_marcador" => ":{$campo}",
-            "campo_valor" => $data[$campo]
+            "campo_valor" => $datosValidados[$campo]
           ];
         }
+      }
+
+      // Solo actualizar si hay campos para cambiar
+      if (empty($camposActualizar)) {
+        return [
+          'success' => true,
+          'message' => 'No se realizaron cambios'
+        ];
       }
 
       // Campos de auditoría
@@ -211,11 +438,13 @@ class SocioeconomicLevelModel extends MainModel
         "campo_valor" => date("Y-m-d H:i:s")
       ];
 
-      $camposActualizar[] = [
-        "campo_nombre" => "usuario_modificacion_id",
-        "campo_marcador" => ":usuario_modificacion_id",
-        "campo_valor" => $data['usuario_modificacion_id']
-      ];
+      if (isset($datosValidados['usuario_modificacion_id'])) {
+        $camposActualizar[] = [
+          "campo_nombre" => "usuario_modificacion_id",
+          "campo_marcador" => ":usuario_modificacion_id",
+          "campo_valor" => $datosValidados['usuario_modificacion_id']
+        ];
+      }
 
       $condicion = [
         "condicion_campo" => "id",
@@ -224,10 +453,24 @@ class SocioeconomicLevelModel extends MainModel
       ];
 
       $resultado = $this->actualizarDatos("nivel_socioeconomico", $camposActualizar, $condicion);
-      return $resultado->rowCount() > 0;
+
+      if ($resultado->rowCount() > 0) {
+        return [
+          'success' => true,
+          'data' => $levelId
+        ];
+      }
+
+      return [
+        'success' => false,
+        'errors' => ['general' => 'No se pudo actualizar el nivel socioeconómico']
+      ];
     } catch (\Exception $e) {
       error_log("Error en updateLevel: " . $e->getMessage());
-      return false;
+      return [
+        'success' => false,
+        'errors' => ['general' => 'Error interno del servidor']
+      ];
     }
   }
 
@@ -479,34 +722,6 @@ class SocioeconomicLevelModel extends MainModel
 
     $result['valid'] = empty($result['errors']);
     return $result;
-  }
-
-  /**
-   * Verifica si hay conflicto de rangos de puntaje
-   * 
-   * @param int $puntajeMinimo Puntaje mínimo a verificar
-   * @param int|null $excludeLevelId ID del nivel a excluir de la verificación
-   * @return bool True si hay conflicto, false en caso contrario
-   */
-  private function hasScoreConflict($puntajeMinimo, $excludeLevelId = null)
-  {
-    try {
-      $query = "SELECT COUNT(*) FROM nivel_socioeconomico 
-                      WHERE puntaje_minimo = :puntaje_minimo AND estado = 1";
-
-      $params = [':puntaje_minimo' => $puntajeMinimo];
-
-      if ($excludeLevelId) {
-        $query .= " AND id != :exclude_id";
-        $params[':exclude_id'] = $excludeLevelId;
-      }
-
-      $resultado = $this->ejecutarConsulta($query, $params);
-      return $resultado->fetchColumn() > 0;
-    } catch (\Exception $e) {
-      error_log("Error en hasScoreConflict: " . $e->getMessage());
-      return true; // En caso de error, asumir que hay conflicto por seguridad
-    }
   }
 
   /**
