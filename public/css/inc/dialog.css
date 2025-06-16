@@ -76,6 +76,7 @@
   justify-content: flex-start;
   font-size: 14px;
   color: var(--gray-700);
+  width: 100%;
   margin: 0;
   padding: 0;
   line-height: 1.6;

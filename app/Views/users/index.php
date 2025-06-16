@@ -461,7 +461,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
     mostrarModalResetearPassword(userId);
   }
 
-
   // --- FUNCIONES DE POSICIONAMIENTO DEL OPTION MENU ---
   function posicionarMenu(boton, menu) {
     const rect = boton.getBoundingClientRect();

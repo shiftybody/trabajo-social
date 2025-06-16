@@ -228,26 +228,16 @@ const UserHandlers = {
   },
 
   onResetPasswordSuccess: async (data, form) => {
-    console.log(data);
-  },
 
-  onError: async (data, form) => {
-    console.log("se ejecuta")
-    if (data.errors) {
-      for (const [field, message] of Object.entries(data.errors)) {
-        const input = form.querySelector(`[name="${field}"]`);
-        if (input) {
-          input.classList.add("error-input");
-          const errorMessage = document.createElement("div");
-          errorMessage.className = "error-message";
-          errorMessage.textContent = message;
-          input.parentElement.appendChild(errorMessage);
-        }
-      }
-    }
+    Modal.closeAll();
 
-    CustomDialog.toast("Corrija los errores marcados en el formulario", "error", 2000);
-  },
+    await CustomDialog.success(
+      "Contraseña Restablecida",
+      data.message || "La contraseña se ha restablecido correctamente"
+    );
+    
+  }
+  
 };
 
 // Utilidades para formularios de usuarios
@@ -546,8 +536,34 @@ function registerAvailableForms(container) {
     console.log("Registrando resetPasswordForm...");
     FormManager.register("resetPasswordForm", {
       validate: UserValidations.validateResetPassword,
-      onSucess: UserHandlers.onResetPasswordSuccess,
+      onSuccess: UserHandlers.onResetPasswordSuccess,
       onError: UserHandlers.onError,
+    })
+  }
+
+  // --- Registrar formulario de cambio de estado ---
+  if (container.querySelector("#changeStatusForm")) {
+    console.log("Registrando changeStatusForm...");
+    FormManager.register("changeStatusForm", {
+      onSuccess: async (data, form) => {
+
+        Modal.closeAll();
+                
+        loadData();
+
+        await CustomDialog.success(
+          "Estado Actualizado",
+          data.message || "El estado del usuario se actualizó correctamente"
+        );
+
+      },
+      onError: async (data, form) => {
+        Modal.closeAll();
+        await CustomDialog.error(
+          "Error",
+          data.message || "No se pudo actualizar tu propia cuenta"
+        );
+      }
     });
   }
 }
