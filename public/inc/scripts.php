@@ -32,5 +32,9 @@
     <script src="<?= APP_URL . 'public/js/modals/delete-role-modal.js' ?>"></script>
   <?php endif; ?>
 
+  <?php if (strpos($_SERVER['REQUEST_URI'], 'settings') !== false): ?>
+    <script src="<?= APP_URL . 'public/js/config-manager.js' ?>"></script>
+  <?php endif; ?>
+
   <script src="<?= APP_URL . 'public/js/libs/datatables.min.js' ?>"></script>
 <?php endif; ?>

@@ -53,9 +53,3 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 </div>
 
 <?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
-
-<!-- Scripts específicos para configuración -->
-<script src="<?php echo APP_URL; ?>public/js/base-modal.js"></script>
-<script src="<?php echo APP_URL; ?>public/js/modal-templates.js"></script>
-<script src="<?php echo APP_URL; ?>public/js/dialog.js"></script>
-<script src="<?php echo APP_URL; ?>public/js/config-manager.js"></script>

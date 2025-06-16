@@ -1,15 +1,20 @@
 /**
- * Gestor de Configuración
+ * Gestor de Configuración Simplificado
  *
- * Controlador principal para el módulo de configuración que maneja
- * la carga dinámica de contenido y las operaciones CRUD
+ * Maneja únicamente las 3 funcionalidades principales:
+ * - Niveles socioeconómicos
+ * - Reglas de aportación
+ * - Criterios básicos
+ *
+ * Utiliza DataTables para todas las tablas
  */
 class ConfigManager {
   constructor() {
-    this.currentSection = "niveles-socioeconomicos"; // Sección inicial
+    this.currentSection = "niveles-socioeconomicos";
     this.baseUrl = `${APP_URL}api/settings`;
     this.contentArea = null;
     this.isLoading = false;
+    this.currentTable = null; // Referencia a la tabla DataTable actual
 
     this.init();
   }
@@ -29,7 +34,7 @@ class ConfigManager {
   }
 
   /**
-   * Cachea elementos del DOM que se usan frecuentemente
+   * Cachea elementos del DOM
    */
   cacheElements() {
     this.contentArea = document.getElementById("config-content-area");
@@ -48,7 +53,6 @@ class ConfigManager {
       link.addEventListener("click", (event) => {
         event.preventDefault();
 
-        // Evitar navegación durante carga
         if (this.isLoading) return;
 
         // Actualizar navegación activa
@@ -80,594 +84,516 @@ class ConfigManager {
       this.showLoading();
       this.currentSection = section;
 
-      const response = await fetch(
-        `${this.baseUrl}/section?section=${section}`,
-        {
-          method: "GET",
-          headers: {
-            accept: "application/json",
-          },
-        }
-      );
+      // Destruir tabla anterior si existe
+      if (this.currentTable) {
+        this.currentTable.destroy();
+        this.currentTable = null;
+      }
 
-      const data = await response.json();
-
-      if (data.status === "success") {
-        this.renderSectionContent(data.data);
-      } else {
-        this.showError(data.message || "Error al cargar la sección");
+      // Solo manejar las 3 secciones principales
+      switch (section) {
+        case "niveles-socioeconomicos":
+          await this.loadLevelsSection();
+          break;
+        case "reglas-aportacion":
+          await this.loadRulesSection();
+          break;
+        case "criterios":
+        case "protocolo":
+        case "gasto-traslado":
+        case "tiempo-traslado":
+        case "integrantes":
+        case "hijos":
+        case "tipo-familia":
+        case "tipo-vivienda":
+        case "tenencia":
+        case "zona":
+        case "materiales":
+        case "servicios":
+          await this.loadCriteriaSection();
+          break;
+        default:
+          this.showError("Sección no implementada");
       }
     } catch (error) {
       console.error("Error loading section:", error);
-      this.showError("Error de conexión al cargar la sección");
+      this.showError("Error al cargar la sección");
     } finally {
       this.isLoading = false;
     }
   }
 
-  /**
-   * Renderiza el contenido de una sección
-   */
-  renderSectionContent(sectionData) {
-    try {
-      // Renderizar contenido según el tipo de sección
-      switch (sectionData.type) {
-        case "socioeconomic-levels":
-          this.renderSocioeconomicLevels(sectionData);
-          break;
-
-        case "contribution-rules":
-          this.renderContributionRules(sectionData);
-          break;
-
-        case "criteria":
-          this.renderCriteria(sectionData);
-          break;
-
-        case "criteria-grouped":
-          this.renderGroupedCriteria(sectionData);
-          break;
-
-        default:
-          this.renderGenericSection(sectionData);
-      }
-    } catch (error) {
-      console.error("Error rendering section:", error);
-      this.showError("Error al renderizar la sección");
-    }
-  }
+  // ==================== NIVELES SOCIOECONÓMICOS ====================
 
   /**
-   * Renderiza la sección de niveles socioeconómicos
+   * Carga la sección de niveles socioeconómicos
    */
-  renderSocioeconomicLevels(data) {
+  async loadLevelsSection() {
     const html = `
       <div class="config-content-header">
-        <h2 id="criteria-title">${data.title}</h2>
+        <h2>Niveles Socioeconómicos</h2>
         <button class="btn-primary" onclick="configManager.openLevelModal()">
-          <i class="icon-plus"></i> Añadir Nivel
+          <i class="icon-plus"></i> Nuevo Nivel
         </button>
       </div>
-      
-      <div class="levels-container fade-in">
-        <div class="levels-stats">
-          <div class="stat-card">
-            <span class="stat-number">${data.levels.length}</span>
-            <span class="stat-label">Niveles Configurados</span>
-          </div>
-        </div>
-        
-        <div class="levels-table-container">
-          <table class="criteria-table">
-            <thead>
-              <tr>
-                <th>Nivel</th>
-                <th>Puntaje Mínimo</th>
-                <th>Reglas</th>
-                <th>Estudios</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${this.renderLevelsRows(data.levels)}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-
-    this.contentArea.innerHTML = html;
-  }
-
-  /**
-   * Renderiza las filas de niveles socioeconómicos
-   */
-  renderLevelsRows(levels) {
-    if (!levels || levels.length === 0) {
-      return `
-        <tr>
-          <td colspan="6" class="text-center">
-            <p>No hay niveles configurados</p>
-            <button class="btn-primary btn-sm" onclick="configManager.openLevelModal()">
-              Crear Primer Nivel
-            </button>
-          </td>
-        </tr>
-      `;
-    }
-
-    return levels
-      .map(
-        (level) => `
-          <tr data-level-id="${level.id}">
-            <td>
-              <strong>${level.nivel}</strong>
-            </td>
-            <td>
-              <span class="badge badge-info">${level.puntaje_minimo}+ pts</span>
-            </td>
-            <td>
-              <span class="count-badge">${level.reglas_count || 0}</span>
-            </td>
-            <td>
-              <span class="count-badge">${level.estudios_count || 0}</span>
-            </td>
-            <td>
-              <label class="toggle-switch">
-                <input type="checkbox" ${level.estado == 1 ? "checked" : ""} 
-                       onchange="configManager.toggleLevelStatus(${
-                         level.id
-                       }, this.checked)">
-                <span class="toggle-slider"></span>
-              </label>
-            </td>
-            <td class="actions">
-              <button class="btn-secondary btn-sm" onclick="configManager.editLevel(${
-                level.id
-              })" title="Editar">
-                <i class="icon-edit"></i>
-              </button>
-              <button class="btn-danger btn-sm" onclick="configManager.deleteLevel(${
-                level.id
-              })" title="Eliminar"
-                      ${
-                        level.reglas_count > 0 || level.estudios_count > 0
-                          ? "disabled"
-                          : ""
-                      }>
-                <i class="icon-delete"></i>
-              </button>
-            </td>
-          </tr>
-        `
-      )
-      .join("");
-  }
-
-  /**
-   * Renderiza la sección de reglas de aportación
-   */
-  renderContributionRules(data) {
-    const html = `
-      <div class="config-content-header">
-        <h2 id="criteria-title">${data.title}</h2>
-        <div class="header-actions">
-          <button class="btn-secondary" onclick="configManager.openRulesMatrixModal()">
-            <i class="icon-grid"></i> Vista Matriz
-          </button>
-          <button class="btn-primary" onclick="configManager.openRuleModal()">
-            <i class="icon-plus"></i> Añadir Regla
-          </button>
-        </div>
-      </div>
-      
-      <div class="rules-container fade-in">
-        <div class="rules-filters">
-          <div class="filter-group">
-            <label>Nivel:</label>
-            <select id="filter-nivel" onchange="configManager.filterRules()">
-              <option value="">Todos los niveles</option>
-              ${data.levels
-                .map(
-                  (level) =>
-                    `<option value="${level.id}">${level.nivel}</option>`
-                )
-                .join("")}
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>Periodicidad:</label>
-            <select id="filter-periodicidad" onchange="configManager.filterRules()">
-              <option value="">Todas</option>
-              ${Object.entries(data.periodicities || {})
-                .map(
-                  ([key, value]) => `<option value="${key}">${value}</option>`
-                )
-                .join("")}
-            </select>
-          </div>
-        </div>
-        
-        <div class="rules-table-container">
-          <table class="criteria-table">
-            <thead>
-              <tr>
-                <th>Nivel</th>
-                <th>Edad</th>
-                <th>Periodicidad</th>
-                <th>Monto</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="rules-table-body">
-              ${this.renderRulesRows(data.rules)}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-
-    this.contentArea.innerHTML = html;
-  }
-
-  /**
-   * Renderiza las filas de reglas de aportación
-   */
-  renderRulesRows(rules) {
-    if (!rules || rules.length === 0) {
-      return `
-        <tr>
-          <td colspan="6" class="text-center">
-            <p>No hay reglas configuradas</p>
-            <button class="btn-primary btn-sm" onclick="configManager.openRuleModal()">
-              Crear Primera Regla
-            </button>
-          </td>
-        </tr>
-      `;
-    }
-
-    return rules
-      .map(
-        (rule) => `
-          <tr data-rule-id="${rule.id}">
-            <td>
-              <span class="level-badge">${rule.nivel_nombre}</span>
-            </td>
-            <td>
-              <span class="age-badge">${rule.edad} años</span>
-            </td>
-            <td>
-              <span class="periodicity-badge periodicity-${rule.periodicidad}">
-                ${TEMPLATE_HELPERS.formatPeriodicity(rule.periodicidad)}
-              </span>
-            </td>
-            <td>
-              <strong class="amount">$${TEMPLATE_HELPERS.formatMoney(
-                rule.monto_aportacion
-              )}</strong>
-            </td>
-            <td>
-              <label class="toggle-switch">
-                <input type="checkbox" ${rule.estado == 1 ? "checked" : ""} 
-                       onchange="configManager.toggleRuleStatus(${
-                         rule.id
-                       }, this.checked)">
-                <span class="toggle-slider"></span>
-              </label>
-            </td>
-            <td class="actions">
-              <button class="btn-secondary btn-sm" onclick="configManager.editRule(${
-                rule.id
-              })" title="Editar">
-                <i class="icon-edit"></i>
-              </button>
-              <button class="btn-danger btn-sm" onclick="configManager.deleteRule(${
-                rule.id
-              })" title="Eliminar">
-                <i class="icon-delete"></i>
-              </button>
-            </td>
-          </tr>
-        `
-      )
-      .join("");
-  }
-
-  /**
-   * Renderiza la sección de criterios
-   */
-  renderCriteria(data) {
-    const html = `
-      <div class="config-content-header">
-        <h2 id="criteria-title">${data.title}</h2>
-        <button class="btn-primary" onclick="configManager.openCriteriaModal(${
-          data.subcategory.id
-        })">
-          <i class="icon-plus"></i> Añadir Criterio
-        </button>
-      </div>
-      
-      <div class="criteria-info fade-in">
-        <div class="subcategory-info">
-          <h4>${data.subcategory.categoria_nombre} > ${
-      data.subcategory.nombre
-    }</h4>
-          <p>${data.subcategory.descripcion || "Sin descripción"}</p>
-        </div>
-      </div>
-      
-      <div class="criteria-table-container">
-        <table class="criteria-table">
+  
+        <table id="levels-table" class="hover nowrap cell-borders" style="width: 100%;">
           <thead>
             <tr>
-              <th>Nombre</th>
-              <th>Tipo</th>
-              <th>Valores</th>
-              <th>Puntaje</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th class="dt-head-center">NIVEL</th>
+              <th class="dt-head-center">PUNTAJE MÍNIMO</th>
+              <th class="dt-head-center">ESTADO</th>
+              <th class="dt-head-center">ACCIONES</th>
             </tr>
           </thead>
-          <tbody>
-            ${this.renderCriteriaRows(data.criteria)}
-          </tbody>
         </table>
       </div>
     `;
 
     this.contentArea.innerHTML = html;
+    await this.initializeLevelsTable();
   }
 
   /**
-   * Renderiza las filas de criterios
+   * Inicializa la tabla de niveles con DataTables
    */
-  renderCriteriaRows(criteria) {
-    if (!criteria || criteria.length === 0) {
-      return `
-        <tr>
-          <td colspan="6" class="text-center">
-            <p>No hay criterios configurados</p>
-            <button class="btn-primary btn-sm" onclick="configManager.openCriteriaModal()">
-              Crear Primer Criterio
-            </button>
-          </td>
-        </tr>
-      `;
-    }
+  async initializeLevelsTable() {
+    this.currentTable = new DataTable("#levels-table", {
+      paging: false,
+      info: false,
+      ajax: {
+        url: `${this.baseUrl}/levels`,
+        dataSrc: "data",
+      },
+      columns: [
 
-    return criteria
-      .map(
-        (criterion) => `
-          <tr data-criteria-id="${criterion.id}">
-            <td>
-              <strong>${criterion.nombre}</strong>
-            </td>
-            <td>
-              <span class="type-badge type-${criterion.tipo_criterio}">
-                ${TEMPLATE_HELPERS.formatCriteriaType(criterion.tipo_criterio)}
-              </span>
-            </td>
-            <td>
-              ${TEMPLATE_HELPERS.formatCriteriaValues(criterion)}
-            </td>
-            <td>
-              <span class="score-badge">${criterion.puntaje} pts</span>
-            </td>
-            <td>
+        { data: "nivel", className: "dt-body-center" },
+        {
+          data: "puntaje_minimo",
+          className: "dt-body-center",
+        },
+        {
+          data: "estado",
+          className: "dt-body-center",
+          render: function (data, type, row) {
+            const checked = data == 1 ? "checked" : "";
+            return `
               <label class="toggle-switch">
-                <input type="checkbox" ${
-                  criterion.estado == 1 ? "checked" : ""
-                } 
-                       onchange="configManager.toggleCriteriaStatus(${
-                         criterion.id
-                       }, this.checked)">
+                <input type="checkbox" ${checked} onchange="configManager.toggleLevelStatus(${row.id}, this.checked)">
                 <span class="toggle-slider"></span>
               </label>
-            </td>
-            <td class="actions">
-              <button class="btn-secondary btn-sm" onclick="configManager.editCriteria(${
-                criterion.id
-              })" title="Editar">
-                <i class="icon-edit"></i>
+            `;
+          },
+        },
+        {
+          data: null,
+          className: "dt-body-center",
+          orderable: false,
+          render: function (data, type, row) {
+            return `
+              <button type="button" class="editar" onclick="configManager.editLevel(${row.id})" title="Editar Nivel">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                <path d="M13.5 6.5l4 4" />
+              </svg>
               </button>
-              <button class="btn-danger btn-sm" onclick="configManager.deleteCriteria(${
-                criterion.id
-              })" title="Eliminar">
-                <i class="icon-delete"></i>
+              <button type="button" class="remover" onclick="configManager.deleteLevel(${row.id})" title="Eliminar Nivel">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M4 7l16 0" />
+                <path d="M10 11l0 6" />
+                <path d="M14 11l0 6" />
+                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+              </svg>
               </button>
-            </td>
-          </tr>
-        `
-      )
-      .join("");
-  }
-
-  /**
-   * Renderiza criterios agrupados (para materiales y servicios)
-   */
-  renderGroupedCriteria(data) {
-    const html = `
-      <div class="config-content-header">
-        <h2 id="criteria-title">${data.title}</h2>
-        <button class="btn-primary" onclick="configManager.showGroupActions()">
-          <i class="icon-plus"></i> Gestionar Criterios
-        </button>
-      </div>
-      
-      <div class="grouped-criteria-container fade-in">
-        ${data.groups
-          .map(
-            (group) => `
-            <div class="criteria-group">
-              <div class="group-header">
-                <h4>${group.subcategory.nombre}</h4>
-                <p>${group.subcategory.descripcion || ""}</p>
-                <button class="btn-secondary btn-sm" onclick="configManager.openCriteriaModal(${
-                  group.subcategory.id
-                })">
-                  Añadir Criterio
-                </button>
-              </div>
-              
-              <div class="group-criteria">
-                <table class="criteria-table">
-                  <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Tipo</th>
-                      <th>Valores</th>
-                      <th>Puntaje</th>
-                      <th>Estado</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${this.renderCriteriaRows(group.criteria)}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          `
-          )
-          .join("")}
-      </div>
-    `;
-
-    this.contentArea.innerHTML = html;
-  }
-
-  /**
-   * Renderiza sección genérica
-   */
-  renderGenericSection(data) {
-    const html = `
-      <div class="config-content-header">
-        <h2 id="criteria-title">${data.title}</h2>
-      </div>
-      <div class="generic-section fade-in">
-        <p>Sección en desarrollo: ${data.title}</p>
-      </div>
-    `;
-
-    this.contentArea.innerHTML = html;
-  }
-
-  // ==================== OPERACIONES DE NIVELES SOCIOECONÓMICOS ====================
-
-  /**
-   * Abre el modal para crear/editar nivel
-   */
-  async openLevelModal(levelId = null) {
-    const isEdit = levelId !== null;
-    let levelData = null;
-
-    if (isEdit) {
-      try {
-        const response = await fetch(`${this.baseUrl}/levels/${levelId}`);
-        const data = await response.json();
-        if (data.status === "success") {
-          levelData = data.data;
-        } else {
-          this.showError("Error al cargar datos del nivel");
-          return;
-        }
-      } catch (error) {
-        this.showError("Error al cargar datos del nivel");
-        return;
-      }
-    }
-
-    const templateData = TEMPLATE_HELPERS.processLevelFormData(levelData);
-
-    const modal = createModal("form", {
-      title: isEdit
-        ? "Editar Nivel Socioeconómico"
-        : "Nuevo Nivel Socioeconómico",
-      size: "medium",
-      template: "levelForm",
-      data: templateData,
-      endpoint: isEdit
-        ? `${this.baseUrl}/levels/${levelId}`
-        : `${this.baseUrl}/levels`,
-      onSubmit: async (formData, modalInstance) => {
-        const success = isEdit
-          ? await this.updateLevel(levelId, formData)
-          : await this.createLevel(formData);
-
-        if (success) {
-          modalInstance.hide();
-        }
+            `;
+          },
+        },
+      ],
+      language: {
+        zeroRecords: "No se encontraron niveles",
+        emptyTable: "Aún no hay niveles, crea uno nuevo",
+        info: "Mostrando _START_ a _END_ de _TOTAL_ niveles",
+        infoEmpty: "Mostrando 0 a 0 de 0 niveles",
+        infoFiltered: "(filtrado de _MAX_ niveles totales)",
+        processing: '<div class="table-spinner"></div>Procesando...',
+      },
+      drawCallback: () => {
+        // Aplicar clases de estado
+        document.querySelectorAll("td").forEach((td) => {
+          if (td.textContent === "Inactivo") {
+            td.classList.add("inactivo");
+          }
+          if (td.textContent === "Activo") {
+            td.classList.add("activo");
+          }
+        });
       },
     });
 
-    modal.show();
+    this.setupTableFilters("levels");
+  }
+
+  // ==================== REGLAS DE APORTACIÓN ====================
+
+  /**
+   * Carga la sección de reglas de aportación
+   */
+  async loadRulesSection() {
+    const html = `
+      <div class="config-content-header">
+        <h2>Reglas de Aportación</h2>
+        <button class="btn-primary" onclick="configManager.openRuleModal()">
+          <i class="icon-plus"></i> Nueva Regla
+        </button>
+      </div>
+      
+      <div class="table-container">
+        <div class="tools">
+          <form class="filter_form" id="rules_filter_form">
+            <div class="input-container">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                <path d="M21 21l-6 -6" />
+              </svg>
+              <input class="matching-search" id="rulesMatchingInput" placeholder="Buscar reglas">
+              <span class="clear-button" id="rulesClearButton" style="display: none;">×</span>
+            </div>
+            <div class="select-container">
+              <select class="custom-select" id="rulesFilterColumn">
+                <option value="0">Todo</option>
+                <option value="1">Nivel</option>
+                <option value="2">Edad</option>
+                <option value="3">Periodicidad</option>
+                <option value="4">Estado</option>
+              </select>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="select-filter-icon">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" />
+              </svg>
+            </div>
+          </form>
+        </div>
+
+        <table id="rules-table" class="hover nowrap cell-borders" style="width: 100%;">
+          <thead>
+            <tr>
+              <th class="dt-head-center">ID</th>
+              <th>NIVEL</th>
+              <th class="dt-head-center">EDAD</th>
+              <th>PERIODICIDAD</th>
+              <th class="dt-head-center">MONTO</th>
+              <th class="dt-head-center">ESTADO</th>
+              <th class="dt-head-center">ACCIONES</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    `;
+
+    this.contentArea.innerHTML = html;
+    await this.initializeRulesTable();
   }
 
   /**
-   * Crea un nuevo nivel socioeconómico
+   * Inicializa la tabla de reglas con DataTables
    */
-  async createLevel(formData) {
-    try {
-      const response = await fetch(`${this.baseUrl}/levels`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
+  async initializeRulesTable() {
+    this.currentTable = new DataTable("#rules-table", {
+      ajax: {
+        url: `${this.baseUrl}/rules`,
+        dataSrc: "data",
+      },
+      columns: [
+        {
+          data: "id",
+          className: "dt-body-center",
         },
-        body: JSON.stringify(formData),
-      });
+        { data: "nivel_nombre" },
+        {
+          data: "edad",
+          className: "dt-body-center",
+          render: function (data) {
+            return `<span class="age-badge">${data} años</span>`;
+          },
+        },
+        {
+          data: "periodicidad",
+          render: function (data) {
+            return `<span class="periodicity-badge periodicity-${data}">${data}</span>`;
+          },
+        },
+        {
+          data: "monto_aportacion",
+          className: "dt-body-center",
+          render: function (data) {
+            return `<strong>$${parseFloat(data).toLocaleString(
+              "es-MX"
+            )}</strong>`;
+          },
+        },
+        {
+          data: "estado",
+          className: "dt-body-center",
+          render: function (data, type, row) {
+            const checked = data == 1 ? "checked" : "";
+            return `
+              <label class="toggle-switch">
+                <input type="checkbox" ${checked} onchange="configManager.toggleRuleStatus(${row.id}, this.checked)">
+                <span class="toggle-slider"></span>
+              </label>
+            `;
+          },
+        },
+        {
+          data: null,
+          className: "dt-body-center",
+          orderable: false,
+          render: function (data, type, row) {
+            return `
+              <button class="btn-secondary btn-sm" onclick="configManager.editRule(${row.id})" title="Editar">
+                <i class="icon-edit"></i>
+              </button>
+              <button class="btn-danger btn-sm" onclick="configManager.deleteRule(${row.id})" title="Eliminar">
+                <i class="icon-delete"></i>
+              </button>
+            `;
+          },
+        },
+      ],
+      language: {
+        zeroRecords: "No se encontraron reglas",
+        emptyTable: "Aún no hay reglas, crea una nueva",
+        info: "Mostrando _START_ a _END_ de _TOTAL_ reglas",
+        infoEmpty: "Mostrando 0 a 0 de 0 reglas",
+        infoFiltered: "(filtrado de _MAX_ reglas totales)",
+        processing: '<div class="table-spinner"></div>Procesando...',
+      },
+    });
 
-      const data = await response.json();
+    this.setupTableFilters("rules");
+  }
 
-      if (data.status === "success") {
-        this.showSuccess("Nivel creado correctamente");
-        this.loadSection(this.currentSection);
-        return true;
-      } else {
-        this.showError(data.message || "Error al crear nivel");
-        return false;
-      }
-    } catch (error) {
-      this.showError("Error de conexión");
-      return false;
+  // ==================== CRITERIOS ====================
+
+  /**
+   * Carga la sección de criterios
+   */
+  async loadCriteriaSection() {
+    const html = `
+      <div class="config-content-header">
+        <h2>Criterios de Puntuación</h2>
+        <button class="btn-primary" onclick="configManager.openCriteriaModal()">
+          <i class="icon-plus"></i> Nuevo Criterio
+        </button>
+      </div>
+      
+      <div class="table-container">
+        <div class="tools">
+          <form class="filter_form" id="criteria_filter_form">
+            <div class="input-container">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                <path d="M21 21l-6 -6" />
+              </svg>
+              <input class="matching-search" id="criteriaMatchingInput" placeholder="Buscar criterios">
+              <span class="clear-button" id="criteriaClearButton" style="display: none;">×</span>
+            </div>
+            <div class="select-container">
+              <select class="custom-select" id="criteriaFilterColumn">
+                <option value="0">Todo</option>
+                <option value="1">Criterio</option>
+                <option value="2">Categoría</option>
+                <option value="3">Tipo</option>
+                <option value="4">Estado</option>
+              </select>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="select-filter-icon">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" />
+              </svg>
+            </div>
+          </form>
+        </div>
+
+        <table id="criteria-table" class="hover nowrap cell-borders" style="width: 100%;">
+          <thead>
+            <tr>
+              <th class="dt-head-center">ID</th>
+              <th>CRITERIO</th>
+              <th>CATEGORÍA</th>
+              <th>TIPO</th>
+              <th class="dt-head-center">PUNTUACIÓN</th>
+              <th class="dt-head-center">ESTADO</th>
+              <th class="dt-head-center">ACCIONES</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    `;
+
+    this.contentArea.innerHTML = html;
+    await this.initializeCriteriaTable();
+  }
+
+  /**
+   * Inicializa la tabla de criterios con DataTables
+   */
+  async initializeCriteriaTable() {
+    this.currentTable = new DataTable("#criteria-table", {
+      ajax: {
+        url: `${this.baseUrl}/criteria`,
+        dataSrc: "data",
+      },
+      columns: [
+        {
+          data: "id",
+          className: "dt-body-center",
+        },
+        { data: "criterio" },
+        { data: "categoria_nombre" },
+        {
+          data: "tipo",
+          render: function (data) {
+            return `<span class="type-badge type-${data}">${data.replace(
+              "_",
+              " "
+            )}</span>`;
+          },
+        },
+        {
+          data: "puntuacion",
+          className: "dt-body-center",
+          render: function (data) {
+            return `<span class="score-badge">${data}</span>`;
+          },
+        },
+        {
+          data: "estado",
+          className: "dt-body-center",
+          render: function (data, type, row) {
+            const checked = data == 1 ? "checked" : "";
+            return `
+              <label class="toggle-switch">
+                <input type="checkbox" ${checked} onchange="configManager.toggleCriteriaStatus(${row.id}, this.checked)">
+                <span class="toggle-slider"></span>
+              </label>
+            `;
+          },
+        },
+        {
+          data: null,
+          className: "dt-body-center",
+          orderable: false,
+          render: function (data, type, row) {
+            return `
+              <button class="btn-secondary btn-sm" onclick="configManager.editCriteria(${row.id})" title="Editar">
+                <i class="icon-edit"></i>
+              </button>
+              <button class="btn-danger btn-sm" onclick="configManager.deleteCriteria(${row.id})" title="Eliminar">
+                <i class="icon-delete"></i>
+              </button>
+            `;
+          },
+        },
+      ],
+      language: {
+        zeroRecords: "No se encontraron criterios",
+        emptyTable: "Aún no hay criterios, crea uno nuevo",
+        info: "Mostrando _START_ a _END_ de _TOTAL_ criterios",
+        infoEmpty: "Mostrando 0 a 0 de 0 criterios",
+        infoFiltered: "(filtrado de _MAX_ criterios totales)",
+        processing: '<div class="table-spinner"></div>Procesando...',
+      },
+    });
+
+    this.setupTableFilters("criteria");
+  }
+
+  // ==================== FILTROS Y BÚSQUEDA ====================
+
+  /**
+   * Configura los filtros de búsqueda para una tabla
+   */
+  setupTableFilters(tableType) {
+    const matchingInput = document.getElementById(`${tableType}MatchingInput`);
+    const filterColumn = document.getElementById(`${tableType}FilterColumn`);
+    const clearButton = document.getElementById(`${tableType}ClearButton`);
+
+    if (!matchingInput || !filterColumn || !clearButton) return;
+
+    // Evento de búsqueda
+    matchingInput.addEventListener("input", () => {
+      this.applyTableFilter(tableType);
+    });
+
+    // Evento de cambio de columna
+    filterColumn.addEventListener("change", () => {
+      this.applyTableFilter(tableType);
+    });
+
+    // Evento de limpiar
+    clearButton.addEventListener("click", () => {
+      matchingInput.value = "";
+      clearButton.style.display = "none";
+      this.applyTableFilter(tableType);
+      matchingInput.focus();
+    });
+  }
+
+  /**
+   * Aplica filtros a la tabla
+   */
+  applyTableFilter(tableType) {
+    const matchingInput = document.getElementById(`${tableType}MatchingInput`);
+    const filterColumn = document.getElementById(`${tableType}FilterColumn`);
+    const clearButton = document.getElementById(`${tableType}ClearButton`);
+
+    if (!matchingInput || !filterColumn || !clearButton || !this.currentTable)
+      return;
+
+    const searchValue = matchingInput.value.trim();
+    const columnIndex = filterColumn.value;
+
+    clearButton.style.display = searchValue ? "block" : "none";
+
+    if (columnIndex == 0) {
+      // Filtro global
+      this.currentTable.columns().search("");
+      this.currentTable.search(searchValue, false, true).draw();
+    } else {
+      // Filtro por columna
+      this.currentTable.search("");
+      this.currentTable.columns().search("");
+      this.currentTable
+        .column(columnIndex)
+        .search(searchValue, false, true)
+        .draw();
     }
   }
 
+  // ==================== OPERACIONES CRUD ====================
+
   /**
-   * Actualiza un nivel socioeconómico
+   * Abre modal para nuevo nivel
    */
-  async updateLevel(levelId, formData) {
-    try {
-      const response = await fetch(`${this.baseUrl}/levels/${levelId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (data.status === "success") {
-        this.showSuccess("Nivel actualizado correctamente");
-        this.loadSection(this.currentSection);
-        return true;
-      } else {
-        this.showError(data.message || "Error al actualizar nivel");
-        return false;
-      }
-    } catch (error) {
-      this.showError("Error de conexión");
-      return false;
-    }
+  openLevelModal(levelId = null) {
+    // Implementar modal de nivel
+    this.showInfo("Modal de nivel en desarrollo");
   }
 
   /**
-   * Cambia el estado de un nivel
+   * Edita un nivel
+   */
+  editLevel(levelId) {
+    this.openLevelModal(levelId);
+  }
+
+  /**
+   * Cambia estado de nivel
    */
   async toggleLevelStatus(levelId, status) {
     try {
@@ -675,7 +601,6 @@ class ConfigManager {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
         },
         body: JSON.stringify({ estado: status }),
       });
@@ -683,216 +608,57 @@ class ConfigManager {
       const data = await response.json();
 
       if (data.status === "success") {
-        this.showSuccess("Estado actualizado");
+        this.showSuccess(data.message);
       } else {
-        this.showError(data.message || "Error al cambiar estado");
-        // Revertir el toggle
-        const checkbox = document.querySelector(
-          `tr[data-level-id="${levelId}"] input[type="checkbox"]`
-        );
-        if (checkbox) checkbox.checked = !status;
+        this.showError(data.message);
+        this.currentTable.ajax.reload(null, false);
       }
     } catch (error) {
       this.showError("Error de conexión");
-      // Revertir el toggle
-      const checkbox = document.querySelector(
-        `tr[data-level-id="${levelId}"] input[type="checkbox"]`
-      );
-      if (checkbox) checkbox.checked = !status;
+      this.currentTable.ajax.reload(null, false);
     }
   }
 
   /**
-   * Elimina un nivel socioeconómico
+   * Elimina un nivel
    */
   async deleteLevel(levelId) {
-    const confirmed = await CustomDialog.confirm(
-      "Eliminar Nivel",
-      "¿Estás seguro de que deseas eliminar este nivel? Esta acción no se puede deshacer.",
-      "Eliminar",
-      "Cancelar"
-    );
-
-    if (!confirmed) return;
+    if (!confirm("¿Está seguro de eliminar este nivel?")) return;
 
     try {
       const response = await fetch(`${this.baseUrl}/levels/${levelId}`, {
         method: "DELETE",
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-        },
       });
 
       const data = await response.json();
 
       if (data.status === "success") {
-        this.showSuccess("Nivel eliminado correctamente");
-        this.loadSection(this.currentSection);
+        this.showSuccess(data.message);
+        this.currentTable.ajax.reload(null, false);
       } else {
-        this.showError(data.message || "Error al eliminar nivel");
+        this.showError(data.message);
       }
     } catch (error) {
       this.showError("Error de conexión");
     }
   }
 
-  // ==================== OPERACIONES DE REGLAS DE APORTACIÓN ====================
-
   /**
-   * Abre el modal para crear/editar regla
+   * Abre modal para nueva regla
    */
-  async openRuleModal(ruleId = null) {
-    const isEdit = ruleId !== null;
-    let ruleData = null;
-
-    // Cargar niveles para el formulario
-    try {
-      const levelsResponse = await fetch(`${this.baseUrl}/levels`);
-      const levelsData = await levelsResponse.json();
-
-      if (levelsData.status !== "success") {
-        this.showError("Error al cargar niveles disponibles");
-        return;
-      }
-
-      if (isEdit) {
-        const response = await fetch(`${this.baseUrl}/rules/${ruleId}`);
-        const data = await response.json();
-        if (data.status === "success") {
-          ruleData = data.data;
-        } else {
-          this.showError("Error al cargar datos de la regla");
-          return;
-        }
-      }
-
-      const templateData = TEMPLATE_HELPERS.processRuleFormData(
-        ruleData,
-        levelsData.data
-      );
-
-      const modal = createModal("form", {
-        title: isEdit
-          ? "Editar Regla de Aportación"
-          : "Nueva Regla de Aportación",
-        size: "medium",
-        template: "ruleForm",
-        data: templateData,
-        endpoint: isEdit
-          ? `${this.baseUrl}/rules/${ruleId}`
-          : `${this.baseUrl}/rules`,
-        onSubmit: async (formData, modalInstance) => {
-          const success = isEdit
-            ? await this.updateRule(ruleId, formData)
-            : await this.createRule(formData);
-
-          if (success) {
-            modalInstance.hide();
-          }
-        },
-      });
-
-      modal.show();
-    } catch (error) {
-      this.showError("Error al cargar datos para el formulario");
-    }
+  openRuleModal(ruleId = null) {
+    this.showInfo("Modal de regla en desarrollo");
   }
 
   /**
-   * Crea una nueva regla de aportación
+   * Edita una regla
    */
-  async createRule(formData) {
-    try {
-      const response = await fetch(`${this.baseUrl}/rules`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (data.status === "success") {
-        this.showSuccess("Regla creada correctamente");
-        this.loadSection(this.currentSection);
-        return true;
-      } else {
-        this.showError(data.message || "Error al crear regla");
-        return false;
-      }
-    } catch (error) {
-      this.showError("Error de conexión");
-      return false;
-    }
+  editRule(ruleId) {
+    this.openRuleModal(ruleId);
   }
 
   /**
-   * Actualiza una regla de aportación
-   */
-  async updateRule(ruleId, formData) {
-    try {
-      const response = await fetch(`${this.baseUrl}/rules/${ruleId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (data.status === "success") {
-        this.showSuccess("Regla actualizada correctamente");
-        this.loadSection(this.currentSection);
-        return true;
-      } else {
-        this.showError(data.message || "Error al actualizar regla");
-        return false;
-      }
-    } catch (error) {
-      this.showError("Error de conexión");
-      return false;
-    }
-  }
-
-  /**
-   * Filtra las reglas según los criterios seleccionados
-   */
-  async filterRules() {
-    const nivelSelect = document.getElementById("filter-nivel");
-    const periodicidadSelect = document.getElementById("filter-periodicidad");
-
-    if (!nivelSelect || !periodicidadSelect) return;
-
-    const nivel = nivelSelect.value;
-    const periodicidad = periodicidadSelect.value;
-
-    const params = new URLSearchParams();
-    if (nivel) params.append("nivel_id", nivel);
-    if (periodicidad) params.append("periodicidad", periodicidad);
-
-    try {
-      const response = await fetch(
-        `${this.baseUrl}/rules?${params.toString()}`
-      );
-      const data = await response.json();
-
-      if (data.status === "success") {
-        const tbody = document.getElementById("rules-table-body");
-        if (tbody) {
-          tbody.innerHTML = this.renderRulesRows(data.data);
-        }
-      }
-    } catch (error) {
-      this.showError("Error al filtrar reglas");
-    }
-  }
-
-  /**
-   * Cambia el estado de una regla
+   * Cambia estado de regla
    */
   async toggleRuleStatus(ruleId, status) {
     try {
@@ -900,7 +666,6 @@ class ConfigManager {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
         },
         body: JSON.stringify({ estado: status }),
       });
@@ -908,174 +673,57 @@ class ConfigManager {
       const data = await response.json();
 
       if (data.status === "success") {
-        this.showSuccess("Estado actualizado");
+        this.showSuccess(data.message);
       } else {
-        this.showError(data.message || "Error al cambiar estado");
-        // Revertir el toggle
-        const checkbox = document.querySelector(
-          `tr[data-rule-id="${ruleId}"] input[type="checkbox"]`
-        );
-        if (checkbox) checkbox.checked = !status;
+        this.showError(data.message);
+        this.currentTable.ajax.reload(null, false);
       }
     } catch (error) {
       this.showError("Error de conexión");
-      // Revertir el toggle
-      const checkbox = document.querySelector(
-        `tr[data-rule-id="${ruleId}"] input[type="checkbox"]`
-      );
-      if (checkbox) checkbox.checked = !status;
+      this.currentTable.ajax.reload(null, false);
     }
   }
 
   /**
-   * Elimina una regla de aportación
+   * Elimina una regla
    */
   async deleteRule(ruleId) {
-    const confirmed = await CustomDialog.confirm(
-      "Eliminar Regla",
-      "¿Estás seguro de que deseas eliminar esta regla?",
-      "Eliminar",
-      "Cancelar"
-    );
-
-    if (!confirmed) return;
+    if (!confirm("¿Está seguro de eliminar esta regla?")) return;
 
     try {
       const response = await fetch(`${this.baseUrl}/rules/${ruleId}`, {
         method: "DELETE",
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-        },
       });
 
       const data = await response.json();
 
       if (data.status === "success") {
-        this.showSuccess("Regla eliminada correctamente");
-        this.loadSection(this.currentSection);
+        this.showSuccess(data.message);
+        this.currentTable.ajax.reload(null, false);
       } else {
-        this.showError(data.message || "Error al eliminar regla");
+        this.showError(data.message);
       }
     } catch (error) {
       this.showError("Error de conexión");
     }
   }
 
-  // ==================== OPERACIONES DE CRITERIOS ====================
-
   /**
-   * Abre el modal para crear/editar criterio
+   * Abre modal para nuevo criterio
    */
-  async openCriteriaModal(subcategoryId, criteriaId = null) {
-    const isEdit = criteriaId !== null;
-    let criteriaData = null;
-
-    if (isEdit) {
-      try {
-        const response = await fetch(`${this.baseUrl}/criteria/${criteriaId}`);
-        const data = await response.json();
-        if (data.status === "success") {
-          criteriaData = data.data;
-          subcategoryId = criteriaData.subcategoria_id; // Obtener subcategoryId del criterio
-        } else {
-          this.showError("Error al cargar datos del criterio");
-          return;
-        }
-      } catch (error) {
-        this.showError("Error al cargar datos del criterio");
-        return;
-      }
-    }
-
-    const templateData = TEMPLATE_HELPERS.processCriteriaFormData(
-      criteriaData,
-      subcategoryId
-    );
-
-    const modal = createModal("form", {
-      title: isEdit ? "Editar Criterio" : "Nuevo Criterio",
-      size: "large",
-      template: "criteriaForm",
-      data: templateData,
-      endpoint: isEdit
-        ? `${this.baseUrl}/criteria/${criteriaId}`
-        : `${this.baseUrl}/criteria`,
-      onSubmit: async (formData, modalInstance) => {
-        const success = isEdit
-          ? await this.updateCriteria(criteriaId, formData)
-          : await this.createCriteria(formData);
-
-        if (success) {
-          modalInstance.hide();
-        }
-      },
-    });
-
-    modal.show();
+  openCriteriaModal(criteriaId = null) {
+    this.showInfo("Modal de criterio en desarrollo");
   }
 
   /**
-   * Crea un nuevo criterio
+   * Edita un criterio
    */
-  async createCriteria(formData) {
-    try {
-      const response = await fetch(`${this.baseUrl}/criteria`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (data.status === "success") {
-        this.showSuccess("Criterio creado correctamente");
-        this.loadSection(this.currentSection);
-        return true;
-      } else {
-        this.showError(data.message || "Error al crear criterio");
-        return false;
-      }
-    } catch (error) {
-      this.showError("Error de conexión");
-      return false;
-    }
+  editCriteria(criteriaId) {
+    this.openCriteriaModal(criteriaId);
   }
 
   /**
-   * Actualiza un criterio
-   */
-  async updateCriteria(criteriaId, formData) {
-    try {
-      const response = await fetch(`${this.baseUrl}/criteria/${criteriaId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (data.status === "success") {
-        this.showSuccess("Criterio actualizado correctamente");
-        this.loadSection(this.currentSection);
-        return true;
-      } else {
-        this.showError(data.message || "Error al actualizar criterio");
-        return false;
-      }
-    } catch (error) {
-      this.showError("Error de conexión");
-      return false;
-    }
-  }
-
-  /**
-   * Cambia el estado de un criterio
+   * Cambia estado de criterio
    */
   async toggleCriteriaStatus(criteriaId, status) {
     try {
@@ -1085,7 +733,6 @@ class ConfigManager {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Requested-With": "XMLHttpRequest",
           },
           body: JSON.stringify({ estado: status }),
         }
@@ -1094,22 +741,14 @@ class ConfigManager {
       const data = await response.json();
 
       if (data.status === "success") {
-        this.showSuccess("Estado actualizado");
+        this.showSuccess(data.message);
       } else {
-        this.showError(data.message || "Error al cambiar estado");
-        // Revertir el toggle
-        const checkbox = document.querySelector(
-          `tr[data-criteria-id="${criteriaId}"] input[type="checkbox"]`
-        );
-        if (checkbox) checkbox.checked = !status;
+        this.showError(data.message);
+        this.currentTable.ajax.reload(null, false);
       }
     } catch (error) {
       this.showError("Error de conexión");
-      // Revertir el toggle
-      const checkbox = document.querySelector(
-        `tr[data-criteria-id="${criteriaId}"] input[type="checkbox"]`
-      );
-      if (checkbox) checkbox.checked = !status;
+      this.currentTable.ajax.reload(null, false);
     }
   }
 
@@ -1117,243 +756,24 @@ class ConfigManager {
    * Elimina un criterio
    */
   async deleteCriteria(criteriaId) {
-    const confirmed = await CustomDialog.confirm(
-      "Eliminar Criterio",
-      "¿Estás seguro de que deseas eliminar este criterio?",
-      "Eliminar",
-      "Cancelar"
-    );
-
-    if (!confirmed) return;
+    if (!confirm("¿Está seguro de eliminar este criterio?")) return;
 
     try {
       const response = await fetch(`${this.baseUrl}/criteria/${criteriaId}`, {
         method: "DELETE",
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-        },
       });
 
       const data = await response.json();
 
       if (data.status === "success") {
-        this.showSuccess("Criterio eliminado correctamente");
-        this.loadSection(this.currentSection);
+        this.showSuccess(data.message);
+        this.currentTable.ajax.reload(null, false);
       } else {
-        this.showError(data.message || "Error al eliminar criterio");
+        this.showError(data.message);
       }
     } catch (error) {
       this.showError("Error de conexión");
     }
-  }
-
-  // ==================== FUNCIONES ESPECIALES ====================
-
-  /**
-   * Abre modal de vista matriz para reglas
-   */
-  async openRulesMatrixModal() {
-    try {
-      // Cargar niveles para mostrar matriz
-      const levelsResponse = await fetch(`${this.baseUrl}/levels`);
-      const levelsData = await levelsResponse.json();
-
-      if (levelsData.status !== "success") {
-        this.showError("Error al cargar niveles");
-        return;
-      }
-
-      const templateData = TEMPLATE_HELPERS.processRulesMatrixData(
-        levelsData.data
-      );
-
-      const modal = createModal("info", {
-        title: "Matriz de Aportaciones",
-        size: "large",
-        template: "rulesMatrix",
-        data: templateData,
-        onShow: (modalInstance) => {
-          // Cargar matriz para el primer nivel
-          if (levelsData.data.length > 0) {
-            this.loadMatrixForLevel(levelsData.data[0].id);
-          }
-        },
-      });
-
-      modal.show();
-    } catch (error) {
-      this.showError("Error al cargar matriz de reglas");
-    }
-  }
-
-  /**
-   * Carga matriz de aportaciones para un nivel específico
-   */
-  async loadMatrixForLevel(levelId) {
-    try {
-      const response = await fetch(
-        `${this.baseUrl}/rules/matrix?nivel_id=${levelId}`
-      );
-      const data = await response.json();
-
-      if (data.status === "success") {
-        this.renderMatrix(data.data);
-      } else {
-        this.showError("Error al cargar matriz");
-      }
-    } catch (error) {
-      this.showError("Error al cargar matriz");
-    }
-  }
-
-  /**
-   * Renderiza la matriz de aportaciones
-   */
-  renderMatrix(matrixData) {
-    const container = document.getElementById("matrix-container");
-    if (!container) return;
-
-    const { edades, periodicidades, matrix } = matrixData;
-
-    if (!edades || !periodicidades) {
-      container.innerHTML = `
-        <div class="matrix-error">
-          <p>No hay datos suficientes para mostrar la matriz</p>
-        </div>
-      `;
-      return;
-    }
-
-    let html = `
-      <table class="matrix-table">
-        <thead>
-          <tr>
-            <th>Edad</th>
-            ${periodicidades
-              .map((p) => `<th>${TEMPLATE_HELPERS.formatPeriodicity(p)}</th>`)
-              .join("")}
-          </tr>
-        </thead>
-        <tbody>
-    `;
-
-    edades.forEach((edad) => {
-      html += `<tr><td class="edad-cell">${edad} años</td>`;
-      periodicidades.forEach((periodicidad) => {
-        const monto =
-          matrix[edad] && matrix[edad][periodicidad]
-            ? `$${TEMPLATE_HELPERS.formatMoney(matrix[edad][periodicidad])}`
-            : '<span class="no-rule">-</span>';
-        html += `<td class="monto-cell">${monto}</td>`;
-      });
-      html += "</tr>";
-    });
-
-    html += `
-        </tbody>
-      </table>
-    `;
-
-    container.innerHTML = html;
-  }
-
-  /**
-   * Muestra acciones agrupadas para criterios múltiples
-   */
-  showGroupActions() {
-    const modal = createModal("info", {
-      title: "Gestionar Criterios",
-      size: "medium",
-      template: "groupActions",
-      data: {},
-    });
-
-    modal.show();
-  }
-
-  /**
-   * Cambia la visibilidad de los campos según el tipo de criterio
-   */
-  toggleCriteriaFields(tipo) {
-    const rangoFields = document.getElementById("rango-fields");
-    const textoFields = document.getElementById("texto-fields");
-    const booleanoFields = document.getElementById("booleano-fields");
-
-    if (!rangoFields || !textoFields || !booleanoFields) return;
-
-    // Ocultar todos los campos
-    rangoFields.style.display = "none";
-    textoFields.style.display = "none";
-    booleanoFields.style.display = "none";
-
-    // Mostrar campos según el tipo
-    switch (tipo) {
-      case "rango_numerico":
-        rangoFields.style.display = "block";
-        break;
-      case "valor_especifico":
-        textoFields.style.display = "block";
-        break;
-      case "booleano":
-        booleanoFields.style.display = "block";
-        break;
-    }
-  }
-
-  // ==================== FUNCIONES AUXILIARES ====================
-
-  /**
-   * Edita un nivel (alias para abrir modal)
-   */
-  editLevel(levelId) {
-    this.openLevelModal(levelId);
-  }
-
-  /**
-   * Edita una regla (alias para abrir modal)
-   */
-  editRule(ruleId) {
-    this.openRuleModal(ruleId);
-  }
-
-  /**
-   * Edita un criterio (alias para abrir modal)
-   */
-  editCriteria(criteriaId) {
-    this.openCriteriaModal(null, criteriaId);
-  }
-
-  // ==================== FUNCIONES FUTURAS (PLACEHOLDERS) ====================
-
-  /**
-   * Funciones para funcionalidades futuras
-   */
-  showBulkCriteriaForm() {
-    CustomDialog.info(
-      "Función en desarrollo",
-      "Esta funcionalidad estará disponible próximamente."
-    );
-  }
-
-  exportCriteria() {
-    CustomDialog.info(
-      "Función en desarrollo",
-      "Esta funcionalidad estará disponible próximamente."
-    );
-  }
-
-  importCriteria() {
-    CustomDialog.info(
-      "Función en desarrollo",
-      "Esta funcionalidad estará disponible próximamente."
-    );
-  }
-
-  openBulkRulesModal() {
-    CustomDialog.info(
-      "Función en desarrollo",
-      "Esta funcionalidad estará disponible próximamente."
-    );
   }
 
   // ==================== FUNCIONES DE UTILIDAD ====================
@@ -1373,7 +793,7 @@ class ConfigManager {
   }
 
   /**
-   * Muestra mensaje de éxito usando CustomDialog
+   * Muestra mensaje de éxito
    */
   showSuccess(message) {
     if (typeof CustomDialog !== "undefined") {
@@ -1384,19 +804,19 @@ class ConfigManager {
   }
 
   /**
-   * Muestra mensaje de error usando CustomDialog
+   * Muestra mensaje de error
    */
   showError(message) {
     if (typeof CustomDialog !== "undefined") {
       CustomDialog.toast(message, "error", 5000);
     } else {
       console.error("Error:", message);
-      alert(message); // Fallback
+      alert(message);
     }
   }
 
   /**
-   * Muestra mensaje informativo usando CustomDialog
+   * Muestra mensaje informativo
    */
   showInfo(message) {
     if (typeof CustomDialog !== "undefined") {
@@ -1410,6 +830,12 @@ class ConfigManager {
    * Cleanup al destruir la instancia
    */
   destroy() {
+    // Destruir tabla actual si existe
+    if (this.currentTable) {
+      this.currentTable.destroy();
+      this.currentTable = null;
+    }
+
     // Cerrar todos los modales abiertos
     if (typeof BaseModal !== "undefined") {
       BaseModal.closeAll();
@@ -1456,7 +882,7 @@ window.addEventListener("beforeunload", function () {
 // Exponer funciones globales para uso en HTML
 window.configManager = configManager;
 
-// Manejo de errors globales para this module
+// Manejo de errores globales para este módulo
 window.addEventListener("error", function (event) {
   if (event.filename && event.filename.includes("config-manager.js")) {
     console.error("Error en ConfigManager:", event.error);
