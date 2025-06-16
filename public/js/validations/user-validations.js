@@ -236,8 +236,45 @@ const UserHandlers = {
       data.message || "La contraseña se ha restablecido correctamente"
     );
     
-  }
-  
+  },
+
+  onError: async (data, form) => {
+
+    console.error("Error en FormManager:", data);
+
+    console.log(data.errors);
+
+    // es posible que errors tenga un solo error o un array de errores
+    if (data.errors && typeof data.errors === "object") {
+      // Limpiar errores previos
+      FormManager.clearErrors(form);
+
+      // Iterar sobre los errores y mostrarlos
+      for (const [field, error] of Object.entries(data.errors)) {
+        const input = form.querySelector(`[name="${field}"]`);
+        if (input) {
+          input.classList.add("error-input");
+          const errorMessage = document.createElement("div");
+          errorMessage.className = "error-message";
+          errorMessage.textContent = error;
+          input.parentElement.appendChild(errorMessage);
+        }
+      }
+
+      CustomDialog.toast(
+        "Corrija los errores marcados en el formulario",
+        "error",
+        2000
+      );
+      
+    } else {
+      await CustomDialog.error(
+        "Error",
+        data.message || "Ocurrió un error al procesar la solicitud"
+      );
+    }
+  },
+ 
 };
 
 // Utilidades para formularios de usuarios
