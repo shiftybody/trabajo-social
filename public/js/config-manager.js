@@ -856,11 +856,6 @@ window.addEventListener("error", function (event) {
         "Error del Sistema",
         "Se ha producido un error en el gestor de configuración. La página se recargará automáticamente."
       );
-
-      // Recargar después de 3 segundos
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
     }
   }
 });

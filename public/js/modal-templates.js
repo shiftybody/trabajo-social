@@ -221,13 +221,13 @@ const MODAL_TEMPLATES = {
     </form>
   `,
 
-  editarNivel: `
+  editLevel: `
       <form novalidate id="editLevelForm" class="base-modal-form form-ajax config-form" method="POST">
       <div class="form-group">
         <label for="nivel" class="field-label">Nombre del Nivel</label>
         <input type="text" id="nivel" name="nivel" class="input-reset" 
                value="{{nivel}}" 
-               maxlength="20" required>s
+               maxlength="20" required disabled>
       </div>
       
       <div class="form-group">
@@ -614,15 +614,14 @@ const TEMPLATE_HELPERS = {
     };
   },
 
-  // ==================== HELPERS DE CONFIGURACIÓN ====================
+  // ==================== HELPERS DE CONFIGURACIÓN ==================
 
-  // Procesa datos para formulario de nivel
-  processLevelFormData: (level = null) => {
+  processEditLevelData: (level) => {
+    console.log("EDITANDO NIVEL", level);
     return {
-      nivel: level?.nivel || "",
-      puntaje_minimo: level?.puntaje_minimo || "",
-      submitText: level ? "Actualizar Nivel" : "Crear Nivel",
-    };
+      nivel: level.nivel || "",
+      puntaje_minimo: level.puntaje_minimo || "",
+    }
   },
 
   // Procesa datos para formulario de regla

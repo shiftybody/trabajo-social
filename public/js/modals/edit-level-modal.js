@@ -2,6 +2,7 @@
  * Modal para editar rol - Solo nombre (sin permisos)
  */
 function editarNivel(nivelId) {
+  console.log("CREANDO MODAL DE EDITAR NIVEL", nivelId);
   const editModal = createModal("editLevel", {
     title: "Editar Nivel Socioeconómico",
     size: "medium", // Reducido de 'large'
@@ -10,7 +11,7 @@ function editarNivel(nivelId) {
       modal.showLoading("Cargando información del nivel...");
 
       try {
-        const response = await fetch(`${APP_URL}api/socioeconomic-levels/${nivelId}`);
+        const response = await fetch(`${APP_URL}api/settings/levels/${nivelId}`);
         const nivelData = await response.json();
 
         if (nivelData.status === "success") {
