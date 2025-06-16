@@ -152,6 +152,7 @@ label {
 input[type="text"],
 input[type="password"],
 input[type="email"],
+input[type="number"],
 select {
   display: flex;
   font-family: var(--font-family);

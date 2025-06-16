@@ -66,6 +66,8 @@ class SettingController
     }
   }
 
+
+
   /**
    * API: Obtiene un nivel socioeconómico por ID
    */
@@ -115,7 +117,7 @@ class SettingController
       } else {
         return Response::json([
           'status' => 'error',
-          'message' => 'Error al crear nivel'
+          'message' => 'El nivel ya existe o el puntaje es inválido'
         ], 400);
       }
     } catch (Exception $e) {
@@ -210,7 +212,7 @@ class SettingController
       } else {
         return Response::json([
           'status' => 'error',
-          'message' => 'Error al eliminar nivel'
+          'message' => 'Nivel asociado a una regla o estudio, no se puede eliminar'
         ], 400);
       }
     } catch (Exception $e) {

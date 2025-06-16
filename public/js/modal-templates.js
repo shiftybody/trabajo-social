@@ -170,50 +170,6 @@ const MODAL_TEMPLATES = {
     </div>
   `,
 
-  // Template para detalles de rol
-  roleDetails: `
-    <div class="role-profile-section">
-      <div class="role-icon-large">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
-        </svg>
-      </div>
-      <div class="role-profile-info">
-        <h3>{{roleName}}</h3>
-        <p class="role-description">Rol del sistema</p>
-        <div class="role-status-badge active">
-          <span class="status-dot active"></span>
-          Activo
-        </div>
-      </div>
-    </div>
- 
-    <div class="role-details-grid">
-      <div class="role-detail-section">
-        <h4>
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          Información del Rol
-        </h4>
-        {{roleDetails}}
-      </div>
- 
-      <div class="role-detail-section">
-        <h4>
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-          </svg>
-          Permisos Asignados
-        </h4>
-        <div class="permissions-list">
-          {{permissionsList}}
-        </div>
-      </div>
-    </div>
-  `,
-
   // Template para editar rol
   createRole: `
     <form novalidate id="createRoleForm" class="base-modal-form form-ajax" method="POST">
@@ -243,26 +199,24 @@ const MODAL_TEMPLATES = {
   // ==================== TEMPLATES DE CONFIGURACIÓN ====================
 
   // Template para formulario de nivel socioeconómico
-  levelForm: `
-    <form novalidate id="levelForm" class="base-modal-form form-ajax config-form" method="POST">
+  createLevel: `
+    <form novalidate id="createLevelForm" class="base-modal-form form-ajax config-form" method="POST">
       <div class="form-group">
-        <label for="nivel" class="field-label">Nombre del Nivel *</label>
+        <label for="nivel" class="field-label">Nombre del Nivel</label>
         <input type="text" id="nivel" name="nivel" class="input-reset" 
-               value="{{nivel}}" placeholder="ej: Alto, Medio, Bajo" 
+               value="{{nivel}}" 
                maxlength="20" required>
-        <small class="field-help">Máximo 20 caracteres</small>
       </div>
       
       <div class="form-group">
-        <label for="puntaje_minimo" class="field-label">Puntaje Mínimo *</label>
+        <label for="puntaje_minimo" class="field-label">Puntaje Mínimo</label>
         <input type="number" id="puntaje_minimo" name="puntaje_minimo" class="input-reset"
                value="{{puntaje_minimo}}" min="0" required>
-        <small class="field-help">Puntaje mínimo requerido para este nivel</small>
       </div>
       
       <div class="base-modal-actions">
-        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
-        <button type="submit" class="btn-primary">{{submitText}}</button>
+        <button class="btn-cancel" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">Crear Nivel</button>
       </div>
     </form>
   `,

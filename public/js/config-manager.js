@@ -1,11 +1,11 @@
 /**
  * Gestor de Configuración Simplificado
- *
+ * 
  * Maneja únicamente las 3 funcionalidades principales:
  * - Niveles socioeconómicos
- * - Reglas de aportación
+ * - Reglas de aportación  
  * - Criterios básicos
- *
+ * 
  * Utiliza DataTables para todas las tablas
  */
 class ConfigManager {
@@ -15,6 +15,7 @@ class ConfigManager {
     this.contentArea = null;
     this.isLoading = false;
     this.currentTable = null; // Referencia a la tabla DataTable actual
+    this.levelsData = []; // Cache de niveles socioeconómicos
 
     this.init();
   }
@@ -26,6 +27,7 @@ class ConfigManager {
     try {
       this.cacheElements();
       this.bindNavigationEvents();
+      this.loadLevelsData(); // Cargar niveles al inicio
       this.loadInitialSection();
     } catch (error) {
       console.error("Error initializing ConfigManager:", error);
@@ -40,6 +42,22 @@ class ConfigManager {
     this.contentArea = document.getElementById("config-content-area");
     if (!this.contentArea) {
       throw new Error("Elemento config-content-area no encontrado");
+    }
+  }
+
+  /**
+   * Carga los datos de niveles socioeconómicos
+   */
+  async loadLevelsData() {
+    try {
+      const response = await fetch(`${this.baseUrl}/levels`);
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        this.levelsData = data.data.filter(level => level.estado == 1); // Solo activos
+      }
+    } catch (error) {
+      console.error("Error loading levels data:", error);
     }
   }
 
@@ -92,28 +110,28 @@ class ConfigManager {
 
       // Solo manejar las 3 secciones principales
       switch (section) {
-        case "niveles-socioeconomicos":
+        case 'niveles-socioeconomicos':
           await this.loadLevelsSection();
           break;
-        case "reglas-aportacion":
+        case 'reglas-aportacion':
           await this.loadRulesSection();
           break;
-        case "criterios":
-        case "protocolo":
-        case "gasto-traslado":
-        case "tiempo-traslado":
-        case "integrantes":
-        case "hijos":
-        case "tipo-familia":
-        case "tipo-vivienda":
-        case "tenencia":
-        case "zona":
-        case "materiales":
-        case "servicios":
+        case 'criterios':
+        case 'protocolo':
+        case 'gasto-traslado':
+        case 'tiempo-traslado':
+        case 'integrantes':
+        case 'hijos':
+        case 'tipo-familia':
+        case 'tipo-vivienda':
+        case 'tenencia':
+        case 'zona':
+        case 'materiales':
+        case 'servicios':
           await this.loadCriteriaSection();
           break;
         default:
-          this.showError("Sección no implementada");
+          this.showError('Sección no implementada');
       }
     } catch (error) {
       console.error("Error loading section:", error);
@@ -129,14 +147,16 @@ class ConfigManager {
    * Carga la sección de niveles socioeconómicos
    */
   async loadLevelsSection() {
+    
     const html = `
       <div class="config-content-header">
         <h2>Niveles Socioeconómicos</h2>
-        <button class="btn-primary" onclick="configManager.openLevelModal()">
-          <i class="icon-plus"></i> Nuevo Nivel
+        <button class="btn-primary" onclick="configManager.createLevel()">
+          Nuevo Nivel
         </button>
       </div>
-  
+      
+      <div class="table-container">
         <table id="levels-table" class="hover nowrap cell-borders" style="width: 100%;">
           <thead>
             <tr>
@@ -158,82 +178,76 @@ class ConfigManager {
    * Inicializa la tabla de niveles con DataTables
    */
   async initializeLevelsTable() {
-    this.currentTable = new DataTable("#levels-table", {
-      paging: false,
-      info: false,
+    this.currentTable = new DataTable('#levels-table', {
       ajax: {
         url: `${this.baseUrl}/levels`,
-        dataSrc: "data",
+        dataSrc: 'data'
       },
       columns: [
-
-        { data: "nivel", className: "dt-body-center" },
-        {
-          data: "puntaje_minimo",
-          className: "dt-body-center",
+        { data: 'nivel', className: 'dt-body-center' },
+        { 
+          data: 'puntaje_minimo',
+          className: 'dt-body-center'
         },
-        {
-          data: "estado",
-          className: "dt-body-center",
-          render: function (data, type, row) {
-            const checked = data == 1 ? "checked" : "";
+        { 
+          data: 'estado',
+          className: 'dt-body-center',
+          render: function(data, type, row) {
+            const checked = data == 1 ? 'checked' : '';
             return `
               <label class="toggle-switch">
                 <input type="checkbox" ${checked} onchange="configManager.toggleLevelStatus(${row.id}, this.checked)">
                 <span class="toggle-slider"></span>
               </label>
             `;
-          },
+          }
         },
-        {
+        { 
           data: null,
-          className: "dt-body-center",
+          className: 'dt-body-center',
           orderable: false,
-          render: function (data, type, row) {
+          render: function(data, type, row) {
             return `
               <button type="button" class="editar" onclick="configManager.editLevel(${row.id})" title="Editar Nivel">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
-                <path d="M13.5 6.5l4 4" />
-              </svg>
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                  <path d="M13.5 6.5l4 4" />
+                </svg>
               </button>
               <button type="button" class="remover" onclick="configManager.deleteLevel(${row.id})" title="Eliminar Nivel">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M4 7l16 0" />
-                <path d="M10 11l0 6" />
-                <path d="M14 11l0 6" />
-                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-              </svg>
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M4 7l16 0" />
+                  <path d="M10 11l0 6" />
+                  <path d="M14 11l0 6" />
+                  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                </svg>
               </button>
             `;
-          },
-        },
+          }
+        }
       ],
+      paging: false,
+      info: false,
       language: {
-        zeroRecords: "No se encontraron niveles",
-        emptyTable: "Aún no hay niveles, crea uno nuevo",
-        info: "Mostrando _START_ a _END_ de _TOTAL_ niveles",
-        infoEmpty: "Mostrando 0 a 0 de 0 niveles",
-        infoFiltered: "(filtrado de _MAX_ niveles totales)",
-        processing: '<div class="table-spinner"></div>Procesando...',
+        "zeroRecords": "No se encontraron niveles",
+        "emptyTable": "Aún no hay niveles, crea uno nuevo",
+        "processing": '<div class="table-spinner"></div>Procesando...'
       },
       drawCallback: () => {
         // Aplicar clases de estado
-        document.querySelectorAll("td").forEach((td) => {
-          if (td.textContent === "Inactivo") {
-            td.classList.add("inactivo");
+        document.querySelectorAll('td').forEach(td => {
+          if (td.textContent === 'Inactivo') {
+            td.classList.add('inactivo');
           }
-          if (td.textContent === "Activo") {
-            td.classList.add("activo");
+          if (td.textContent === 'Activo') {
+            td.classList.add('activo');
           }
         });
-      },
+      }
     });
-
-    this.setupTableFilters("levels");
   }
 
   // ==================== REGLAS DE APORTACIÓN ====================
@@ -242,6 +256,11 @@ class ConfigManager {
    * Carga la sección de reglas de aportación
    */
   async loadRulesSection() {
+    // Generar opciones de niveles
+    const levelOptions = this.levelsData.map(level => 
+      `<option value="${level.id}">${level.nivel}</option>`
+    ).join('');
+
     const html = `
       <div class="config-content-header">
         <h2>Reglas de Aportación</h2>
@@ -253,27 +272,12 @@ class ConfigManager {
       <div class="table-container">
         <div class="tools">
           <form class="filter_form" id="rules_filter_form">
-            <div class="input-container">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
-                <path d="M21 21l-6 -6" />
-              </svg>
-              <input class="matching-search" id="rulesMatchingInput" placeholder="Buscar reglas">
-              <span class="clear-button" id="rulesClearButton" style="display: none;">×</span>
-            </div>
             <div class="select-container">
-              <select class="custom-select" id="rulesFilterColumn">
-                <option value="0">Todo</option>
-                <option value="1">Nivel</option>
-                <option value="2">Edad</option>
-                <option value="3">Periodicidad</option>
-                <option value="4">Estado</option>
+              <label for="levelFilter" style="margin-right: 10px; font-weight: 500;">Filtrar por Nivel:</label>
+              <select class="custom-select" id="levelFilter" style="min-width: 200px;">
+                <option value="">Seleccione un nivel</option>
+                ${levelOptions}
               </select>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="select-filter-icon">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" />
-              </svg>
             </div>
           </form>
         </div>
@@ -281,7 +285,6 @@ class ConfigManager {
         <table id="rules-table" class="hover nowrap cell-borders" style="width: 100%;">
           <thead>
             <tr>
-              <th class="dt-head-center">ID</th>
               <th>NIVEL</th>
               <th class="dt-head-center">EDAD</th>
               <th>PERIODICIDAD</th>
@@ -302,79 +305,105 @@ class ConfigManager {
    * Inicializa la tabla de reglas con DataTables
    */
   async initializeRulesTable() {
-    this.currentTable = new DataTable("#rules-table", {
+    this.currentTable = new DataTable('#rules-table', {
       ajax: {
         url: `${this.baseUrl}/rules`,
-        dataSrc: "data",
+        dataSrc: 'data',
+        data: function(d) {
+          // Agregar filtro de nivel si está seleccionado
+          const levelFilter = document.getElementById('levelFilter');
+          if (levelFilter && levelFilter.value) {
+            d.nivel_id = levelFilter.value;
+          }
+        }
       },
       columns: [
-        {
-          data: "id",
-          className: "dt-body-center",
-        },
-        { data: "nivel_nombre" },
-        {
-          data: "edad",
-          className: "dt-body-center",
-          render: function (data) {
+        { data: 'nivel_nombre' },
+        { 
+          data: 'edad',
+          className: 'dt-body-center',
+          render: function(data) {
             return `<span class="age-badge">${data} años</span>`;
-          },
+          }
         },
-        {
-          data: "periodicidad",
-          render: function (data) {
+        { 
+          data: 'periodicidad',
+          render: function(data) {
             return `<span class="periodicity-badge periodicity-${data}">${data}</span>`;
-          },
+          }
         },
-        {
-          data: "monto_aportacion",
-          className: "dt-body-center",
-          render: function (data) {
-            return `<strong>$${parseFloat(data).toLocaleString(
-              "es-MX"
-            )}</strong>`;
-          },
+        { 
+          data: 'monto_aportacion',
+          className: 'dt-body-center',
+          render: function(data) {
+            return `<strong>$${parseFloat(data).toLocaleString('es-MX')}</strong>`;
+          }
         },
-        {
-          data: "estado",
-          className: "dt-body-center",
-          render: function (data, type, row) {
-            const checked = data == 1 ? "checked" : "";
+        { 
+          data: 'estado',
+          className: 'dt-body-center',
+          render: function(data, type, row) {
+            const checked = data == 1 ? 'checked' : '';
             return `
               <label class="toggle-switch">
                 <input type="checkbox" ${checked} onchange="configManager.toggleRuleStatus(${row.id}, this.checked)">
                 <span class="toggle-slider"></span>
               </label>
             `;
-          },
+          }
         },
-        {
+        { 
           data: null,
-          className: "dt-body-center",
+          className: 'dt-body-center',
           orderable: false,
-          render: function (data, type, row) {
+          render: function(data, type, row) {
             return `
-              <button class="btn-secondary btn-sm" onclick="configManager.editRule(${row.id})" title="Editar">
-                <i class="icon-edit"></i>
+              <button type="button" class="editar" onclick="configManager.editRule(${row.id})" title="Editar Regla">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                  <path d="M13.5 6.5l4 4" />
+                </svg>
               </button>
-              <button class="btn-danger btn-sm" onclick="configManager.deleteRule(${row.id})" title="Eliminar">
-                <i class="icon-delete"></i>
+              <button type="button" class="remover" onclick="configManager.deleteRule(${row.id})" title="Eliminar Regla">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M4 7l16 0" />
+                  <path d="M10 11l0 6" />
+                  <path d="M14 11l0 6" />
+                  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                </svg>
               </button>
             `;
-          },
-        },
+          }
+        }
       ],
+      paging: false,
+      info: false,
       language: {
-        zeroRecords: "No se encontraron reglas",
-        emptyTable: "Aún no hay reglas, crea una nueva",
-        info: "Mostrando _START_ a _END_ de _TOTAL_ reglas",
-        infoEmpty: "Mostrando 0 a 0 de 0 reglas",
-        infoFiltered: "(filtrado de _MAX_ reglas totales)",
-        processing: '<div class="table-spinner"></div>Procesando...',
-      },
+        "zeroRecords": "No se encontraron reglas para el nivel seleccionado",
+        "emptyTable": "Seleccione un nivel para ver las reglas de aportación",
+        "processing": '<div class="table-spinner"></div>Procesando...'
+      }
     });
 
-    this.setupTableFilters("rules");
+    // Configurar filtro por nivel
+    this.setupLevelFilter();
+  }
+
+  /**
+   * Configura el filtro por nivel para reglas
+   */
+  setupLevelFilter() {
+    const levelFilter = document.getElementById('levelFilter');
+    if (!levelFilter) return;
+
+    levelFilter.addEventListener('change', () => {
+      if (this.currentTable) {
+        this.currentTable.ajax.reload();
+      }
+    });
   }
 
   // ==================== CRITERIOS ====================
@@ -392,37 +421,9 @@ class ConfigManager {
       </div>
       
       <div class="table-container">
-        <div class="tools">
-          <form class="filter_form" id="criteria_filter_form">
-            <div class="input-container">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
-                <path d="M21 21l-6 -6" />
-              </svg>
-              <input class="matching-search" id="criteriaMatchingInput" placeholder="Buscar criterios">
-              <span class="clear-button" id="criteriaClearButton" style="display: none;">×</span>
-            </div>
-            <div class="select-container">
-              <select class="custom-select" id="criteriaFilterColumn">
-                <option value="0">Todo</option>
-                <option value="1">Criterio</option>
-                <option value="2">Categoría</option>
-                <option value="3">Tipo</option>
-                <option value="4">Estado</option>
-              </select>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="select-filter-icon">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" />
-              </svg>
-            </div>
-          </form>
-        </div>
-
         <table id="criteria-table" class="hover nowrap cell-borders" style="width: 100%;">
           <thead>
             <tr>
-              <th class="dt-head-center">ID</th>
               <th>CRITERIO</th>
               <th>CATEGORÍA</th>
               <th>TIPO</th>
@@ -443,153 +444,88 @@ class ConfigManager {
    * Inicializa la tabla de criterios con DataTables
    */
   async initializeCriteriaTable() {
-    this.currentTable = new DataTable("#criteria-table", {
+    this.currentTable = new DataTable('#criteria-table', {
       ajax: {
         url: `${this.baseUrl}/criteria`,
-        dataSrc: "data",
+        dataSrc: 'data'
       },
       columns: [
-        {
-          data: "id",
-          className: "dt-body-center",
+        { data: 'criterio' },
+        { data: 'categoria_nombre' },
+        { 
+          data: 'tipo',
+          render: function(data) {
+            return `<span class="type-badge type-${data}">${data.replace('_', ' ')}</span>`;
+          }
         },
-        { data: "criterio" },
-        { data: "categoria_nombre" },
-        {
-          data: "tipo",
-          render: function (data) {
-            return `<span class="type-badge type-${data}">${data.replace(
-              "_",
-              " "
-            )}</span>`;
-          },
-        },
-        {
-          data: "puntuacion",
-          className: "dt-body-center",
-          render: function (data) {
+        { 
+          data: 'puntuacion',
+          className: 'dt-body-center',
+          render: function(data) {
             return `<span class="score-badge">${data}</span>`;
-          },
+          }
         },
-        {
-          data: "estado",
-          className: "dt-body-center",
-          render: function (data, type, row) {
-            const checked = data == 1 ? "checked" : "";
+        { 
+          data: 'estado',
+          className: 'dt-body-center',
+          render: function(data, type, row) {
+            const checked = data == 1 ? 'checked' : '';
             return `
               <label class="toggle-switch">
                 <input type="checkbox" ${checked} onchange="configManager.toggleCriteriaStatus(${row.id}, this.checked)">
                 <span class="toggle-slider"></span>
               </label>
             `;
-          },
+          }
         },
-        {
+        { 
           data: null,
-          className: "dt-body-center",
+          className: 'dt-body-center',
           orderable: false,
-          render: function (data, type, row) {
+          render: function(data, type, row) {
             return `
-              <button class="btn-secondary btn-sm" onclick="configManager.editCriteria(${row.id})" title="Editar">
-                <i class="icon-edit"></i>
+              <button type="button" class="editar" onclick="configManager.editCriteria(${row.id})" title="Editar Criterio">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                  <path d="M13.5 6.5l4 4" />
+                </svg>
               </button>
-              <button class="btn-danger btn-sm" onclick="configManager.deleteCriteria(${row.id})" title="Eliminar">
-                <i class="icon-delete"></i>
+              <button type="button" class="remover" onclick="configManager.deleteCriteria(${row.id})" title="Eliminar Criterio">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M4 7l16 0" />
+                  <path d="M10 11l0 6" />
+                  <path d="M14 11l0 6" />
+                  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                </svg>
               </button>
             `;
-          },
-        },
+          }
+        }
       ],
+      paging: false,
+      info: false,
       language: {
-        zeroRecords: "No se encontraron criterios",
-        emptyTable: "Aún no hay criterios, crea uno nuevo",
-        info: "Mostrando _START_ a _END_ de _TOTAL_ criterios",
-        infoEmpty: "Mostrando 0 a 0 de 0 criterios",
-        infoFiltered: "(filtrado de _MAX_ criterios totales)",
-        processing: '<div class="table-spinner"></div>Procesando...',
-      },
+        "zeroRecords": "No se encontraron criterios",
+        "emptyTable": "Aún no hay criterios, crea uno nuevo",
+        "processing": '<div class="table-spinner"></div>Procesando...'
+      }
     });
-
-    this.setupTableFilters("criteria");
-  }
-
-  // ==================== FILTROS Y BÚSQUEDA ====================
-
-  /**
-   * Configura los filtros de búsqueda para una tabla
-   */
-  setupTableFilters(tableType) {
-    const matchingInput = document.getElementById(`${tableType}MatchingInput`);
-    const filterColumn = document.getElementById(`${tableType}FilterColumn`);
-    const clearButton = document.getElementById(`${tableType}ClearButton`);
-
-    if (!matchingInput || !filterColumn || !clearButton) return;
-
-    // Evento de búsqueda
-    matchingInput.addEventListener("input", () => {
-      this.applyTableFilter(tableType);
-    });
-
-    // Evento de cambio de columna
-    filterColumn.addEventListener("change", () => {
-      this.applyTableFilter(tableType);
-    });
-
-    // Evento de limpiar
-    clearButton.addEventListener("click", () => {
-      matchingInput.value = "";
-      clearButton.style.display = "none";
-      this.applyTableFilter(tableType);
-      matchingInput.focus();
-    });
-  }
-
-  /**
-   * Aplica filtros a la tabla
-   */
-  applyTableFilter(tableType) {
-    const matchingInput = document.getElementById(`${tableType}MatchingInput`);
-    const filterColumn = document.getElementById(`${tableType}FilterColumn`);
-    const clearButton = document.getElementById(`${tableType}ClearButton`);
-
-    if (!matchingInput || !filterColumn || !clearButton || !this.currentTable)
-      return;
-
-    const searchValue = matchingInput.value.trim();
-    const columnIndex = filterColumn.value;
-
-    clearButton.style.display = searchValue ? "block" : "none";
-
-    if (columnIndex == 0) {
-      // Filtro global
-      this.currentTable.columns().search("");
-      this.currentTable.search(searchValue, false, true).draw();
-    } else {
-      // Filtro por columna
-      this.currentTable.search("");
-      this.currentTable.columns().search("");
-      this.currentTable
-        .column(columnIndex)
-        .search(searchValue, false, true)
-        .draw();
-    }
   }
 
   // ==================== OPERACIONES CRUD ====================
 
-  /**
-   * Abre modal para nuevo nivel
-   */
-  openLevelModal(levelId = null) {
-    // Implementar modal de nivel
-    this.showInfo("Modal de nivel en desarrollo");
+  createLevel() {
+    mostrarModalCrearNivel();
   }
 
   /**
    * Edita un nivel
    */
   editLevel(levelId) {
-    this.openLevelModal(levelId);
+    mostrarModalCrearNivel();
   }
 
   /**
@@ -598,23 +534,25 @@ class ConfigManager {
   async toggleLevelStatus(levelId, status) {
     try {
       const response = await fetch(`${this.baseUrl}/levels/${levelId}/status`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ estado: status }),
+        body: JSON.stringify({ estado: status })
       });
 
       const data = await response.json();
-
-      if (data.status === "success") {
+      
+      if (data.status === 'success') {
         this.showSuccess(data.message);
+        // Recargar datos de niveles
+        await this.loadLevelsData();
       } else {
         this.showError(data.message);
         this.currentTable.ajax.reload(null, false);
       }
     } catch (error) {
-      this.showError("Error de conexión");
+      this.showError('Error de conexión');
       this.currentTable.ajax.reload(null, false);
     }
   }
@@ -623,23 +561,33 @@ class ConfigManager {
    * Elimina un nivel
    */
   async deleteLevel(levelId) {
-    if (!confirm("¿Está seguro de eliminar este nivel?")) return;
+
+    const userConfirmed = await CustomDialog.confirm(
+      'Eliminar Nivel',
+      '¿Estás seguro de que quieres eliminar este nivel?',
+      'Sí, Eliminar',
+      'Cancelar'
+    );
+
+    if (!userConfirmed) return;
 
     try {
       const response = await fetch(`${this.baseUrl}/levels/${levelId}`, {
-        method: "DELETE",
+        method: 'DELETE'
       });
 
       const data = await response.json();
-
-      if (data.status === "success") {
+      
+      if (data.status === 'success') {
         this.showSuccess(data.message);
         this.currentTable.ajax.reload(null, false);
+        // Recargar datos de niveles
+        await this.loadLevelsData();
       } else {
         this.showError(data.message);
       }
     } catch (error) {
-      this.showError("Error de conexión");
+      this.showError('Error de conexión');
     }
   }
 
@@ -663,23 +611,23 @@ class ConfigManager {
   async toggleRuleStatus(ruleId, status) {
     try {
       const response = await fetch(`${this.baseUrl}/rules/${ruleId}/status`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ estado: status }),
+        body: JSON.stringify({ estado: status })
       });
 
       const data = await response.json();
-
-      if (data.status === "success") {
+      
+      if (data.status === 'success') {
         this.showSuccess(data.message);
       } else {
         this.showError(data.message);
         this.currentTable.ajax.reload(null, false);
       }
     } catch (error) {
-      this.showError("Error de conexión");
+      this.showError('Error de conexión');
       this.currentTable.ajax.reload(null, false);
     }
   }
@@ -688,23 +636,23 @@ class ConfigManager {
    * Elimina una regla
    */
   async deleteRule(ruleId) {
-    if (!confirm("¿Está seguro de eliminar esta regla?")) return;
+    if (!confirm('¿Está seguro de eliminar esta regla?')) return;
 
     try {
       const response = await fetch(`${this.baseUrl}/rules/${ruleId}`, {
-        method: "DELETE",
+        method: 'DELETE'
       });
 
       const data = await response.json();
-
-      if (data.status === "success") {
+      
+      if (data.status === 'success') {
         this.showSuccess(data.message);
         this.currentTable.ajax.reload(null, false);
       } else {
         this.showError(data.message);
       }
     } catch (error) {
-      this.showError("Error de conexión");
+      this.showError('Error de conexión');
     }
   }
 
@@ -727,27 +675,24 @@ class ConfigManager {
    */
   async toggleCriteriaStatus(criteriaId, status) {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/criteria/${criteriaId}/status`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ estado: status }),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/criteria/${criteriaId}/status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ estado: status })
+      });
 
       const data = await response.json();
-
-      if (data.status === "success") {
+      
+      if (data.status === 'success') {
         this.showSuccess(data.message);
       } else {
         this.showError(data.message);
         this.currentTable.ajax.reload(null, false);
       }
     } catch (error) {
-      this.showError("Error de conexión");
+      this.showError('Error de conexión');
       this.currentTable.ajax.reload(null, false);
     }
   }
@@ -756,23 +701,23 @@ class ConfigManager {
    * Elimina un criterio
    */
   async deleteCriteria(criteriaId) {
-    if (!confirm("¿Está seguro de eliminar este criterio?")) return;
+    if (!confirm('¿Está seguro de eliminar este criterio?')) return;
 
     try {
       const response = await fetch(`${this.baseUrl}/criteria/${criteriaId}`, {
-        method: "DELETE",
+        method: 'DELETE'
       });
 
       const data = await response.json();
-
-      if (data.status === "success") {
+      
+      if (data.status === 'success') {
         this.showSuccess(data.message);
         this.currentTable.ajax.reload(null, false);
       } else {
         this.showError(data.message);
       }
     } catch (error) {
-      this.showError("Error de conexión");
+      this.showError('Error de conexión');
     }
   }
 

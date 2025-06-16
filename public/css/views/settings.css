@@ -351,10 +351,6 @@ input:checked+.toggle-slider:before {
   margin-bottom: 1rem;
 }
 
-.form-group {
-  margin-bottom: 1rem;
-}
-
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
@@ -714,12 +710,6 @@ input:checked+.toggle-slider:before {
   white-space: nowrap;
 }
 
-/* Matrix modal specific */
-.matrix-modal-content {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
 /* Form validation states */
 .form-group.has-error input,
 .form-group.has-error select {
@@ -728,12 +718,6 @@ input:checked+.toggle-slider:before {
 
 .form-group.has-error label {
   color: #ef4444;
-}
-
-.error-message {
-  color: #ef4444;
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
 }
 
 /* Success states */

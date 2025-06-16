@@ -33,7 +33,10 @@
   <?php endif; ?>
 
   <?php if (strpos($_SERVER['REQUEST_URI'], 'settings') !== false): ?>
+    <script src="<?= APP_URL . 'public/js/validations/setting-validations.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/config-manager.js' ?>"></script>
+    <script src="<?= APP_URL . 'public/js/modals/delete-user-modal.js' ?>"></script>
+    <script src="<?= APP_URL . 'public/js/modals/create-level-modal.js' ?>"></script>
   <?php endif; ?>
 
   <script src="<?= APP_URL . 'public/js/libs/datatables.min.js' ?>"></script>

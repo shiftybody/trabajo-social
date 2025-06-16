@@ -49,6 +49,15 @@ class FormValidator {
                 if (!file || file.size === 0) return null;
                 return !rule.value.includes(file.type) ? 
                     (rule.message || 'Tipo de archivo no válido') : null;
+            },
+
+            min: (value, rule) => {
+                if (typeof value !== 'number') return null;
+                return value < rule.value ? (rule.message || `El valor mínimo es ${rule.value}`) : null;
+            },
+            max: (value, rule) => {
+                if (typeof value !== 'number') return null;
+                return value > rule.value ? (rule.message || `El valor máximo es ${rule.value}`) : null;
             }
         };
     }
