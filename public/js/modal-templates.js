@@ -365,34 +365,6 @@ const MODAL_TEMPLATES = {
       </div>
     </form>
   `,
-
-  // Template para matriz de reglas
-  rulesMatrix: `
-    <div class="matrix-modal-content">
-      <div class="matrix-controls">
-        <div class="form-group">
-          <label for="matrix-level-select" class="field-label">Seleccionar Nivel:</label>
-          <select id="matrix-level-select" class="input-reset" 
-                  onchange="window.configManager?.loadMatrixForLevel?.(this.value)">
-            {{levelsOptions}}
-          </select>
-        </div>
-      </div>
-      
-      <div id="matrix-container">
-        <div class="loading-container">
-          <div class="loading-spinner"></div>
-          <p>Cargando matriz...</p>
-        </div>
-      </div>
-      
-      <div class="matrix-actions">
-        <button class="btn-primary" onclick="window.configManager?.openBulkRulesModal?.()">
-          <i class="icon-plus"></i> Crear Reglas en Lote
-        </button>
-      </div>
-    </div>
-  `,
 };
 
 /**
@@ -476,6 +448,9 @@ const TEMPLATE_GENERATORS = {
  * Funciones helper para procesar templates complejos
  */
 const TEMPLATE_HELPERS = {
+
+  // ==================== USUARIOS ==================
+
   processCreateRole: (roles) => {
     const baseRolesOptions = roles
       .map(
@@ -569,6 +544,8 @@ const TEMPLATE_HELPERS = {
     };
   },
 
+  // ================= ROLES ==================
+
   // Procesa datos para editar rol
   processEditRoleData: (role, allPermissions, rolePermissions) => {
     const assignedPermissionIds = rolePermissions.map((p) => p.permiso_id);
@@ -617,7 +594,6 @@ const TEMPLATE_HELPERS = {
   // ==================== HELPERS DE CONFIGURACIÓN ==================
 
   processEditLevelData: (level) => {
-    console.log("EDITANDO NIVEL", level);
     return {
       nivel: level.nivel || "",
       puntaje_minimo: level.puntaje_minimo || "",
@@ -692,61 +668,6 @@ const TEMPLATE_HELPERS = {
     return {
       levelsOptions,
     };
-  },
-
-  // Genera grid de permisos
-  generatePermissionsGrid: (permissions, assignedIds) => {
-    if (!permissions || permissions.length === 0) {
-      return '<div class="no-permissions">No hay permisos disponibles</div>';
-    }
-
-    // Agrupar permisos por categoría (usando el prefijo del slug)
-    const groupedPermissions = {};
-
-    permissions.forEach((permission) => {
-      const category = permission.permiso_slug.split(".")[0] || "otros";
-      const categoryName = TEMPLATE_HELPERS.getCategoryDisplayName(category);
-
-      if (!groupedPermissions[categoryName]) {
-        groupedPermissions[categoryName] = [];
-      }
-      groupedPermissions[categoryName].push(permission);
-    });
-
-    let html = "";
-
-    Object.keys(groupedPermissions).forEach((categoryName) => {
-      html += `
-        <div class="permission-category">
-          <h5 class="category-title">${categoryName.toUpperCase()}</h5>
-          <div class="category-permissions">
-      `;
-
-      groupedPermissions[categoryName].forEach((permission) => {
-        const isChecked = assignedIds.includes(permission.permiso_id);
-        html += `
-          <div class="permission-item">
-            <label class="permission-label">
-              <input type="checkbox" name="permisos[]" value="${
-                permission.permiso_id
-              }" 
-                     ${isChecked ? "checked" : ""} class="permission-checkbox">
-              <span class="permission-name">${permission.permiso_nombre}</span>
-              <span class="permission-description">${
-                permission.permiso_descripcion || ""
-              }</span>
-            </label>
-          </div>
-        `;
-      });
-
-      html += `
-          </div>
-        </div>
-      `;
-    });
-
-    return html;
   },
 
   // Obtiene nombre de categoría para mostrar
