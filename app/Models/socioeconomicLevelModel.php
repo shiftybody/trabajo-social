@@ -104,8 +104,6 @@ class SocioeconomicLevelModel extends MainModel
    */
   public function createLevel($data)
   {
-    error_log("Intentando crear nivel socioeconómico: " . json_encode($data));
-
     try {
       // Definir reglas de validación
       $validar = [

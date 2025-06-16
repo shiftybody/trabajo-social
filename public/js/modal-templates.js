@@ -222,12 +222,12 @@ const MODAL_TEMPLATES = {
   `,
 
   editLevel: `
-      <form novalidate id="editLevelForm" class="base-modal-form form-ajax config-form" method="POST">
+      <form novalidate id="editLevelForm" class="base-modal-form form-ajax config-form" method="PUT">
       <div class="form-group">
         <label for="nivel" class="field-label">Nombre del Nivel</label>
         <input type="text" id="nivel" name="nivel" class="input-reset" 
                value="{{nivel}}" 
-               maxlength="20" required disabled>
+               maxlength="20" required>
       </div>
       
       <div class="form-group">

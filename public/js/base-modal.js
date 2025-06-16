@@ -69,8 +69,6 @@ class BaseModal {
 
     document.body.insertAdjacentHTML("beforeend", modalHTML);
     this.modal = document.getElementById(this.config.id);
-
-    console.log("intentando crear modal");
     
     this.attachFormEvents();
   }
@@ -168,9 +166,6 @@ class BaseModal {
   attachFormEvents() {
     const form = this.modal.querySelector("form");
     if (form) {
-
-      console.log("intentando agregar action al formulario", this.config.endpoint);
-
       // Configurar endpoint si se proporciona
       if (this.config.endpoint) {
         form.setAttribute("action", this.config.endpoint);

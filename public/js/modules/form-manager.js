@@ -25,62 +25,102 @@ class FormManager {
     });
   }
 
-  async handleFormSubmit(form) {
-    const formId = form.id;
-    const config = this.validators.get(formId);
+async handleFormSubmit(form) {
+  const formId = form.id;
+  const config = this.validators.get(formId);
 
-    if (!config) {
-      console.warn(`No validator registered for form: ${formId}`);
+  if (!config) {
+    console.warn(`No validator registered for form: ${formId}`);
+    return;
+  }
+
+  try {
+    // Ejecutar hook antes del envío
+    config.beforeSubmit(form);
+
+    // Validar el formulario
+    const validationResult = await config.validate(form);
+
+    if (!validationResult.isValid) {
+      this.displayErrors(form, validationResult.errors);
       return;
     }
 
-    try {
-      // Ejecutar hook antes del envío
-      config.beforeSubmit(form);
+    // Limpiar errores previos
+    this.clearErrors(form);
 
-      // Validar el formulario
-      const validationResult = await config.validate(form);
+    // Preparar datos del formulario
+    const formData = new FormData(form);
 
-      if (!validationResult.isValid) {
-        this.displayErrors(form, validationResult.errors);
-        return;
-      }
+    // Determinar el método HTTP correcto
+    let method = this.determineHttpMethod(form);
 
-      // Limpiar errores previos
-      this.clearErrors(form);
+    // Realizar petición AJAX
+    const response = await fetch(form.action, {
+      method: method,
+      body: formData,
+      headers: {
+        Accept: "application/json",
+      },
+    });
 
-      // Preparar datos del formulario
-      const formData = new FormData(form);
+    const data = await response.json();
 
-      // Realizar petición AJAX
-      const response = await fetch(form.action, {
-        method: form.method.toUpperCase(),
-        body: formData,
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.status === "success") {
-        await config.onSuccess(data, form);
-      } else {
-        await config.onError(data, form);
-      }
-    } catch (error) {
-      console.error("Error en FormManager:", error);
-      await config.onError(
-        {
-          status: "error",
-          message: "Error de conexión. Inténtelo de nuevo.",
-        },
-        form
-      );
-    } finally {
-      config.afterSubmit(form);
+    if (response.ok && data.status === "success") {
+      await config.onSuccess(data, form);
+    } else {
+      await config.onError(data, form);
     }
+  } catch (error) {
+    console.error("Error en FormManager:", error);
+    await config.onError(
+      {
+        status: "error",
+        message: "Error de conexión. Inténtelo de nuevo.",
+      },
+      form
+    );
+  } finally {
+    config.afterSubmit(form);
   }
+}
+
+// Método auxiliar para determinar el método HTTP correcto
+determineHttpMethod(form) {
+  // 1. Si el formulario tiene data-method, usarlo (mayor prioridad)
+  if (form.dataset.method) {
+    return form.dataset.method.toUpperCase();
+  }
+
+  // 2. Si hay un campo _method oculto, usarlo
+  const methodField = form.querySelector('input[name="_method"]');
+  if (methodField && methodField.value) {
+    return methodField.value.toUpperCase();
+  }
+
+  // 3. Determinar por convención basada en la acción y el ID del formulario
+  const actionParts = form.action.split('/');
+  const lastPart = actionParts[actionParts.length - 1];
+  const hasResourceId = /^\d+$/.test(lastPart);
+
+  // Si la URL termina en un número (ID) y es un formulario de edición
+  if (hasResourceId && form.id.toLowerCase().includes('edit')) {
+    return 'PUT';
+  }
+
+  // Si la URL termina en un número y es un formulario de eliminación
+  if (hasResourceId && form.id.toLowerCase().includes('delete')) {
+    return 'DELETE';
+  }
+
+  // Si es un formulario de creación, usar POST
+  if (form.id.toLowerCase().includes('create')) {
+    return 'POST';
+  }
+
+  // 4. Por defecto, usar el método del formulario (GET o POST)
+  return form.method.toUpperCase();
+}
 
   displayErrors(form, errors) {
     // Limpiar errores previos

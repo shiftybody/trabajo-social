@@ -2,7 +2,6 @@
  * Modal para editar rol - Solo nombre (sin permisos)
  */
 function editarNivel(nivelId) {
-  console.log("CREANDO MODAL DE EDITAR NIVEL", nivelId);
   const editModal = createModal("editLevel", {
     title: "Editar Nivel Socioeconómico",
     size: "medium", // Reducido de 'large'
