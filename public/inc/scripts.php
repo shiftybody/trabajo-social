@@ -11,13 +11,14 @@
   <script src="<?= APP_URL . 'public/js/validations/auth-validations.js' ?>"></script>
 <?php else : ?>
   <script src="<?= APP_URL . "public/js/navbar.js" ?>"></script>
-  <script src="<?= APP_URL . 'public/js/main.js' ?>"></script>
+  <script src="<?= APP_URL . 'public/js/utils.js' ?>"></script>
   <script src="<?= APP_URL . 'public/js/inactivity.js' ?>"></script>
   <script src="<?= APP_URL . 'public/js/dialog.js' ?>"></script>
   <script src="<?= APP_URL . 'public/js/base-modal.js' ?>"></script>
   <script src="<?= APP_URL . 'public/js/modal-templates.js' ?>"></script>
 
   <?php if (strpos($_SERVER['REQUEST_URI'], 'users') !== false): ?>
+    <script src="<?= APP_URL . 'public/js/validations/user-validations.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/change-status-modal.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/reset-password-modal.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/user-details-modal.js' ?>"></script>

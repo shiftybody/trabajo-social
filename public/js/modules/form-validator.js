@@ -1,4 +1,3 @@
-// public/js/core/validation-engine.js
 class FormValidator {
     constructor() {
         this.rules = {

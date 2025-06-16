@@ -24,8 +24,8 @@ class userModel extends mainModel
             // Mapear las claves del array asociativo a los nombres de los campos en la BD
             $datosParaInsertar = [
                 'usuario_nombre' => $data['nombre'],
-                'usuario_apellido_paterno' => $data['apellidoPaterno'],
-                'usuario_apellido_materno' => $data['apellidoMaterno'],
+                'usuario_apellido_paterno' => $data['apellido_paterno'],
+                'usuario_apellido_materno' => $data['apellido_materno'],
                 'usuario_telefono' => $data['telefono'],
                 'usuario_email' => $data['correo'],
                 'usuario_usuario' => $data['username'],
@@ -60,8 +60,8 @@ class userModel extends mainModel
             // Mapeo de claves de entrada a nombres de columna de BD
             $mapeoColumnas = [
                 'nombre' => 'usuario_nombre',
-                'apellidoPaterno' => 'usuario_apellido_paterno',
-                'apellidoMaterno' => 'usuario_apellido_materno',
+                'apellido_paterno' => 'usuario_apellido_paterno',
+                'apellido_materno' => 'usuario_apellido_materno',
                 'telefono' => 'usuario_telefono',
                 'correo' => 'usuario_email',
                 'username' => 'usuario_usuario',

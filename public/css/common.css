@@ -427,12 +427,16 @@ input.error-input:-webkit-autofill:focus {
   align-items: center;
   gap: var(--spacing-xsmall);
   font-size: 14px;
-  color: var(--gray-500);
+}
+
+.breadcrumb span {
+  color: var(--gray-700);
+  font-weight: var(--font-weight-medium);
 }
 
 .breadcrumb a {
   color: var(--blue-400);
-  font-weight: var(--font-weight-normal);
+  font-weight: var(--font-weight-medium);
   text-decoration: none;
   transition: var(--transition-fast);
 }
@@ -442,8 +446,9 @@ input.error-input:-webkit-autofill:focus {
   text-decoration: underline;
 }
 
-.breadcrumb-separator {
-  color: var(--gray-400);
+.breadcrumb-separator svg {
+  stroke: var(--gray-500);
+  width: 1em;
 }
 
 .breadcrumb-separator svg:hover {
@@ -477,7 +482,7 @@ input.error-input:-webkit-autofill:focus {
 
 /* padding */
 .container {
-  padding: 2.5rem 10.5rem 2.5rem 10.5rem;
+  padding: 1rem 10.5rem 2.5rem 10.5rem;
 }
 
 .navigation {

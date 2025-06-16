@@ -444,6 +444,14 @@
     box-shadow: var(--shadow-normal);
   }
 
+  /* Estilo para el resultado de búsqueda resaltado */
+  .search-result-item.is-highlighted {
+    outline: none;
+    background: var(--gray-100);
+    box-shadow: var(--shadow-normal);
+  }
+
+
   .search-result-icon {
     width: 20px;
     height: 20px;

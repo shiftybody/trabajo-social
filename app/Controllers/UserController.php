@@ -169,9 +169,6 @@ class UserController
     $avatar = $request->files('avatar');
     $datos = $request->post();
 
-    error_log(print_r($datos, true));
-    error_log(print_r($avatar, true));
-
     $validar = [
       'nombre' => [
         'requerido' => true,
@@ -180,14 +177,14 @@ class UserController
         'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',
         'sanitizar' => true
       ],
-      'apellidoPaterno' => [
+      'apellido_paterno' => [
         'requerido' => true,
         'min' => 2,
         'max' => 50,
         'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',
         'sanitizar' => true
       ],
-      'apellidoMaterno' => [
+      'apellido_materno' => [
         'min' => 2,
         'max' => 50,
         'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',
@@ -228,7 +225,7 @@ class UserController
     if (!empty($resultado['errores'])) {
       return Response::json([
         'status' => 'error',
-        'errores' => $resultado['errores']
+        'errors' => $resultado['errores']
       ]);
     }
 
@@ -236,7 +233,7 @@ class UserController
     if ($resultado['datos']['password'] !== $datos['password2']) {
       return Response::json([
         'status' => 'error',
-        'errores' => ['password2' => 'Las contraseñas no coinciden']
+        'errors' => ['password2' => 'Las contraseñas no coinciden']
       ]);
     }
 
@@ -247,7 +244,7 @@ class UserController
     if ($this->userModel->localizarCorreo($resultado['datos']['correo'])) {
       return Response::json([
         'status' => 'error',
-        'errores' => ['correo' => 'Este correo ya está registrado']
+        'errors' => ['correo' => 'Este correo ya está registrado']
       ]);
     }
 
@@ -255,7 +252,7 @@ class UserController
     if ($this->userModel->localizarUsername($resultado['datos']['username'])) {
       return Response::json([
         'status' => 'error',
-        'errores' => ['username' => 'Este nombre de usuario ya está registrado']
+        'errors' => ['username' => 'Este nombre de usuario ya está registrado']
       ]);
     }
 
@@ -278,7 +275,7 @@ class UserController
       if (!$validacionArchivo['valido']) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['avatar' => $validacionArchivo['message']]
+          'errors' => ['avatar' => $validacionArchivo['message']]
         ]);
       }
     }
@@ -335,7 +332,7 @@ class UserController
       if (!move_uploaded_file($avatar['tmp_name'], $rutaOriginal)) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['avatar' => 'Error al guardar la imagen']
+          'errors' => ['avatar' => 'Error al guardar la imagen']
         ]);
       }
 
@@ -361,7 +358,7 @@ class UserController
           }
           return Response::json([
             'status' => 'error',
-            'errores' => ['avatar' => 'Error al procesar la imagen (miniatura): ' . $e->getMessage()]
+            'errors' => ['avatar' => 'Error al procesar la imagen (miniatura): ' . $e->getMessage()]
           ]);
         }
       }
@@ -381,7 +378,7 @@ class UserController
     } else {
       return Response::json([
         'status' => 'error',
-        'errores' => ['general' => 'Error al registrar el usuario']
+        'message' => 'Error al registrar el usuario'
       ]);
     }
   }
@@ -410,8 +407,8 @@ class UserController
     // si los datos subidos son iguales a los del usuario no hacer nada
     if (
       $datos['nombre'] == $usuario->usuario_nombre &&
-      $datos['apellidoPaterno'] == $usuario->usuario_apellido_paterno &&
-      $datos['apellidoMaterno'] == $usuario->usuario_apellido_materno &&
+      $datos['apellido_paterno'] == $usuario->usuario_apellido_paterno &&
+      $datos['apellido_materno'] == $usuario->usuario_apellido_materno &&
       $datos['telefono'] == $usuario->usuario_telefono &&
       $datos['correo'] == $usuario->usuario_email &&
       $datos['username'] == $usuario->usuario_usuario &&
@@ -433,13 +430,13 @@ class UserController
         'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',
         'sanitizar' => true
       ],
-      'apellidoPaterno' => [
+      'apellido_paterno' => [
         'min' => 2,
         'max' => 50,
         'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',
         'sanitizar' => true
       ],
-      'apellidoMaterno' => [
+      'apellido_materno' => [
         'min' => 2,
         'max' => 50,
         'formato' => '[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}',

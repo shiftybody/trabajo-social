@@ -417,27 +417,6 @@ const MODAL_TEMPLATES = {
       </div>
     </div>
   `,
-
-  // Template para acciones grupales
-  groupActions: `
-    <div class="group-actions">
-      <p>Seleccione una acción para gestionar los criterios de esta sección:</p>
-      <div class="actions-grid">
-        <button class="action-btn" onclick="window.configManager?.showBulkCriteriaForm?.()">
-          <i class="icon-plus"></i>
-          Crear Múltiples Criterios
-        </button>
-        <button class="action-btn" onclick="window.configManager?.exportCriteria?.()">
-          <i class="icon-download"></i>
-          Exportar Criterios
-        </button>
-        <button class="action-btn" onclick="window.configManager?.importCriteria?.()">
-          <i class="icon-upload"></i>
-          Importar Criterios
-        </button>
-      </div>
-    </div>
-  `,
 };
 
 /**

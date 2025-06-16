@@ -1,8 +1,11 @@
 // cuando se presione un tag img con clase logo
 document.querySelectorAll("img.logo").forEach((logo) => {
-  logo.addEventListener("click", function () {
-    // redirigir a la página principal
-    window.location.href = APP_URL + "home";
+  logo.addEventListener("click", function () {  
+    if (typeof window.confirmAndNavigate !== "function") {
+      window.location.href = APP_URL + "home";
+    } else {
+      window.confirmAndNavigate(APP_URL + "home");
+    }
   });
 });
 
@@ -206,23 +209,36 @@ function closeInstantSearch() {
   mainSearchInput.value = "";
 }
 
-// Función para realizar la búsqueda
+// navbar.js
+
+// Función para realizar la búsqueda (MODIFICADA)
 function performSearch(query) {
   const normalizedQuery = query.toLowerCase().trim();
 
   if (!normalizedQuery) {
-    // Mostrar todos los resultados agrupados por sección
     displayAllResults();
-    return;
+  } else {
+    const filteredResults = searchData.filter((item) =>
+      item.name.toLowerCase().includes(normalizedQuery)
+    );
+    displaySearchResults(filteredResults, normalizedQuery);
   }
 
-  // Filtrar resultados
-  const filteredResults = searchData.filter((item) =>
-    item.name.toLowerCase().includes(normalizedQuery)
-  );
+  // --- INICIO DE LA MODIFICACIÓN ---
+  // Elimina cualquier resaltado anterior
+  const previouslyHighlighted = searchResultsList.querySelector('.is-highlighted');
+  if (previouslyHighlighted) {
+    previouslyHighlighted.classList.remove('is-highlighted');
+  }
 
-  displaySearchResults(filteredResults, normalizedQuery);
+  // Resalta el primer resultado de la nueva lista, si existe
+  const firstResult = searchResultsList.querySelector('.search-result-item');
+  if (firstResult) {
+    firstResult.classList.add('is-highlighted');
+  }
+  // --- FIN DE LA MODIFICACIÓN ---
 }
+
 
 // Mostrar todos los resultados agrupados
 function displayAllResults() {
@@ -367,29 +383,47 @@ instantSearchContainer.addEventListener("click", (e) => {
 
 // Navegar con teclado
 modalSearchInput.addEventListener("keydown", (e) => {
-  const results = searchResultsList.querySelectorAll(".search-result-item");
-  const currentFocus = searchResultsList.querySelector(
-    ".search-result-item:focus"
-  );
-  let currentIndex = Array.from(results).indexOf(currentFocus);
+  const results = Array.from(searchResultsList.querySelectorAll(".search-result-item"));
+  if (results.length === 0) return; // No hacer nada si no hay resultados
 
-  if (e.key === "ArrowDown") {
-    e.preventDefault();
-    if (currentIndex < results.length - 1) {
-      results[currentIndex + 1].focus();
-    } else if (currentIndex === -1 && results.length > 0) {
-      results[0].focus();
+  // Lógica para flechas Arriba/Abajo
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault(); // Evita que el cursor del input se mueva
+
+    const highlighted = searchResultsList.querySelector('.is-highlighted');
+    let currentIndex = highlighted ? results.indexOf(highlighted) : -1;
+
+    // Quitar resaltado actual
+    if (highlighted) {
+      highlighted.classList.remove('is-highlighted');
     }
-  } else if (e.key === "ArrowUp") {
-    e.preventDefault();
-    if (currentIndex > 0) {
-      results[currentIndex - 1].focus();
-    } else if (currentIndex === 0) {
-      modalSearchInput.focus();
+
+    // Calcular el índice del siguiente elemento
+    let nextIndex;
+    if (e.key === "ArrowDown") {
+      nextIndex = currentIndex + 1;
+      if (nextIndex >= results.length) {
+        nextIndex = 0; // Vuelve al inicio
+      }
+    } else { // ArrowUp
+      nextIndex = currentIndex - 1;
+      if (nextIndex < 0) {
+        nextIndex = results.length - 1; // Vuelve al final
+      }
     }
-  } else if (e.key === "Enter" && currentIndex !== -1) {
+
+    // Añadir resaltado al nuevo elemento
+    results[nextIndex].classList.add('is-highlighted');
+  }
+
+  // Lógica para la tecla Enter
+  if (e.key === "Enter") {
     e.preventDefault();
-    results[currentIndex].click();
+    const highlighted = searchResultsList.querySelector('.is-highlighted');
+    if (highlighted) {
+      highlighted.click(); // Simula el clic en el elemento resaltado
+      closeInstantSearch(); // Cierra el modal de búsqueda
+    }
   }
 });
 

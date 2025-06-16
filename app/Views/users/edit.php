@@ -39,8 +39,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
                   pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
               </div>
               <div class="input-field">
-                <label for="apellidoPaterno" class="file-label">Apellido Paterno</label>
-                <input type="text" name="apellidoPaterno" id="apellidoPaterno" value="<?= $usuario->usuario_apellido_paterno ?>" class="input"
+                <label for="apellido_paterno" class="file-label">Apellido Paterno</label>
+                <input type="text" name="apellido_paterno" id="apellido_paterno" value="<?= $usuario->usuario_apellido_paterno ?>" class="input"
                   placeholder="Apellido Paterno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
               </div>
             </div>
@@ -48,8 +48,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
             <!-- Apellido Materno & Telefono -->
             <div class="row-layout">
               <div class="input-field">
-                <label for="apellidoMaterno" class="file-label">Apellido Materno</label>
-                <input type="text" name="apellidoMaterno" id="apellidoMaterno" value="<?= $usuario->usuario_apellido_materno ?>" class="input"
+                <label for="apellido_materno" class="file-label">Apellido Materno</label>
+                <input type="text" name="apellido_materno" id="apellido_materno" value="<?= $usuario->usuario_apellido_materno ?>" class="input"
                   placeholder="Apellido Materno" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}" maxlength="70">
               </div>
               <div class="input-field">

@@ -1,5 +1,3 @@
-// auth-validations.js - Versión completa unificada
-
 // Esquemas de validación para autenticación
 const AUTH_VALIDATION_SCHEMAS = {
   login: {

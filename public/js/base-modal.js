@@ -70,7 +70,8 @@ class BaseModal {
     document.body.insertAdjacentHTML("beforeend", modalHTML);
     this.modal = document.getElementById(this.config.id);
 
-    // Adjuntar eventos de formulario si es necesario
+    console.log("intentando crear modal");
+    
     this.attachFormEvents();
   }
 
@@ -166,9 +167,9 @@ class BaseModal {
 
   attachFormEvents() {
     const form = this.modal.querySelector("form");
-    if (form && window.attachAjaxFormHandlers) {
-      // Integrar con el sistema ajax.js existente
-      window.attachAjaxFormHandlers(form);
+    if (form) {
+
+      console.log("intentando agregar action al formulario", this.config.endpoint);
 
       // Configurar endpoint si se proporciona
       if (this.config.endpoint) {

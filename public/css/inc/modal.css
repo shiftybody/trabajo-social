@@ -44,6 +44,10 @@
   max-width: var(--modal-width-medium);
 }
 
+.base-modal.modal-medium .base-modal-content p {
+  max-width: 100%;
+}
+
 .base-modal.modal-large .base-modal-content {
   max-width: var(--modal-width-large);
 }

@@ -1,4 +1,3 @@
-// public/js/core/ajax-core.js
 class FormManager {
     constructor() {
         this.validators = new Map();
@@ -50,14 +49,6 @@ class FormManager {
             // Limpiar errores previos
             this.clearErrors(form);
 
-            // Deshabilitar botón de envío
-            const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
-            if (submitButton) {
-                submitButton.disabled = true;
-                submitButton.dataset.originalText = submitButton.textContent;
-                submitButton.textContent = 'Enviando...';
-            }
-
             // Preparar datos del formulario
             const formData = new FormData(form);
             
@@ -85,16 +76,7 @@ class FormManager {
                 message: 'Error de conexión. Inténtelo de nuevo.' 
             }, form);
         } finally {
-            // Rehabilitar botón
-            const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
-            if (submitButton) {
-                submitButton.disabled = false;
-                if (submitButton.dataset.originalText) {
-                    submitButton.textContent = submitButton.dataset.originalText;
-                }
-            }
 
-            // Ejecutar hook después del envío
             config.afterSubmit(form);
         }
     }
@@ -115,6 +97,8 @@ class FormManager {
                 field.parentElement.appendChild(errorElement);
             }
         });
+
+        CustomDialog.toast("Corrija los errores marcados en el formulario", "error", 2000);
     }
 
     clearErrors(form) {
