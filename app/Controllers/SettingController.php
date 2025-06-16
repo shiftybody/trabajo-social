@@ -138,6 +138,7 @@ class SettingController
     try {
       $id = $request->param('id');
       $data = $request->post();
+
       $data['usuario_modificacion_id'] = Auth::user()->usuario_id;
 
       // Verificar que el nivel existe

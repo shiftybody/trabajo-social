@@ -222,7 +222,7 @@ const MODAL_TEMPLATES = {
   `,
 
   editLevel: `
-      <form novalidate id="editLevelForm" class="base-modal-form form-ajax config-form" method="PUT">
+      <form novalidate id="editLevelForm" class="base-modal-form form-ajax config-form" method="POST">
       <div class="form-group">
         <label for="nivel" class="field-label">Nombre del Nivel</label>
         <input type="text" id="nivel" name="nivel" class="input-reset" 
@@ -258,7 +258,7 @@ const MODAL_TEMPLATES = {
         <div class="form-group">
           <label for="edad" class="field-label">Edad del Paciente *</label>
           <input type="number" id="edad" name="edad" class="input-reset"
-                 value="{{edad}}" min="0" max="150" required>
+                 value="{{edad}}" min="0" max="150" required>s
           <small class="field-help">Edad en años</small>
         </div>
       </div>

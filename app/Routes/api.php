@@ -99,7 +99,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   });
 
   $router->group(['middleware' => 'Permission:settings.levels.edit|settings.manage'], function ($router) {
-    $router->put('/settings/levels/:id', 'SettingController@updateLevel');
+    $router->post('/settings/levels/:id', 'SettingController@updateLevel');
     $router->post('/settings/levels/:id/status', 'SettingController@toggleLevelStatus');
   });
 

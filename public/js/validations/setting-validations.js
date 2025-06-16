@@ -88,8 +88,8 @@ const LevelHandlers = {
     );
 
     // Recargar datos si existe la función
-    if (typeof loadData === "function") {
-      await loadData();
+    if (typeof window.reloadLevelsTable === "function") {
+      await window.reloadLevelsTable();
     } else {
       window.location.reload();
     }

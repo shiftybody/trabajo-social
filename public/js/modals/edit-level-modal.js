@@ -5,7 +5,7 @@ function editarNivel(nivelId) {
   const editModal = createModal("editLevel", {
     title: "Editar Nivel Socioeconómico",
     size: "medium", // Reducido de 'large'
-    endpoint: `${APP_URL}api/settings/level/${nivelId}`,
+    endpoint: `${APP_URL}api/settings/levels/${nivelId}`,
     onShow: async (modal) => {
       modal.showLoading("Cargando información del nivel...");
 
