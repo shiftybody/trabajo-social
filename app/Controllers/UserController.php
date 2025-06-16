@@ -221,11 +221,11 @@ class UserController
 
     $resultado = $this->userModel->validarDatos($datos, $validar);
 
-    // Si hay errores de formato, devolverlos
-    if (!empty($resultado['errores'])) {
+    // Si hay errors de formato, devolverlos
+    if (!empty($resultado['errors'])) {
       return Response::json([
         'status' => 'error',
-        'errors' => $resultado['errores']
+        'errors' => $resultado['errors']
       ]);
     }
 
@@ -317,7 +317,7 @@ class UserController
           // Manejar tipos no soportados
           return Response::json([
             'status' => 'error',
-            'errores' => ['avatar' => 'Formato de imagen no soportado: ' . $mimeType]
+            'errors' => ['avatar' => 'Formato de imagen no soportado: ' . $mimeType]
           ]);
       }
 
@@ -477,11 +477,11 @@ class UserController
     // Validar los datos
     $resultado = $this->userModel->validarDatos($datos, $validar);
 
-    // Verificar errores de validación
-    if (!empty($resultado['errores'])) {
+    // Verificar errors de validación
+    if (!empty($resultado['errors'])) {
       return Response::json([
         'status' => 'error',
-        'errores' => $resultado['errores']
+        'errors' => $resultado['errors']
       ]);
     }
 
@@ -517,7 +517,7 @@ class UserController
       if (!$validacionArchivo['valido']) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['avatar' => $validacionArchivo['message']]
+          'errors' => ['avatar' => $validacionArchivo['message']]
         ]);
       }
     }
@@ -553,7 +553,7 @@ class UserController
         default:
           return Response::json([
             'status' => 'error',
-            'errores' => ['avatar' => 'Formato de imagen no soportado: ' . $mimeType]
+            'errors' => ['avatar' => 'Formato de imagen no soportado: ' . $mimeType]
           ]);
       }
 
@@ -564,7 +564,7 @@ class UserController
       if (!move_uploaded_file($avatar['tmp_name'], $rutaOriginalNueva)) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['avatar' => 'Error al guardar la nueva imagen']
+          'errors' => ['avatar' => 'Error al guardar la nueva imagen']
         ]);
       }
 
@@ -582,7 +582,7 @@ class UserController
           }
           return Response::json([
             'status' => 'error',
-            'errores' => ['avatar' => 'Error al procesar la nueva imagen (miniatura): ' . $e->getMessage()]
+            'errors' => ['avatar' => 'Error al procesar la nueva imagen (miniatura): ' . $e->getMessage()]
           ]);
         }
       }
@@ -609,7 +609,7 @@ class UserController
       if ($this->userModel->localizarCorreo($resultado['datos']['correo'])) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['correo' => 'Este correo ya está registrado']
+          'errors' => ['correo' => 'Este correo ya está registrado']
         ]);
       }
     }
@@ -619,7 +619,7 @@ class UserController
       if ($this->userModel->localizarUsername($resultado['datos']['username'])) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['username' => 'Este nombre de usuario ya está registrado']
+          'errors' => ['username' => 'Este nombre de usuario ya está registrado']
         ]);
       }
     }
@@ -629,7 +629,7 @@ class UserController
       if ($resultado['datos']['password'] !== $datos['password2']) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['password2' => 'Las contraseñas no coinciden']
+          'errors' => ['password2' => 'Las contraseñas no coinciden']
         ]);
       }
       unset($resultado['datos']['password2']);
@@ -652,7 +652,7 @@ class UserController
     } else {
       return Response::json([
         'status' => 'error',
-        'errores' => ['general' => 'Error al actualizar el usuario']
+        'errors' => ['general' => 'Error al actualizar el usuario']
       ]);
     }
   }
@@ -691,11 +691,11 @@ class UserController
 
     $resultado = $this->userModel->validarDatos($datos, $validar);
 
-    // Verificar errores de validación
-    if (!empty($resultado['errores'])) {
+    // Verificar errors de validación
+    if (!empty($resultado['errors'])) {
       return Response::json([
         'status' => 'error',
-        'errores' => $resultado['errores']
+        'errors' => $resultado['errors']
       ]);
     }
 
@@ -703,7 +703,7 @@ class UserController
     if ($resultado['datos']['password'] !== $datos['password2']) {
       return Response::json([
         'status' => 'error',
-        'errores' => ['password2' => 'Las contraseñas no coinciden']
+        'errors' => ['password2' => 'Las contraseñas no coinciden']
       ]);
     }
 
@@ -752,7 +752,7 @@ class UserController
     if (!isset($datos['estado'])) {
       return Response::json([
         'status' => 'error',
-        'errores' => ['estado' => 'El nuevo estado es requerido']
+        'errors' => ['estado' => 'El nuevo estado es requerido']
       ]);
     }
 
@@ -762,7 +762,7 @@ class UserController
     if (!in_array($nuevoEstado, ['0', '1', 0, 1])) {
       return Response::json([
         'status' => 'error',
-        'errores' => ['estado' => 'El estado debe ser 0 (inactivo) o 1 (activo)']
+        'errors' => ['estado' => 'El estado debe ser 0 (inactivo) o 1 (activo)']
       ]);
     }
 

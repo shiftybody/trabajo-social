@@ -303,7 +303,7 @@ class BaseModal {
   }
 
   clearFormErrors(form) {
-    // Integrar con el sistema de errores existente
+    // Integrar con el sistema de errors existente
     form.querySelectorAll(".error-message").forEach((el) => el.remove());
     form
       .querySelectorAll(".error-input")

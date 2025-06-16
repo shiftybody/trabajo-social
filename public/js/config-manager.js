@@ -1456,7 +1456,7 @@ window.addEventListener("beforeunload", function () {
 // Exponer funciones globales para uso en HTML
 window.configManager = configManager;
 
-// Manejo de errores globales para this module
+// Manejo de errors globales para this module
 window.addEventListener("error", function (event) {
   if (event.filename && event.filename.includes("config-manager.js")) {
     console.error("Error en ConfigManager:", event.error);

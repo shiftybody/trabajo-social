@@ -452,7 +452,7 @@ class SettingController
 
       return Response::json([
         'status' => 'success',
-        'message' => "Proceso completado: {$resultado['success']} éxitos, {$resultado['errors']} errores",
+        'message' => "Proceso completado: {$resultado['success']} éxitos, {$resultado['errors']} errors",
         'data' => $resultado
       ]);
     } catch (Exception $e) {

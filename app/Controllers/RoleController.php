@@ -175,17 +175,17 @@ class RoleController
 
       $resultado = $this->roleModel->validarDatos($datos, $validar);
 
-      if (!empty($resultado['errores'])) {
+      if (!empty($resultado['errors'])) {
         return Response::json([
           'status' => 'error',
-          'errores' => $resultado['errores']
+          'errors' => $resultado['errors']
         ]);
       }
 
       if ($this->roleModel->existeRolPornombre($resultado['datos']['nombre'])) {
         return Response::json([
           'status' => 'error',
-          'errores' => ['nombre' => 'Ya existe un rol con este nombre']
+          'errors' => ['nombre' => 'Ya existe un rol con este nombre']
         ]);
       }
 
@@ -260,10 +260,10 @@ class RoleController
 
       $resultado = $this->roleModel->validarDatos($datos, $validar);
 
-      if (!empty($resultado['errores'])) {
+      if (!empty($resultado['errors'])) {
         return Response::json([
           'status' => 'error',
-          'errores' => $resultado['errores']
+          'errors' => $resultado['errors']
         ]);
       }
 
@@ -272,7 +272,7 @@ class RoleController
         if ($this->roleModel->existeRolPornombre($resultado['datos']['nombre'])) {
           return Response::json([
             'status' => 'error',
-            'errores' => ['nombre' => 'Ya existe un rol con este nombre']
+            'errors' => ['nombre' => 'Ya existe un rol con este nombre']
           ]);
         }
       }

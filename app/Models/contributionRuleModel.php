@@ -425,7 +425,7 @@ class ContributionRuleModel extends MainModel
    * @param int $nivelId ID del nivel socioeconómico
    * @param array $reglas Array de reglas con edad, periodicidad y monto
    * @param int $userId ID del usuario que crea las reglas
-   * @return array Resultado con éxitos y errores
+   * @return array Resultado con éxitos y errors
    */
   public function createBulkRules($nivelId, $reglas, $userId)
   {

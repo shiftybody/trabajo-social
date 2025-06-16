@@ -332,7 +332,7 @@ const UserUtils = {
     });
   },
 
-  // Función para limpiar formulario y errores
+  // Función para limpiar formulario y errors
   resetForm: async (form) => {
     const performReset = await CustomDialog.confirm(
       "Confirmar",
@@ -356,7 +356,7 @@ const UserUtils = {
       error.remove();
     });
 
-    // Si existe FormManager, también limpiar sus errores
+    // Si existe FormManager, también limpiar sus errors
     if (window.FormManager) {
       FormManager.clearErrors(form);
     }

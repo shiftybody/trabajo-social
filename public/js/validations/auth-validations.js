@@ -70,7 +70,7 @@ const AuthUtils = {
 
   // Función para limpiar todos los estilos de error
   clearAllErrorStyles: (form) => {
-    // Limpiar errores de validación (excluyendo mensajes de estado)
+    // Limpiar errors de validación (excluyendo mensajes de estado)
     form.querySelectorAll(
       ".error-message:not(.expired-session-message):not(.account-disabled-message)"
     ).forEach((errorMsg) => errorMsg.remove());
@@ -214,7 +214,7 @@ const initializeLoginFeatures = () => {
   }
 };
 
-// Función para configurar event listeners para limpiar errores
+// Función para configurar event listeners para limpiar errors
 const setupErrorClearingListeners = () => {
   const form = document.getElementById("login-form");
   if (!form) return;
@@ -222,7 +222,7 @@ const setupErrorClearingListeners = () => {
   const inputs = form.querySelectorAll("input[type='text'], input[type='password']");
   
   inputs.forEach((input) => {
-    // Limpiar errores al escribir
+    // Limpiar errors al escribir
     input.addEventListener("input", function(e) {
       e.preventDefault();
 
@@ -281,7 +281,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Inicializar funcionalidades del login
   initializeLoginFeatures();
 
-  // Configurar listeners para limpiar errores
+  // Configurar listeners para limpiar errors
   setupErrorClearingListeners();
 
   // Registrar formulario de login

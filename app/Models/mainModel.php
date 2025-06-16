@@ -237,7 +237,7 @@ class mainModel
 
     $salt = '';
     $saltChars = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    $saltLength = 22; 
+    $saltLength = 22;
 
     for ($i = 0; $i < $saltLength; $i++) {
       $salt .= $saltChars[mt_rand(0, strlen($saltChars) - 1)];
@@ -318,13 +318,13 @@ class mainModel
    * 
    * @param array $datos Array de datos a sanitizar y validar
    * @param array $reglas Array asociativo con reglas de validación
-   * @return array Array con datos sanitizados y errores encontrados
+   * @return array Array con datos sanitizados y errors encontrados
    */
   public function validarDatos($datos, $reglas)
   {
     $resultado = [
       'datos' => [],
-      'errores' => []
+      'errors' => []
     ];
 
     foreach ($reglas as $campo => $regla) {
@@ -338,19 +338,19 @@ class mainModel
 
       // Validar si es obligatorio
       if (isset($regla['requerido']) && $regla['requerido'] === true && ($valor === null || $valor === '')) {
-        $resultado['errores'][$campo] = "El campo $campo es requerido";
+        $resultado['errors'][$campo] = "El campo $campo es requerido";
         continue;
       }
 
       // Validar longitud mínima
       if (isset($regla['min']) && strlen($valor) < $regla['min']) {
-        $resultado['errores'][$campo] = "El campo $campo debe tener al menos {$regla['min']} caracteres";
+        $resultado['errors'][$campo] = "El campo $campo debe tener al menos {$regla['min']} caracteres";
         continue;
       }
 
       // Validar longitud máxima
       if (isset($regla['max']) && strlen($valor) > $regla['max']) {
-        $resultado['errores'][$campo] = "El campo $campo no debe exceder {$regla['max']} caracteres";
+        $resultado['errors'][$campo] = "El campo $campo no debe exceder {$regla['max']} caracteres";
         continue;
       }
 
@@ -359,14 +359,14 @@ class mainModel
         switch ($regla['formato']) {
           case 'email':
             if (!filter_var($valor, FILTER_VALIDATE_EMAIL)) {
-              $resultado['errores'][$campo] = "El formato de correo electrónico no es válido";
+              $resultado['errors'][$campo] = "El formato de correo electrónico no es válido";
               continue 2; // Sale del switch y del foreach actual
             }
             break;
 
           case 'numero':
             if (!is_numeric($valor)) {
-              $resultado['errores'][$campo] = "El campo $campo debe ser un número";
+              $resultado['errors'][$campo] = "El campo $campo debe ser un número";
               continue 2;
             }
             // Convertir a número si es válido
@@ -375,7 +375,7 @@ class mainModel
 
           case 'entero':
             if (!filter_var($valor, FILTER_VALIDATE_INT)) {
-              $resultado['errores'][$campo] = "El campo $campo debe ser un número entero";
+              $resultado['errors'][$campo] = "El campo $campo debe ser un número entero";
               continue 2;
             }
             // Convertir a entero si es válido
@@ -384,14 +384,14 @@ class mainModel
 
           case 'alfa':
             if (!ctype_alpha($valor)) {
-              $resultado['errores'][$campo] = "El campo $campo solo debe contener letras";
+              $resultado['errors'][$campo] = "El campo $campo solo debe contener letras";
               continue 2;
             }
             break;
 
           case 'alfanumerico':
             if (!ctype_alnum($valor)) {
-              $resultado['errores'][$campo] = "El campo $campo solo debe contener letras y números";
+              $resultado['errors'][$campo] = "El campo $campo solo debe contener letras y números";
               continue 2;
             }
             break;
@@ -399,7 +399,7 @@ class mainModel
           default:
             // Si es una expresión regular personalizada
             if (!$this->validarFormato($regla['formato'], $valor)) {
-              $resultado['errores'][$campo] = "El formato del campo $campo no es válido";
+              $resultado['errors'][$campo] = "El formato del campo $campo no es válido";
               continue 2;
             }
         }

@@ -239,7 +239,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         // Limpiamos los campos de contraseña
         document.getElementById('password').value = '';
         document.getElementById('password2').value = '';
-        // Limpiar errores de contraseña si existen
+        // Limpiar errors de contraseña si existen
         ['password', 'password2'].forEach(fieldName => {
           const field = document.getElementById(fieldName);
           if (field && field.classList.contains('error-input')) {
