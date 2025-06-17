@@ -447,16 +447,48 @@ class SettingController
   // ==================== CRITERIOS ====================
 
   /**
-   * API: Obtiene todos los criterios
+   * API: Obtiene criterios filtrados por subcategoría
    */
   public function getAllCriteria()
   {
     try {
-      $criteria = $this->criteriaModel->getAllCriteria();
+      // Mapeo de secciones a IDs de subcategoría
+      $sectionToSubcategoryMap = [
+        'protocolo' => 1,        // Protocolo  
+        'tiempo-traslado' => 2,  // Tiempo Traslado
+        'gasto-traslado' => 3,   // Gasto Traslado
+        'integrantes' => 4,      // Integrantes
+        'hijos' => 5,            // Hijos
+        'tipo-familia' => 6,     // Tipo Familia
+        'grupo-etnico' => 7,     // Grupo Étnico
+        'parientes-enfermos' => 8, // Parientes Enfermos
+        'tipo-vivienda' => 9,    // Tipo Vivienda
+        'tenencia' => 10,        // Tenencia
+        'zona' => 11,            // Zona
+        'materiales' => 12,      // Material Paredes
+        'techo' => 13,           // Material Techo
+        'piso' => 14,            // Material Piso
+        'servicios' => 15,       // Servicio Agua
+        'luz' => 16,             // Servicio Luz
+        'dependientes' => 17,    // Dependientes Económicos
+        'aporte' => 18,          // Aporte Familiar
+      ];
+
+      // Obtener sección del query parameter
+      $section = $_GET['section'] ?: null;
+      $subcategoryId = null;
+
+      if ($section && isset($sectionToSubcategoryMap[$section])) {
+        $subcategoryId = $sectionToSubcategoryMap[$section];
+      }
+
+      $criteria = $this->criteriaModel->getAllCriteria($subcategoryId);
 
       return Response::json([
         'status' => 'success',
-        'data' => $criteria
+        'data' => $criteria,
+        'section' => $section,
+        'subcategory_id' => $subcategoryId
       ]);
     } catch (Exception $e) {
       error_log("Error en getAllCriteria: " . $e->getMessage());
@@ -567,8 +599,8 @@ class SettingController
   {
     try {
       $id = $request->param('id');
-      $data = $request->post();
-      $estado = $data['estado'] === 'true' ? 1 : 0;
+      $data = $request->json();
+      $estado = $data['estado'] ? 1 : 0;
       $userId = Auth::user()->usuario_id;
 
       $updated = $this->criteriaModel->toggleCriteriaStatus($id, $estado, $userId);
@@ -619,6 +651,27 @@ class SettingController
       return Response::json([
         'status' => 'error',
         'message' => 'Error interno del servidor'
+      ], 500);
+    }
+  }
+
+  /**
+   * API: Obtiene todas las subcategorías para formularios
+   */
+  public function getAllSubcategories()
+  {
+    try {
+      $subcategories = $this->criteriaModel->getAllSubcategories();
+
+      return Response::json([
+        'status' => 'success',
+        'data' => $subcategories
+      ]);
+    } catch (Exception $e) {
+      error_log("Error en getAllSubcategories: " . $e->getMessage());
+      return Response::json([
+        'status' => 'error',
+        'message' => 'Error al obtener subcategorías'
       ], 500);
     }
   }

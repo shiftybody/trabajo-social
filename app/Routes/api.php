@@ -133,6 +133,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   $router->group(['middleware' => 'Permission:settings.criteria.view|settings.manage'], function ($router) {
     $router->get('/settings/criteria', 'SettingController@getAllCriteria');
     $router->get('/settings/criteria/:id', 'SettingController@getCriteriaById');
+    $router->get('/settings/subcategories', 'SettingController@getAllSubcategories');
   });
 
   $router->group(['middleware' => 'Permission:settings.criteria.create|settings.manage'], function ($router) {

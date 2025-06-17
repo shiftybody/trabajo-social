@@ -226,7 +226,7 @@ class CustomDialog {
   }
 
   // Sistema de Toast
-  static toast(message, type = "info", duration = 3000) {
+  static toast(message, type = "info", duration = 1000) {
     const container =
       document.getElementById("toastContainer") || this.createToastContainer();
 

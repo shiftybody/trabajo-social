@@ -19,7 +19,7 @@ class CriteriaModel extends MainModel
   const TIPO_BOOLEANO = 'booleano';
 
   /**
-   * Obtiene todos los criterios activos
+   * Obtiene criterios filtrados por subcategoría con campos para DataTables
    * 
    * @param int|null $subcategoryId Filtrar por subcategoría específica
    * @return array Lista de criterios
@@ -27,21 +27,32 @@ class CriteriaModel extends MainModel
   public function getAllCriteria($subcategoryId = null)
   {
     try {
-      $query = "SELECT cr.*, 
-                             s.nombre as subcategoria_nombre,
-                             c.nombre as categoria_nombre
-                      FROM criterio_puntuacion cr
-                      JOIN subcategoria_criterio s ON cr.subcategoria_id = s.id
-                      JOIN categoria_criterio c ON s.categoria_id = c.id
-                      WHERE cr.estado = 1";
+      $query = "SELECT cr.id,
+                     cr.nombre as criterio,
+                     cr.puntaje,
+                     cr.estado,
+                     cr.tipo_criterio,
+                     cr.valor_minimo,
+                     cr.valor_maximo,
+                     cr.valor_texto,
+                     cr.valor_booleano,
+                     cr.subcategoria_id,
+                     s.nombre as subcategoria_nombre,
+                     c.nombre as categoria_nombre
+              FROM criterio_puntuacion cr
+              JOIN subcategoria_criterio s ON cr.subcategoria_id = s.id
+              JOIN categoria_criterio c ON s.categoria_id = c.id
+              WHERE 1=1";
 
       $params = [];
+
+      // Filtrar por subcategoría si se especifica
       if ($subcategoryId) {
         $query .= " AND cr.subcategoria_id = :subcategory_id";
         $params[':subcategory_id'] = $subcategoryId;
       }
 
-      $query .= " ORDER BY c.nombre, s.nombre, cr.nombre ASC";
+      $query .= " ORDER BY cr.nombre ASC";
 
       $resultado = $this->ejecutarConsulta($query, $params);
       return $resultado->fetchAll(PDO::FETCH_OBJ);
@@ -60,13 +71,25 @@ class CriteriaModel extends MainModel
   public function getCriteriaById($criteriaId)
   {
     try {
-      $query = "SELECT cr.*, 
-                             s.nombre as subcategoria_nombre,
-                             c.nombre as categoria_nombre
-                      FROM criterio_puntuacion cr
-                      JOIN subcategoria_criterio s ON cr.subcategoria_id = s.id
-                      JOIN categoria_criterio c ON s.categoria_id = c.id
-                      WHERE cr.id = :criteria_id";
+      $query = "SELECT cr.id,
+                       cr.nombre as criterio,
+                       cr.tipo_criterio,
+                       cr.valor_minimo,
+                       cr.valor_maximo,
+                       cr.valor_texto,
+                       cr.valor_booleano,
+                       cr.puntaje,
+                       cr.estado,
+                       cr.fecha_creacion,
+                       cr.fecha_modificacion,
+                       cr.subcategoria_id,
+                       s.nombre as subcategoria_nombre,
+                       c.id as categoria_id,
+                       c.nombre as categoria_nombre
+                FROM criterio_puntuacion cr
+                JOIN subcategoria_criterio s ON cr.subcategoria_id = s.id
+                JOIN categoria_criterio c ON s.categoria_id = c.id
+                WHERE cr.id = :criteria_id";
 
       $resultado = $this->ejecutarConsulta($query, [':criteria_id' => $criteriaId]);
       return $resultado->fetch(PDO::FETCH_OBJ);
@@ -77,22 +100,26 @@ class CriteriaModel extends MainModel
   }
 
   /**
-   * Obtiene criterios por subcategoría
+   * Obtiene todas las subcategorías activas para selects
    * 
-   * @param int $subcategoryId ID de la subcategoría
-   * @return array Lista de criterios de la subcategoría
+   * @return array Lista de subcategorías
    */
-  public function getCriteriaBySubcategory($subcategoryId)
+  public function getAllSubcategories()
   {
     try {
-      $query = "SELECT * FROM criterio_puntuacion 
-                      WHERE subcategoria_id = :subcategory_id AND estado = 1 
-                      ORDER BY nombre ASC";
+      $query = "SELECT s.id, 
+                       s.nombre as subcategoria_nombre, 
+                       s.categoria_id,
+                       c.nombre as categoria_nombre
+                FROM subcategoria_criterio s
+                JOIN categoria_criterio c ON s.categoria_id = c.id
+                WHERE s.estado = 1 AND c.estado = 1
+                ORDER BY c.nombre, s.nombre";
 
-      $resultado = $this->ejecutarConsulta($query, [':subcategory_id' => $subcategoryId]);
+      $resultado = $this->ejecutarConsulta($query);
       return $resultado->fetchAll(PDO::FETCH_OBJ);
     } catch (\Exception $e) {
-      error_log("Error en getCriteriaBySubcategory: " . $e->getMessage());
+      error_log("Error en getAllSubcategories: " . $e->getMessage());
       return [];
     }
   }
@@ -129,7 +156,7 @@ class CriteriaModel extends MainModel
       switch ($data['tipo_criterio']) {
         case self::TIPO_RANGO_NUMERICO:
           $datosParaInsertar['valor_minimo'] = $data['valor_minimo'];
-          $datosParaInsertar['valor_maximo'] = $data['valor_maximo'] ?: null;
+          $datosParaInsertar['valor_maximo'] = isset($data['valor_maximo']) ? $data['valor_maximo'] : null;
           $datosParaInsertar['valor_texto'] = null;
           $datosParaInsertar['valor_booleano'] = null;
           break;
@@ -149,13 +176,8 @@ class CriteriaModel extends MainModel
           break;
       }
 
-      $resultado = $this->insertarDatos("criterio_puntuacion", $datosParaInsertar);
-
-      if ($resultado->rowCount() > 0) {
-        return $this->getLastInsertId();
-      }
-
-      return false;
+      $this->insertarDatos("criterio_puntuacion", $datosParaInsertar);
+      return $this->getLastInsertId();
     } catch (\Exception $e) {
       error_log("Error en createCriteria: " . $e->getMessage());
       return false;
@@ -167,99 +189,126 @@ class CriteriaModel extends MainModel
    * 
    * @param int $criteriaId ID del criterio
    * @param array $data Datos a actualizar
-   * @return bool True si se actualizó correctamente, false en caso contrario
+   * @return bool True si se actualizó correctamente
    */
   public function updateCriteria($criteriaId, $data)
   {
     try {
-      // Verificar que el criterio existe
-      $criterioExistente = $this->getCriteriaById($criteriaId);
-      if (!$criterioExistente) {
-        return false;
-      }
-
       // Validar datos según el tipo de criterio
-      $validationResult = $this->validateCriteriaData($data, $criteriaId);
+      $validationResult = $this->validateCriteriaData($data);
       if (!$validationResult['valid']) {
         error_log("Error de validación en updateCriteria: " . implode(', ', $validationResult['errors']));
         return false;
       }
 
-      $camposActualizar = [];
-
-      // Campos básicos
-      $camposBasicos = ['nombre', 'tipo_criterio', 'puntaje', 'estado'];
-      foreach ($camposBasicos as $campo) {
-        if (isset($data[$campo])) {
-          $camposActualizar[] = [
-            "campo_nombre" => $campo,
-            "campo_marcador" => ":{$campo}",
-            "campo_valor" => $data[$campo]
-          ];
-        }
-      }
-
-      // Campos específicos del tipo de criterio - resetear todos primero
-      $camposActualizar[] = [
-        "campo_nombre" => "valor_minimo",
-        "campo_marcador" => ":valor_minimo",
-        "campo_valor" => null
-      ];
-      $camposActualizar[] = [
-        "campo_nombre" => "valor_maximo",
-        "campo_marcador" => ":valor_maximo",
-        "campo_valor" => null
-      ];
-      $camposActualizar[] = [
-        "campo_nombre" => "valor_texto",
-        "campo_marcador" => ":valor_texto",
-        "campo_valor" => null
-      ];
-      $camposActualizar[] = [
-        "campo_nombre" => "valor_booleano",
-        "campo_marcador" => ":valor_booleano",
-        "campo_valor" => null
+      $datosActualizar = [
+        [
+          "campo_nombre" => "nombre",
+          "campo_marcador" => ":nombre",
+          "campo_valor" => $data['nombre']
+        ],
+        [
+          "campo_nombre" => "tipo_criterio",
+          "campo_marcador" => ":tipo_criterio",
+          "campo_valor" => $data['tipo_criterio']
+        ],
+        [
+          "campo_nombre" => "puntaje",
+          "campo_marcador" => ":puntaje",
+          "campo_valor" => $data['puntaje']
+        ],
+        [
+          "campo_nombre" => "fecha_modificacion",
+          "campo_marcador" => ":fecha_modificacion",
+          "campo_valor" => date("Y-m-d H:i:s")
+        ],
+        [
+          "campo_nombre" => "usuario_modificacion_id",
+          "campo_marcador" => ":usuario_modificacion_id",
+          "campo_valor" => $data['usuario_modificacion_id']
+        ]
       ];
 
-      // Establecer valores según el tipo
-      $tipoCriterio = $data['tipo_criterio'] ?: $criterioExistente->tipo_criterio;
-      switch ($tipoCriterio) {
+      // Agregar campos específicos según el tipo - resetear todos primero
+      switch ($data['tipo_criterio']) {
         case self::TIPO_RANGO_NUMERICO:
-          // Actualizar valores específicos
-          $camposActualizar[count($camposActualizar) - 4]['campo_valor'] = $data['valor_minimo'] ?: null;
-          $camposActualizar[count($camposActualizar) - 3]['campo_valor'] = $data['valor_maximo'] ?: null;
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_minimo",
+            "campo_marcador" => ":valor_minimo",
+            "campo_valor" => $data['valor_minimo']
+          ];
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_maximo",
+            "campo_marcador" => ":valor_maximo",
+            "campo_valor" => isset($data['valor_maximo']) ? $data['valor_maximo'] : null
+          ];
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_texto",
+            "campo_marcador" => ":valor_texto",
+            "campo_valor" => null
+          ];
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_booleano",
+            "campo_marcador" => ":valor_booleano",
+            "campo_valor" => null
+          ];
           break;
 
         case self::TIPO_VALOR_ESPECIFICO:
-          $camposActualizar[count($camposActualizar) - 2]['campo_valor'] = $data['valor_texto'] ?: null;
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_texto",
+            "campo_marcador" => ":valor_texto",
+            "campo_valor" => $data['valor_texto']
+          ];
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_minimo",
+            "campo_marcador" => ":valor_minimo",
+            "campo_valor" => null
+          ];
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_maximo",
+            "campo_marcador" => ":valor_maximo",
+            "campo_valor" => null
+          ];
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_booleano",
+            "campo_marcador" => ":valor_booleano",
+            "campo_valor" => null
+          ];
           break;
 
         case self::TIPO_BOOLEANO:
-          $camposActualizar[count($camposActualizar) - 1]['campo_valor'] = $data['valor_booleano'] ?: null;
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_booleano",
+            "campo_marcador" => ":valor_booleano",
+            "campo_valor" => $data['valor_booleano']
+          ];
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_minimo",
+            "campo_marcador" => ":valor_minimo",
+            "campo_valor" => null
+          ];
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_maximo",
+            "campo_marcador" => ":valor_maximo",
+            "campo_valor" => null
+          ];
+          $datosActualizar[] = [
+            "campo_nombre" => "valor_texto",
+            "campo_marcador" => ":valor_texto",
+            "campo_valor" => null
+          ];
           break;
       }
 
-      // Campos de auditoría
-      $camposActualizar[] = [
-        "campo_nombre" => "fecha_modificacion",
-        "campo_marcador" => ":fecha_modificacion",
-        "campo_valor" => date("Y-m-d H:i:s")
-      ];
-
-      $camposActualizar[] = [
-        "campo_nombre" => "usuario_modificacion_id",
-        "campo_marcador" => ":usuario_modificacion_id",
-        "campo_valor" => $data['usuario_modificacion_id']
-      ];
-
       $condicion = [
         "condicion_campo" => "id",
-        "condicion_marcador" => ":criteria_id",
+        "condicion_marcador" => ":id",
         "condicion_valor" => $criteriaId
       ];
 
-      $resultado = $this->actualizarDatos("criterio_puntuacion", $camposActualizar, $condicion);
-      return $resultado->rowCount() > 0;
+      $this->actualizarDatos("criterio_puntuacion", $datosActualizar, $condicion);
+      return true;
     } catch (\Exception $e) {
       error_log("Error en updateCriteria: " . $e->getMessage());
       return false;
@@ -267,21 +316,57 @@ class CriteriaModel extends MainModel
   }
 
   /**
-   * Cambia el estado de un criterio (activo/inactivo)
+   * Elimina un criterio (soft delete)
    * 
    * @param int $criteriaId ID del criterio
-   * @param bool $estado Nuevo estado
-   * @param int $userId ID del usuario que realiza el cambio
-   * @return bool True si se cambió correctamente, false en caso contrario
+   * @return bool True si se eliminó correctamente
+   */
+  public function deleteCriteria($criteriaId)
+  {
+    try {
+      $datosActualizar = [
+        [
+          "campo_nombre" => "estado",
+          "campo_marcador" => ":estado",
+          "campo_valor" => 0
+        ],
+        [
+          "campo_nombre" => "fecha_modificacion",
+          "campo_marcador" => ":fecha_modificacion",
+          "campo_valor" => date("Y-m-d H:i:s")
+        ]
+      ];
+
+      $condicion = [
+        "condicion_campo" => "id",
+        "condicion_marcador" => ":id",
+        "condicion_valor" => $criteriaId
+      ];
+
+      $this->actualizarDatos("criterio_puntuacion", $datosActualizar, $condicion);
+      return true;
+    } catch (\Exception $e) {
+      error_log("Error en deleteCriteria: " . $e->getMessage());
+      return false;
+    }
+  }
+
+  /**
+   * Cambia el estado de un criterio
+   * 
+   * @param int $criteriaId ID del criterio
+   * @param int $estado Nuevo estado (0 o 1)
+   * @param int $userId ID del usuario que hace el cambio
+   * @return bool True si se actualizó correctamente
    */
   public function toggleCriteriaStatus($criteriaId, $estado, $userId)
   {
     try {
-      $camposActualizar = [
+      $datosActualizar = [
         [
           "campo_nombre" => "estado",
           "campo_marcador" => ":estado",
-          "campo_valor" => $estado ? 1 : 0
+          "campo_valor" => $estado
         ],
         [
           "campo_nombre" => "fecha_modificacion",
@@ -297,31 +382,14 @@ class CriteriaModel extends MainModel
 
       $condicion = [
         "condicion_campo" => "id",
-        "condicion_marcador" => ":criteria_id",
+        "condicion_marcador" => ":id",
         "condicion_valor" => $criteriaId
       ];
 
-      $resultado = $this->actualizarDatos("criterio_puntuacion", $camposActualizar, $condicion);
-      return $resultado->rowCount() > 0;
+      $this->actualizarDatos("criterio_puntuacion", $datosActualizar, $condicion);
+      return true;
     } catch (\Exception $e) {
       error_log("Error en toggleCriteriaStatus: " . $e->getMessage());
-      return false;
-    }
-  }
-
-  /**
-   * Elimina un criterio
-   * 
-   * @param int $criteriaId ID del criterio
-   * @return bool True si se eliminó correctamente, false en caso contrario
-   */
-  public function deleteCriteria($criteriaId)
-  {
-    try {
-      $resultado = $this->eliminarRegistro("criterio_puntuacion", "id", $criteriaId);
-      return $resultado->rowCount() > 0;
-    } catch (\Exception $e) {
-      error_log("Error en deleteCriteria: " . $e->getMessage());
       return false;
     }
   }
@@ -330,32 +398,27 @@ class CriteriaModel extends MainModel
    * Valida los datos de un criterio según su tipo
    * 
    * @param array $data Datos a validar
-   * @param int|null $criteriaId ID del criterio (para actualizaciones)
-   * @return array Resultado de la validación
+   * @return array Resultado de validación con 'valid' y 'errors'
    */
-  private function validateCriteriaData($data, $criteriaId = null)
+  private function validateCriteriaData($data)
   {
-    $result = ['valid' => true, 'errors' => []];
+    $result = ['valid' => false, 'errors' => []];
 
     // Validaciones básicas
     if (empty($data['nombre'])) {
-      $result['errors'][] = "El nombre es requerido";
+      $result['errors'][] = "Nombre del criterio requerido";
     }
 
-    if (empty($data['tipo_criterio']) || !in_array($data['tipo_criterio'], [
-      self::TIPO_RANGO_NUMERICO,
-      self::TIPO_VALOR_ESPECIFICO,
-      self::TIPO_BOOLEANO
-    ])) {
-      $result['errors'][] = "Tipo de criterio inválido";
+    if (empty($data['tipo_criterio'])) {
+      $result['errors'][] = "Tipo de criterio requerido";
     }
 
     if (!isset($data['puntaje']) || !is_numeric($data['puntaje'])) {
-      $result['errors'][] = "El puntaje debe ser un número";
+      $result['errors'][] = "Puntaje requerido y debe ser numérico";
     }
 
-    if (empty($data['subcategoria_id']) || !is_numeric($data['subcategoria_id'])) {
-      $result['errors'][] = "ID de subcategoría inválido";
+    if (!isset($data['subcategoria_id']) || !is_numeric($data['subcategoria_id'])) {
+      $result['errors'][] = "Subcategoría requerida";
     }
 
     // Validaciones específicas por tipo
@@ -364,9 +427,6 @@ class CriteriaModel extends MainModel
         case self::TIPO_RANGO_NUMERICO:
           if (!isset($data['valor_minimo']) || !is_numeric($data['valor_minimo'])) {
             $result['errors'][] = "Valor mínimo requerido para rango numérico";
-          }
-          if (isset($data['valor_maximo']) && !is_numeric($data['valor_maximo'])) {
-            $result['errors'][] = "Valor máximo debe ser numérico";
           }
           if (
             isset($data['valor_minimo']) && isset($data['valor_maximo']) &&
@@ -404,14 +464,14 @@ class CriteriaModel extends MainModel
   {
     try {
       $query = "SELECT c.id as categoria_id, c.nombre as categoria_nombre,
-                             s.id as subcategoria_id, s.nombre as subcategoria_nombre,
-                             cr.id, cr.nombre, cr.tipo_criterio, cr.puntaje,
-                             cr.valor_minimo, cr.valor_maximo, cr.valor_texto, cr.valor_booleano
-                      FROM categoria_criterio c
-                      JOIN subcategoria_criterio s ON c.id = s.categoria_id
-                      JOIN criterio_puntuacion cr ON s.id = cr.subcategoria_id
-                      WHERE c.estado = 1 AND s.estado = 1 AND cr.estado = 1
-                      ORDER BY c.nombre, s.nombre, cr.nombre";
+                       s.id as subcategoria_id, s.nombre as subcategoria_nombre,
+                       cr.id, cr.nombre, cr.tipo_criterio, cr.puntaje,
+                       cr.valor_minimo, cr.valor_maximo, cr.valor_texto, cr.valor_booleano
+                FROM categoria_criterio c
+                JOIN subcategoria_criterio s ON c.id = s.categoria_id
+                JOIN criterio_puntuacion cr ON s.id = cr.subcategoria_id
+                WHERE c.estado = 1 AND s.estado = 1 AND cr.estado = 1
+                ORDER BY c.nombre, s.nombre, cr.nombre";
 
       $resultado = $this->ejecutarConsulta($query);
       $criterios = $resultado->fetchAll(PDO::FETCH_OBJ);

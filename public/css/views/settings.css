@@ -88,6 +88,10 @@
   border: 1px solid #e5e7eb;
 }
 
+.content-loading {
+  visibility: hidden;
+}
+
 .config-content-header {
   display: flex;
   justify-content: space-between;
@@ -277,9 +281,9 @@
 }
 
 .type-badge {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -301,10 +305,10 @@
 .score-badge {
   background-color: #f59e0b;
   color: white;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* Toggle switch */
@@ -526,6 +530,10 @@ input:checked+.toggle-slider:before {
   display: flex;
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.level-name {
+  font-weight: 700;
 }
 
 .stat-card {

@@ -44,7 +44,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         </div>
       </nav>
 
-      <main class="config-content" id="config-content-area">
+      <main class="config-content content-loading" id="config-content-area">
         <div class="loading-container">
         </div>
       </main>

@@ -61,6 +61,13 @@
       "url": "roles",
       "permissionKey": "permissions.view",
       "section": "Roles y Permisos"
+    },
+    {
+      "id": "settings",
+      "name": "Configuración",
+      "url": "settings",
+      "permissionKey": "settings.view",
+      "section": "Configuración"
     }
   ]
 }
