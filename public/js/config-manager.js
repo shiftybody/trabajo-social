@@ -487,36 +487,112 @@ class ConfigManager {
     );
   }
 
+  /**
+   * Abre modal para nuevo criterio
+   */
   openCriteriaModal(criteriaId = null) {
-    this.showInfo("Modal de criterio en desarrollo");
+    if (criteriaId) {
+      // Editar criterio existente
+      editCriteria(criteriaId);
+    } else {
+      // Crear nuevo criterio
+      createCriteria();
+    }
   }
+
+  /**
+   * Edita un criterio
+   */
   editCriteria(criteriaId) {
-    this.openCriteriaModal(criteriaId);
+    window.editCriteria(criteriaId);
   }
+
+  /**
+   * Elimina un criterio con confirmación
+   */
   async deleteCriteria(criteriaId) {
-    const confirm = await CustomDialog.confirm(
-      "Confirmar Eliminación",
-      "¿Está seguro de eliminar este criterio?",
-      "Eliminar",
-      "Cancelar"
-    );
-    if (!confirm) return;
-    this.performFetch(
-      `${this.baseUrl}/criteria/${criteriaId}`,
-      { method: "DELETE" },
-      "Criterio eliminado correctamente."
-    );
+    if (!criteriaId) {
+      this.showError("ID de criterio no válido");
+      return;
+    }
+
+    try {
+      // Obtener datos del criterio primero para mostrar el nombre
+      const response = await fetch(`${this.baseUrl}/criteria/${criteriaId}`);
+      const result = await response.json();
+
+      let criteriaName = "este criterio";
+      if (result.status === "success" && result.data) {
+        criteriaName = `"${result.data.nombre || result.data.criterio}"`;
+      }
+
+      // Confirmar eliminación usando CustomDialog
+      const confirmDelete = await CustomDialog.confirm(
+        "Confirmar Eliminación",
+        `¿Está seguro de eliminar el criterio ${criteriaName}?<br><br>
+       <strong>Esta acción no se puede deshacer.</strong><br>
+       El criterio se eliminará permanentemente del sistema.`,
+        "Eliminar",
+        "Cancelar"
+      );
+
+      if (!confirmDelete) return;
+
+      // Proceder con la eliminación
+      const deleteResponse = await fetch(
+        `${this.baseUrl}/criteria/${criteriaId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const deleteResult = await deleteResponse.json();
+
+      if (deleteResult.status === "success") {
+        this.showSuccess(deleteResult.message);
+
+        // Recargar tabla
+        if (this.currentTable) {
+          this.currentTable.ajax.reload(null, false);
+        }
+      } else {
+        this.showError(deleteResult.message || "Error al eliminar el criterio");
+      }
+    } catch (error) {
+      console.error("Error deleting criteria:", error);
+      this.showError("Error de conexión al eliminar el criterio");
+    }
   }
-  toggleCriteriaStatus(criteriaId, status) {
-    this.performFetch(
-      `${this.baseUrl}/criteria/${criteriaId}/status`,
-      {
-        method: "POST",
-        body: JSON.stringify({ estado: status }),
-        headers: { "Content-Type": "application/json" },
-      },
-      "Estado del criterio actualizado."
-    );
+
+  /**
+   * Alterna la visibilidad de campos según el tipo de criterio
+   * @param {string} tipoCriterio Tipo seleccionado
+   */
+  toggleCriteriaFields(tipoCriterio) {
+    // Ocultar todos los campos primero
+    const allFields = document.querySelectorAll(".criteria-fields");
+    allFields.forEach((field) => (field.style.display = "none"));
+
+    // Mostrar campos relevantes según el tipo
+    switch (tipoCriterio) {
+      case "rango_numerico":
+        const numericFields = document.getElementById("numeric-fields");
+        if (numericFields) numericFields.style.display = "block";
+        break;
+
+      case "valor_especifico":
+        const textFields = document.getElementById("text-fields");
+        if (textFields) textFields.style.display = "block";
+        break;
+
+      case "booleano":
+        const booleanFields = document.getElementById("boolean-fields");
+        if (booleanFields) booleanFields.style.display = "block";
+        break;
+    }
   }
 
   async performFetch(url, options, successMessage, skipReload = false) {

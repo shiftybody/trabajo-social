@@ -243,7 +243,7 @@ const MODAL_TEMPLATES = {
     </form>
   `,
 
-   // Template para crear regla de aportación
+  // Template para crear regla de aportación
   createRule: `
     <form novalidate id="createRuleForm" class="base-modal-form form-ajax config-form" method="POST">
       <div class="form-group">
@@ -327,80 +327,82 @@ const MODAL_TEMPLATES = {
     </form>
   `,
 
-  // Template para formulario de criterio
   criteriaForm: `
-    <form novalidate id="criteriaForm" class="base-modal-form form-ajax config-form" method="POST">
-      <input type="hidden" name="subcategoria_id" value="{{subcategoria_id}}">
-      
-      <div class="form-group">
-        <label for="nombre" class="field-label">Nombre del Criterio *</label>
-        <input type="text" id="nombre" name="nombre" class="input-reset"
-               value="{{nombre}}" placeholder="ej: Casa propia, 3-4 integrantes" 
-               maxlength="100" required>
+  <form novalidate id="criteriaForm" class="base-modal-form form-ajax config-form" method="POST">
+    <input type="hidden" name="subcategoria_id" value="{{subcategoria_id}}">
+    
+    <div class="form-group">
+      <label for="nombre" class="field-label">Nombre del Criterio *</label>
+      <input type="text" id="nombre" name="nombre" class="input-reset"
+             value="{{nombre}}" placeholder="ej: Casa propia, 3-4 integrantes" 
+             maxlength="100" required>
+      <small class="field-help">Descripción del criterio de evaluación</small>
+    </div>
+    
+    <div class="form-group">
+      <label for="tipo_criterio" class="field-label">Tipo de Criterio *</label>
+      <select id="tipo_criterio" name="tipo_criterio" class="input-reset" required 
+              onchange="configManager.toggleCriteriaFields(this.value)">
+        <option value="">Seleccione tipo de criterio</option>
+        <option value="rango_numerico" {{rangoSelected}}>Rango Numérico</option>
+        <option value="valor_especifico" {{valorSelected}}>Valor Específico</option>
+        <option value="booleano" {{booleanoSelected}}>Booleano (Sí/No)</option>
+      </select>
+      <small class="field-help">Determina qué tipo de valores acepta el criterio</small>
+    </div>
+
+    <!-- Campos dinámicos según tipo de criterio -->
+    <div id="numeric-fields" class="criteria-fields" style="display: none;">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="valor_minimo" class="field-label">Valor Mínimo *</label>
+          <input type="number" id="valor_minimo" name="valor_minimo" class="input-reset"
+                 value="{{valor_minimo}}" placeholder="0" min="0" step="1">
+        </div>
+        <div class="form-group">
+          <label for="valor_maximo" class="field-label">Valor Máximo</label>
+          <input type="number" id="valor_maximo" name="valor_maximo" class="input-reset"
+                 value="{{valor_maximo}}" placeholder="Sin límite" min="0" step="1">
+          <small class="field-help">Dejar vacío para sin límite superior</small>
+        </div>
       </div>
-      
+    </div>
+    
+    <div id="text-fields" class="criteria-fields" style="display: none;">
       <div class="form-group">
-        <label for="tipo_criterio" class="field-label">Tipo de Criterio *</label>
-        <select id="tipo_criterio" name="tipo_criterio" class="input-reset" required 
-                onchange="window.configManager?.toggleCriteriaFields?.(this.value)">
-          <option value="">Seleccione tipo...</option>
-          <option value="rango_numerico" {{tipoRangoSelected}}>Rango Numérico</option>
-          <option value="valor_especifico" {{tipoValorSelected}}>Valor Específico</option>
-          <option value="booleano" {{tipoBoolSelected}}>Booleano (Sí/No)</option>
+        <label for="valor_texto" class="field-label">Valor Específico *</label>
+        <input type="text" id="valor_texto" name="valor_texto" class="input-reset"
+               value="{{valor_texto}}" placeholder="ej: Casa, Departamento, Neurohabilitación"
+               maxlength="100">
+        <small class="field-help">Valor exacto que debe coincidir</small>
+      </div>
+    </div>
+    
+    <div id="boolean-fields" class="criteria-fields" style="display: none;">
+      <div class="form-group">
+        <label for="valor_booleano" class="field-label">Valor Booleano *</label>
+        <select id="valor_booleano" name="valor_booleano" class="input-reset">
+          <option value="">Seleccione valor</option>
+          <option value="1" {{siSelected}}>Verdadero (Sí)</option>
+          <option value="0" {{noSelected}}>Falso (No)</option>
         </select>
+        <small class="field-help">Valor que debe tener la condición</small>
       </div>
-      
-      <!-- Campos para rango numérico -->
-      <div id="rango-fields" class="criteria-type-fields" style="display: {{rangoDisplay}}">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="valor_minimo" class="field-label">Valor Mínimo *</label>
-            <input type="number" id="valor_minimo" name="valor_minimo" class="input-reset"
-                   value="{{valor_minimo}}">
-          </div>
-          <div class="form-group">
-            <label for="valor_maximo" class="field-label">Valor Máximo</label>
-            <input type="number" id="valor_maximo" name="valor_maximo" class="input-reset"
-                   value="{{valor_maximo}}">
-            <small class="field-help">Dejar vacío para "sin límite"</small>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Campos para valor específico -->
-      <div id="texto-fields" class="criteria-type-fields" style="display: {{textoDisplay}}">
-        <div class="form-group">
-          <label for="valor_texto" class="field-label">Valor de Texto *</label>
-          <input type="text" id="valor_texto" name="valor_texto" class="input-reset"
-                 value="{{valor_texto}}" placeholder="ej: Casa, Departamento, Sí, No" 
-                 maxlength="100">
-        </div>
-      </div>
-      
-      <!-- Campos para booleano -->
-      <div id="booleano-fields" class="criteria-type-fields" style="display: {{booleanoDisplay}}">
-        <div class="form-group">
-          <label for="valor_booleano" class="field-label">Valor Booleano *</label>
-          <select id="valor_booleano" name="valor_booleano" class="input-reset">
-            <option value="1" {{boolTrueSelected}}>Sí (Verdadero)</option>
-            <option value="0" {{boolFalseSelected}}>No (Falso)</option>
-          </select>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="puntaje" class="field-label">Puntaje *</label>
-        <input type="number" id="puntaje" name="puntaje" class="input-reset"
-               value="{{puntaje}}" min="0" required>
-        <small class="field-help">Puntos que otorga este criterio</small>
-      </div>
-      
-      <div class="base-modal-actions">
-        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
-        <button type="submit" class="btn-primary">{{submitText}}</button>
-      </div>
-    </form>
-  `,
+    </div>
+    
+    <div class="form-group">
+      <label for="puntaje" class="field-label">Puntuación *</label>
+      <input type="number" id="puntaje" name="puntaje" class="input-reset"
+             value="{{puntaje}}" placeholder="0" min="0" max="100" step="1" required>
+      <small class="field-help">Puntos que aporta este criterio (0-100)</small>
+    </div>
+    
+    <div class="base-modal-actions">
+      <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
+      <button type="submit" class="btn-primary">{{submitText}}</button>
+    </div>
+  </form>
+`,
 };
 
 /**
@@ -484,7 +486,6 @@ const TEMPLATE_GENERATORS = {
  * Funciones helper para procesar templates complejos
  */
 const TEMPLATE_HELPERS = {
-
   // ==================== USUARIOS ==================
 
   processCreateRole: (roles) => {
@@ -633,7 +634,7 @@ const TEMPLATE_HELPERS = {
     return {
       nivel: level.nivel || "",
       puntaje_minimo: level.puntaje_minimo || "",
-    }
+    };
   },
 
   // Procesa datos para formulario de regla
