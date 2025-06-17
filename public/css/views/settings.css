@@ -248,15 +248,16 @@
 .age-badge {
   background-color: #e0e7ff;
   color: #3730a3;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .periodicity-badge {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 14px;
   font-weight: 500;
 }
 

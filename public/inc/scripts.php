@@ -38,6 +38,10 @@
     <script src="<?= APP_URL . 'public/js/modals/delete-user-modal.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/create-level-modal.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/edit-level-modal.js' ?>"></script>
+
+    <script src="<?= APP_URL . 'public/js/modals/create-rule-modal.js' ?>"></script>
+    <script src="<?= APP_URL . 'public/js/modals/edit-rule-modal.js' ?>"></script>
+    <script src="<?= APP_URL . 'public/js/modals/delete-rule-modal.js' ?>"></script>
   <?php endif; ?>
 
   <script src="<?= APP_URL . 'public/js/libs/datatables.min.js' ?>"></script>

@@ -10,7 +10,9 @@ function editarNivel(nivelId) {
       modal.showLoading("Cargando información del nivel...");
 
       try {
-        const response = await fetch(`${APP_URL}api/settings/levels/${nivelId}`);
+        const response = await fetch(
+          `${APP_URL}api/settings/levels/${nivelId}`
+        );
         const nivelData = await response.json();
 
         if (nivelData.status === "success") {

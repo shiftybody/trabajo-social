@@ -275,7 +275,7 @@ class ConfigManager {
             <div class="select-container">
               <label class="label-filter" for="levelFilter">Filtrar por Nivel:</label>
               <select class="custom-select" id="levelFilter" style="min-width: 200px;">
-                <option value="">Seleccione un nivel</option>
+                <option value="0">Seleccione un nivel</option>
                 ${levelOptions}
               </select>
             </div>
@@ -311,7 +311,6 @@ class ConfigManager {
         url: `${this.baseUrl}/rules`,
         dataSrc: "data",
         data: function (d) {
-          // Agregar filtro de nivel si está seleccionado
           const levelFilter = document.getElementById("levelFilter");
           if (levelFilter && levelFilter.value) {
             d.nivel_id = levelFilter.value;
@@ -383,12 +382,17 @@ class ConfigManager {
           },
         },
       ],
-      paging: false,
-      info: false,
+      order: [
+        [0, "asc"],
+        [1, "asc"],
+      ], // Ordenar por edad
       language: {
         zeroRecords: "No se encontraron reglas para el nivel seleccionado",
-        emptyTable: "Seleccione un nivel para ver las reglas de aportación",
+        emptyTable: "No se encontraron reglas de aportación",
         processing: '<div class="table-spinner"></div>Procesando...',
+        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        infoEmpty: "Mostrando 0 a 0 de 0 registros",
+        infoFiltered: "(filtrado de _MAX_ registros totales)",
       },
     });
 
@@ -549,6 +553,38 @@ class ConfigManager {
   }
 
   /**
+   * Elimina un nivel
+   */
+  async deleteLevel(levelId) {
+    // usar customDialog
+    const confirmDelete = await CustomDialog.confirm(
+      "Confirmar Eliminación",
+      "¿Está seguro de eliminar este nivel socioeconómico? Esta acción no se puede deshacer.",
+      "Eliminar",
+      "Cancelar"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(`${this.baseUrl}/levels/${levelId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        this.showSuccess(data.message);
+        this.currentTable.ajax.reload(null, false);
+      } else {
+        this.showError(data.message);
+      }
+    } catch (error) {
+      this.showError("Error de conexión");
+    }
+  }
+
+  /**
    * Cambia estado de nivel
    */
   async toggleLevelStatus(levelId, status) {
@@ -578,20 +614,42 @@ class ConfigManager {
   }
 
   /**
-   * Elimina un nivel
+   * Abre modal para crear regla de aportación
    */
-  async deleteLevel(levelId) {
-    const userConfirmed = await CustomDialog.confirm(
-      "Eliminar Nivel",
-      "¿Estás seguro de que quieres eliminar este nivel?",
-      "Sí, Eliminar",
+  async openRuleModal() {
+    if (typeof window.mostrarModalCrearRegla === "function") {
+      await window.mostrarModalCrearRegla();
+    } else {
+      this.showError("Función de creación de regla no disponible");
+    }
+  }
+
+  /**
+   * Abre modal para editar regla de aportación
+   */
+  async editRule(ruleId) {
+    if (typeof window.mostrarModalEditarRegla === "function") {
+      await window.mostrarModalEditarRegla(ruleId);
+    } else {
+      this.showError("Función de edición de regla no disponible");
+    }
+  }
+
+  /**
+   * Elimina una regla de aportación
+   */
+  async deleteRule(ruleId) {
+    const confirmDelete = await CustomDialog.confirm(
+      "Confirmar Eliminación",
+      "¿Está seguro de eliminar esta regla de aportación? Esta acción no se puede deshacer.",
+      "Eliminar",
       "Cancelar"
     );
 
-    if (!userConfirmed) return;
+    if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`${this.baseUrl}/levels/${levelId}`, {
+      const response = await fetch(`${this.baseUrl}/rules/${ruleId}`, {
         method: "DELETE",
       });
 
@@ -600,28 +658,12 @@ class ConfigManager {
       if (data.status === "success") {
         this.showSuccess(data.message);
         this.currentTable.ajax.reload(null, false);
-        // Recargar datos de niveles
-        await this.loadLevelsData();
       } else {
         this.showError(data.message);
       }
     } catch (error) {
       this.showError("Error de conexión");
     }
-  }
-
-  /**
-   * Abre modal para nueva regla
-   */
-  openRuleModal(ruleId = null) {
-    this.showInfo("Modal de regla en desarrollo");
-  }
-
-  /**
-   * Edita una regla
-   */
-  editRule(ruleId) {
-    this.openRuleModal(ruleId);
   }
 
   /**
@@ -649,32 +691,6 @@ class ConfigManager {
     } catch (error) {
       this.showError("Error de conexión");
       this.currentTable.ajax.reload(null, false);
-    }
-  }
-
-  /**
-   * Elimina una regla
-   */
-  async deleteRule(ruleId) {
-    if (!confirm("¿Está seguro de eliminar esta regla?")) return;
-
-    try {
-      const response = await fetch(`${this.baseUrl}/rules/${ruleId}`, {
-        method: "DELETE",
-      });
-
-      const data = await response.json();
-
-      if (data.status === "success") {
-        this.showSuccess(data.message);
-        this.currentTable.ajax.reload(null, false);
-        // Recargar datos de niveles
-        await this.loadLevelsData();
-      } else {
-        this.showError(data.message);
-      }
-    } catch (error) {
-      this.showError("Error de conexión");
     }
   }
 

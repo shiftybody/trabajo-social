@@ -1,6 +1,5 @@
 /** Modal de confirmacion para eliminar usuario */
 async function eliminarUsuario(usuarioId, nombreUsuario) {
-
   const confirmacion = await CustomDialog.confirm(
     "Confirmar Eliminación",
     `¿Está seguro de que desea eliminar el usuario "${nombreUsuario}"?`,

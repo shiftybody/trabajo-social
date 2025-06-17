@@ -17,6 +17,342 @@ class ContributionRuleModel extends MainModel
   const PERIODICIDAD_MENSUAL = 'mensual';
   const PERIODICIDAD_SEMESTRAL = 'semestral';
   const PERIODICIDAD_ANUAL = 'anual';
+  /**
+   * Crea una nueva regla de aportación
+   * 
+   * @param array $data Datos de la regla
+   * @return array Resultado con success, data/errors
+   */
+  public function createRule($data)
+  {
+    try {
+      // Definir reglas de validación
+      $validar = [
+        'nivel_socioeconomico_id' => [
+          'requerido' => true,
+          'formato' => 'entero',
+          'min_valor' => 1
+        ],
+        'edad' => [
+          'requerido' => true,
+          'formato' => 'entero',
+          'min_valor' => 0,
+          'max_valor' => 8
+        ],
+        'periodicidad' => [
+          'requerido' => true,
+          'valores_permitidos' => [self::PERIODICIDAD_MENSUAL, self::PERIODICIDAD_SEMESTRAL, self::PERIODICIDAD_ANUAL],
+          'sanitizar' => true
+        ],
+        'monto_aportacion' => [
+          'requerido' => true,
+        ],
+        'usuario_creacion_id' => [
+          'requerido' => true,
+          'formato' => 'entero'
+        ]
+      ];
+
+      // Validar datos usando el método del MainModel
+      $validationResult = $this->validarDatos($data, $validar);
+
+      if (!empty($validationResult['errors'])) {
+        error_log("Errores de validación en createRule: " . json_encode($validationResult['errors']));
+        return [
+          'success' => false,
+          'errors' => $validationResult['errors']
+        ];
+      }
+
+      $datosValidados = $validationResult['datos'];
+
+      // Verificar que el nivel socioeconómico existe y está activo
+      $nivelExiste = $this->verificarNivelExiste($datosValidados['nivel_socioeconomico_id']);
+      if (!$nivelExiste['existe']) {
+        return [
+          'success' => false,
+          'errors' => ['nivel_socioeconomico_id' => $nivelExiste['mensaje']]
+        ];
+      }
+
+      // Verificar que no exista una regla con la misma combinación nivel + edad
+      if ($this->ruleExists($datosValidados['nivel_socioeconomico_id'], $datosValidados['edad'])) {
+        error_log("Intento de crear regla duplicada: Nivel {$datosValidados['nivel_socioeconomico_id']}, Edad {$datosValidados['edad']}");
+        return [
+          'success' => false,
+          'errors' => ['edad' => 'Ya existe una regla de aportación para este nivel socioeconómico y edad']
+        ];
+      }
+
+      $datosParaInsertar = [
+        'nivel_socioeconomico_id' => $datosValidados['nivel_socioeconomico_id'],
+        'edad' => $datosValidados['edad'],
+        'periodicidad' => $datosValidados['periodicidad'],
+        'monto_aportacion' => $datosValidados['monto_aportacion'],
+        'estado' => 1,
+        'fecha_creacion' => date("Y-m-d H:i:s"),
+        'fecha_modificacion' => date("Y-m-d H:i:s"),
+        'usuario_creacion_id' => $datosValidados['usuario_creacion_id'],
+        'usuario_modificacion_id' => $datosValidados['usuario_creacion_id']
+      ];
+
+      $resultado = $this->insertarDatos("regla_aportacion", $datosParaInsertar);
+
+      if ($resultado->rowCount() > 0) {
+        return [
+          'success' => true,
+          'data' => $this->getLastInsertId()
+        ];
+      }
+
+      return [
+        'success' => false,
+        'errors' => ['general' => 'No se pudo crear la regla de aportación']
+      ];
+    } catch (\Exception $e) {
+      error_log("Error en createRule: " . $e->getMessage());
+      return [
+        'success' => false,
+        'errors' => ['general' => 'Error interno del servidor']
+      ];
+    }
+  }
+
+  /**
+   * Actualiza una regla de aportación existente
+   * 
+   * @param int $ruleId ID de la regla
+   * @param array $data Datos a actualizar
+   * @return array Resultado con success, data/errors
+   */
+  public function updateRule($ruleId, $data)
+  {
+    try {
+      // Verificar que la regla existe
+      $reglaExistente = $this->getRuleById($ruleId);
+      if (!$reglaExistente) {
+        return [
+          'success' => false,
+          'errors' => ['general' => 'Regla de aportación no encontrada']
+        ];
+      }
+
+      // Definir reglas de validación (solo para campos que se van a actualizar)
+      $validar = [];
+
+      if (isset($data['nivel_socioeconomico_id'])) {
+        $validar['nivel_socioeconomico_id'] = [
+          'requerido' => true,
+          'formato' => 'entero',
+          'min_valor' => 1
+        ];
+      }
+
+      if (isset($data['edad'])) {
+        $validar['edad'] = [
+          'requerido' => true,
+          'formato' => 'entero',
+          'min_valor' => 0,
+          'max_valor' => 150
+        ];
+      }
+
+      if (isset($data['periodicidad'])) {
+        $validar['periodicidad'] = [
+          'requerido' => true,
+          'valores_permitidos' => [self::PERIODICIDAD_MENSUAL, self::PERIODICIDAD_SEMESTRAL, self::PERIODICIDAD_ANUAL],
+          'sanitizar' => true
+        ];
+      }
+
+      if (isset($data['monto_aportacion'])) {
+        $validar['monto_aportacion'] = [
+          'requerido' => true,
+        ];
+      }
+
+      if (isset($data['estado'])) {
+        $validar['estado'] = [
+          'requerido' => true,
+          'formato' => 'entero'
+        ];
+      }
+
+      if (isset($data['usuario_modificacion_id'])) {
+        $validar['usuario_modificacion_id'] = [
+          'requerido' => true,
+          'formato' => 'entero'
+        ];
+      }
+
+      // Validar datos usando el método del MainModel
+      $validationResult = $this->validarDatos($data, $validar);
+
+      if (!empty($validationResult['errors'])) {
+        error_log("Errores de validación en updateRule: " . json_encode($validationResult['errors']));
+        return [
+          'success' => false,
+          'errors' => $validationResult['errors']
+        ];
+      }
+
+      $datosValidados = $validationResult['datos'];
+
+      // Si se está cambiando el nivel, verificar que existe y está activo
+      if (isset($datosValidados['nivel_socioeconomico_id']) && $datosValidados['nivel_socioeconomico_id'] != $reglaExistente->nivel_socioeconomico_id) {
+        $nivelExiste = $this->verificarNivelExiste($datosValidados['nivel_socioeconomico_id']);
+        if (!$nivelExiste['existe']) {
+          return [
+            'success' => false,
+            'errors' => ['nivel_socioeconomico_id' => $nivelExiste['mensaje']]
+          ];
+        }
+      }
+
+      // Si se están cambiando nivel o edad, verificar duplicados
+      $criteriosCambiados = (
+        (isset($datosValidados['nivel_socioeconomico_id']) && $datosValidados['nivel_socioeconomico_id'] != $reglaExistente->nivel_socioeconomico_id) ||
+        (isset($datosValidados['edad']) && $datosValidados['edad'] != $reglaExistente->edad)
+      );
+
+      if ($criteriosCambiados) {
+        $nuevoNivel = $datosValidados['nivel_socioeconomico_id'] ?: $reglaExistente->nivel_socioeconomico_id;
+        $nuevaEdad = $datosValidados['edad'] ?: $reglaExistente->edad;
+
+        if ($this->ruleExists($nuevoNivel, $nuevaEdad, null, $ruleId)) {
+          return [
+            'success' => false,
+            'errors' => ['edad' => 'Ya existe una regla de aportación para este nivel socioeconómico y edad']
+          ];
+        }
+      }
+
+      // Agregar campos de auditoría
+      $datosValidados['fecha_modificacion'] = date("Y-m-d H:i:s");
+
+      $resultado = $this->actualizarDatos("regla_aportacion", $datosValidados, "id", $ruleId);
+
+      if ($resultado->rowCount() > 0) {
+        return [
+          'success' => true,
+          'data' => $ruleId
+        ];
+      }
+
+      return [
+        'success' => false,
+        'errors' => ['general' => 'No se realizaron cambios en la regla']
+      ];
+    } catch (\Exception $e) {
+      error_log("Error en updateRule: " . $e->getMessage());
+      return [
+        'success' => false,
+        'errors' => ['general' => 'Error interno del servidor']
+      ];
+    }
+  }
+
+  /**
+   * Verifica que un nivel socioeconómico existe y está activo
+   * 
+   * @param int $nivelId ID del nivel
+   * @return array Resultado con existe y mensaje
+   */
+  private function verificarNivelExiste($nivelId)
+  {
+    try {
+      $query = "SELECT id, nivel, estado FROM nivel_socioeconomico WHERE id = :nivel_id";
+      $resultado = $this->ejecutarConsulta($query, [':nivel_id' => $nivelId]);
+      $nivel = $resultado->fetch(PDO::FETCH_OBJ);
+
+      if (!$nivel) {
+        return [
+          'existe' => false,
+          'mensaje' => 'El nivel socioeconómico seleccionado no existe'
+        ];
+      }
+
+      if ($nivel->estado != 1) {
+        return [
+          'existe' => false,
+          'mensaje' => 'El nivel socioeconómico seleccionado está inactivo'
+        ];
+      }
+
+      return [
+        'existe' => true,
+        'mensaje' => 'Nivel válido'
+      ];
+    } catch (\Exception $e) {
+      error_log("Error en verificarNivelExiste: " . $e->getMessage());
+      return [
+        'existe' => false,
+        'mensaje' => 'Error al verificar el nivel socioeconómico'
+      ];
+    }
+  }
+
+  /**
+   * Verifica si ya existe una regla para la misma combinación nivel + edad
+   * Solo puede existir UNA regla por nivel y edad, independiente de la periodicidad
+   * 
+   * @param int $nivelId ID del nivel
+   * @param int $edad Edad
+   * @param string $periodicidad Periodicidad (no se usa en la validación, pero se mantiene por consistencia)
+   * @param int|null $excludeId ID de regla a excluir (para updates)
+   * @return bool True si existe, false si no
+   */
+  private function ruleExists($nivelId, $edad, $periodicidad = null, $excludeId = null)
+  {
+    try {
+      // Verificar si ya existe una regla para este nivel y edad
+      // (sin importar la periodicidad)
+      $query = "SELECT COUNT(*) FROM regla_aportacion 
+                WHERE nivel_socioeconomico_id = :nivel_id 
+                AND edad = :edad";
+
+      $params = [
+        ':nivel_id' => $nivelId,
+        ':edad' => $edad
+      ];
+
+      if ($excludeId) {
+        $query .= " AND id != :exclude_id";
+        $params[':exclude_id'] = $excludeId;
+      }
+
+      $resultado = $this->ejecutarConsulta($query, $params);
+      return $resultado->fetchColumn() > 0;
+    } catch (\Exception $e) {
+      error_log("Error en ruleExists: " . $e->getMessage());
+      return false;
+    }
+  }
+
+  /**
+   * Cambia el estado de una regla de aportación
+   * 
+   * @param int $ruleId ID de la regla
+   * @param int $estado Nuevo estado (0 o 1)
+   * @param int $userId ID del usuario que hace el cambio
+   * @return bool True si se actualizó correctamente, false en caso contrario
+   */
+  public function toggleRuleStatus($ruleId, $estado, $userId)
+  {
+    try {
+      $datosActualizar = [
+        'estado' => $estado,
+        'fecha_modificacion' => date("Y-m-d H:i:s"),
+        'usuario_modificacion_id' => $userId
+      ];
+
+      $resultado = $this->actualizarDatos("regla_aportacion", $datosActualizar, "id", $ruleId);
+      return $resultado->rowCount() > 0;
+    } catch (\Exception $e) {
+      error_log("Error en toggleRuleStatus: " . $e->getMessage());
+      return false;
+    }
+  }
 
   /**
    * Obtiene todas ilas reglas de aportación actvas
@@ -118,178 +454,6 @@ class ContributionRuleModel extends MainModel
     }
   }
 
-  /**
-   * Crea una nueva regla de aportación
-   * 
-   * @param array $data Datos de la regla
-   * @return int|false ID de la regla creada o false si hubo error
-   */
-  public function createRule($data)
-  {
-    try {
-      // Validar datos
-      $validationResult = $this->validateRuleData($data);
-      if (!$validationResult['valid']) {
-        error_log("Error de validación en createRule: " . implode(', ', $validationResult['errors']));
-        return false;
-      }
-
-      // Verificar que no exista una regla con la misma combinación
-      if ($this->ruleExists($data['nivel_socioeconomico_id'], $data['edad'], $data['periodicidad'])) {
-        error_log("Intento de crear regla duplicada: Nivel {$data['nivel_socioeconomico_id']}, Edad {$data['edad']}, Periodicidad {$data['periodicidad']}");
-        return false;
-      }
-
-      $datosParaInsertar = [
-        'nivel_socioeconomico_id' => $data['nivel_socioeconomico_id'],
-        'edad' => $data['edad'],
-        'periodicidad' => $data['periodicidad'],
-        'monto_aportacion' => $data['monto_aportacion'],
-        'estado' => 1,
-        'fecha_creacion' => date("Y-m-d H:i:s"),
-        'fecha_modificacion' => date("Y-m-d H:i:s"),
-        'usuario_creacion_id' => $data['usuario_creacion_id'],
-        'usuario_modificacion_id' => $data['usuario_creacion_id']
-      ];
-
-      $resultado = $this->insertarDatos("regla_aportacion", $datosParaInsertar);
-
-      if ($resultado->rowCount() > 0) {
-        return $this->getLastInsertId();
-      }
-
-      return false;
-    } catch (\Exception $e) {
-      error_log("Error en createRule: " . $e->getMessage());
-      return false;
-    }
-  }
-
-  /**
-   * Actualiza una regla de aportación existente
-   * 
-   * @param int $ruleId ID de la regla
-   * @param array $data Datos a actualizar
-   * @return bool True si se actualizó correctamente, false en caso contrario
-   */
-  public function updateRule($ruleId, $data)
-  {
-    try {
-      // Verificar que la regla existe
-      $reglaExistente = $this->getRuleById($ruleId);
-      if (!$reglaExistente) {
-        return false;
-      }
-
-      // Validar datos
-      $validationResult = $this->validateRuleData($data, $ruleId);
-      if (!$validationResult['valid']) {
-        error_log("Error de validación en updateRule: " . implode(', ', $validationResult['errors']));
-        return false;
-      }
-
-      // Si se están cambiendo los criterios únicos, verificar duplicados
-      $criteriosCambiados = (
-        (isset($data['nivel_socioeconomico_id']) && $data['nivel_socioeconomico_id'] != $reglaExistente->nivel_socioeconomico_id) ||
-        (isset($data['edad']) && $data['edad'] != $reglaExistente->edad) ||
-        (isset($data['periodicidad']) && $data['periodicidad'] != $reglaExistente->periodicidad)
-      );
-
-      if ($criteriosCambiados) {
-        $nuevoNivel = $data['nivel_socioeconomico_id'] ?: $reglaExistente->nivel_socioeconomico_id;
-        $nuevaEdad = $data['edad'] ?: $reglaExistente->edad;
-        $nuevaPeriodicidad = $data['periodicidad'] ?: $reglaExistente->periodicidad;
-
-        if ($this->ruleExists($nuevoNivel, $nuevaEdad, $nuevaPeriodicidad, $ruleId)) {
-          error_log("Conflicto de regla única en actualización: Nivel {$nuevoNivel}, Edad {$nuevaEdad}, Periodicidad {$nuevaPeriodicidad}");
-          return false;
-        }
-      }
-
-      $camposActualizar = [];
-
-      // Campos permitidos para actualizar
-      $camposPermitidos = ['nivel_socioeconomico_id', 'edad', 'periodicidad', 'monto_aportacion', 'estado'];
-
-      foreach ($camposPermitidos as $campo) {
-        if (isset($data[$campo])) {
-          $camposActualizar[] = [
-            "campo_nombre" => $campo,
-            "campo_marcador" => ":{$campo}",
-            "campo_valor" => $data[$campo]
-          ];
-        }
-      }
-
-      // Campos de auditoría
-      $camposActualizar[] = [
-        "campo_nombre" => "fecha_modificacion",
-        "campo_marcador" => ":fecha_modificacion",
-        "campo_valor" => date("Y-m-d H:i:s")
-      ];
-
-      $camposActualizar[] = [
-        "campo_nombre" => "usuario_modificacion_id",
-        "campo_marcador" => ":usuario_modificacion_id",
-        "campo_valor" => $data['usuario_modificacion_id']
-      ];
-
-      $condicion = [
-        "condicion_campo" => "id",
-        "condicion_marcador" => ":rule_id",
-        "condicion_valor" => $ruleId
-      ];
-
-      $resultado = $this->actualizarDatos("regla_aportacion", $camposActualizar, $condicion);
-      return $resultado->rowCount() > 0;
-    } catch (\Exception $e) {
-      error_log("Error en updateRule: " . $e->getMessage());
-      return false;
-    }
-  }
-
-  /**
-   * Cambia el estado de una regla de aportación (activa/inactiva)
-   * 
-   * @param int $ruleId ID de la regla
-   * @param bool $estado Nuevo estado
-   * @param int $userId ID del usuario que realiza el cambio
-   * @return bool True si se cambió correctamente, false en caso contrario
-   */
-  public function toggleRuleStatus($ruleId, $estado, $userId)
-  {
-    try {
-      $camposActualizar = [
-        [
-          "campo_nombre" => "estado",
-          "campo_marcador" => ":estado",
-          "campo_valor" => $estado ? 1 : 0
-        ],
-        [
-          "campo_nombre" => "fecha_modificacion",
-          "campo_marcador" => ":fecha_modificacion",
-          "campo_valor" => date("Y-m-d H:i:s")
-        ],
-        [
-          "campo_nombre" => "usuario_modificacion_id",
-          "campo_marcador" => ":usuario_modificacion_id",
-          "campo_valor" => $userId
-        ]
-      ];
-
-      $condicion = [
-        "condicion_campo" => "id",
-        "condicion_marcador" => ":rule_id",
-        "condicion_valor" => $ruleId
-      ];
-
-      $resultado = $this->actualizarDatos("regla_aportacion", $camposActualizar, $condicion);
-      return $resultado->rowCount() > 0;
-    } catch (\Exception $e) {
-      error_log("Error en toggleRuleStatus: " . $e->getMessage());
-      return false;
-    }
-  }
 
   /**
    * Elimina una regla de aportación
@@ -459,42 +623,6 @@ class ContributionRuleModel extends MainModel
       self::PERIODICIDAD_SEMESTRAL => 'Semestral',
       self::PERIODICIDAD_ANUAL => 'Anual'
     ];
-  }
-
-  /**
-   * Verifica si existe una regla con los criterios especificados
-   * 
-   * @param int $nivelId ID del nivel socioeconómico
-   * @param int $edad Edad
-   * @param string $periodicidad Periodicidad
-   * @param int|null $excludeRuleId ID de regla a excluir de la verificación
-   * @return bool True si existe, false en caso contrario
-   */
-  private function ruleExists($nivelId, $edad, $periodicidad, $excludeRuleId = null)
-  {
-    try {
-      $query = "SELECT COUNT(*) FROM regla_aportacion 
-                      WHERE nivel_socioeconomico_id = :nivel_id 
-                      AND edad = :edad 
-                      AND periodicidad = :periodicidad";
-
-      $params = [
-        ':nivel_id' => $nivelId,
-        ':edad' => $edad,
-        ':periodicidad' => $periodicidad
-      ];
-
-      if ($excludeRuleId) {
-        $query .= " AND id != :exclude_id";
-        $params[':exclude_id'] = $excludeRuleId;
-      }
-
-      $resultado = $this->ejecutarConsulta($query, $params);
-      return $resultado->fetchColumn() > 0;
-    } catch (\Exception $e) {
-      error_log("Error en ruleExists: " . $e->getMessage());
-      return true; // En caso de error, asumir que existe por seguridad
-    }
   }
 
   /**

@@ -243,50 +243,86 @@ const MODAL_TEMPLATES = {
     </form>
   `,
 
-  // Template para formulario de regla de aportación
-  ruleForm: `
-    <form novalidate id="ruleForm" class="base-modal-form form-ajax config-form" method="POST">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="nivel_socioeconomico_id" class="field-label">Nivel Socioeconómico *</label>
-          <select id="nivel_socioeconomico_id" name="nivel_socioeconomico_id" class="input-reset" required>
-            <option value="">Seleccione un nivel...</option>
-            {{levelsOptions}}
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="edad" class="field-label">Edad del Paciente *</label>
-          <input type="number" id="edad" name="edad" class="input-reset"
-                 value="{{edad}}" min="0" max="150" required>
-          <small class="field-help">Edad en años</small>
-        </div>
+   // Template para crear regla de aportación
+  createRule: `
+    <form novalidate id="createRuleForm" class="base-modal-form form-ajax config-form" method="POST">
+      <div class="form-group">
+        <label for="nivel_socioeconomico_id" class="field-label">Nivel Socioeconómico</label>
+        <select id="nivel_socioeconomico_id" name="nivel_socioeconomico_id" class="input-reset" required>
+          <option value="">Seleccione un nivel</option>
+          {{nivelOptions}}
+        </select>
       </div>
       
-      <div class="form-row">
-        <div class="form-group">
-          <label for="periodicidad" class="field-label">Periodicidad *</label>
-          <select id="periodicidad" name="periodicidad" class="input-reset" required>
-            <option value="">Seleccione periodicidad...</option>
-            <option value="mensual" {{periodicidadMensualSelected}}>Mensual</option>
-            <option value="semestral" {{periodicidadSemestralSelected}}>Semestral</option>
-            <option value="anual" {{periodicidadAnualSelected}}>Anual</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="monto_aportacion" class="field-label">Monto de Aportación *</label>
-          <div class="input-group">
-            <span class="input-group-text">$</span>
-            <input type="number" id="monto_aportacion" name="monto_aportacion" class="input-reset"
-                   value="{{monto_aportacion}}" min="0" step="0.01" required>
-          </div>
-        </div>
+      <div class="form-group">
+        <label for="edad" class="field-label">Edad</label>
+        <input type="number" id="edad" name="edad" class="input-reset"
+               value="{{edad}}" min="0" max="150" required>
+        <small class="field-help">Edad del paciente</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="periodicidad" class="field-label">Periodicidad</label>
+        <select id="periodicidad" name="periodicidad" class="input-reset" required>
+          <option value="">Seleccione periodicidad</option>
+          <option value="mensual">Mensual</option>
+          <option value="semestral">Semestral</option>
+          <option value="anual">Anual</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="monto_aportacion" class="field-label">Monto de Aportación</label>
+        <input type="number" id="monto_aportacion" name="monto_aportacion" class="input-reset"
+               value="{{monto_aportacion}}" min="0" step="0.01" required>
+        <small class="field-help">Monto en pesos mexicanos</small>
       </div>
       
       <div class="base-modal-actions">
-        <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
-        <button type="submit" class="btn-primary">{{submitText}}</button>
+        <button class="btn-cancel" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">Crear Regla</button>
+      </div>
+    </form>
+  `,
+
+  // Template para editar regla de aportación
+  editRule: `
+    <form novalidate id="editRuleForm" class="base-modal-form form-ajax config-form" method="POST">
+      <div class="form-group">
+        <label for="nivel_socioeconomico_id" class="field-label">Nivel Socioeconómico</label>
+        <select id="nivel_socioeconomico_id" name="nivel_socioeconomico_id" class="input-reset" required>
+          <option value="">Seleccione un nivel</option>
+          {{nivelOptions}}
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="edad" class="field-label">Edad</label>
+        <input type="number" id="edad" name="edad" class="input-reset"
+               value="{{edad}}" min="0" max="150" required>
+        <small class="field-help">Edad del paciente</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="periodicidad" class="field-label">Periodicidad</label>
+        <select id="periodicidad" name="periodicidad" class="input-reset" required>
+          <option value="">Seleccione periodicidad</option>
+          <option value="mensual" {{mensualSelected}}>Mensual</option>
+          <option value="semestral" {{semestralSelected}}>Semestral</option>
+          <option value="anual" {{anualSelected}}>Anual</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="monto_aportacion" class="field-label">Monto de Aportación</label>
+        <input type="number" id="monto_aportacion" name="monto_aportacion" class="input-reset"
+               value="{{monto_aportacion}}" min="0" step="0.01" required>
+        <small class="field-help">Monto en pesos mexicanos</small>
+      </div>
+      
+      <div class="base-modal-actions">
+        <button class="btn-cancel" data-action="close">Cancelar</button>
+        <button type="submit" class="btn-primary">Actualizar Regla</button>
       </div>
     </form>
   `,

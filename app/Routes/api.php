@@ -120,7 +120,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   });
 
   $router->group(['middleware' => 'Permission:settings.rules.edit|settings.manage'], function ($router) {
-    $router->put('/settings/rules/:id', 'SettingController@updateRule');
+    $router->post('/settings/rules/:id', 'SettingController@updateRule');
     $router->post('/settings/rules/:id/status', 'SettingController@toggleRuleStatus');
   });
 
@@ -140,7 +140,7 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   });
 
   $router->group(['middleware' => 'Permission:settings.criteria.edit|settings.manage'], function ($router) {
-    $router->put('/settings/criteria/:id', 'SettingController@updateCriteria');
+    $router->post('/settings/criteria/:id', 'SettingController@updateCriteria');
     $router->post('/settings/criteria/:id/status', 'SettingController@toggleCriteriaStatus');
   });
 
