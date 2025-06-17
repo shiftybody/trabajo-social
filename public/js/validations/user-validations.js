@@ -84,8 +84,8 @@ const USER_VALIDATION_SCHEMAS = {
       required: { message: "El campo apellido paterno no puede estar vacío" },
       pattern: {
         value: "^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,70}$",
-          message: "Solo se permiten letras y espacios",
-        },
+        message: "Solo se permiten letras y espacios",
+      },
     },
     apellido_materno: {
       pattern: {
@@ -119,7 +119,8 @@ const USER_VALIDATION_SCHEMAS = {
     password: {
       pattern: {
         value: "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20}$",
-        message: "La contraseña debe tener mínimo 8 caracteres, un número, una mayúscula, una minúscula y un símbolo (@#$%)",
+        message:
+          "La contraseña debe tener mínimo 8 caracteres, un número, una mayúscula, una minúscula y un símbolo (@#$%)",
       },
     },
     password2: {
@@ -158,7 +159,7 @@ const USER_VALIDATION_SCHEMAS = {
         message: "Las contraseñas no coinciden",
       },
     },
-  }
+  },
 };
 
 // Funciones de validación para usuarios
@@ -199,7 +200,7 @@ const UserValidations = {
       formData,
       USER_VALIDATION_SCHEMAS.resetPassword
     );
-  }
+  },
 };
 
 // Manejadores para respuestas del servidor
@@ -228,18 +229,15 @@ const UserHandlers = {
   },
 
   onResetPasswordSuccess: async (data, form) => {
-
     Modal.closeAll();
 
     await CustomDialog.success(
       "Contraseña Restablecida",
       data.message || "La contraseña se ha restablecido correctamente"
     );
-    
   },
 
   onError: async (data, form) => {
-
     console.error("Error en FormManager:", data);
 
     console.log(data.errors);
@@ -266,7 +264,6 @@ const UserHandlers = {
         "error",
         2000
       );
-      
     } else {
       await CustomDialog.error(
         "Error",
@@ -274,7 +271,6 @@ const UserHandlers = {
       );
     }
   },
- 
 };
 
 // Utilidades para formularios de usuarios
@@ -502,7 +498,6 @@ const UserUtils = {
       }
     });
 
-
     // Advertencia al cerrar ventana
     window.addEventListener("beforeunload", (e) => {
       if (formChanged && !isSubmitting) {
@@ -532,7 +527,7 @@ const UserUtils = {
 // 1. Mueve toda la lógica de registro a una función reutilizable
 function registerAvailableForms(container) {
   // Asegurarse de que el contenedor sea un elemento válido antes de usar querySelector
-  if (!container || typeof container.querySelector !== 'function') {
+  if (!container || typeof container.querySelector !== "function") {
     return;
   }
 
@@ -575,7 +570,7 @@ function registerAvailableForms(container) {
       validate: UserValidations.validateResetPassword,
       onSuccess: UserHandlers.onResetPasswordSuccess,
       onError: UserHandlers.onError,
-    })
+    });
   }
 
   // --- Registrar formulario de cambio de estado ---
@@ -583,16 +578,14 @@ function registerAvailableForms(container) {
     console.log("Registrando changeStatusForm...");
     FormManager.register("changeStatusForm", {
       onSuccess: async (data, form) => {
-
         Modal.closeAll();
-                
+
         loadData();
 
         await CustomDialog.success(
           "Estado Actualizado",
           data.message || "El estado del usuario se actualizó correctamente"
         );
-
       },
       onError: async (data, form) => {
         Modal.closeAll();
@@ -600,11 +593,10 @@ function registerAvailableForms(container) {
           "Error",
           data.message || "No se pudo actualizar tu propia cuenta"
         );
-      }
+      },
     });
   }
 }
-
 
 // 2. Ejecutar al cargar la página inicial
 document.addEventListener("DOMContentLoaded", function () {
@@ -615,8 +607,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const observer = new MutationObserver((mutationsList) => {
     for (const mutation of mutationsList) {
       // Si se han añadido nodos (como un modal)
-      if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-        mutation.addedNodes.forEach(node => {
+      if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach((node) => {
           // Nos aseguramos de que el nodo sea un elemento HTML (nodeType 1)
           if (node.nodeType === 1) {
             registerAvailableForms(node);

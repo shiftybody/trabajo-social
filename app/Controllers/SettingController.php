@@ -270,11 +270,7 @@ class SettingController
         'nivel_id' => $request->get('nivel_id'),
       ];
 
-      error_log("getAllRules filters: " . print_r($filters, true));
-
       $rules = $this->ruleModel->getAllRules($filters);
-
-      error_log("getAllRules result: " . print_r($rules, true));
 
       return Response::json([
         'status' => 'success',

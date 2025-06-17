@@ -14,7 +14,10 @@ const AUTH_VALIDATION_SCHEMAS = {
 const AuthValidations = {
   validateLogin: async (form) => {
     const formData = new FormData(form);
-    return await FormValidator.validate(formData, AUTH_VALIDATION_SCHEMAS.login);
+    return await FormValidator.validate(
+      formData,
+      AUTH_VALIDATION_SCHEMAS.login
+    );
   },
 };
 
@@ -23,7 +26,7 @@ const AuthUtils = {
   // Función para manejar estilos de error del password toggle
   togglePasswordErrorStyle: (input, hasError) => {
     const toggleButton = document.getElementById("password-toggle");
-    
+
     if (input.id === "password" && toggleButton) {
       if (hasError) {
         toggleButton.classList.add("error-toggle");
@@ -37,12 +40,12 @@ const AuthUtils = {
   updateToggleVisibility: () => {
     const passwordInput = document.getElementById("password");
     const passwordToggle = document.getElementById("password-toggle");
-    
+
     if (passwordInput && passwordToggle) {
       if (passwordInput.value.trim() === "") {
-        passwordToggle.style.display = 'none';
+        passwordToggle.style.display = "none";
       } else {
-        passwordToggle.style.display = 'flex';
+        passwordToggle.style.display = "flex";
       }
     }
   },
@@ -51,29 +54,31 @@ const AuthUtils = {
   handlePasswordToggle: () => {
     const passwordInput = document.getElementById("password");
     const passwordToggle = document.getElementById("password-toggle");
-    
+
     if (!passwordInput || !passwordToggle) return;
 
-    const eyeIcon = passwordToggle.querySelector('.eye-icon');
-    const eyeOffIcon = passwordToggle.querySelector('.eye-off-icon');
-    
-    if (passwordInput.type === 'password') {
-      passwordInput.type = 'text';
-      eyeIcon.style.display = 'none';
-      eyeOffIcon.style.display = 'block';
+    const eyeIcon = passwordToggle.querySelector(".eye-icon");
+    const eyeOffIcon = passwordToggle.querySelector(".eye-off-icon");
+
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      eyeIcon.style.display = "none";
+      eyeOffIcon.style.display = "block";
     } else {
-      passwordInput.type = 'password';
-      eyeIcon.style.display = 'block';
-      eyeOffIcon.style.display = 'none';
+      passwordInput.type = "password";
+      eyeIcon.style.display = "block";
+      eyeOffIcon.style.display = "none";
     }
   },
 
   // Función para limpiar todos los estilos de error
   clearAllErrorStyles: (form) => {
     // Limpiar errors de validación (excluyendo mensajes de estado)
-    form.querySelectorAll(
-      ".error-message:not(.expired-session-message):not(.account-disabled-message)"
-    ).forEach((errorMsg) => errorMsg.remove());
+    form
+      .querySelectorAll(
+        ".error-message:not(.expired-session-message):not(.account-disabled-message)"
+      )
+      .forEach((errorMsg) => errorMsg.remove());
 
     // Limpiar clases de error de inputs
     form.querySelectorAll(".error-input").forEach((errorInput) => {
@@ -85,7 +90,9 @@ const AuthUtils = {
 
   // Función para aplicar estilos de error a todos los inputs
   applyErrorStylesToInputs: (form) => {
-    const inputs = form.querySelectorAll("input[type='text'], input[type='password']");
+    const inputs = form.querySelectorAll(
+      "input[type='text'], input[type='password']"
+    );
     inputs.forEach((input) => {
       input.classList.add("error-input");
       // Aplicar estilo de error al toggle de password si aplica
@@ -131,7 +138,7 @@ const AuthUtils = {
     const statusMessages = messageContainer.querySelectorAll(
       ".expired-session-message, .account-disabled-message"
     );
-    
+
     if (statusMessages.length > 0) {
       statusMessages.forEach((msg) => msg.remove());
       if (!messageContainer.querySelector("p")) {
@@ -153,20 +160,19 @@ const AuthUtils = {
     ) {
       AuthUtils.clearMainError();
     }
-  }
+  },
 };
 
 // Manejadores de respuesta
 const AuthHandlers = {
   onLoginSuccess: async (data, form) => {
-
-      if (data.redirect_url) {
-        window.location.href = data.redirect_url;
-      } else if (data.redirect) {
-        window.location.href = data.redirect;
-      } else {
-        window.location.href = `${APP_URL}home`;
-      }
+    if (data.redirect_url) {
+      window.location.href = data.redirect_url;
+    } else if (data.redirect) {
+      window.location.href = data.redirect;
+    } else {
+      window.location.href = `${APP_URL}home`;
+    }
   },
 
   onLoginError: async (data, form) => {
@@ -180,9 +186,9 @@ const AuthHandlers = {
 
 // Función para inicializar funcionalidades del login
 const initializeLoginFeatures = () => {
-  const passwordToggle = document.getElementById('password-toggle');
-  const passwordInput = document.getElementById('password');
-  const usernameInput = document.getElementById('username');
+  const passwordToggle = document.getElementById("password-toggle");
+  const passwordInput = document.getElementById("password");
+  const usernameInput = document.getElementById("username");
 
   // Configurar toggle de contraseña
   if (passwordToggle && passwordInput) {
@@ -190,12 +196,12 @@ const initializeLoginFeatures = () => {
     AuthUtils.updateToggleVisibility();
 
     // Event listeners para el toggle
-    passwordInput.addEventListener('input', AuthUtils.updateToggleVisibility);
-    passwordInput.addEventListener('paste', function() {
+    passwordInput.addEventListener("input", AuthUtils.updateToggleVisibility);
+    passwordInput.addEventListener("paste", function () {
       setTimeout(AuthUtils.updateToggleVisibility, 0);
     });
-    
-    passwordToggle.addEventListener('click', AuthUtils.handlePasswordToggle);
+
+    passwordToggle.addEventListener("click", AuthUtils.handlePasswordToggle);
   }
 
   // Auto-focus en el campo de usuario
@@ -205,8 +211,8 @@ const initializeLoginFeatures = () => {
 
   // Enter en username pasa a password
   if (usernameInput && passwordInput) {
-    usernameInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
+    usernameInput.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
         e.preventDefault();
         passwordInput.focus();
       }
@@ -219,11 +225,13 @@ const setupErrorClearingListeners = () => {
   const form = document.getElementById("login-form");
   if (!form) return;
 
-  const inputs = form.querySelectorAll("input[type='text'], input[type='password']");
-  
+  const inputs = form.querySelectorAll(
+    "input[type='text'], input[type='password']"
+  );
+
   inputs.forEach((input) => {
     // Limpiar errors al escribir
-    input.addEventListener("input", function(e) {
+    input.addEventListener("input", function (e) {
       e.preventDefault();
 
       // Limpiar mensajes de estado la primera vez que el usuario escriba
@@ -232,10 +240,10 @@ const setupErrorClearingListeners = () => {
       // Eliminar clase de error del input actual
       if (this.classList.contains("error-input")) {
         this.classList.remove("error-input");
-        
+
         // Limpiar estilo del toggle de password si aplica
         AuthUtils.togglePasswordErrorStyle(this, false);
-        
+
         // Eliminar mensaje de error específico para este campo
         const error = this.parentElement.querySelector(".error-message");
         if (error) error.remove();
@@ -246,7 +254,7 @@ const setupErrorClearingListeners = () => {
     });
 
     // También limpiar mensajes de estado al hacer focus
-    input.addEventListener("focus", function(e) {
+    input.addEventListener("focus", function (e) {
       AuthUtils.clearStatusMessages();
     });
   });
@@ -270,8 +278,8 @@ const cleanUrlParams = () => {
 // Registrar validaciones cuando se carga el DOM
 document.addEventListener("DOMContentLoaded", function () {
   // Verificar que FormManager esté disponible
-  if (typeof FormManager === 'undefined' || !FormManager) {
-    console.error('FormManager no está disponible');
+  if (typeof FormManager === "undefined" || !FormManager) {
+    console.error("FormManager no está disponible");
     return;
   }
 
@@ -293,13 +301,13 @@ document.addEventListener("DOMContentLoaded", function () {
       beforeSubmit: (form) => {
         // Limpiar todos los estilos de error previos
         AuthUtils.clearAllErrorStyles(form);
-        
+
         // Limpiar mensaje principal si no es de estado
         AuthUtils.clearMainErrorIfNotStatus();
       },
       afterSubmit: (form) => {
         // Lógica adicional después del submit si es necesario
-      }
+      },
     });
   }
 });
