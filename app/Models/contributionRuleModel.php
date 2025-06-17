@@ -366,13 +366,31 @@ class ContributionRuleModel extends MainModel
   public function toggleRuleStatus($ruleId, $estado, $userId)
   {
     try {
-      $datosActualizar = [
-        'estado' => $estado,
-        'fecha_modificacion' => date("Y-m-d H:i:s"),
-        'usuario_modificacion_id' => $userId
+      $camposActualizar = [
+        [
+          "campo_nombre" => "estado",
+          "campo_marcador" => ":estado",
+          "campo_valor" => $estado
+        ],
+        [
+          "campo_nombre" => "fecha_modificacion",
+          "campo_marcador" => ":fecha_modificacion",
+          "campo_valor" => date("Y-m-d H:i:s")
+        ],
+        [
+          "campo_nombre" => "usuario_modificacion_id",
+          "campo_marcador" => ":usuario_modificacion_id",
+          "campo_valor" => $userId
+        ]
       ];
 
-      $resultado = $this->actualizarDatos("regla_aportacion", $datosActualizar, "id", $ruleId);
+      $condicion = [
+        "condicion_campo" => "id",
+        "condicion_marcador" => ":rule_id",
+        "condicion_valor" => $ruleId
+      ];
+
+      $resultado = $this->actualizarDatos("regla_aportacion", $camposActualizar, $condicion);
       return $resultado->rowCount() > 0;
     } catch (\Exception $e) {
       error_log("Error en toggleRuleStatus: " . $e->getMessage());
