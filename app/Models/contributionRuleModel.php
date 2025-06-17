@@ -128,9 +128,155 @@ class ContributionRuleModel extends MainModel
    */
   public function updateRule($ruleId, $data)
   {
-    // TODO:
-    
+    try {
+      // Verificar que la regla existe
+      $reglaExistente = $this->getRuleById($ruleId);
+      if (!$reglaExistente) {
+        return [
+          'success' => false,
+          'errors' => ['general' => 'Regla de aportación no encontrada']
+        ];
+      }
+
+      // Definir reglas de validación (solo para campos que se van a actualizar)
+      $validar = [];
+
+      if (isset($data['nivel_socioeconomico_id'])) {
+        $validar['nivel_socioeconomico_id'] = [
+          'requerido' => true,
+          'formato' => 'entero',
+          'min_valor' => 1
+        ];
+      }
+
+      if (isset($data['edad'])) {
+        $validar['edad'] = [
+          'requerido' => true,
+          'formato' => 'entero',
+          'min_valor' => 0,
+          'max_valor' => 150
+        ];
+      }
+
+      if (isset($data['periodicidad'])) {
+        $validar['periodicidad'] = [
+          'requerido' => true,
+          'valores_permitidos' => [self::PERIODICIDAD_MENSUAL, self::PERIODICIDAD_SEMESTRAL, self::PERIODICIDAD_ANUAL],
+          'sanitizar' => true
+        ];
+      }
+
+      if (isset($data['monto_aportacion'])) {
+        $validar['monto_aportacion'] = [
+          'requerido' => true,
+        ];
+      }
+
+      if (isset($data['estado'])) {
+        $validar['estado'] = [
+          'requerido' => true,
+          'formato' => 'entero'
+        ];
+      }
+
+      if (isset($data['usuario_modificacion_id'])) {
+        $validar['usuario_modificacion_id'] = [
+          'requerido' => true,
+          'formato' => 'entero'
+        ];
+      }
+
+      // Validar datos usando el método del MainModel
+      $validationResult = $this->validarDatos($data, $validar);
+
+      if (!empty($validationResult['errors'])) {
+        error_log("Errores de validación en updateRule: " . json_encode($validationResult['errors']));
+        return [
+          'success' => false,
+          'errors' => $validationResult['errors']
+        ];
+      }
+
+      $datosValidados = $validationResult['datos'];
+
+      // Si se está cambiando el nivel, verificar que existe y está activo
+      if (isset($datosValidados['nivel_socioeconomico_id']) && $datosValidados['nivel_socioeconomico_id'] != $reglaExistente->nivel_socioeconomico_id) {
+        $nivelExiste = $this->verificarNivelExiste($datosValidados['nivel_socioeconomico_id']);
+        if (!$nivelExiste['existe']) {
+          return [
+            'success' => false,
+            'errors' => ['nivel_socioeconomico_id' => $nivelExiste['mensaje']]
+          ];
+        }
+      }
+
+      // Si se están cambiando nivel o edad, verificar duplicados
+      $criteriosCambiados = (
+        (isset($datosValidados['nivel_socioeconomico_id']) && $datosValidados['nivel_socioeconomico_id'] != $reglaExistente->nivel_socioeconomico_id) ||
+        (isset($datosValidados['edad']) && $datosValidados['edad'] != $reglaExistente->edad)
+      );
+
+      if ($criteriosCambiados) {
+        $nuevoNivel = $datosValidados['nivel_socioeconomico_id'] ?: $reglaExistente->nivel_socioeconomico_id;
+        $nuevaEdad = $datosValidados['edad'] ?: $reglaExistente->edad;
+
+        if ($this->ruleExists($nuevoNivel, $nuevaEdad, null, $ruleId)) {
+          return [
+            'success' => false,
+            'errors' => ['edad' => 'Ya existe una regla de aportación para este nivel socioeconómico y edad']
+          ];
+        }
+      }
+
+      // Preparar datos para actualización usando el formato del MainModel
+      $camposActualizar = [];
+
+      // Procesar cada campo validado
+      foreach ($datosValidados as $campo => $valor) {
+        $camposActualizar[] = [
+          "campo_nombre" => $campo,
+          "campo_marcador" => ":{$campo}",
+          "campo_valor" => $valor
+        ];
+      }
+
+      // Agregar campos de auditoría
+      $camposActualizar[] = [
+        "campo_nombre" => "fecha_modificacion",
+        "campo_marcador" => ":fecha_modificacion",
+        "campo_valor" => date("Y-m-d H:i:s")
+      ];
+
+      // Definir condición para la actualización
+      $condicion = [
+        "condicion_campo" => "id",
+        "condicion_marcador" => ":rule_id",
+        "condicion_valor" => $ruleId
+      ];
+
+      // Ejecutar actualización
+      $resultado = $this->actualizarDatos("regla_aportacion", $camposActualizar, $condicion);
+
+      if ($resultado->rowCount() > 0) {
+        return [
+          'success' => true,
+          'data' => $ruleId
+        ];
+      }
+
+      return [
+        'success' => false,
+        'errors' => ['general' => 'No se realizaron cambios en la regla']
+      ];
+    } catch (\Exception $e) {
+      error_log("Error en updateRule: " . $e->getMessage());
+      return [
+        'success' => false,
+        'errors' => ['general' => 'Error interno del servidor']
+      ];
+    }
   }
+
 
   /**
    * Verifica que un nivel socioeconómico existe y está activo
