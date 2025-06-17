@@ -543,7 +543,7 @@ class ConfigManager {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ estado: status }),
+        body: JSON.stringify({ status: status ? 1 : 0 }),
       });
 
       const data = await response.json();
@@ -844,7 +844,6 @@ window.addEventListener("beforeunload", function () {
     configManager.destroy();
   }
 });
-
 
 // Manejo de errores globales para este módulo
 window.addEventListener("error", function (event) {

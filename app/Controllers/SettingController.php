@@ -199,9 +199,12 @@ class SettingController
   {
     try {
       $id = $request->param('id');
-      $data = $request->post();
-      $estado = $data['estado'] === 'true' ? 1 : 0;
+      $data = $request->json();
+      $estado = $data['status'];
       $userId = Auth::user()->usuario_id;
+
+      // imprimir contenido de data
+      error_log("toggleLevelStatus data: " . print_r($data, true));
 
       $updated = $this->levelModel->toggleLevelStatus($id, $estado, $userId);
 
