@@ -30,8 +30,7 @@ class ContributionRuleModel extends MainModel
       $query = "SELECT r.*, 
                              n.nivel as nivel_nombre
                       FROM regla_aportacion r
-                      JOIN nivel_socioeconomico n ON r.nivel_socioeconomico_id = n.id
-                      WHERE r.estado = 1 AND n.estado = 1";
+                      JOIN nivel_socioeconomico n ON r.nivel_socioeconomico_id = n.id";
 
       $params = [];
 

@@ -304,6 +304,7 @@ class ConfigManager {
   /**
    * Inicializa la tabla de reglas con DataTables
    */
+
   async initializeRulesTable() {
     this.currentTable = new DataTable("#rules-table", {
       ajax: {
@@ -315,6 +316,7 @@ class ConfigManager {
           if (levelFilter && levelFilter.value) {
             d.nivel_id = levelFilter.value;
           }
+          return d;
         },
       },
       columns: [
@@ -347,11 +349,11 @@ class ConfigManager {
           render: function (data, type, row) {
             const checked = data == 1 ? "checked" : "";
             return `
-              <label class="toggle-switch">
-                <input type="checkbox" ${checked} onchange="configManager.toggleRuleStatus(${row.id}, this.checked)">
-                <span class="toggle-slider"></span>
-              </label>
-            `;
+            <label class="toggle-switch">
+              <input type="checkbox" ${checked} onchange="configManager.toggleRuleStatus(${row.id}, this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+          `;
           },
         },
         {
@@ -360,24 +362,24 @@ class ConfigManager {
           orderable: false,
           render: function (data, type, row) {
             return `
-              <button type="button" class="editar" onclick="configManager.editRule(${row.id})" title="Editar Regla">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                  <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
-                  <path d="M13.5 6.5l4 4" />
-                </svg>
-              </button>
-              <button type="button" class="remover" onclick="configManager.deleteRule(${row.id})" title="Eliminar Regla">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                  <path d="M4 7l16 0" />
-                  <path d="M10 11l0 6" />
-                  <path d="M14 11l0 6" />
-                  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                </svg>
-              </button>
-            `;
+            <button type="button" class="editar" onclick="configManager.editRule(${row.id})" title="Editar Regla">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                <path d="M13.5 6.5l4 4" />
+              </svg>
+            </button>
+            <button type="button" class="remover" onclick="configManager.deleteRule(${row.id})" title="Eliminar Regla">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M4 7l16 0" />
+                <path d="M10 11l0 6" />
+                <path d="M14 11l0 6" />
+                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+              </svg>
+            </button>
+          `;
           },
         },
       ],
@@ -394,6 +396,19 @@ class ConfigManager {
     this.setupLevelFilter();
   }
 
+  /**
+   * Configura el filtro por nivel para reglas
+   */
+  setupLevelFilter() {
+    const levelFilter = document.getElementById("levelFilter");
+    if (!levelFilter) return;
+
+    levelFilter.addEventListener("change", () => {
+      if (this.currentTable) {
+        this.currentTable.ajax.reload();
+      }
+    });
+  }
   /**
    * Configura el filtro por nivel para reglas
    */
@@ -614,12 +629,13 @@ class ConfigManager {
    */
   async toggleRuleStatus(ruleId, status) {
     try {
+      console.log(status);
       const response = await fetch(`${this.baseUrl}/rules/${ruleId}/status`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ estado: status }),
+        body: JSON.stringify({ status: status ? 1 : 0 }),
       });
 
       const data = await response.json();
@@ -652,6 +668,8 @@ class ConfigManager {
       if (data.status === "success") {
         this.showSuccess(data.message);
         this.currentTable.ajax.reload(null, false);
+        // Recargar datos de niveles
+        await this.loadLevelsData();
       } else {
         this.showError(data.message);
       }

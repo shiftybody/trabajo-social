@@ -268,11 +268,13 @@ class SettingController
     try {
       $filters = [
         'nivel_id' => $request->get('nivel_id'),
-        'edad' => $request->get('edad'),
-        'periodicidad' => $request->get('periodicidad')
       ];
 
+      error_log("getAllRules filters: " . print_r($filters, true));
+
       $rules = $this->ruleModel->getAllRules($filters);
+
+      error_log("getAllRules result: " . print_r($rules, true));
 
       return Response::json([
         'status' => 'success',
@@ -387,8 +389,8 @@ class SettingController
   {
     try {
       $id = $request->param('id');
-      $data = $request->post();
-      $estado = $data['estado'] === 'true' ? 1 : 0;
+      $data = $request->json();
+      $estado = $data['status'];
       $userId = Auth::user()->usuario_id;
 
       $updated = $this->ruleModel->toggleRuleStatus($id, $estado, $userId);

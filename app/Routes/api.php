@@ -112,7 +112,6 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
   $router->group(['middleware' => 'Permission:settings.rules.view|settings.manage'], function ($router) {
     $router->get('/settings/rules', 'SettingController@getAllRules');
     $router->get('/settings/rules/:id', 'SettingController@getRuleById');
-    $router->get('/settings/rules/matrix', 'SettingController@getContributionMatrix');
   });
 
   $router->group(['middleware' => 'Permission:settings.rules.create|settings.manage'], function ($router) {
