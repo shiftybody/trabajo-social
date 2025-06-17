@@ -258,7 +258,7 @@ const MODAL_TEMPLATES = {
         <div class="form-group">
           <label for="edad" class="field-label">Edad del Paciente *</label>
           <input type="number" id="edad" name="edad" class="input-reset"
-                 value="{{edad}}" min="0" max="150" required>s
+                 value="{{edad}}" min="0" max="150" required>
           <small class="field-help">Edad en años</small>
         </div>
       </div>

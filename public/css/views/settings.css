@@ -8,6 +8,19 @@
   /* Alinea los items al inicio */
 }
 
+.select-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.label-filter {
+  align-self: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
 /* --- Barra de Navegación Izquierda (Master) --- */
 .config-nav {
   flex: 0 0 240px;

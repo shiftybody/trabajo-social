@@ -13,9 +13,9 @@ const SETTING_VALIDATION_SCHEMAS = {
         message: "El campo nivel debe tener como máximo 50 caracteres",
       },
       pattern: {
-        value: "^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]+$",
+        value: "^[a-zA-Z]+$",
         message:
-          "El campo nivel solo puede contener letras, números, espacios y acentos",
+          "El campo nivel solo puede contener letras",
       },
     },
     puntaje_minimo: {

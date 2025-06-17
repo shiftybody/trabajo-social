@@ -52,12 +52,9 @@ async handleFormSubmit(form) {
     // Preparar datos del formulario
     const formData = new FormData(form);
 
-    // Determinar el método HTTP correcto
-    let method = this.determineHttpMethod(form);
-
     // Realizar petición AJAX
     const response = await fetch(form.action, {
-      method: method,
+      method: form.method.toUpperCase(),
       body: formData,
       headers: {
         Accept: "application/json",
@@ -83,43 +80,6 @@ async handleFormSubmit(form) {
   } finally {
     config.afterSubmit(form);
   }
-}
-
-// Método auxiliar para determinar el método HTTP correcto
-determineHttpMethod(form) {
-  // 1. Si el formulario tiene data-method, usarlo (mayor prioridad)
-  if (form.dataset.method) {
-    return form.dataset.method.toUpperCase();
-  }
-
-  // 2. Si hay un campo _method oculto, usarlo
-  const methodField = form.querySelector('input[name="_method"]');
-  if (methodField && methodField.value) {
-    return methodField.value.toUpperCase();
-  }
-
-  // 3. Determinar por convención basada en la acción y el ID del formulario
-  const actionParts = form.action.split('/');
-  const lastPart = actionParts[actionParts.length - 1];
-  const hasResourceId = /^\d+$/.test(lastPart);
-
-  // Si la URL termina en un número (ID) y es un formulario de edición
-  if (hasResourceId && form.id.toLowerCase().includes('edit')) {
-    return 'PUT';
-  }
-
-  // Si la URL termina en un número y es un formulario de eliminación
-  if (hasResourceId && form.id.toLowerCase().includes('delete')) {
-    return 'DELETE';
-  }
-
-  // Si es un formulario de creación, usar POST
-  if (form.id.toLowerCase().includes('create')) {
-    return 'POST';
-  }
-
-  // 4. Por defecto, usar el método del formulario (GET o POST)
-  return form.method.toUpperCase();
 }
 
   displayErrors(form, errors) {

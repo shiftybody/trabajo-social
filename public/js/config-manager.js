@@ -273,7 +273,7 @@ class ConfigManager {
         <div class="tools">
           <form class="filter_form" id="rules_filter_form">
             <div class="select-container">
-              <label for="levelFilter" style="margin-right: 10px; font-weight: 500;">Filtrar por Nivel:</label>
+              <label class="label-filter" for="levelFilter">Filtrar por Nivel:</label>
               <select class="custom-select" id="levelFilter" style="min-width: 200px;">
                 <option value="">Seleccione un nivel</option>
                 ${levelOptions}

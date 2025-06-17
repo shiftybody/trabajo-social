@@ -1,5 +1,7 @@
 .role-table-container {
-  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   padding: 2rem 24rem;
 }
 

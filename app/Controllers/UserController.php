@@ -415,6 +415,8 @@ class UserController
       $datos['rol'] == $usuario->usuario_rol &&
       $datos['estado'] == $usuario->usuario_estado &&
       (!isset($datos['change_password']) || ($datos['change_password'] == 0 && empty($datos['password'])))
+      // Si no se subió un nuevo avatar, mantener el actual
+      && (!isset($avatar['tmp_name']) || empty($avatar['tmp_name']) || !file_exists($avatar['tmp_name']))
     ) {
       return Response::json([
         'status' => 'success',
