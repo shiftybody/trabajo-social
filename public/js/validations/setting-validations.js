@@ -286,8 +286,6 @@ const RuleHandlers = {
   },
 };
 
-// public/js/validations/setting-validations.js (modificar la función registerAvailableForms)
-
 function registerAvailableForms(container) {
   // Asegurarse de que el contenedor sea un elemento válido antes de usar querySelector
   if (!container || typeof container.querySelector !== "function") {

@@ -17,6 +17,7 @@ class ContributionRuleModel extends MainModel
   const PERIODICIDAD_MENSUAL = 'mensual';
   const PERIODICIDAD_SEMESTRAL = 'semestral';
   const PERIODICIDAD_ANUAL = 'anual';
+
   /**
    * Crea una nueva regla de aportación
    * 
@@ -127,129 +128,8 @@ class ContributionRuleModel extends MainModel
    */
   public function updateRule($ruleId, $data)
   {
-    try {
-      // Verificar que la regla existe
-      $reglaExistente = $this->getRuleById($ruleId);
-      if (!$reglaExistente) {
-        return [
-          'success' => false,
-          'errors' => ['general' => 'Regla de aportación no encontrada']
-        ];
-      }
-
-      // Definir reglas de validación (solo para campos que se van a actualizar)
-      $validar = [];
-
-      if (isset($data['nivel_socioeconomico_id'])) {
-        $validar['nivel_socioeconomico_id'] = [
-          'requerido' => true,
-          'formato' => 'entero',
-          'min_valor' => 1
-        ];
-      }
-
-      if (isset($data['edad'])) {
-        $validar['edad'] = [
-          'requerido' => true,
-          'formato' => 'entero',
-          'min_valor' => 0,
-          'max_valor' => 150
-        ];
-      }
-
-      if (isset($data['periodicidad'])) {
-        $validar['periodicidad'] = [
-          'requerido' => true,
-          'valores_permitidos' => [self::PERIODICIDAD_MENSUAL, self::PERIODICIDAD_SEMESTRAL, self::PERIODICIDAD_ANUAL],
-          'sanitizar' => true
-        ];
-      }
-
-      if (isset($data['monto_aportacion'])) {
-        $validar['monto_aportacion'] = [
-          'requerido' => true,
-        ];
-      }
-
-      if (isset($data['estado'])) {
-        $validar['estado'] = [
-          'requerido' => true,
-          'formato' => 'entero'
-        ];
-      }
-
-      if (isset($data['usuario_modificacion_id'])) {
-        $validar['usuario_modificacion_id'] = [
-          'requerido' => true,
-          'formato' => 'entero'
-        ];
-      }
-
-      // Validar datos usando el método del MainModel
-      $validationResult = $this->validarDatos($data, $validar);
-
-      if (!empty($validationResult['errors'])) {
-        error_log("Errores de validación en updateRule: " . json_encode($validationResult['errors']));
-        return [
-          'success' => false,
-          'errors' => $validationResult['errors']
-        ];
-      }
-
-      $datosValidados = $validationResult['datos'];
-
-      // Si se está cambiando el nivel, verificar que existe y está activo
-      if (isset($datosValidados['nivel_socioeconomico_id']) && $datosValidados['nivel_socioeconomico_id'] != $reglaExistente->nivel_socioeconomico_id) {
-        $nivelExiste = $this->verificarNivelExiste($datosValidados['nivel_socioeconomico_id']);
-        if (!$nivelExiste['existe']) {
-          return [
-            'success' => false,
-            'errors' => ['nivel_socioeconomico_id' => $nivelExiste['mensaje']]
-          ];
-        }
-      }
-
-      // Si se están cambiando nivel o edad, verificar duplicados
-      $criteriosCambiados = (
-        (isset($datosValidados['nivel_socioeconomico_id']) && $datosValidados['nivel_socioeconomico_id'] != $reglaExistente->nivel_socioeconomico_id) ||
-        (isset($datosValidados['edad']) && $datosValidados['edad'] != $reglaExistente->edad)
-      );
-
-      if ($criteriosCambiados) {
-        $nuevoNivel = $datosValidados['nivel_socioeconomico_id'] ?: $reglaExistente->nivel_socioeconomico_id;
-        $nuevaEdad = $datosValidados['edad'] ?: $reglaExistente->edad;
-
-        if ($this->ruleExists($nuevoNivel, $nuevaEdad, null, $ruleId)) {
-          return [
-            'success' => false,
-            'errors' => ['edad' => 'Ya existe una regla de aportación para este nivel socioeconómico y edad']
-          ];
-        }
-      }
-
-      // Agregar campos de auditoría
-      $datosValidados['fecha_modificacion'] = date("Y-m-d H:i:s");
-
-      $resultado = $this->actualizarDatos("regla_aportacion", $datosValidados, "id", $ruleId);
-
-      if ($resultado->rowCount() > 0) {
-        return [
-          'success' => true,
-          'data' => $ruleId
-        ];
-      }
-
-      return [
-        'success' => false,
-        'errors' => ['general' => 'No se realizaron cambios en la regla']
-      ];
-    } catch (\Exception $e) {
-      error_log("Error en updateRule: " . $e->getMessage());
-      return [
-        'success' => false,
-        'errors' => ['general' => 'Error interno del servidor']
-      ];
-    }
+    // TODO:
+    
   }
 
   /**
@@ -540,50 +420,6 @@ class ContributionRuleModel extends MainModel
   }
 
   /**
-   * Obtiene matriz de aportaciones (edad x periodicidad) para un nivel
-   * 
-   * @param int $nivelId ID del nivel socioeconómico
-   * @return array Matriz de aportaciones
-   */
-  public function getContributionMatrix($nivelId)
-  {
-    try {
-      $query = "SELECT edad, periodicidad, monto_aportacion
-                      FROM regla_aportacion
-                      WHERE nivel_socioeconomico_id = :nivel_id AND estado = 1
-                      ORDER BY edad ASC";
-
-      $resultado = $this->ejecutarConsulta($query, [':nivel_id' => $nivelId]);
-      $reglas = $resultado->fetchAll(PDO::FETCH_OBJ);
-
-      // Crear matriz
-      $matrix = [];
-      $edades = [];
-      $periodicidades = [self::PERIODICIDAD_MENSUAL, self::PERIODICIDAD_SEMESTRAL, self::PERIODICIDAD_ANUAL];
-
-      foreach ($reglas as $regla) {
-        if (!in_array($regla->edad, $edades)) {
-          $edades[] = $regla->edad;
-        }
-
-        $matrix[$regla->edad][$regla->periodicidad] = $regla->monto_aportacion;
-      }
-
-      sort($edades);
-
-      return [
-        'edades' => $edades,
-        'periodicidades' => $periodicidades,
-        'matrix' => $matrix
-      ];
-    } catch (\Exception $e) {
-      error_log("Error en getContributionMatrix: " . $e->getMessage());
-      return ['edades' => [], 'periodicidades' => [], 'matrix' => []];
-    }
-  }
-
-
-  /**
    * Obtiene estadísticas de uso de las reglas de aportación
    * 
    * @return array Estadísticas
@@ -623,61 +459,5 @@ class ContributionRuleModel extends MainModel
       self::PERIODICIDAD_SEMESTRAL => 'Semestral',
       self::PERIODICIDAD_ANUAL => 'Anual'
     ];
-  }
-
-  /**
-   * Valida los datos de una regla de aportación
-   * 
-   * @param array $data Datos a validar
-   * @param int|null $ruleId ID de la regla (para actualizaciones)
-   * @return array Resultado de la validación
-   */
-  private function validateRuleData($data, $ruleId = null)
-  {
-    $result = ['valid' => true, 'errors' => []];
-
-    // Validar nivel socioeconómico
-    if (empty($data['nivel_socioeconomico_id']) || !is_numeric($data['nivel_socioeconomico_id'])) {
-      $result['errors'][] = "ID de nivel socioeconómico inválido";
-    }
-
-    // Validar edad
-    if (!isset($data['edad'])) {
-      $result['errors'][] = "La edad es requerida";
-    } elseif (!is_numeric($data['edad']) || $data['edad'] < 0 || $data['edad'] > 150) {
-      $result['errors'][] = "La edad debe ser un número entre 0 y 150";
-    }
-
-    // Validar periodicidad
-    if (empty($data['periodicidad'])) {
-      $result['errors'][] = "La periodicidad es requerida";
-    } elseif (!in_array($data['periodicidad'], [
-      self::PERIODICIDAD_MENSUAL,
-      self::PERIODICIDAD_SEMESTRAL,
-      self::PERIODICIDAD_ANUAL
-    ])) {
-      $result['errors'][] = "Periodicidad inválida";
-    }
-
-    // Validar monto de aportación
-    if (!isset($data['monto_aportacion'])) {
-      $result['errors'][] = "El monto de aportación es requerido";
-    } elseif (!is_numeric($data['monto_aportacion']) || $data['monto_aportacion'] < 0) {
-      $result['errors'][] = "El monto de aportación debe ser un número positivo";
-    } elseif ($data['monto_aportacion'] > 999999.99) {
-      $result['errors'][] = "El monto de aportación no puede exceder $999,999.99";
-    }
-
-    // Validar usuarios
-    if (empty($data['usuario_creacion_id']) && !$ruleId) {
-      $result['errors'][] = "ID de usuario de creación requerido";
-    }
-
-    if (empty($data['usuario_modificacion_id']) && $ruleId) {
-      $result['errors'][] = "ID de usuario de modificación requerido";
-    }
-
-    $result['valid'] = empty($result['errors']);
-    return $result;
   }
 }

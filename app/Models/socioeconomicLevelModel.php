@@ -681,46 +681,6 @@ class SocioeconomicLevelModel extends MainModel
     }
   }
 
-  /**
-   * Valida los datos de un nivel socioeconómico
-   * 
-   * @param array $data Datos a validar
-   * @param int|null $levelId ID del nivel (para actualizaciones)
-   * @return array Resultado de la validación
-   */
-  private function validateLevelData($data, $levelId = null)
-  {
-    $result = ['valid' => true, 'errors' => []];
-
-    // Validar nombre del nivel
-    if (empty($data['nivel'])) {
-      $result['errors'][] = "El nombre del nivel es requerido";
-    } elseif (strlen($data['nivel']) > 20) {
-      $result['errors'][] = "El nombre del nivel no debe exceder 20 caracteres";
-    }
-
-    // Validar puntaje mínimo
-    if (!isset($data['puntaje_minimo'])) {
-      $result['errors'][] = "El puntaje mínimo es requerido";
-    } elseif (!is_numeric($data['puntaje_minimo'])) {
-      $result['errors'][] = "El puntaje mínimo debe ser un número";
-    } elseif ($data['puntaje_minimo'] < 0) {
-      $result['errors'][] = "El puntaje mínimo no puede ser negativo";
-    }
-
-    // Validar usuario de creación
-    if (empty($data['usuario_creacion_id']) && !$levelId) {
-      $result['errors'][] = "ID de usuario de creación requerido";
-    }
-
-    // Validar usuario de modificación
-    if (empty($data['usuario_modificacion_id']) && $levelId) {
-      $result['errors'][] = "ID de usuario de modificación requerido";
-    }
-
-    $result['valid'] = empty($result['errors']);
-    return $result;
-  }
 
   /**
    * Obtiene estadísticas de uso de los niveles socioeconómicos

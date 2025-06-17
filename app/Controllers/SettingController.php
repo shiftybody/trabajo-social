@@ -357,41 +357,6 @@ class SettingController
       $data = $request->post();
       $data['usuario_modificacion_id'] = Auth::user()->usuario_id;
 
-      // Verificar que la regla existe
-      $reglaExistente = $this->ruleModel->getRuleById($id);
-      if (!$reglaExistente) {
-        return Response::json([
-          'status' => 'error',
-          'errors' => ['general' => 'Regla de aportación no encontrada']
-        ], 404);
-      }
-
-      // Validar que se hayan enviado cambios
-      $cambiosDetectados = false;
-      if (isset($data['nivel_socioeconomico_id']) && $data['nivel_socioeconomico_id'] != $reglaExistente->nivel_socioeconomico_id) {
-        $cambiosDetectados = true;
-      }
-      if (isset($data['edad']) && $data['edad'] != $reglaExistente->edad) {
-        $cambiosDetectados = true;
-      }
-      if (isset($data['periodicidad']) && $data['periodicidad'] !== $reglaExistente->periodicidad) {
-        $cambiosDetectados = true;
-      }
-      if (isset($data['monto_aportacion']) && $data['monto_aportacion'] != $reglaExistente->monto_aportacion) {
-        $cambiosDetectados = true;
-      }
-      if (isset($data['estado']) && $data['estado'] != $reglaExistente->estado) {
-        $cambiosDetectados = true;
-      }
-
-      if (!$cambiosDetectados) {
-        return Response::json([
-          'status' => 'success',
-          'message' => 'No se realizaron cambios en la regla'
-        ]);
-      }
-
-      // Actualizar usando la validación del modelo
       $resultado = $this->ruleModel->updateRule($id, $data);
 
       if ($resultado['success']) {
