@@ -35,7 +35,6 @@ class CriteriaModel extends MainModel
                      cr.valor_minimo,
                      cr.valor_maximo,
                      cr.valor_texto,
-                     cr.valor_booleano,
                      cr.subcategoria_id,
                      s.nombre as subcategoria_nombre,
                      c.nombre as categoria_nombre
@@ -63,6 +62,33 @@ class CriteriaModel extends MainModel
   }
 
   /**
+   * Obtiene todas las subcategorías para formularios
+   * 
+   * @return array Lista de subcategorías con información de categoría
+   */
+  public function getAllSubcategories()
+  {
+    try {
+      $query = "SELECT s.id,
+                       s.nombre,
+                       s.descripcion,
+                       s.categoria_id,
+                       c.nombre as categoria_nombre
+                FROM subcategoria_criterio s
+                JOIN categoria_criterio c ON s.categoria_id = c.id
+                WHERE s.estado = 1 
+                AND c.estado = 1
+                ORDER BY c.nombre ASC, s.nombre ASC";
+
+      $resultado = $this->ejecutarConsulta($query);
+      return $resultado->fetchAll(PDO::FETCH_OBJ);
+    } catch (\Exception $e) {
+      error_log("Error en getAllSubcategories: " . $e->getMessage());
+      return [];
+    }
+  }
+
+  /**
    * Obtiene un criterio por su ID
    * 
    * @param int $criteriaId ID del criterio
@@ -77,7 +103,6 @@ class CriteriaModel extends MainModel
                        cr.valor_minimo,
                        cr.valor_maximo,
                        cr.valor_texto,
-                       cr.valor_booleano,
                        cr.puntaje,
                        cr.estado,
                        cr.fecha_creacion,
@@ -98,7 +123,6 @@ class CriteriaModel extends MainModel
       return false;
     }
   }
-
 
   /**
    * Crea un nuevo criterio
@@ -145,10 +169,6 @@ class CriteriaModel extends MainModel
           break;
 
         case self::TIPO_BOOLEANO:
-          $datosParaInsertar['valor_booleano'] = $data['valor_booleano'];
-          $datosParaInsertar['valor_minimo'] = null;
-          $datosParaInsertar['valor_maximo'] = null;
-          $datosParaInsertar['valor_texto'] = null;
           break;
       }
 
@@ -254,10 +274,11 @@ class CriteriaModel extends MainModel
           break;
 
         case self::TIPO_BOOLEANO:
+          // Para booleano resetear todos los campos de valor a null
           $datosActualizar[] = [
             "campo_nombre" => "valor_booleano",
             "campo_marcador" => ":valor_booleano",
-            "campo_valor" => $data['valor_booleano']
+            "campo_valor" => null
           ];
           $datosActualizar[] = [
             "campo_nombre" => "valor_minimo",
@@ -287,42 +308,6 @@ class CriteriaModel extends MainModel
       return true;
     } catch (\Exception $e) {
       error_log("Error en updateCriteria: " . $e->getMessage());
-      return false;
-    }
-  }
-
-  /**
-   * Elimina un criterio (soft delete)
-   * 
-   * @param int $criteriaId ID del criterio
-   * @return bool True si se eliminó correctamente
-   */
-  public function deleteCriteria($criteriaId)
-  {
-    try {
-      $datosActualizar = [
-        [
-          "campo_nombre" => "estado",
-          "campo_marcador" => ":estado",
-          "campo_valor" => 0
-        ],
-        [
-          "campo_nombre" => "fecha_modificacion",
-          "campo_marcador" => ":fecha_modificacion",
-          "campo_valor" => date("Y-m-d H:i:s")
-        ]
-      ];
-
-      $condicion = [
-        "condicion_campo" => "id",
-        "condicion_marcador" => ":id",
-        "condicion_valor" => $criteriaId
-      ];
-
-      $this->actualizarDatos("criterio_puntuacion", $datosActualizar, $condicion);
-      return true;
-    } catch (\Exception $e) {
-      error_log("Error en deleteCriteria: " . $e->getMessage());
       return false;
     }
   }
@@ -366,6 +351,38 @@ class CriteriaModel extends MainModel
       return true;
     } catch (\Exception $e) {
       error_log("Error en toggleCriteriaStatus: " . $e->getMessage());
+      return false;
+    }
+  }
+
+  /**
+   * Elimina un criterio permanentemente (hard delete)
+   * 
+   * @param int $criteriaId ID del criterio
+   * @return bool True si se eliminó correctamente
+   */
+  public function deleteCriteria($criteriaId)
+  {
+    try {
+      // Verificar que el criterio existe antes de eliminar
+      $criterio = $this->getCriteriaById($criteriaId);
+      if (!$criterio) {
+        error_log("Intento de eliminar criterio inexistente: ID $criteriaId");
+        return false;
+      }
+
+      // Realizar hard delete
+      $query = "DELETE FROM criterio_puntuacion WHERE id = :criteria_id";
+      $resultado = $this->ejecutarConsulta($query, [':criteria_id' => $criteriaId]);
+
+      if ($resultado->rowCount() > 0) {
+        error_log("Criterio eliminado permanentemente: ID $criteriaId - {$criterio->criterio}");
+        return true;
+      }
+
+      return false;
+    } catch (\Exception $e) {
+      error_log("Error en deleteCriteria: " . $e->getMessage());
       return false;
     }
   }

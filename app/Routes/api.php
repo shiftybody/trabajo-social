@@ -76,6 +76,9 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
 
   // Rutas principales de configuración
   $router->group(['middleware' => 'Permission:settings.view|settings.manage'], function ($router) {
+    // NUEVA RUTA: Estructura jerárquica de navegación
+    $router->get('/settings/navigation', 'SettingController@getNavigationStructure');
+
     // Obtener contenido de secciones
     $router->get('/settings/section', 'SettingController@getSection');
 

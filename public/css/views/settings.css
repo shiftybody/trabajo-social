@@ -23,7 +23,7 @@
 
 /* --- Barra de Navegación Izquierda (Master) --- */
 .config-nav {
-  flex: 0 0 240px;
+  flex: 0 0 250px;
   /* Base de 240px, no crece, no se encoge */
   background-color: #ffffff;
   border-radius: 8px;
