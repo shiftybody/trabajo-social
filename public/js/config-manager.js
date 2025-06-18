@@ -20,11 +20,11 @@ class ConfigManager {
   /**
    * Inicializa el gestor de configuración
    */
-  init() {
+  async init() {
     try {
       this.cacheElements();
       this.bindNavigationEvents();
-      this.loadLevelsData();
+      await this.loadLevelsData();
       this.loadInitialSection();
     } catch (error) {
       console.error("Error initializing ConfigManager:", error);
@@ -256,7 +256,7 @@ class ConfigManager {
         <table id="rules-table" class="hover nowrap cell-borders" style="width: 100%;">
           <thead>
             <tr>
-              <th class="dt-head-center">NIVEL</th><th class="dt-head-center">EDAD</th><th class="dt-head-center">PERIODICIDAD</th>
+              <th class="dt-head-center">EDAD</th><th class="dt-head-center">PERIODICIDAD</th>
               <th class="dt-head-center">MONTO</th><th class="dt-head-center">ESTADO</th><th class="dt-head-center">ACCIONES</th>
             </tr>
           </thead>
@@ -278,7 +278,6 @@ class ConfigManager {
         },
       },
       columns: [
-        { data: "nivel_nombre", className: "dt-body-center" },
         {
           data: "edad",
           className: "dt-body-center",
@@ -315,13 +314,12 @@ class ConfigManager {
             <button type="button" class="remover" onclick="configManager.deleteRule(${row.id})" title="Eliminar Regla"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>`,
         },
       ],
-      order: [
-        [0, "asc"],
-        [1, "asc"],
-      ],
+      paging: false,
+      info: false,
+      order: [[0, "asc"]],
       language: {
-        zeroRecords: "No se encontraron reglas para el nivel seleccionado",
-        emptyTable: "No se encontraron reglas de aportación",
+        emptyTable:
+          "El nivel no ha sido seleccionado o no tiene reglas configuradas",
         processing: '<div class="table-spinner"></div>Procesando...',
         info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
         infoEmpty: "Mostrando 0 a 0 de 0 registros",

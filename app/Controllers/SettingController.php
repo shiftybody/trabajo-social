@@ -270,7 +270,12 @@ class SettingController
         'nivel_id' => $request->get('nivel_id'),
       ];
 
-      $rules = $this->ruleModel->getAllRules($filters);
+      $rules = [];
+
+      if ($filters['nivel_id'] !== "0") {
+        error_log(" el filtro es diferente de 0");
+        $rules = $this->ruleModel->getAllRules($filters);
+      }
 
       return Response::json([
         'status' => 'success',
