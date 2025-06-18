@@ -332,7 +332,7 @@ const MODAL_TEMPLATES = {
     <input type="hidden" name="subcategoria_id" value="{{subcategoria_id}}">
     
     <div class="form-group">
-      <label for="nombre" class="field-label">Nombre del Criterio *</label>
+      <label for="nombre" class="field-label">Nombre del Criterio</label>
       <input type="text" id="nombre" name="nombre" class="input-reset"
              value="{{nombre}}" placeholder="ej: Casa propia, 3-4 integrantes" 
              maxlength="100" required>
@@ -340,7 +340,7 @@ const MODAL_TEMPLATES = {
     </div>
     
     <div class="form-group">
-      <label for="tipo_criterio" class="field-label">Tipo de Criterio *</label>
+      <label for="tipo_criterio" class="field-label">Tipo de Criterio</label>
       <select id="tipo_criterio" name="tipo_criterio" class="input-reset" required 
               onchange="configManager.toggleCriteriaFields(this.value)">
         <option value="">Seleccione tipo de criterio</option>
@@ -355,7 +355,7 @@ const MODAL_TEMPLATES = {
     <div id="numeric-fields" class="criteria-fields" style="display: none;">
       <div class="form-row">
         <div class="form-group">
-          <label for="valor_minimo" class="field-label">Valor Mínimo *</label>
+          <label for="valor_minimo" class="field-label">Valor Mínimo</label>
           <input type="number" id="valor_minimo" name="valor_minimo" class="input-reset"
                  value="{{valor_minimo}}" placeholder="0" min="0" step="1">
         </div>
@@ -370,7 +370,7 @@ const MODAL_TEMPLATES = {
     
     <div id="text-fields" class="criteria-fields" style="display: none;">
       <div class="form-group">
-        <label for="valor_texto" class="field-label">Valor Específico *</label>
+        <label for="valor_texto" class="field-label">Valor Específico</label>
         <input type="text" id="valor_texto" name="valor_texto" class="input-reset"
                value="{{valor_texto}}" placeholder="ej: Casa, Departamento, Neurohabilitación"
                maxlength="100">
@@ -380,7 +380,7 @@ const MODAL_TEMPLATES = {
     
     <div id="boolean-fields" class="criteria-fields" style="display: none;">
       <div class="form-group">
-        <label for="valor_booleano" class="field-label">Valor Booleano *</label>
+        <label for="valor_booleano" class="field-label">Valor Booleano</label>
         <select id="valor_booleano" name="valor_booleano" class="input-reset">
           <option value="">Seleccione valor</option>
           <option value="1" {{siSelected}}>Verdadero (Sí)</option>
@@ -391,7 +391,7 @@ const MODAL_TEMPLATES = {
     </div>
     
     <div class="form-group">
-      <label for="puntaje" class="field-label">Puntuación *</label>
+      <label for="puntaje" class="field-label">Puntuación</label>
       <input type="number" id="puntaje" name="puntaje" class="input-reset"
              value="{{puntaje}}" placeholder="0" min="0" max="100" step="1" required>
       <small class="field-help">Puntos que aporta este criterio (0-100)</small>

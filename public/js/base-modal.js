@@ -226,27 +226,29 @@ class BaseModal {
     this.isOpen = false;
     this.modal.classList.remove("show");
 
-    // Esperar fin de transición para ocultar del todo
+    // Esperar fin de transición para destruir completamente
     const handleTransitionEnd = (e) => {
       if (e.propertyName === "opacity") {
-        this.modal.style.display = "none";
         this.modal.removeEventListener("transitionend", handleTransitionEnd);
+
+        // Callback onHide antes de destruir
+        if (this.config.onHide) {
+          this.config.onHide(this);
+        }
+
+        // Limpiar formulario si existe
+        const form = this.modal.querySelector("form");
+        if (form) {
+          this.clearFormErrors(form);
+        }
+
+        // AQUÍ ESTÁ LA CORRECCIÓN: Destruir el modal completamente
+        this.destroy();
       }
     };
 
     this.modal.addEventListener("transitionend", handleTransitionEnd);
-
     document.body.style.overflow = "";
-
-    if (this.config.onHide) {
-      this.config.onHide(this);
-    }
-
-    // Limpiar formulario si existe
-    const form = this.modal.querySelector("form");
-    if (form) {
-      this.clearFormErrors(form);
-    }
 
     return this;
   }
@@ -307,15 +309,19 @@ class BaseModal {
 
   destroy() {
     if (this.modal) {
-      // Remover listeners
-      document.removeEventListener("keydown", this.handleKeydown.bind(this));
-
-      // Cerrar si está abierto
-      if (this.isOpen) {
-        this.hide();
+      // Remover listeners específicos
+      if (this.config.keyboard) {
+        document.removeEventListener("keydown", this.handleKeydown.bind(this));
       }
 
-      // Remover del DOM
+      // Cerrar si está abierto (sin llamar destroy recursivamente)
+      if (this.isOpen) {
+        this.isOpen = false;
+        this.modal.classList.remove("show");
+        document.body.style.overflow = "";
+      }
+
+      // Remover del DOM completamente
       this.modal.remove();
       this.modal = null;
     }
