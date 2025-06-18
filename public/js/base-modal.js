@@ -69,7 +69,7 @@ class BaseModal {
 
     document.body.insertAdjacentHTML("beforeend", modalHTML);
     this.modal = document.getElementById(this.config.id);
-    
+
     this.attachFormEvents();
   }
 

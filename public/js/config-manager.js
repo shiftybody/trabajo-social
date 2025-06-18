@@ -526,11 +526,9 @@ class ConfigManager {
         criteriaName = `"${result.data.nombre || result.data.criterio}"`;
       }
 
-      // Confirmar eliminación usando CustomDialog
       const confirmDelete = await CustomDialog.confirm(
         "Confirmar Eliminación",
-        `¿Está seguro de eliminar el criterio ${criteriaName}?<br><br>
-       <strong>Esta acción no se puede deshacer.</strong><br>
+        `¿Está seguro de eliminar el criterio ${criteriaName}. Esta acción no se puede deshacer.
        El criterio se eliminará permanentemente del sistema.`,
         "Eliminar",
         "Cancelar"

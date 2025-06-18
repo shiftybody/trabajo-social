@@ -40,8 +40,6 @@
     <script src="<?= APP_URL . 'public/js/modals/edit-level-modal.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/create-rule-modal.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/edit-rule-modal.js' ?>"></script>
-    <script src="<?= APP_URL . 'public/js/modals/delete-rule-modal.js' ?>"></script>
-    <!-- Modales de criterios -->
     <script src="<?= APP_URL . 'public/js/modals/create-criteria-modal.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/edit-criteria-modal.js' ?>"></script>
   <?php endif; ?>
