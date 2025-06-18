@@ -20,28 +20,8 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           <a href="#reglas-aportacion">Reglas de Aportación</a>
         </div>
 
-        <div class="config-nav-group">
-          <h3>Criterios Paciente</h3>
-          <a href="#protocolo">Protocolo</a>
-          <a href="#gasto-traslado">Gasto de Traslado</a>
-          <a href="#tiempo-traslado">Tiempo de Traslado</a>
-        </div>
+        <!-- Aqui deben de ir los criterios -->
 
-        <div class="config-nav-group">
-          <h3>Criterios Familia</h3>
-          <a href="#integrantes">Integrantes de Familia</a>
-          <a href="#hijos">Número de Hijos</a>
-          <a href="#tipo-familia">Tipo de Familia</a>
-        </div>
-
-        <div class="config-nav-group">
-          <h3>Criterios Vivienda</h3>
-          <a href="#tipo-vivienda">Tipo de Vivienda</a>
-          <a href="#tenencia">Tenencia</a>
-          <a href="#zona">Zona</a>
-          <a href="#materiales">Materiales</a>
-          <a href="#servicios">Servicios</a>
-        </div>
       </nav>
 
       <main class="config-content content-loading" id="config-content-area">

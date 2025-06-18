@@ -99,30 +99,6 @@ class CriteriaModel extends MainModel
     }
   }
 
-  /**
-   * Obtiene todas las subcategorías activas para selects
-   * 
-   * @return array Lista de subcategorías
-   */
-  public function getAllSubcategories()
-  {
-    try {
-      $query = "SELECT s.id, 
-                       s.nombre as subcategoria_nombre, 
-                       s.categoria_id,
-                       c.nombre as categoria_nombre
-                FROM subcategoria_criterio s
-                JOIN categoria_criterio c ON s.categoria_id = c.id
-                WHERE s.estado = 1 AND c.estado = 1
-                ORDER BY c.nombre, s.nombre";
-
-      $resultado = $this->ejecutarConsulta($query);
-      return $resultado->fetchAll(PDO::FETCH_OBJ);
-    } catch (\Exception $e) {
-      error_log("Error en getAllSubcategories: " . $e->getMessage());
-      return [];
-    }
-  }
 
   /**
    * Crea un nuevo criterio
@@ -453,71 +429,5 @@ class CriteriaModel extends MainModel
 
     $result['valid'] = empty($result['errors']);
     return $result;
-  }
-
-  /**
-   * Obtiene criterios agrupados por categoría y subcategoría
-   * 
-   * @return array Criterios agrupados
-   */
-  public function getCriteriaGrouped()
-  {
-    try {
-      $query = "SELECT c.id as categoria_id, c.nombre as categoria_nombre,
-                       s.id as subcategoria_id, s.nombre as subcategoria_nombre,
-                       cr.id, cr.nombre, cr.tipo_criterio, cr.puntaje,
-                       cr.valor_minimo, cr.valor_maximo, cr.valor_texto, cr.valor_booleano
-                FROM categoria_criterio c
-                JOIN subcategoria_criterio s ON c.id = s.categoria_id
-                JOIN criterio_puntuacion cr ON s.id = cr.subcategoria_id
-                WHERE c.estado = 1 AND s.estado = 1 AND cr.estado = 1
-                ORDER BY c.nombre, s.nombre, cr.nombre";
-
-      $resultado = $this->ejecutarConsulta($query);
-      $criterios = $resultado->fetchAll(PDO::FETCH_OBJ);
-
-      // Agrupar resultados
-      $grouped = [];
-      foreach ($criterios as $criterio) {
-        $catId = $criterio->categoria_id;
-        $subId = $criterio->subcategoria_id;
-
-        if (!isset($grouped[$catId])) {
-          $grouped[$catId] = [
-            'categoria' => [
-              'id' => $criterio->categoria_id,
-              'nombre' => $criterio->categoria_nombre
-            ],
-            'subcategorias' => []
-          ];
-        }
-
-        if (!isset($grouped[$catId]['subcategorias'][$subId])) {
-          $grouped[$catId]['subcategorias'][$subId] = [
-            'subcategoria' => [
-              'id' => $criterio->subcategoria_id,
-              'nombre' => $criterio->subcategoria_nombre
-            ],
-            'criterios' => []
-          ];
-        }
-
-        $grouped[$catId]['subcategorias'][$subId]['criterios'][] = [
-          'id' => $criterio->id,
-          'nombre' => $criterio->nombre,
-          'tipo_criterio' => $criterio->tipo_criterio,
-          'puntaje' => $criterio->puntaje,
-          'valor_minimo' => $criterio->valor_minimo,
-          'valor_maximo' => $criterio->valor_maximo,
-          'valor_texto' => $criterio->valor_texto,
-          'valor_booleano' => $criterio->valor_booleano
-        ];
-      }
-
-      return $grouped;
-    } catch (\Exception $e) {
-      error_log("Error en getCriteriaGrouped: " . $e->getMessage());
-      return [];
-    }
   }
 }
