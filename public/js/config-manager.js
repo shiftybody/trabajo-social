@@ -33,16 +33,13 @@ class ConfigManager {
   }
 
   /**
-   * MODIFICADO: Cachea elementos y se asegura de que el área de contenido esté oculta
-   * para prevenir el "flash" de contenido al cargar la página.
+   * Cachea los elementos necesarios del DOM para evitar búsquedas repetidas.
    */
   cacheElements() {
     this.contentArea = document.getElementById("config-content-area");
     if (!this.contentArea) {
       throw new Error("Elemento config-content-area no encontrado");
     }
-    // Añade la clase para ocultar el contenedor hasta que todo esté listo.
-    // Requiere que la clase 'content-loading' esté definida en el CSS.
     this.contentArea.classList.add("content-loading");
   }
 
@@ -55,7 +52,10 @@ class ConfigManager {
       const data = await response.json();
 
       if (data.status === "success") {
-        this.levelsData = data.data.filter((level) => level.estado == 1); // Solo activos
+        // solo activos y que no sea EXENTO
+        this.levelsData = data.data.filter(
+          (level) => level.estado == 1 && level.nivel.toUpperCase() !== "EXENTO"
+        );
       }
     } catch (error) {
       console.error("Error loading levels data:", error);
@@ -147,9 +147,6 @@ class ConfigManager {
     }
   }
 
-  /**
-   * NUEVO MÉTODO: Actualiza el estado visual de los enlaces de navegación.
-   */
   updateActiveNavLink(section) {
     const navLinks = document.querySelectorAll(".config-nav a");
     navLinks.forEach((link) => {
@@ -560,6 +557,36 @@ class ConfigManager {
     } catch (error) {
       console.error("Error deleting criteria:", error);
       this.showError("Error de conexión al eliminar el criterio");
+    }
+  }
+
+  /**
+   * Cambia estado de criterio
+   */
+  async toggleCriteriaStatus(criteriaId, status) {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/criteria/${criteriaId}/status`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ estado: status }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        this.showSuccess(data.message);
+      } else {
+        this.showError(data.message);
+        this.currentTable.ajax.reload(null, false);
+      }
+    } catch (error) {
+      this.showError("Error de conexión");
+      this.currentTable.ajax.reload(null, false);
     }
   }
 
