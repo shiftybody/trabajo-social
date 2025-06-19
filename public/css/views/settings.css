@@ -2,10 +2,8 @@
 .config-container {
   display: flex;
   gap: 2rem;
-  /* Espacio entre la navegación y el contenido */
   margin-top: 1.5rem;
   align-items: flex-start;
-  /* Alinea los items al inicio */
 }
 
 .select-container {
@@ -21,10 +19,9 @@
   color: #374151;
 }
 
-/* --- Barra de Navegación Izquierda (Master) --- */
+/* --- Barra de Navegación Izquierda --- */
 .config-nav {
   flex: 0 0 250px;
-  /* Base de 240px, no crece, no se encoge */
   background-color: #ffffff;
   border-radius: 8px;
   padding: 1rem;

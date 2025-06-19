@@ -327,79 +327,152 @@ const MODAL_TEMPLATES = {
     </form>
   `,
 
-  criteriaForm: `
-  <form novalidate id="criteriaForm" class="base-modal-form form-ajax config-form" method="POST">
-    <input type="hidden" name="subcategoria_id" value="{{subcategoria_id}}">
+  // Template para crear criterio
+  createCriteria: `
+  <form novalidate id="createCriteriaForm" class="base-modal-form form-ajax config-form" method="POST">
+    <input type="hidden" name="subcategoria_id" value="{{selectedSubcategoryId}}">
     
     <div class="form-group">
       <label for="nombre" class="field-label">Nombre del Criterio</label>
-      <input type="text" id="nombre" name="nombre" class="input-reset"
-             value="{{nombre}}" placeholder="ej: Casa propia, 3-4 integrantes" 
-             maxlength="100" required>
-      <small class="field-help">Descripción del criterio de evaluación</small>
+      <input type="text" id="nombre" name="nombre" class="input-reset" 
+             placeholder="Ej: Tiene servicio de agua" maxlength="100" required>
     </div>
     
     <div class="form-group">
       <label for="tipo_criterio" class="field-label">Tipo de Criterio</label>
       <select id="tipo_criterio" name="tipo_criterio" class="input-reset" required 
-              onchange="configManager.toggleCriteriaFields(this.value)">
-        <option value="">Seleccione tipo de criterio</option>
-        <option value="rango_numerico" {{rangoSelected}}>Rango Numérico</option>
-        <option value="valor_especifico" {{valorSelected}}>Valor Específico</option>
-        <option value="booleano" {{booleanoSelected}}>Booleano (Sí/No)</option>
+              onchange="toggleCriteriaFields(this.value)">
+        <option value="">Seleccione el tipo</option>
+        <option value="rango_numerico">Rango Numérico</option>
+        <option value="valor_especifico">Valor Específico</option>
+        <option value="booleano">Booleano (Sí/No)</option>
       </select>
-      <small class="field-help">Determina qué tipo de valores acepta el criterio</small>
     </div>
 
-    <!-- Campos dinámicos según tipo de criterio -->
+    <!-- Campos dinámicos para rango numérico -->
     <div id="numeric-fields" class="criteria-fields" style="display: none;">
       <div class="form-row">
         <div class="form-group">
           <label for="valor_minimo" class="field-label">Valor Mínimo</label>
-          <input type="number" id="valor_minimo" name="valor_minimo" class="input-reset"
-                 value="{{valor_minimo}}" placeholder="0" min="0" step="1">
+          <input type="number" id="valor_minimo" name="valor_minimo" class="input-reset" 
+                 placeholder="Ej: 0" min="0">
         </div>
         <div class="form-group">
-          <label for="valor_maximo" class="field-label">Valor Máximo</label>
-          <input type="number" id="valor_maximo" name="valor_maximo" class="input-reset"
-                 value="{{valor_maximo}}" placeholder="Sin límite" min="0" step="1">
-          <small class="field-help">Dejar vacío para sin límite superior</small>
+          <label for="valor_maximo" class="field-label">Valor Máximo (Opcional)</label>
+          <input type="number" id="valor_maximo" name="valor_maximo" class="input-reset" 
+                 placeholder="Ej: 100" min="0">
+          <small class="field-help">Dejar vacío para "sin límite superior"</small>
         </div>
       </div>
     </div>
-    
+
+    <!-- Campos dinámicos para valor específico -->
     <div id="text-fields" class="criteria-fields" style="display: none;">
       <div class="form-group">
-        <label for="valor_texto" class="field-label">Valor Específico</label>
-        <input type="text" id="valor_texto" name="valor_texto" class="input-reset"
-               value="{{valor_texto}}" placeholder="ej: Casa, Departamento, Neurohabilitación"
-               maxlength="100">
-        <small class="field-help">Valor exacto que debe coincidir</small>
+        <label for="valor_texto" class="field-label">Valor de Texto</label>
+        <input type="text" id="valor_texto" name="valor_texto" class="input-reset" 
+               placeholder="Ej: Neurohabilitación" maxlength="100">
       </div>
     </div>
-    
+
+    <!-- Campos dinámicos para booleano -->
     <div id="boolean-fields" class="criteria-fields" style="display: none;">
       <div class="form-group">
-        <label for="valor_booleano" class="field-label">Valor Booleano</label>
-        <select id="valor_booleano" name="valor_booleano" class="input-reset">
-          <option value="">Seleccione valor</option>
-          <option value="1" {{siSelected}}>Verdadero (Sí)</option>
-          <option value="0" {{noSelected}}>Falso (No)</option>
-        </select>
-        <small class="field-help">Valor que debe tener la condición</small>
+        <div class="info-box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 16v-4"></path>
+            <path d="M12 8h.01"></path>
+          </svg>
+          <span>Los criterios booleanos se evalúan como Sí/No automáticamente. No requieren valores adicionales.</span>
+        </div>
       </div>
     </div>
     
     <div class="form-group">
-      <label for="puntaje" class="field-label">Puntuación</label>
-      <input type="number" id="puntaje" name="puntaje" class="input-reset"
-             value="{{puntaje}}" placeholder="0" min="0" max="100" step="1" required>
-      <small class="field-help">Puntos que aporta este criterio (0-100)</small>
+      <label for="puntaje" class="field-label">Puntaje</label>
+      <input type="number" id="puntaje" name="puntaje" class="input-reset" 
+             placeholder="Ej: 5" min="0" max="999" required>
     </div>
     
     <div class="base-modal-actions">
-      <button type="button" class="btn-cancel" data-action="close">Cancelar</button>
-      <button type="submit" class="btn-primary">{{submitText}}</button>
+      <button class="btn-cancel" data-action="close">Cancelar</button>
+      <button type="submit" class="btn-primary">Crear Criterio</button>
+    </div>
+  </form>
+`,
+
+  // Template para editar criterio
+  editCriteria: `
+  <form novalidate id="editCriteriaForm" class="base-modal-form form-ajax config-form" method="POST">
+    <!-- Campo oculto para subcategoría -->
+    <input type="hidden" name="subcategoria_id" value="{{subcategoria_id}}">
+    
+    <div class="form-group">
+      <label for="nombre" class="field-label">Nombre del Criterio</label>
+      <input type="text" id="nombre" name="nombre" class="input-reset" 
+             value="{{criterio}}" maxlength="100" required>
+    </div>
+    
+    <div class="form-group">
+      <label for="tipo_criterio" class="field-label">Tipo de Criterio</label>
+      <select id="tipo_criterio" name="tipo_criterio" class="input-reset" required 
+              onchange="toggleCriteriaFields(this.value)">
+        <option value="rango_numerico">Rango Numérico</option>
+        <option value="valor_especifico">Valor Específico</option>
+        <option value="booleano">Booleano (Sí/No)</option>
+      </select>
+    </div>
+
+    <!-- Campos dinámicos para rango numérico -->
+    <div id="numeric-fields" class="criteria-fields" style="display: none;">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="valor_minimo" class="field-label">Valor Mínimo</label>
+          <input type="number" id="valor_minimo" name="valor_minimo" class="input-reset" 
+                 value="{{valor_minimo}}" min="0">
+        </div>
+        <div class="form-group">
+          <label for="valor_maximo" class="field-label">Valor Máximo (Opcional)</label>
+          <input type="number" id="valor_maximo" name="valor_maximo" class="input-reset" 
+                 value="{{valor_maximo}}" min="0">
+          <small class="field-help">Dejar vacío para "sin límite superior"</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campos dinámicos para valor específico -->
+    <div id="text-fields" class="criteria-fields" style="display: none;">
+      <div class="form-group">
+        <label for="valor_texto" class="field-label">Valor de Texto</label>
+        <input type="text" id="valor_texto" name="valor_texto" class="input-reset" 
+               value="{{valor_texto}}" maxlength="100">
+      </div>
+    </div>
+
+    <!-- Campos dinámicos para booleano -->
+    <div id="boolean-fields" class="criteria-fields" style="display: none;">
+      <div class="form-group">
+        <div class="info-box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 16v-4"></path>
+            <path d="M12 8h.01"></path>
+          </svg>
+          <span>Los criterios booleanos se evalúan como Sí/No automáticamente. No requieren valores adicionales.</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="puntaje" class="field-label">Puntaje</label>
+      <input type="number" id="puntaje" name="puntaje" class="input-reset" 
+             value="{{puntaje}}" min="0" max="999" required>
+    </div>
+    
+    <div class="base-modal-actions">
+      <button class="btn-cancel" data-action="close">Cancelar</button>
+      <button type="submit" class="btn-primary">Actualizar Criterio</button>
     </div>
   </form>
 `,

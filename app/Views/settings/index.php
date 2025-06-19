@@ -32,4 +32,4 @@ require_once APP_ROOT . 'public/inc/navbar.php';
   </div>
 </div>
 
-<?= require_once APP_ROOT . 'public/inc/scripts.php' ?>
+<?php require_once APP_ROOT . 'public/inc/scripts.php' ?>

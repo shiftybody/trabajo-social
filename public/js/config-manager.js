@@ -13,7 +13,7 @@ class ConfigManager {
     this.isLoading = false;
     this.currentTable = null;
     this.levelsData = [];
-    this.categoriesData = []; // NUEVO: Cache para categorías
+    this.categoriesData = [];
 
     this.init();
   }
@@ -630,31 +630,63 @@ class ConfigManager {
   }
 
   /**
-   * NUEVO: Abre modal para crear criterio
+   * Abre modal para crear criterio
    */
   createCriteria(subcategoryId) {
-    // Implementar en la siguiente fase
-    console.log("createCriteria", subcategoryId);
+    if (typeof mostrarModalCrearCriterio === "function") {
+      mostrarModalCrearCriterio(subcategoryId);
+    } else {
+      console.error("mostrarModalCrearCriterio no está disponible");
+      this.showError("Error al abrir modal de creación");
+    }
   }
 
   /**
-   * NUEVO: Abre modal para editar criterio
+   * Abre modal para editar criterio
    */
   editCriteria(criteriaId) {
-    // Implementar en la siguiente fase
-    console.log("editCriteria", criteriaId);
+    if (typeof mostrarModalEditarCriterio === "function") {
+      mostrarModalEditarCriterio(criteriaId);
+    } else {
+      console.error("mostrarModalEditarCriterio no está disponible");
+      this.showError("Error al abrir modal de edición");
+    }
   }
 
   /**
-   * NUEVO: Elimina criterio
+   * Elimina criterio con confirmación
    */
   async deleteCriteria(criteriaId) {
-    // Implementar confirmación y eliminación en la siguiente fase
-    console.log("deleteCriteria", criteriaId);
+    const confirm = await CustomDialog.confirm(
+      "Confirmar Eliminación",
+      "¿Está seguro de eliminar este criterio de puntuación? Esta acción no se puede deshacer.",
+      "Eliminar",
+      "Cancelar"
+    );
+
+    if (!confirm) return;
+
+    try {
+      const response = await fetch(`${this.baseUrl}/criteria/${criteriaId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        this.showSuccess("Criterio eliminado correctamente");
+        this.currentTable?.ajax.reload(null, false);
+      } else {
+        this.showError(data.message || "Error al eliminar criterio");
+      }
+    } catch (error) {
+      console.error("Error deleting criteria:", error);
+      this.showError("Error de conexión");
+    }
   }
 
   /**
-   * NUEVO: Cambia estado de criterio
+   *  Cambia estado de criterio
    */
   async toggleCriteriaStatus(criteriaId, estado) {
     try {
@@ -681,34 +713,6 @@ class ConfigManager {
       console.error("Error toggling criteria status:", error);
       this.showError("Error de conexión");
       this.currentTable?.ajax.reload(null, false);
-    }
-  }
-
-  /**
-   * Alterna la visibilidad de campos según el tipo de criterio
-   * @param {string} tipoCriterio Tipo seleccionado
-   */
-  toggleCriteriaFields(tipoCriterio) {
-    // Ocultar todos los campos primero
-    const allFields = document.querySelectorAll(".criteria-fields");
-    allFields.forEach((field) => (field.style.display = "none"));
-
-    // Mostrar campos relevantes según el tipo
-    switch (tipoCriterio) {
-      case "rango_numerico":
-        const numericFields = document.getElementById("numeric-fields");
-        if (numericFields) numericFields.style.display = "block";
-        break;
-
-      case "valor_especifico":
-        const textFields = document.getElementById("text-fields");
-        if (textFields) textFields.style.display = "block";
-        break;
-
-      case "booleano":
-        const booleanFields = document.getElementById("boolean-fields");
-        if (booleanFields) booleanFields.style.display = "block";
-        break;
     }
   }
 
@@ -774,6 +778,57 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 });
+
+function toggleCriteriaFields(tipoCriterio) {
+  // Ocultar todos los campos primero
+  const allFields = document.querySelectorAll(".criteria-fields");
+  allFields.forEach((field) => {
+    field.style.display = "none";
+  });
+
+  // Limpiar campos no utilizados para evitar datos incorrectos
+  const numericInputs = document.querySelectorAll(
+    "#valor_minimo, #valor_maximo"
+  );
+  const textInput = document.querySelector("#valor_texto");
+
+  // Mostrar campos relevantes según el tipo
+  switch (tipoCriterio) {
+    case "rango_numerico":
+      const numericFields = document.getElementById("numeric-fields");
+      if (numericFields) {
+        numericFields.style.display = "block";
+      }
+      // Limpiar campo de texto
+      if (textInput) textInput.value = "";
+      break;
+
+    case "valor_especifico":
+      const textFields = document.getElementById("text-fields");
+      if (textFields) {
+        textFields.style.display = "block";
+      }
+      // Limpiar campos numéricos
+      numericInputs.forEach((input) => (input.value = ""));
+      break;
+
+    case "booleano":
+      const booleanFields = document.getElementById("boolean-fields");
+      if (booleanFields) {
+        booleanFields.style.display = "block";
+      }
+      // Limpiar todos los campos de valor
+      if (textInput) textInput.value = "";
+      numericInputs.forEach((input) => (input.value = ""));
+      break;
+
+    default:
+      // No mostrar ningún campo si no hay tipo seleccionado
+      break;
+  }
+}
+
+window.toggleCriteriaFields = toggleCriteriaFields;
 
 window.addEventListener("beforeunload", () => {
   configManager?.destroy();

@@ -92,6 +92,47 @@ const SETTING_VALIDATION_SCHEMAS = {
       },
     },
   },
+  criteria: {
+    subcategoria_id: {
+      required: {
+        message: "Debe seleccionar una subcategoría",
+      },
+    },
+    nombre: {
+      required: {
+        message: "El nombre del criterio es obligatorio",
+      },
+      maxLength: {
+        value: 100,
+        message: "El nombre no puede exceder 100 caracteres",
+      },
+    },
+    tipo_criterio: {
+      required: {
+        message: "Debe seleccionar el tipo de criterio",
+      },
+      in: {
+        values: ["rango_numerico", "valor_especifico", "booleano"],
+        message: "Tipo de criterio inválido",
+      },
+    },
+    puntaje: {
+      required: {
+        message: "El puntaje es obligatorio",
+      },
+      numeric: {
+        message: "El puntaje debe ser un número",
+      },
+      min: {
+        value: 0,
+        message: "El puntaje no puede ser negativo",
+      },
+      max: {
+        value: 999,
+        message: "El puntaje no puede exceder 999",
+      },
+    },
+  },
 };
 
 const LevelValidations = {
@@ -286,6 +327,168 @@ const RuleHandlers = {
   },
 };
 
+const CriteriaValidations = {
+  validateCreate: async (form) => {
+    const formData = new FormData(form);
+
+    // Verificar que subcategoria_id venga del campo oculto
+    const subcategoriaId = formData.get("subcategoria_id");
+    if (!subcategoriaId) {
+      return {
+        isValid: false,
+        errors: { subcategoria_id: "Error: subcategoría no especificada" },
+      };
+    }
+
+    const result = await FormValidator.validate(
+      formData,
+      SETTING_VALIDATION_SCHEMAS.criteria
+    );
+
+    // Validaciones adicionales según tipo de criterio
+    if (result.isValid) {
+      return await CriteriaValidations.validateByType(formData, result);
+    }
+
+    return result;
+  },
+
+  validateEdit: async (form) => {
+    const formData = new FormData(form);
+
+    // Verificar que subcategoria_id venga del campo oculto
+    const subcategoriaId = formData.get("subcategoria_id");
+    if (!subcategoriaId) {
+      return {
+        isValid: false,
+        errors: { subcategoria_id: "Error: subcategoría no especificada" },
+      };
+    }
+
+    const result = await FormValidator.validate(
+      formData,
+      SETTING_VALIDATION_SCHEMAS.criteria
+    );
+
+    // Validaciones adicionales según tipo de criterio
+    if (result.isValid) {
+      return await CriteriaValidations.validateByType(formData, result);
+    }
+
+    return result;
+  },
+
+  validateByType: async (formData, result) => {
+    const tipoCriterio = formData.get("tipo_criterio");
+
+    switch (tipoCriterio) {
+      case "rango_numerico":
+        const valorMinimo = formData.get("valor_minimo");
+        const valorMaximo = formData.get("valor_maximo");
+
+        if (!valorMinimo || valorMinimo === "") {
+          result.isValid = false;
+          result.errors.valor_minimo =
+            "El valor mínimo es requerido para rangos numéricos";
+        }
+
+        if (
+          valorMaximo &&
+          valorMinimo &&
+          parseInt(valorMaximo) <= parseInt(valorMinimo)
+        ) {
+          result.isValid = false;
+          result.errors.valor_maximo =
+            "El valor máximo debe ser mayor al mínimo";
+        }
+        break;
+
+      case "valor_especifico":
+        const valorTexto = formData.get("valor_texto");
+        if (!valorTexto || valorTexto.trim() === "") {
+          result.isValid = false;
+          result.errors.valor_texto = "El valor de texto es requerido";
+        }
+        break;
+
+      case "booleano":
+        // No requiere validaciones adicionales
+        break;
+    }
+
+    return result;
+  },
+};
+
+const CriteriaHandlers = {
+  onCreateSuccess: async (data, form) => {
+    if (typeof BaseModal !== "undefined") {
+      BaseModal.closeAll();
+    }
+
+    await CustomDialog.success(
+      "Criterio Creado",
+      data.message || "El criterio se creó correctamente"
+    );
+
+    // Recargar tabla actual
+    if (typeof configManager !== "undefined" && configManager.currentTable) {
+      configManager.currentTable.ajax.reload();
+    } else {
+      window.location.reload();
+    }
+  },
+
+  onEditSuccess: async (data, form) => {
+    if (typeof BaseModal !== "undefined") {
+      BaseModal.closeAll();
+    }
+
+    await CustomDialog.success(
+      "Criterio Actualizado",
+      data.message || "El criterio se actualizó correctamente"
+    );
+
+    // Recargar tabla actual
+    if (typeof configManager !== "undefined" && configManager.currentTable) {
+      configManager.currentTable.ajax.reload();
+    } else {
+      window.location.reload();
+    }
+  },
+
+  onError: async (data, form) => {
+    if (data.errors) {
+      // Mostrar errores específicos de campos
+      for (const [field, message] of Object.entries(data.errors)) {
+        const input = form.querySelector(`[name="${field}"]`);
+        if (input) {
+          input.classList.add("error-input");
+
+          // Crear mensaje de error
+          const errorElement = document.createElement("p");
+          errorElement.className = "error-message";
+          errorElement.textContent = message;
+
+          // Insertar el mensaje después del input
+          input.parentElement.appendChild(errorElement);
+        }
+      }
+
+      CustomDialog.toast(
+        "Corrija los errores marcados en el formulario",
+        "error",
+        3000
+      );
+    } else {
+      await CustomDialog.error(
+        "Error",
+        data.message || "Ocurrió un error al procesar la solicitud"
+      );
+    }
+  },
+};
+
 function registerAvailableForms(container) {
   // Asegurarse de que el contenedor sea un elemento válido antes de usar querySelector
   if (!container || typeof container.querySelector !== "function") {
@@ -355,13 +558,41 @@ function registerAvailableForms(container) {
       onError: RuleHandlers.onError,
     });
   }
+
+  let createCriteriaForm = container.querySelector("#createCriteriaForm");
+  if (!createCriteriaForm && container.id === "createCriteriaForm") {
+    createCriteriaForm = container;
+  }
+
+  if (createCriteriaForm) {
+    console.log("Registrando createCriteriaForm...");
+    FormManager.register("createCriteriaForm", {
+      validate: CriteriaValidations.validateCreate,
+      onSuccess: CriteriaHandlers.onCreateSuccess,
+      onError: CriteriaHandlers.onError,
+    });
+  }
+
+  let editCriteriaForm = container.querySelector("#editCriteriaForm");
+  if (!editCriteriaForm && container.id === "editCriteriaForm") {
+    editCriteriaForm = container;
+  }
+
+  if (editCriteriaForm) {
+    console.log("Registrando editCriteriaForm...");
+    FormManager.register("editCriteriaForm", {
+      validate: CriteriaValidations.validateEdit,
+      onSuccess: CriteriaHandlers.onEditSuccess,
+      onError: CriteriaHandlers.onError,
+    });
+  }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
   // Registra los formularios que ya existen al cargar la página
   registerAvailableForms(document.body);
 
-  // Configurar el observador para futuros cambios en el DOM
+  // Configurar el observador para detectar los modales o formularios que se añadan dinámicamente
   const observer = new MutationObserver((mutationsList) => {
     for (const mutation of mutationsList) {
       // Si se han añadido nodos (como un modal)
