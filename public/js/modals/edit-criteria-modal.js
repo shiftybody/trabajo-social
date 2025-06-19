@@ -1,8 +1,5 @@
-// public/js/modals/edit-criteria-modal.js
-
 async function editCriteria(criteriaId) {
   try {
-    // Solo cargar datos del criterio
     const criteriaResponse = await fetch(
       `${APP_URL}api/settings/criteria/${criteriaId}`
     );
@@ -14,25 +11,32 @@ async function editCriteria(criteriaId) {
 
     const criteriaModal = createModal("editCriteria", {
       title: "Editar Criterio",
-      size: "large",
+      size: "medium",
       endpoint: `${APP_URL}api/settings/criteria/${criteriaId}`,
       data: {
         ...criteriaData.data,
       },
       onShow: (modal) => {
-        // Configurar el select del tipo de criterio y mostrar campos apropiados
         setTimeout(() => {
+          // Inicializar estado con valores existentes
+          initializeCriteriaFieldsState(criteriaData.data);
+
+          // Configurar select y mostrar campos
           const tipoCriterioSelect = document.getElementById("tipo_criterio");
           const tipoCriterio = criteriaData.data.tipo_criterio;
 
           if (tipoCriterioSelect && tipoCriterio) {
-            // Establecer el valor correcto en el select
             tipoCriterioSelect.value = tipoCriterio;
-
-            // Mostrar los campos apropiados
             toggleCriteriaFields(tipoCriterio);
           }
+
+          // Configurar guardado en tiempo real
+          setupRealtimeStateSaving();
         }, 100);
+      },
+      onHide: () => {
+        // Limpiar estado al cerrar modal
+        clearCriteriaFieldsState();
       },
     });
 

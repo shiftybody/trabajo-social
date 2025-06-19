@@ -351,6 +351,7 @@ class ConfigManager {
           await this.loadLevelsSection();
           break;
         case "reglas-aportacion":
+          await this.loadLevelsData();
           await this.loadRulesSection();
           break;
         default:
@@ -779,37 +780,52 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+/**
+ * Función mejorada para alternar campos con guardado de estado
+ */
 function toggleCriteriaFields(tipoCriterio) {
-  // Ocultar todos los campos primero
+  // Objeto para guardar el estado de los campos
+  if (!window.criteriaFieldsState) {
+    window.criteriaFieldsState = {
+      rango_numerico: {
+        valor_minimo: "",
+        valor_maximo: "",
+      },
+      valor_especifico: {
+        valor_texto: "",
+      },
+      // booleano no necesita estado ya que no tiene inputs
+    };
+  }
+
+  // Guardar el estado actual antes de cambiar
+  saveCurrentFieldsState();
+
+  // Ocultar todos los campos
   const allFields = document.querySelectorAll(".criteria-fields");
   allFields.forEach((field) => {
     field.style.display = "none";
   });
 
-  // Limpiar campos no utilizados para evitar datos incorrectos
-  const numericInputs = document.querySelectorAll(
-    "#valor_minimo, #valor_maximo"
-  );
-  const textInput = document.querySelector("#valor_texto");
-
-  // Mostrar campos relevantes según el tipo
+  // Mostrar y restaurar campos según el tipo seleccionado
   switch (tipoCriterio) {
     case "rango_numerico":
       const numericFields = document.getElementById("numeric-fields");
       if (numericFields) {
         numericFields.style.display = "block";
+        // Restaurar valores guardados
+        restoreFieldValue("valor_minimo");
+        restoreFieldValue("valor_maximo");
       }
-      // Limpiar campo de texto
-      if (textInput) textInput.value = "";
       break;
 
     case "valor_especifico":
       const textFields = document.getElementById("text-fields");
       if (textFields) {
         textFields.style.display = "block";
+        // Restaurar valor guardado
+        restoreFieldValue("valor_texto");
       }
-      // Limpiar campos numéricos
-      numericInputs.forEach((input) => (input.value = ""));
       break;
 
     case "booleano":
@@ -817,18 +833,109 @@ function toggleCriteriaFields(tipoCriterio) {
       if (booleanFields) {
         booleanFields.style.display = "block";
       }
-      // Limpiar todos los campos de valor
-      if (textInput) textInput.value = "";
-      numericInputs.forEach((input) => (input.value = ""));
-      break;
-
-    default:
-      // No mostrar ningún campo si no hay tipo seleccionado
       break;
   }
 }
 
+/**
+ * Guarda el estado actual de los campos visibles
+ */
+function saveCurrentFieldsState() {
+  // Guardar campos numéricos si están visibles
+  const numericFields = document.getElementById("numeric-fields");
+  if (numericFields && numericFields.style.display !== "none") {
+    const valorMinimo = document.getElementById("valor_minimo");
+    const valorMaximo = document.getElementById("valor_maximo");
+
+    if (valorMinimo) {
+      window.criteriaFieldsState.rango_numerico.valor_minimo =
+        valorMinimo.value;
+    }
+    if (valorMaximo) {
+      window.criteriaFieldsState.rango_numerico.valor_maximo =
+        valorMaximo.value;
+    }
+  }
+
+  // Guardar campo de texto si está visible
+  const textFields = document.getElementById("text-fields");
+  if (textFields && textFields.style.display !== "none") {
+    const valorTexto = document.getElementById("valor_texto");
+    if (valorTexto) {
+      window.criteriaFieldsState.valor_especifico.valor_texto =
+        valorTexto.value;
+    }
+  }
+}
+
+/**
+ * Restaura el valor de un campo específico desde el estado guardado
+ */
+function restoreFieldValue(fieldName) {
+  const input = document.getElementById(fieldName);
+  if (!input) return;
+
+  let savedValue = "";
+
+  // Buscar el valor guardado según el campo
+  if (fieldName === "valor_minimo" || fieldName === "valor_maximo") {
+    savedValue = window.criteriaFieldsState.rango_numerico[fieldName] || "";
+  } else if (fieldName === "valor_texto") {
+    savedValue = window.criteriaFieldsState.valor_especifico[fieldName] || "";
+  }
+
+  // Restaurar el valor
+  input.value = savedValue;
+}
+
+/**
+ * Inicializa el estado con valores existentes (para modo edición)
+ */
+function initializeCriteriaFieldsState(data) {
+  if (!window.criteriaFieldsState) {
+    window.criteriaFieldsState = {
+      rango_numerico: {
+        valor_minimo: "",
+        valor_maximo: "",
+      },
+      valor_especifico: {
+        valor_texto: "",
+      },
+    };
+  }
+
+  // Si hay datos existentes, inicializar el estado
+  if (data) {
+    if (data.tipo_criterio === "rango_numerico") {
+      window.criteriaFieldsState.rango_numerico.valor_minimo =
+        data.valor_minimo || "";
+      window.criteriaFieldsState.rango_numerico.valor_maximo =
+        data.valor_maximo || "";
+    } else if (data.tipo_criterio === "valor_especifico") {
+      window.criteriaFieldsState.valor_especifico.valor_texto =
+        data.valor_texto || "";
+    }
+  }
+}
+
+/**
+ * Limpia el estado guardado (útil al cerrar modal o crear nuevo)
+ */
+function clearCriteriaFieldsState() {
+  window.criteriaFieldsState = {
+    rango_numerico: {
+      valor_minimo: "",
+      valor_maximo: "",
+    },
+    valor_especifico: {
+      valor_texto: "",
+    },
+  };
+}
+
 window.toggleCriteriaFields = toggleCriteriaFields;
+window.initializeCriteriaFieldsState = initializeCriteriaFieldsState;
+window.clearCriteriaFieldsState = clearCriteriaFieldsState;
 
 window.addEventListener("beforeunload", () => {
   configManager?.destroy();
