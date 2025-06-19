@@ -550,13 +550,21 @@ class SettingController
       $data = $request->post();
       $data['usuario_creacion_id'] = Auth::user()->usuario_id;
 
-      $criteriaId = $this->criteriaModel->createCriteria($data);
+      $result = $this->criteriaModel->createCriteria($data);
 
-      if ($criteriaId) {
+      if (is_array($result) && isset($result['error']) && $result['error'] === 'validation') {
+        return Response::json([
+          'status' => 'error',
+          'message' => 'Error de validación',
+          'errors' => $result['errors']
+        ], 422);
+      }
+
+      if ($result) {
         return Response::json([
           'status' => 'success',
           'message' => 'Criterio creado correctamente',
-          'data' => ['id' => $criteriaId]
+          'data' => ['id' => $result]
         ]);
       } else {
         return Response::json([
@@ -583,9 +591,17 @@ class SettingController
       $data = $request->post();
       $data['usuario_modificacion_id'] = Auth::user()->usuario_id;
 
-      $updated = $this->criteriaModel->updateCriteria($id, $data);
+      $result = $this->criteriaModel->updateCriteria($id, $data);
 
-      if ($updated) {
+      if (is_array($result) && isset($result['error']) && $result['error'] === 'validation') {
+        return Response::json([
+          'status' => 'error',
+          'message' => 'Error de validación',
+          'errors' => $result['errors']
+        ], 422);
+      }
+
+      if ($result) {
         return Response::json([
           'status' => 'success',
           'message' => 'Criterio actualizado correctamente'

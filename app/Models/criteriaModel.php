@@ -125,24 +125,29 @@ class CriteriaModel extends MainModel
   }
 
   /**
-   * Crea un nuevo criterio
-   * 
-   * @param array $data Datos del criterio
-   * @return int|false ID del criterio creado o false si hubo error
+   * Actualizar método createCriteria para incluir validaciones
    */
   public function createCriteria($data)
   {
     try {
-      // Validar datos según el tipo de criterio
+      // Validaciones básicas
       $validationResult = $this->validateCriteriaData($data);
       if (!$validationResult['valid']) {
-        error_log("Error de validación en createCriteria: " . implode(', ', $validationResult['errors']));
+        error_log("Error de validación básica en createCriteria: " . implode(', ', $validationResult['errors']));
         return false;
       }
 
+      // Validaciones de conflictos
+      $conflictValidation = $this->validateCriteriaConflicts($data);
+      if (!$conflictValidation['valid']) {
+        error_log("Error de conflictos en createCriteria: " . implode(', ', $conflictValidation['errors']));
+        return ['error' => 'validation', 'errors' => $conflictValidation['errors']];
+      }
+
+      // Resto del código de creación...
       $datosParaInsertar = [
         'subcategoria_id' => $data['subcategoria_id'],
-        'nombre' => $data['nombre'],
+        'nombre' => trim($data['nombre']), // Aplicar trim
         'tipo_criterio' => $data['tipo_criterio'],
         'puntaje' => $data['puntaje'],
         'estado' => 1,
@@ -156,19 +161,20 @@ class CriteriaModel extends MainModel
       switch ($data['tipo_criterio']) {
         case self::TIPO_RANGO_NUMERICO:
           $datosParaInsertar['valor_minimo'] = $data['valor_minimo'];
-          $datosParaInsertar['valor_maximo'] = isset($data['valor_maximo']) ? $data['valor_maximo'] : null;
+          $datosParaInsertar['valor_maximo'] = isset($data['valor_maximo']) && $data['valor_maximo'] !== '' ? $data['valor_maximo'] : null;
           $datosParaInsertar['valor_texto'] = null;
-          $datosParaInsertar['valor_booleano'] = null;
           break;
 
         case self::TIPO_VALOR_ESPECIFICO:
-          $datosParaInsertar['valor_texto'] = $data['valor_texto'];
+          $datosParaInsertar['valor_texto'] = trim($data['valor_texto']);
           $datosParaInsertar['valor_minimo'] = null;
           $datosParaInsertar['valor_maximo'] = null;
-          $datosParaInsertar['valor_booleano'] = null;
           break;
 
         case self::TIPO_BOOLEANO:
+          $datosParaInsertar['valor_minimo'] = null;
+          $datosParaInsertar['valor_maximo'] = null;
+          $datosParaInsertar['valor_texto'] = null;
           break;
       }
 
@@ -181,27 +187,31 @@ class CriteriaModel extends MainModel
   }
 
   /**
-   * Actualiza un criterio existente
-   * 
-   * @param int $criteriaId ID del criterio
-   * @param array $data Datos a actualizar
-   * @return bool True si se actualizó correctamente
+   * Actualizar método updateCriteria para incluir validaciones
    */
   public function updateCriteria($criteriaId, $data)
   {
     try {
-      // Validar datos según el tipo de criterio
+      // Validaciones básicas
       $validationResult = $this->validateCriteriaData($data);
       if (!$validationResult['valid']) {
-        error_log("Error de validación en updateCriteria: " . implode(', ', $validationResult['errors']));
+        error_log("Error de validación básica en updateCriteria: " . implode(', ', $validationResult['errors']));
         return false;
       }
 
+      // Validaciones de conflictos (excluyendo el criterio actual)
+      $conflictValidation = $this->validateCriteriaConflicts($data, $criteriaId);
+      if (!$conflictValidation['valid']) {
+        error_log("Error de conflictos en updateCriteria: " . implode(', ', $conflictValidation['errors']));
+        return ['error' => 'validation', 'errors' => $conflictValidation['errors']];
+      }
+
+      // Resto del código de actualización...
       $datosActualizar = [
         [
           "campo_nombre" => "nombre",
           "campo_marcador" => ":nombre",
-          "campo_valor" => $data['nombre']
+          "campo_valor" => trim($data['nombre']) // Aplicar trim
         ],
         [
           "campo_nombre" => "tipo_criterio",
@@ -225,7 +235,7 @@ class CriteriaModel extends MainModel
         ]
       ];
 
-      // Agregar campos específicos según el tipo - resetear todos primero
+      // Agregar campos específicos según el tipo
       switch ($data['tipo_criterio']) {
         case self::TIPO_RANGO_NUMERICO:
           $datosActualizar[] = [
@@ -236,16 +246,11 @@ class CriteriaModel extends MainModel
           $datosActualizar[] = [
             "campo_nombre" => "valor_maximo",
             "campo_marcador" => ":valor_maximo",
-            "campo_valor" => isset($data['valor_maximo']) ? $data['valor_maximo'] : null
+            "campo_valor" => isset($data['valor_maximo']) && $data['valor_maximo'] !== '' ? $data['valor_maximo'] : null
           ];
           $datosActualizar[] = [
             "campo_nombre" => "valor_texto",
             "campo_marcador" => ":valor_texto",
-            "campo_valor" => null
-          ];
-          $datosActualizar[] = [
-            "campo_nombre" => "valor_booleano",
-            "campo_marcador" => ":valor_booleano",
             "campo_valor" => null
           ];
           break;
@@ -254,7 +259,7 @@ class CriteriaModel extends MainModel
           $datosActualizar[] = [
             "campo_nombre" => "valor_texto",
             "campo_marcador" => ":valor_texto",
-            "campo_valor" => $data['valor_texto']
+            "campo_valor" => trim($data['valor_texto'])
           ];
           $datosActualizar[] = [
             "campo_nombre" => "valor_minimo",
@@ -266,20 +271,9 @@ class CriteriaModel extends MainModel
             "campo_marcador" => ":valor_maximo",
             "campo_valor" => null
           ];
-          $datosActualizar[] = [
-            "campo_nombre" => "valor_booleano",
-            "campo_marcador" => ":valor_booleano",
-            "campo_valor" => null
-          ];
           break;
 
         case self::TIPO_BOOLEANO:
-          // Para booleano resetear todos los campos de valor a null
-          $datosActualizar[] = [
-            "campo_nombre" => "valor_booleano",
-            "campo_marcador" => ":valor_booleano",
-            "campo_valor" => null
-          ];
           $datosActualizar[] = [
             "campo_nombre" => "valor_minimo",
             "campo_marcador" => ":valor_minimo",
@@ -435,16 +429,226 @@ class CriteriaModel extends MainModel
             $result['errors'][] = "Valor de texto requerido para valor específico";
           }
           break;
-
-        case self::TIPO_BOOLEANO:
-          if (!isset($data['valor_booleano']) || !in_array($data['valor_booleano'], [0, 1, '0', '1', true, false])) {
-            $result['errors'][] = "Valor booleano requerido (0 o 1)";
-          }
-          break;
       }
     }
 
     $result['valid'] = empty($result['errors']);
+    return $result;
+  }
+
+  /**
+   * Valida que no existan conflictos con criterios existentes
+   * 
+   * @param array $data Datos del criterio a validar
+   * @param int|null $excludeCriteriaId ID del criterio a excluir (para edición)
+   * @return array Resultado de validación con 'valid' y 'errors'
+   */
+  public function validateCriteriaConflicts($data, $excludeCriteriaId = null)
+  {
+    $result = ['valid' => true, 'errors' => []];
+
+    try {
+      // 1. Validar nombre único (con trim)
+      $result = $this->validateUniqueName($data, $excludeCriteriaId, $result);
+
+      // 2. Validar consistencia de tipo de criterio
+      $result = $this->validateCriteriaTypeConsistency($data, $excludeCriteriaId, $result);
+
+      // 3. Validaciones específicas por tipo
+      switch ($data['tipo_criterio']) {
+        case self::TIPO_RANGO_NUMERICO:
+          $result = $this->validateNumericRangeConflicts($data, $excludeCriteriaId, $result);
+          break;
+
+        case self::TIPO_VALOR_ESPECIFICO:
+          $result = $this->validateSpecificValueConflicts($data, $excludeCriteriaId, $result);
+          break;
+
+        case self::TIPO_BOOLEANO:
+          // Los booleanos no tienen conflictos de valor
+          break;
+      }
+    } catch (\Exception $e) {
+      error_log("Error en validateCriteriaConflicts: " . $e->getMessage());
+      $result['valid'] = false;
+      $result['errors'][] = 'Error interno al validar criterios';
+    }
+
+    return $result;
+  }
+
+  /**
+   * Valida que el nombre del criterio sea único en la subcategoría
+   */
+  private function validateUniqueName($data, $excludeCriteriaId, $result)
+  {
+    $nombreTrimmed = trim($data['nombre']);
+
+    $query = "SELECT id FROM criterio_puntuacion 
+              WHERE subcategoria_id = :subcategoria_id 
+              AND TRIM(nombre) = :nombre 
+              AND estado = 1";
+
+    $params = [
+      ':subcategoria_id' => $data['subcategoria_id'],
+      ':nombre' => $nombreTrimmed
+    ];
+
+    // Excluir el criterio actual en caso de edición
+    if ($excludeCriteriaId) {
+      $query .= " AND id != :exclude_id";
+      $params[':exclude_id'] = $excludeCriteriaId;
+    }
+
+    $resultado = $this->ejecutarConsulta($query, $params);
+    $existingCriteria = $resultado->fetch(PDO::FETCH_OBJ);
+
+    if ($existingCriteria) {
+      $result['valid'] = false;
+      $result['errors']['nombre'] = 'Ya existe un criterio con este nombre en la subcategoría';
+    }
+
+    return $result;
+  }
+
+  /**
+   * Valida que el tipo de criterio sea consistente con los existentes
+   */
+  private function validateCriteriaTypeConsistency($data, $excludeCriteriaId, $result)
+  {
+    $query = "SELECT DISTINCT tipo_criterio FROM criterio_puntuacion 
+              WHERE subcategoria_id = :subcategoria_id 
+              AND estado = 1";
+
+    $params = [':subcategoria_id' => $data['subcategoria_id']];
+
+    // Excluir el criterio actual en caso de edición
+    if ($excludeCriteriaId) {
+      $query .= " AND id != :exclude_id";
+      $params[':exclude_id'] = $excludeCriteriaId;
+    }
+
+    $resultado = $this->ejecutarConsulta($query, $params);
+    $existingTypes = $resultado->fetchAll(PDO::FETCH_COLUMN);
+
+    // Si hay criterios existentes y tienen tipo diferente
+    if (!empty($existingTypes) && !in_array($data['tipo_criterio'], $existingTypes)) {
+      $existingTypeNames = [
+        'rango_numerico' => 'Rango Numérico',
+        'valor_especifico' => 'Valor Específico',
+        'booleano' => 'Booleano'
+      ];
+
+      $existingTypeName = $existingTypeNames[$existingTypes[0]] ?: $existingTypes[0];
+
+      $result['valid'] = false;
+      $result['errors']['tipo_criterio'] = "Los criterios de esta subcategoría deben ser de tipo: {$existingTypeName}";
+    }
+
+    return $result;
+  }
+
+  /**
+   * Valida conflictos en rangos numéricos
+   */
+  private function validateNumericRangeConflicts($data, $excludeCriteriaId, $result)
+  {
+    $valorMinimo = (int)$data['valor_minimo'];
+    $valorMaximo = isset($data['valor_maximo']) && $data['valor_maximo'] !== ''
+      ? (int)$data['valor_maximo']
+      : null;
+
+    $query = "SELECT id, nombre, valor_minimo, valor_maximo 
+              FROM criterio_puntuacion 
+              WHERE subcategoria_id = :subcategoria_id 
+              AND tipo_criterio = 'rango_numerico' 
+              AND estado = 1";
+
+    $params = [':subcategoria_id' => $data['subcategoria_id']];
+
+    if ($excludeCriteriaId) {
+      $query .= " AND id != :exclude_id";
+      $params[':exclude_id'] = $excludeCriteriaId;
+    }
+
+    $resultado = $this->ejecutarConsulta($query, $params);
+    $existingRanges = $resultado->fetchAll(PDO::FETCH_OBJ);
+
+    foreach ($existingRanges as $range) {
+      $existingMin = (int)$range->valor_minimo;
+      $existingMax = $range->valor_maximo !== null ? (int)$range->valor_maximo : null;
+
+      // Verificar si hay solapamiento
+      if ($this->rangesOverlap($valorMinimo, $valorMaximo, $existingMin, $existingMax)) {
+        $result['valid'] = false;
+
+        $rangeText = $existingMax !== null
+          ? "{$existingMin} - {$existingMax}"
+          : "{$existingMin} o más";
+
+        $result['errors']['valor_minimo'] = "El rango se superpone con el criterio '{$range->nombre}' (rango: {$rangeText})";
+        break;
+      }
+    }
+
+    return $result;
+  }
+
+  /**
+   * Determina si dos rangos se superponen
+   */
+  private function rangesOverlap($min1, $max1, $min2, $max2)
+  {
+    // Caso 1: Rango 1 tiene máximo, Rango 2 tiene máximo
+    if ($max1 !== null && $max2 !== null) {
+      return !($max1 < $min2 || $max2 < $min1);
+    }
+
+    // Caso 2: Rango 1 sin máximo, Rango 2 con máximo
+    if ($max1 === null && $max2 !== null) {
+      return $min1 <= $max2;
+    }
+
+    // Caso 3: Rango 1 con máximo, Rango 2 sin máximo
+    if ($max1 !== null && $max2 === null) {
+      return $max1 >= $min2;
+    }
+
+    // Caso 4: Ambos sin máximo (siempre se superponen)
+    return true;
+  }
+
+  /**
+   * Valida conflictos en valores específicos
+   */
+  private function validateSpecificValueConflicts($data, $excludeCriteriaId, $result)
+  {
+    $valorTexto = trim($data['valor_texto']);
+
+    $query = "SELECT id, nombre FROM criterio_puntuacion 
+              WHERE subcategoria_id = :subcategoria_id 
+              AND tipo_criterio = 'valor_especifico' 
+              AND TRIM(valor_texto) = :valor_texto 
+              AND estado = 1";
+
+    $params = [
+      ':subcategoria_id' => $data['subcategoria_id'],
+      ':valor_texto' => $valorTexto
+    ];
+
+    if ($excludeCriteriaId) {
+      $query .= " AND id != :exclude_id";
+      $params[':exclude_id'] = $excludeCriteriaId;
+    }
+
+    $resultado = $this->ejecutarConsulta($query, $params);
+    $existingCriteria = $resultado->fetch(PDO::FETCH_OBJ);
+
+    if ($existingCriteria) {
+      $result['valid'] = false;
+      $result['errors']['valor_texto'] = "Ya existe el criterio '{$existingCriteria->nombre}' con este valor en la subcategoría";
+    }
+
     return $result;
   }
 }

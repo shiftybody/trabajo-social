@@ -52,7 +52,7 @@ async function loadPermissionDependencies() {
     config.dependencies.forEach((dep) => {
       permissionDependencies[dep.permissionSlug] = {
         requires: dep.requires || [],
-        description: dep.description || ""
+        description: dep.description || "",
       };
     });
   } catch (error) {
@@ -163,7 +163,9 @@ async function loadRoleData() {
 
     // Crear mapa de slug a ID
     allPermissions.forEach((permission) => {
-      permissionSlugToId[permission.permiso_slug] = parseInt(permission.permiso_id);
+      permissionSlugToId[permission.permiso_slug] = parseInt(
+        permission.permiso_id
+      );
     });
 
     // Identificar permisos "manage"
@@ -219,7 +221,7 @@ function getPermissionDependencies(permissionSlug) {
 // Obtener permisos que dependen de este
 function getDependentPermissions(permissionSlug) {
   const dependents = [];
-  
+
   Object.entries(permissionDependencies).forEach(([slug, deps]) => {
     if (deps.requires && deps.requires.includes(permissionSlug)) {
       const permId = permissionSlugToId[slug];
@@ -300,24 +302,24 @@ function groupPermissionsByCategory(permissions) {
 
   // Crear un Map ordenado
   const sortedGrouped = new Map();
-  
+
   // Definir el orden deseado de categorías
   const categoryOrder = [
-    'users',
-    'roles', 
-    'permissions',
-    'patients',
-    'reports',
-    'search',
-    'notifications',
-    'donations',
-    'stats',
-    'settings',
-    'profile'
+    "users",
+    "roles",
+    "permissions",
+    "patients",
+    "reports",
+    "search",
+    "notifications",
+    "donations",
+    "stats",
+    "settings",
+    "profile",
   ];
 
   // Primero agregar las categorías en el orden definido
-  categoryOrder.forEach(category => {
+  categoryOrder.forEach((category) => {
     if (grouped.has(category)) {
       sortedGrouped.set(category, grouped.get(category));
     }
@@ -325,10 +327,10 @@ function groupPermissionsByCategory(permissions) {
 
   // Luego agregar cualquier categoría restante alfabéticamente
   const remainingCategories = Array.from(grouped.keys())
-    .filter(category => !categoryOrder.includes(category))
+    .filter((category) => !categoryOrder.includes(category))
     .sort();
-  
-  remainingCategories.forEach(category => {
+
+  remainingCategories.forEach((category) => {
     sortedGrouped.set(category, grouped.get(category));
   });
 
@@ -417,7 +419,7 @@ function getCategoryDisplayName(category) {
     search: "Buscar",
     notifications: "Notificaciones",
     patients: "Pacientes",
-    donations: "Donaciones",
+    donations: "Aportaciones",
     stats: "Estadísticas",
     settings: "Configuración",
     profile: "Perfil",
@@ -466,14 +468,14 @@ function handlePermissionChange(checkbox) {
       const category = permissionSlug.split(".")[0];
       const categoryPermissions = getCategoryPermissions(category);
       const managePermissionIds = managePermissions[category] || [];
-      
+
       if (managePermissionIds.length > 0) {
-        const allCategoryPermissionsSelected = categoryPermissions.every(catPermId => 
-          currentPermissions.includes(catPermId)
+        const allCategoryPermissionsSelected = categoryPermissions.every(
+          (catPermId) => currentPermissions.includes(catPermId)
         );
-        
+
         if (allCategoryPermissionsSelected) {
-          managePermissionIds.forEach(manageId => {
+          managePermissionIds.forEach((manageId) => {
             if (!currentPermissions.includes(manageId)) {
               currentPermissions.push(manageId);
               const manageCheckbox = dom.permissionsGrid.querySelector(
@@ -481,7 +483,9 @@ function handlePermissionChange(checkbox) {
               );
               if (manageCheckbox && !manageCheckbox.checked) {
                 manageCheckbox.checked = true;
-                manageCheckbox.closest(".permission-label").classList.add("selected");
+                manageCheckbox
+                  .closest(".permission-label")
+                  .classList.add("selected");
               }
             }
           });
@@ -516,8 +520,10 @@ function handlePermissionChange(checkbox) {
 
     // Verificar si hay permisos que dependen de este y desmarcarlos también
     const dependents = getDependentPermissions(permissionSlug);
-    const activeDependents = dependents.filter(depId => currentPermissions.includes(depId));
-    
+    const activeDependents = dependents.filter((depId) =>
+      currentPermissions.includes(depId)
+    );
+
     if (activeDependents.length > 0) {
       // Desmarcar los dependientes automáticamente
       activeDependents.forEach((depId) => {
@@ -539,10 +545,10 @@ function handlePermissionChange(checkbox) {
     if (permissionSlug && !permissionSlug.includes("manage")) {
       const category = permissionSlug.split(".")[0];
       const managePermissionIds = managePermissions[category] || [];
-      
+
       if (managePermissionIds.length > 0) {
         // Desmarcar el manage ya que al menos un permiso de la categoría está desmarcado
-        managePermissionIds.forEach(manageId => {
+        managePermissionIds.forEach((manageId) => {
           const manageIndex = currentPermissions.indexOf(manageId);
           if (manageIndex > -1) {
             currentPermissions.splice(manageIndex, 1);
@@ -551,13 +557,15 @@ function handlePermissionChange(checkbox) {
             );
             if (manageCheckbox && manageCheckbox.checked) {
               manageCheckbox.checked = false;
-              manageCheckbox.closest(".permission-label").classList.remove("selected");
+              manageCheckbox
+                .closest(".permission-label")
+                .classList.remove("selected");
             }
           }
         });
       }
     }
-    
+
     // ELIMINAMOS la lógica que deseleccionaba toda la categoría cuando se desmarca "manage"
     // para evitar romper dependencias de otras categorías
   }
@@ -669,7 +677,11 @@ function selectAllVisiblePermissions() {
   });
 
   if (addedCount > 0) {
-    CustomDialog.toast("Todos los permisos visibles seleccionados", "success", 2000);
+    CustomDialog.toast(
+      "Todos los permisos visibles seleccionados",
+      "success",
+      2000
+    );
   } else {
     CustomDialog.toast(
       "Todos los permisos visibles ya estaban seleccionados",
@@ -792,7 +804,7 @@ function showError(message) {
     `;
 }
 
-// Utilidad debounce 
+// Utilidad debounce
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {

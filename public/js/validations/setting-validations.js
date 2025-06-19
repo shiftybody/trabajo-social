@@ -330,7 +330,6 @@ const RuleHandlers = {
 const CriteriaValidations = {
   validateCreate: async (form) => {
     const formData = new FormData(form);
-
     // Verificar que subcategoria_id venga del campo oculto
     const subcategoriaId = formData.get("subcategoria_id");
     if (!subcategoriaId) {
@@ -347,7 +346,23 @@ const CriteriaValidations = {
 
     // Validaciones adicionales según tipo de criterio
     if (result.isValid) {
-      return await CriteriaValidations.validateByType(formData, result);
+      const typeValidation = await CriteriaValidations.validateByType(
+        formData,
+        result
+      );
+      if (!typeValidation.isValid) {
+        return typeValidation;
+      }
+
+      // Aplicar trim al nombre para validación
+      const nombre = formData.get("nombre");
+      if (nombre && nombre.trim() !== nombre) {
+        // Actualizar el campo con el valor trimmed
+        const nombreInput = form.querySelector('[name="nombre"]');
+        if (nombreInput) {
+          nombreInput.value = nombre.trim();
+        }
+      }
     }
 
     return result;
@@ -356,7 +371,6 @@ const CriteriaValidations = {
   validateEdit: async (form) => {
     const formData = new FormData(form);
 
-    // Verificar que subcategoria_id venga del campo oculto
     const subcategoriaId = formData.get("subcategoria_id");
     if (!subcategoriaId) {
       return {
@@ -370,9 +384,23 @@ const CriteriaValidations = {
       SETTING_VALIDATION_SCHEMAS.criteria
     );
 
-    // Validaciones adicionales según tipo de criterio
     if (result.isValid) {
-      return await CriteriaValidations.validateByType(formData, result);
+      const typeValidation = await CriteriaValidations.validateByType(
+        formData,
+        result
+      );
+      if (!typeValidation.isValid) {
+        return typeValidation;
+      }
+
+      // Aplicar trim al nombre
+      const nombre = formData.get("nombre");
+      if (nombre && nombre.trim() !== nombre) {
+        const nombreInput = form.querySelector('[name="nombre"]');
+        if (nombreInput) {
+          nombreInput.value = nombre.trim();
+        }
+      }
     }
 
     return result;
@@ -408,6 +436,14 @@ const CriteriaValidations = {
         if (!valorTexto || valorTexto.trim() === "") {
           result.isValid = false;
           result.errors.valor_texto = "El valor de texto es requerido";
+        } else if (valorTexto.trim() !== valorTexto) {
+          // Aplicar trim automáticamente
+          const valorTextoInput = document.querySelector(
+            '[name="valor_texto"]'
+          );
+          if (valorTextoInput) {
+            valorTextoInput.value = valorTexto.trim();
+          }
         }
         break;
 

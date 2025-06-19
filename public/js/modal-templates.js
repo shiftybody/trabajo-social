@@ -379,12 +379,7 @@ const MODAL_TEMPLATES = {
     <div id="boolean-fields" class="criteria-fields" style="display: none;">
       <div class="form-group">
         <div class="info-box">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 16v-4"></path>
-            <path d="M12 8h.01"></path>
-          </svg>
-          <span>Los criterios booleanos se evalúan como Sí/No automáticamente. No requieren valores adicionales.</span>
+          <small>Los criterios booleanos se evalúan como Sí/No automáticamente. No requieren valores adicionales.</small>
         </div>
       </div>
     </div>
@@ -454,12 +449,7 @@ const MODAL_TEMPLATES = {
     <div id="boolean-fields" class="criteria-fields" style="display: none;">
       <div class="form-group">
         <div class="info-box">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 16v-4"></path>
-            <path d="M12 8h.01"></path>
-          </svg>
-          <span>Los criterios booleanos se evalúan como Sí/No automáticamente. No requieren valores adicionales.</span>
+          <small>Los criterios booleanos se evalúan como Sí/No automáticamente. No requieren valores adicionales.</small>
         </div>
       </div>
     </div>
@@ -738,48 +728,6 @@ const TEMPLATE_HELPERS = {
     };
   },
 
-  // Procesa datos para formulario de criterio
-  processCriteriaFormData: (criteria = null, subcategoryId = null) => {
-    const isRango = criteria?.tipo_criterio === "rango_numerico";
-    const isTexto = criteria?.tipo_criterio === "valor_especifico";
-    const isBooleano = criteria?.tipo_criterio === "booleano";
-
-    return {
-      subcategoria_id: subcategoryId || criteria?.subcategoria_id || "",
-      nombre: criteria?.nombre || "",
-      tipoRangoSelected: isRango ? "selected" : "",
-      tipoValorSelected: isTexto ? "selected" : "",
-      tipoBoolSelected: isBooleano ? "selected" : "",
-      rangoDisplay: isRango ? "block" : "none",
-      textoDisplay: isTexto ? "block" : "none",
-      booleanoDisplay: isBooleano ? "block" : "none",
-      valor_minimo: criteria?.valor_minimo || "",
-      valor_maximo: criteria?.valor_maximo || "",
-      valor_texto: criteria?.valor_texto || "",
-      boolTrueSelected: criteria?.valor_booleano == 1 ? "selected" : "",
-      boolFalseSelected: criteria?.valor_booleano == 0 ? "selected" : "",
-      puntaje: criteria?.puntaje || "",
-      submitText: criteria ? "Actualizar Criterio" : "Crear Criterio",
-    };
-  },
-
-  // Procesa datos para matriz de reglas
-  processRulesMatrixData: (levels = []) => {
-    const levelsOptions = levels
-      .map(
-        (level) => `
-        <option value="${level.id}">
-          ${level.nivel} (≥ ${level.puntaje_minimo} pts)
-        </option>
-      `
-      )
-      .join("");
-
-    return {
-      levelsOptions,
-    };
-  },
-
   // Obtiene nombre de categoría para mostrar
   getCategoryDisplayName: (category) => {
     const categoryNames = {
@@ -790,7 +738,7 @@ const TEMPLATE_HELPERS = {
       search: "Buscar",
       notifications: "Notificaciones",
       patients: "Pacientes",
-      donations: "Donaciones",
+      donations: "Aportaciones",
       stats: "Estadísticas",
       settings: "Configuración",
       profile: "Perfil",
@@ -800,64 +748,6 @@ const TEMPLATE_HELPERS = {
       categoryNames[category] ||
       category.charAt(0).toUpperCase() + category.slice(1)
     );
-  },
-
-  // Genera campos de formulario desde configuración
-  generateFormFields: (fields) => {
-    return fields
-      .map((field) => TEMPLATE_GENERATORS.generateFormField(field))
-      .join("");
-  },
-
-  // ==================== UTILIDADES DE FORMATEO ====================
-
-  // Formatea valores monetarios
-  formatMoney: (amount) => {
-    return new Intl.NumberFormat("es-MX", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  },
-
-  // Formatea periodicidad
-  formatPeriodicity: (periodicity) => {
-    const periodicities = {
-      mensual: "Mensual",
-      semestral: "Semestral",
-      anual: "Anual",
-    };
-    return periodicities[periodicity] || periodicity;
-  },
-
-  // Formatea tipo de criterio
-  formatCriteriaType: (type) => {
-    const types = {
-      rango_numerico: "Rango Numérico",
-      valor_especifico: "Valor Específico",
-      booleano: "Booleano",
-    };
-    return types[type] || type;
-  },
-
-  // Formatea valores de criterio según su tipo
-  formatCriteriaValues: (criterion) => {
-    switch (criterion.tipo_criterio) {
-      case "rango_numerico":
-        if (criterion.valor_maximo) {
-          return `${criterion.valor_minimo} - ${criterion.valor_maximo}`;
-        } else {
-          return `${criterion.valor_minimo}+`;
-        }
-
-      case "valor_especifico":
-        return `"${criterion.valor_texto}"`;
-
-      case "booleano":
-        return criterion.valor_booleano ? "Sí" : "No";
-
-      default:
-        return "Sin valor";
-    }
   },
 };
 
