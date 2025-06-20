@@ -46,6 +46,24 @@ $router->group(['middleware' => 'Auth'], function ($router) {
     $router->get('/roles/:id/permissions', 'RoleController@permissionsView');
   });
 
+  // ESTUDIES
+  $router->group(['middleware' => 'Permission:studies.view'], function ($router) {
+    $router->get('/studies', 'StudiesController@indexView');
+  });
+
+  $router->group(['middleware' => 'Permission:patients.edit'], function ($router) {
+    $router->get('/patients/edit/:id', 'PatientsController@editView');
+  });
+
+  $router->group(['middleware' => 'Permission:patients.create'], function ($router) {
+    $router->get('/patients/:id/studies', 'StudiesController@indexView');
+    $router->get('/patients/:id/studies/new', 'StudiesController@createView');
+  });
+
+  $router->group(['middleware' => 'Permission:patients.edit|patients.create'], function ($router) {
+    $router->get('/patients/:id/studies/:study_id/edit', 'StudiesController@editView');
+  });
+
   // CONFIGURACIÓN
   $router->group(['middleware' => 'Permission:settings.view|settings.manage'], function ($router) {
     $router->get('/settings', 'SettingController@indexView');

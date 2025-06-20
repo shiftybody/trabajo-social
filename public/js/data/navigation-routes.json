@@ -36,7 +36,7 @@
     },
     {
       "id": "settings",
-      "name": "Configuraciónes",
+      "name": "Configuraciones",
       "url": "settings",
       "permissionKey": "settings.view",
       "section": "Configuración"

@@ -41,6 +41,10 @@
   margin-bottom: 0.25rem;
 }
 
+.config-nav-group hr {
+  margin-bottom: .5rem;
+}
+
 .config-nav-group:first-child h3 {
   margin-top: 0;
 }

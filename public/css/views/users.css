@@ -123,19 +123,6 @@ td.inactivo {
   position: relative;
 }
 
-.custom-select {
-  width: 100%;
-  padding: 8px 36px 8px 16px;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--rounded-md);
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  font-size: var(--font-size-small);
-  cursor: pointer;
-  background-color: var(--gray-100);
-}
-
 .select-filter-icon {
   background-color: var(--gray-100);
   position: absolute;

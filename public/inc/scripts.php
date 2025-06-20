@@ -32,6 +32,10 @@
     <script src="<?= APP_URL . 'public/js/modals/delete-role-modal.js' ?>"></script>
   <?php endif; ?>
 
+  <?php if (strpos($_SERVER['REQUEST_URI'], 'studies') !== false): ?>
+    <script src="<?= APP_URL . 'public/js/validations/study-validations.js' ?>"></script>
+  <?php endif; ?>
+
   <?php if (strpos($_SERVER['REQUEST_URI'], 'settings') !== false): ?>
     <script src="<?= APP_URL . 'public/js/validations/setting-validations.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/config-manager.js' ?>"></script>

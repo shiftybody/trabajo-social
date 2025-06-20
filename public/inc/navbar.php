@@ -114,24 +114,36 @@ use App\Core\Auth;
         Roles
       </a>
     <?php endif; ?>
-    <?php if (Auth::can('patients.view')): ?>
-      <a href="<?= APP_URL ?>patients " <?= stripos($titulo, 'paciente') !== false ? 'class="active"' : '' ?>>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-horse-toy">
+    <?php if (Auth::can('studies.view')): ?>
+      <a href="<?= APP_URL ?>studies " <?= stripos($titulo, 'estudios') !== false ? 'class="active"' : '' ?>>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-receipt">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M3.5 17.5c5.667 4.667 11.333 4.667 17 0" />
-          <path d="M19 18.5l-2 -8.5l1 -2l2 1l1.5 -1.5l-2.5 -4.5c-5.052 .218 -5.99 3.133 -7 6h-6a3 3 0 0 0 -3 3" />
-          <path d="M5 18.5l2 -9.5" />
-          <path d="M8 20l2 -5h4l2 5" />
+          <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2m4 -14h6m-6 4h6m-2 4h2" />
         </svg>
-        Pacientes
+        Estudios
+      </a>
+    <?php endif; ?>
+    <?php if (Auth::can('donators.view')): ?>
+      <a href="<?= APP_URL ?>donations" <?= stripos($titulo, 'donacion') !== false ? 'class="active"' : '' ?>>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-heart-handshake">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572" />
+          <path d="M12 6l-3.293 3.293a1 1 0 0 0 0 1.414l.543 .543c.69 .69 1.81 .69 2.5 0l1 -1a3.182 3.182 0 0 1 4.5 0l2.25 2.25" />
+          <path d="M12.5 15.5l2 2" />
+          <path d="M15 13l2 2" />
+        </svg>
+        Contribuyentes
       </a>
     <?php endif; ?>
     <?php if (Auth::can('donations.view')): ?>
       <a href="<?= APP_URL ?>donations" <?= stripos($titulo, 'donacion') !== false ? 'class="active"' : '' ?>>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-hearts">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-coins">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M14.017 18l-2.017 2l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 0 1 8.153 5.784" />
-          <path d="M15.99 20l4.197 -4.223a2.81 2.81 0 0 0 0 -3.948a2.747 2.747 0 0 0 -3.91 -.007l-.28 .282l-.279 -.283a2.747 2.747 0 0 0 -3.91 -.007a2.81 2.81 0 0 0 -.007 3.948l4.182 4.238z" />
+          <path d="M9 14c0 1.657 2.686 3 6 3s6 -1.343 6 -3s-2.686 -3 -6 -3s-6 1.343 -6 3z" />
+          <path d="M9 14v4c0 1.656 2.686 3 6 3s6 -1.344 6 -3v-4" />
+          <path d="M3 6c0 1.072 1.144 2.062 3 2.598s4.144 .536 6 0c1.856 -.536 3 -1.526 3 -2.598c0 -1.072 -1.144 -2.062 -3 -2.598s-4.144 -.536 -6 0c-1.856 .536 -3 1.526 -3 2.598z" />
+          <path d="M3 6v10c0 .888 .772 1.45 2 2" />
+          <path d="M3 11c0 .888 .772 1.45 2 2" />
         </svg>
         Aportaciones
       </a>

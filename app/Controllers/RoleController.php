@@ -371,6 +371,11 @@ class RoleController
     try {
       $id = $request->param('id');
 
+      // Si el id es el del administrador, redireccionar a la pagina de error 403
+      if ($id == 1) {
+        return Response::redirect(APP_URL . 'error/403');
+      }
+
       $permisos = $this->permissionModel->obtenerPermisosPorRol($id);
 
       return Response::json([

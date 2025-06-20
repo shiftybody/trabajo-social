@@ -87,7 +87,7 @@ class ConfigManager {
 
   /**
    * ACTUALIZADO: Renderiza toda la navegación dinámicamente
-   * (reemplaza el contenido completo del nav)
+   *
    */
   renderCriteriaNavigation(categories) {
     const navigationContainer = document.querySelector(".config-nav");
@@ -98,9 +98,15 @@ class ConfigManager {
     <!-- Sección estática de configuración general -->
     <div class="config-nav-group">
       <h3>General</h3>
+      <hr>
       <a href="#niveles-socioeconomicos" class="static-nav-link">Niveles Socioeconómicos</a>
       <a href="#reglas-aportacion" class="static-nav-link">Reglas de Aportación</a>
     </div>
+    <!-- Sección dinámica de criterios -->
+    <div class="config-nav-group">
+      <h3>Criterios</h3>
+      <hr>
+    <div>
   `;
 
     // Generar grupos dinámicos por categoría

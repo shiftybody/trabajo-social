@@ -1,0 +1,17 @@
+.select-container select {
+  min-width: 13rem;
+}
+
+.select-container {
+  position: relative;
+}
+
+.select-filter-icon {
+  background-color: var(--gray-100);
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  stroke: var(--gray-500);
+}

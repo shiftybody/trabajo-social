@@ -40,6 +40,12 @@
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/views/roles.css">
     <?php endif; ?>
 
+    <!-- Estilos de Estudios -->
+    <?php if (strpos($_SERVER['REQUEST_URI'], 'studies') !== false): ?>
+      <link rel="stylesheet" href="<?= APP_URL ?>public/css/libs/datatables.min.css">
+      <link rel="stylesheet" href="<?= APP_URL ?>public/css/views/studies.css">
+    <?php endif; ?>
+
     <!-- Estilos de Configuración -->
     <?php if (strpos($_SERVER['REQUEST_URI'], 'settings') !== false): ?>
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/libs/datatables.min.css">

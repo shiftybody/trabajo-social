@@ -415,14 +415,15 @@ function getCategoryDisplayName(category) {
     users: "Usuarios",
     roles: "Roles",
     permissions: "Permisos",
-    reports: "Reportes",
-    search: "Buscar",
-    notifications: "Notificaciones",
-    patients: "Pacientes",
+    studies: "Estudios",
+    donators: "Contribuyentes",
     donations: "Aportaciones",
+    reports: "Reportes",
+    notifications: "Notificaciones",
     stats: "Estadísticas",
     settings: "Configuración",
     profile: "Perfil",
+    search: "Búsqueda",
   };
 
   return (
