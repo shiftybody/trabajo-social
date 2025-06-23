@@ -18,36 +18,36 @@
     <link rel="stylesheet" href="<?= APP_URL ?>public/css/inc/dialog.css">
     <link rel="stylesheet" href="<?= APP_URL ?>public/css/inc/modal.css">
 
-    <!-- Estilos del home -->
     <?php if (strpos($_SERVER['REQUEST_URI'], 'home') !== false): ?>
+      <!-- Estilos del home -->
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/views/home.css">
     <?php endif; ?>
 
-    <!-- Estilos de Error -->
     <?php if (strpos($_SERVER['REQUEST_URI'], 'error') !== false): ?>
+      <!-- Estilos de Error -->
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/views/errors.css">
     <?php endif; ?>
 
-    <!-- Estilos de Usuarios -->
     <?php if (strpos($_SERVER['REQUEST_URI'], 'users') !== false): ?>
+      <!-- Estilos de Usuarios -->
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/libs/datatables.min.css">
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/views/users.css">
     <?php endif; ?>
 
-    <!-- Estilos de Roles | Permisos -->
     <?php if (strpos($_SERVER['REQUEST_URI'], 'roles') !== false): ?>
+      <!-- Estilos de Roles | Permisos -->
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/libs/datatables.min.css">
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/views/roles.css">
     <?php endif; ?>
 
-    <!-- Estilos de Estudios -->
     <?php if (strpos($_SERVER['REQUEST_URI'], 'studies') !== false): ?>
+      <!-- Estilos de Estudios -->
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/libs/datatables.min.css">
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/views/studies.css">
     <?php endif; ?>
 
-    <!-- Estilos de Configuración -->
     <?php if (strpos($_SERVER['REQUEST_URI'], 'settings') !== false): ?>
+      <!-- Estilos de Configuración -->
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/libs/datatables.min.css">
       <link rel="stylesheet" href="<?= APP_URL ?>public/css/views/settings.css">
     <?php endif; ?>

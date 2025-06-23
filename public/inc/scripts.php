@@ -28,7 +28,6 @@
   <?php if (strpos($_SERVER['REQUEST_URI'], 'roles') !== false): ?>
     <script src="<?= APP_URL . 'public/js/validations/role-validations.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/create-role-modal.js' ?>"></script>
-    <script src="<?= APP_URL . 'public/js/modals/edit-role-modal.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/delete-role-modal.js' ?>"></script>
   <?php endif; ?>
 
@@ -38,7 +37,6 @@
 
   <?php if (strpos($_SERVER['REQUEST_URI'], 'settings') !== false): ?>
     <script src="<?= APP_URL . 'public/js/validations/setting-validations.js' ?>"></script>
-    <script src="<?= APP_URL . 'public/js/config-manager.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/delete-user-modal.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/create-level-modal.js' ?>"></script>
     <script src="<?= APP_URL . 'public/js/modals/edit-level-modal.js' ?>"></script>

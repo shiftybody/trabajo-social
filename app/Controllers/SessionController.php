@@ -38,7 +38,7 @@ class SessionController
    * Refresca la actividad de la sesión del usuario. 
    * y devuelve un mensaje JSON con el nuevo estado de la sesión.
    *
-   * @return Response
+   * @return ResponseC
    */
   public function refresh()
   {

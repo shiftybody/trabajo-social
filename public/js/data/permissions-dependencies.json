@@ -29,6 +29,66 @@
       "permissionSlug": "permissions.view",
       "requires": ["roles.view"],
       "description": "Ver permisos requiere ver roles"
+    },
+    {
+      "permissionSlug": "settings.levels.view",
+      "requires": ["settings.view"],
+      "description": "Ver niveles requiere acceso a configuración"
+    },
+    {
+      "permissionSlug": "settings.levels.create",
+      "requires": ["settings.view", "settings.levels.view"],
+      "description": "Crear niveles requiere acceso a configuración y poder verlos"
+    },
+    {
+      "permissionSlug": "settings.levels.edit",
+      "requires": ["settings.view", "settings.levels.view"],
+      "description": "Editar niveles requiere acceso a configuración y poder verlos"
+    },
+    {
+      "permissionSlug": "settings.levels.delete",
+      "requires": ["settings.view", "settings.levels.view"],
+      "description": "Eliminar niveles requiere acceso a configuración y poder verlos"
+    },
+    {
+      "permissionSlug": "settings.rules.view",
+      "requires": ["settings.view", "settings.levels.view"],
+      "description": "Ver reglas requiere acceso a configuración y poder ver niveles"
+    },
+    {
+      "permissionSlug": "settings.rules.create",
+      "requires": ["settings.view", "settings.rules.view", "settings.levels.view"],
+      "description": "Crear reglas requiere acceso a configuración, poder ver reglas y niveles"
+    },
+    {
+      "permissionSlug": "settings.rules.edit",
+      "requires": ["settings.view", "settings.rules.view"],
+      "description": "Editar reglas requiere acceso a configuración y poder verlas"
+    },
+    {
+      "permissionSlug": "settings.rules.delete",
+      "requires": ["settings.view", "settings.rules.view"],
+      "description": "Eliminar reglas requiere acceso a configuración y poder verlas"
+    },
+    {
+      "permissionSlug": "settings.criteria.view",
+      "requires": ["settings.view"],
+      "description": "Ver criterios requiere acceso a configuración"
+    },
+    {
+      "permissionSlug": "settings.criteria.create",
+      "requires": ["settings.view", "settings.criteria.view"],
+      "description": "Crear criterios requiere acceso a configuración y poder verlos"
+    },
+    {
+      "permissionSlug": "settings.criteria.edit",
+      "requires": ["settings.view", "settings.criteria.view"],
+      "description": "Editar criterios requiere acceso a configuración y poder verlos"
+    },
+    {
+      "permissionSlug": "settings.criteria.delete",
+      "requires": ["settings.view", "settings.criteria.view"],
+      "description": "Eliminar criterios requiere acceso a configuración y poder verlos"
     }
   ]
 }
