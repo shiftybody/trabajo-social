@@ -487,8 +487,6 @@ class SettingController
 
       $subcategoryId = $request->get('subcategory_id');
 
-      error_log($subcategoryId);
-
       if ($subcategoryId && !is_numeric($subcategoryId)) {
         return Response::json([
           'status' => 'error',

@@ -152,29 +152,19 @@ $router->group(array('middleware' => 'Auth'), function ($router) {
     $router->delete('/settings/criteria/:id', 'SettingController@deleteCriteria');
   });
 
-  // Estudios Socioeconómicos
-  $router->group(['middleware' => 'Permission:patients.view'], function ($router) {
-    $router->get('/studies/:study_id', 'StudiesController@getStudyById');
-    $router->get('/studies/:study_id/summary', 'StudiesController@getStudySummary');
-    $router->get('/studies/:study_id/family-members', 'StudiesController@getFamilyMembers');
-    $router->get('/studies/:study_id/family-relations', 'StudiesController@getFamilyRelationsData');
-    $router->get('/studies/:study_id/contact-data', 'StudiesController@getContactData');
-    $router->get('/studies/socioeconomic-levels', 'StudiesController@getSocioeconomicLevels');
+  // ESTUDIOS SOCIOECONÓMICOS
+  $router->group(['middleware' => 'Permission:studies.view'], function ($router) {
+    $router->get('/studies/patients-info', 'StudiesController@getPatientsWithStudyInfo');
+    $router->get('/studies/patient/:id/history', 'StudiesController@getPatientStudyHistory');
   });
 
   $router->group(['middleware' => 'Permission:patients.create'], function ($router) {
-    $router->post('/studies/create/:patient_id', 'StudiesController@createStudy');
+    $router->post('/studies/patient/:id', 'StudiesController@createStudy');
+    $router->post('/studies/patient/:id/copy', 'StudiesController@copyStudy');
   });
 
   $router->group(['middleware' => 'Permission:patients.edit'], function ($router) {
-    $router->post('/studies/update-section/:study_id', 'StudiesController@updateSection');
-    $router->post('/studies/family-members/:study_id', 'StudiesController@saveFamilyMembers');
-    $router->post('/studies/family-relations/:study_id', 'StudiesController@saveFamilyRelations');
-    $router->post('/studies/upload-document/:study_id', 'StudiesController@uploadDocument');
-    $router->post('/studies/evaluate-criteria', 'StudiesController@evaluateCriteria');
-    $router->post('/studies/calculate-score/:study_id', 'StudiesController@calculateScore');
-    $router->post('/studies/update-socioeconomic-level/:study_id', 'StudiesController@updateSocioeconomicLevel');
-    $router->post('/studies/finalize/:study_id', 'StudiesController@finalizeStudy');
+    $router->post('/studies/patient/:patient_id/study/:study_id/activate', 'StudiesController@activateStudy');
   });
 });
 

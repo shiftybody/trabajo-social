@@ -1,4 +1,4 @@
-.select-container select {
+.custom-select {
   min-width: 13rem;
 }
 
@@ -14,4 +14,67 @@
   transform: translateY(-50%);
   pointer-events: none;
   stroke: var(--gray-500);
+}
+
+thead:nth-child(2) {
+  visibility: collapse;
+}
+
+table.dataTable thead tr>.dtfc-fixed-start,
+table.dataTable thead tr>.dtfc-fixed-end,
+table.dataTable tfoot tr>.dtfc-fixed-start,
+table.dataTable tfoot tr>.dtfc-fixed-end {
+  background-color: var(--gray-200) !important;
+}
+
+table.dataTable.cell-border tbody th,
+table.dataTable.cell-border tbody td {
+  border-top: 1px solid var(--gray-300);
+  border-right: 1px solid var(--red-500);
+}
+
+table.dataTable.cell-border tbody tr th:first-child,
+table.dataTable.cell-border tbody tr td:first-child {
+  border-left: 1px solid var(--red-500);
+}
+
+table.dataTable.no-footer {
+  border-bottom: 0px solid var(--gray-900);
+}
+
+div.dt-container.dt-empty-footer .dt-scroll-body {
+  border-bottom: none !important;
+}
+
+.table-container.loading table {
+  display: none;
+}
+
+.table-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+}
+
+.table-error svg {
+  width: 48px;
+  height: 48px;
+  color: var(--red-500);
+}
+
+.table-error h3 {
+  color: var(--gray-900);
+  font-size: 18px;
+  font-weight: var(--font-weight-medium);
+  margin: 0;
+}
+
+.table-error p {
+  color: var(--gray-500);
+  font-size: var(--font-size-small);
+  margin: 0;
+  text-align: center;
 }

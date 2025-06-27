@@ -46,24 +46,24 @@ $router->group(['middleware' => 'Auth'], function ($router) {
     $router->get('/roles/:id/permissions', 'RoleController@permissionsView');
   });
 
-  // ESTUDIES
+  // ESTUDIOS
   $router->group(['middleware' => 'Permission:studies.view'], function ($router) {
     $router->get('/studies', 'StudiesController@indexView');
   });
 
-  $router->group(['middleware' => 'Permission:patients.edit'], function ($router) {
-    $router->get('/patients/edit/:id', 'PatientsController@editView');
-  });
-
   $router->group(['middleware' => 'Permission:patients.create'], function ($router) {
-    $router->get('/patients/:id/studies', 'StudiesController@indexView');
-    $router->get('/patients/:id/studies/new', 'StudiesController@createView');
+    $router->get('/studies/create/:id', 'StudiesController@createView');
+    $router->get('/studies/copy/:id', 'StudiesController@copyView');
   });
 
-  $router->group(['middleware' => 'Permission:patients.edit|patients.create'], function ($router) {
-    $router->get('/patients/:id/studies/:study_id/edit', 'StudiesController@editView');
+  $router->group(['middleware' => 'Permission:patients.view'], function ($router) {
+    $router->get('/studies/history/:id', 'StudiesController@historyView');
+    $router->get('/studies/view/:patient_id/:study_id', 'StudiesController@viewStudy');
   });
 
+  $router->group(['middleware' => 'Permission:patients.edit'], function ($router) {
+    $router->get('/studies/edit/:patient_id/:study_id', 'StudiesController@editView');
+  });
   // CONFIGURACIÓN
   $router->group(['middleware' => 'Permission:settings.view|settings.manage'], function ($router) {
     $router->get('/settings', 'SettingController@indexView');
