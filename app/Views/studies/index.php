@@ -29,10 +29,10 @@ require_once APP_ROOT . 'public/inc/navbar.php';
 
         <select id="filterColumn" class="custom-select">
           <option value="0">Todos los campos</option>
-          <option value="1">Código</option>
-          <option value="2">Nombre</option>
-          <option value="4">Nivel</option>
-          <option value="5">Estado</option>
+          <option value="0">Código</option>
+          <option value="1">Nombre</option>
+          <option value="3">Nivel</option>
+          <option value="4">Estado</option>
         </select>
       </form>
     </div>
@@ -122,13 +122,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         className: 'dt-body-center'
       }, {
         targets: [5], // Columna de acciones
-        orderable: false
       }],
-      layout: {
-        topStart: null,
-        bottomStart: null,
-        bottomEnd: null
-      },
       language: {
         "zeroRecords": "No se encontraron registros",
         "emptyTable": "Aún no hay pacientes registrados",
@@ -247,7 +241,6 @@ require_once APP_ROOT . 'public/inc/navbar.php';
           // Agregar fila a la tabla (sin la columna "Tiene Nivel")
           table.row.add([
             item.codigo || 'S/C',
-            // item.nombre_completo modificado para que solo mayusculas la primera letra de cada palabra considerando que nombre_completo ya esta en uppercase
             item.nombre_completo.toLowerCase().replace(/\b\w/g, char => char.toUpperCase()),
             item.edad_completa,
             item.nivel_socioeconomico || 'Sin asignar',
