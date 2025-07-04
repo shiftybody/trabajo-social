@@ -121,7 +121,7 @@ require_once APP_ROOT . 'public/inc/navbar.php';
         targets: [0, 2, 3, 4], // Ajustado para las nuevas columnas
         className: 'dt-body-center'
       }, {
-        targets: [5], // Columna de acciones
+        targets: [5],
       }],
       language: {
         "zeroRecords": "No se encontraron registros",
